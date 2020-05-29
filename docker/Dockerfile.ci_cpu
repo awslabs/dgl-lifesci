@@ -13,3 +13,7 @@ RUN bash /install/ubuntu_install_build.sh
 # python
 COPY install/ubuntu_install_conda.sh /install/ubuntu_install_conda.sh
 RUN bash /install/ubuntu_install_conda.sh
+
+ENV CONDA_ALWAYS_YES="true"
+
+ENV CONDA_ALWAYS_YES=
