@@ -1,4 +1,4 @@
-## My Project
+## DGL Lifesci
 
 TODO: Fill this README out!
 
