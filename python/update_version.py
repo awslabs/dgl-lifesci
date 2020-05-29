@@ -1,10 +1,27 @@
-"""
-This is the global script that set the version information of DGL-LifeSci.
-This script runs and update all the locations that related to versions
-List of affected files:
-- app-root/python/dgllife/__init__.py
-- app-root/conda/dgllife/meta.yaml
-"""
+# -*- coding: utf-8 -*-
+#
+# update_version.py
+#
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# This is the global script that set the version information of DGL-LifeSci.
+# This script runs and update all the locations that related to versions
+# List of affected files:
+# - app-root/python/dgllife/__init__.py
+# - app-root/conda/dgllife/meta.yaml
+
 import os
 import re
 
