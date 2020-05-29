@@ -16,4 +16,7 @@ RUN bash /install/ubuntu_install_conda.sh
 
 ENV CONDA_ALWAYS_YES="true"
 
+COPY install/conda_env/torch_cpu.yml /install/conda_env/torch_cpu.yml
+RUN ["/bin/bash", "-i", "-c", "conda env create -f /install/conda_env/torch_cpu.yml"]
+
 ENV CONDA_ALWAYS_YES=
