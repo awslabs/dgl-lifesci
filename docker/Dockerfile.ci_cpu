@@ -18,7 +18,6 @@ ENV CONDA_ALWAYS_YES="true"
 
 COPY install/conda_env/torch_cpu.yml /install/conda_env/torch_cpu.yml
 RUN ["/bin/bash", "-i", "-c", "conda env create -f /install/conda_env/torch_cpu.yml"]
-RUN conda activate pytorch-ci
-RUN conda deactivate
+conda install -c conda-forge rdkit==2018.09.3
 
 ENV CONDA_ALWAYS_YES=
