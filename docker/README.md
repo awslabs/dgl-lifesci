@@ -19,5 +19,5 @@ docker push dgllib/dgllife-ci-cpu:latest
 ```
 
 ```bash
-docker push dgllib/dgllife-ci-gpu:latest
+~~docker push dgllib/dgllife-ci-gpu:latest~~
 ```

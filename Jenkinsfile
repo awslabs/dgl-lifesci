@@ -63,7 +63,7 @@ pipeline {
           agent {
             docker {
               label "linux-cpu-node"
-              image "dgllib/${app}-ci-cpu"
+              image "dgllib/${app}-ci-cpu:latest"
             }
           }
           steps {
@@ -79,7 +79,7 @@ pipeline {
           agent {
             docker {
               label "linux-cpu-node"
-              image "dgllib/${app}-ci-gpu"
+              image "dgllib/${app}-ci-gpu:latest"
               //args "-u root"
             }
           }
@@ -100,7 +100,7 @@ pipeline {
           agent {
             docker {
               label "linux-cpu-node"
-              image "dgllib/${app}-ci-cpu"
+              image "dgllib/${app}-ci-cpu:latest"
             }
           }
           stages {
@@ -120,7 +120,7 @@ pipeline {
           agent {
             docker {
               label "linux-gpu-node"
-              image "dgllib/${app}-ci-gpu"
+              image "dgllib/${app}-ci-gpu:latest"
               args "--runtime nvidia"
             }
           }
