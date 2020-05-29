@@ -63,7 +63,8 @@ pipeline {
           agent {
             docker {
               label "linux-cpu-node"
-              image "dgllib/${app}-ci-cpu:latest"
+              image "dgllib/${app}-ci-cpu"
+              alwaysPull true
             }
           }
           steps {
@@ -80,7 +81,8 @@ pipeline {
             docker {
               label "linux-cpu-node"
               image "dgllib/${app}-ci-gpu:latest"
-              //args "-u root"
+              args "-u root"
+              alwaysPull true
             }
           }
           steps {
