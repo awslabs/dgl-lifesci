@@ -26,12 +26,12 @@ def unpack_dgl(name, libs) {
 def build_linux(dev) {
   init_git()
   sh "bash tests/scripts/build.sh ${dev}"
-  pack_dgl("${app}-${dev}-linux", app_linux_libs)
+  // pack_dgl("${app}-${dev}-linux", app_linux_libs)
 }
 
 def unit_test_linux(backend, dev) {
   init_git()
-  unpack_dgl("${app}-${dev}-linux", app_linux_libs)
+  // unpack_dgl("${app}-${dev}-linux", app_linux_libs)
   timeout(time: 10, unit: 'MINUTES') {
     sh "bash tests/scripts/task_unit_test.sh ${backend} ${dev}"
   }
