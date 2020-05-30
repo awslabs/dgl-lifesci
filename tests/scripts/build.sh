@@ -15,6 +15,7 @@ set -e
 rm -rf _deps
 mkdir _deps
 pushd _deps
+pushd python
 conda activate "pytorch-ci"
 if [ "$dev" == "gpu" ]; then
   pip uninstall -y dgl
