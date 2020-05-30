@@ -13,8 +13,6 @@ set -e
 . /opt/conda/etc/profile.d/conda.sh
 
 rm -rf _deps
-mkdir _deps
-pushd _deps
 pushd python
 conda activate "pytorch-ci"
 if [ "$dev" == "gpu" ]; then
