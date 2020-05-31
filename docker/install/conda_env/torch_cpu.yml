@@ -17,3 +17,4 @@ dependencies:
     - tqdm
     - scikit-learn
     - pandas
+  - rdkit=2018.09.3

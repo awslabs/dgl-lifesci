@@ -17,9 +17,9 @@ ENV CONDA_ALWAYS_YES="true"
 
 COPY install/conda_env/torch_gpu.yml /install/conda_env/torch_gpu.yml
 RUN ["/bin/bash", "-i", "-c", "conda env create -f /install/conda_env/torch_gpu.yml"]
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pytorch-ci && \
-    conda install -c conda-forge rdkit==2018.09.3
+# RUN . /opt/conda/etc/profile.d/conda.sh && \
+#     conda activate pytorch-ci && \
+#     conda install -c conda-forge rdkit==2018.09.3
 
 ENV CONDA_ALWAYS_YES=
 
