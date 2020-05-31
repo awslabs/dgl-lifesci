@@ -15,7 +15,6 @@ def build_linux(dev) {
 }
 
 def unit_test_linux(backend, dev) {
-  init_git()
   timeout(time: 10, unit: 'MINUTES') {
     sh "bash tests/scripts/task_unit_test.sh ${backend} ${dev}"
   }
