@@ -34,4 +34,4 @@ else
 fi
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib
-python -m pytest -v --junitxml=pytest_utils.xml tests/utils || fail "utils"
+python -m pytest -v junit_family=legacy --junitxml=pytest_utils.xml tests/utils || fail "utils"
