@@ -30,4 +30,4 @@ fi
 conda activate ${DGLBACKEND}-ci
 
 # python3 -m pytest -v --junitxml=pytest_utils.xml tests/utils || fail "utils"
-strings /usr/lib/libstdc++.so.6 | grep CXXABI
+locate libstdc++.so.6
