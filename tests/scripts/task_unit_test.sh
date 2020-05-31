@@ -18,6 +18,7 @@ fi
 
 export DGLBACKEND=$1
 export DGL_DOWNLOAD_DIR=${PWD}
+export PYTHONPATH=${PWD}/python:$PYTHONPATH
 
 if [ $2 == "gpu" ]
 then
@@ -29,6 +30,5 @@ fi
 conda activate ${DGLBACKEND}-ci
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib
-export PYTHONPATH=${PWD}/python:$PYTHONPATH
 
 python3 -m pytest -v --junitxml=pytest_utils.xml tests/utils || fail "utils"

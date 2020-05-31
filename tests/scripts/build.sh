@@ -14,8 +14,6 @@ set -e
 
 rm -rf _deps
 conda activate "pytorch-ci"
-export LD_LIBRARY_PATH=$CONDA_PREFIX/lib
-export PYTHONPATH=${PWD}/python:$PYTHONPATH
 
 if [ "$dev" == "gpu" ]; then
   pip uninstall -y dgl
