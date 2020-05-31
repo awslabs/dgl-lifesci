@@ -19,6 +19,8 @@ fi
 export DGLBACKEND=$1
 export PYTHONPATH=${PWD}/python:$PYTHONPATH
 export DGL_DOWNLOAD_DIR=${PWD}
+LD_LIBRARY_PATH=/usr/local/lib64/:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH
 
 if [ $2 == "gpu" ]
 then
