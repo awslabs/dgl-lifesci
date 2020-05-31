@@ -23,10 +23,10 @@ else
   export CUDA_VISIBLE_DEVICES=-1
 fi
 
+export DGLBACKEND=$1
 conda activate ${DGLBACKEND}-ci
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:${LD_LIBRARY_PATH}
-export DGLBACKEND=$1
 export PYTHONPATH=${PWD}/python:$PYTHONPATH
 export DGL_DOWNLOAD_DIR=${PWD}
 
