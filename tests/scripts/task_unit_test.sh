@@ -20,8 +20,6 @@ export DGLBACKEND=$1
 export PYTHONPATH=${PWD}/python:$PYTHONPATH
 export DGL_DOWNLOAD_DIR=${PWD}
 
-strings /usr/lib/libstdc++.so.6 | grep CXXABI
-
 if [ $2 == "gpu" ]
 then
   export CUDA_VISIBLE_DEVICES=0
@@ -31,4 +29,5 @@ fi
 
 conda activate ${DGLBACKEND}-ci
 
-python3 -m pytest -v --junitxml=pytest_utils.xml tests/utils || fail "utils"
+# python3 -m pytest -v --junitxml=pytest_utils.xml tests/utils || fail "utils"
+strings /usr/lib/libstdc++.so.6 | grep CXXABI
