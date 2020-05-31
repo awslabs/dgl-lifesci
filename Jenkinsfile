@@ -1,8 +1,6 @@
 #!/usr/bin/env groovy
 // Adapted from github.com/dmlc/dgl/Jenkinsfile
 
-app_linux_libs = "_deps/dgl*.whl"
-
 app = "dgllife"
 
 def init_git() {
@@ -11,27 +9,13 @@ def init_git() {
   sh "git submodule update --recursive --init"
 }
 
-// pack libraries for later use
-def pack_dgl(name, libs) {
-  echo "Packing ${libs} into ${name}"
-  stash includes: libs, name: name
-}
-
-// unpack libraries saved before
-def unpack_dgl(name, libs) {
-  unstash name
-  echo "Unpacked ${libs} from ${name}"
-}
-
 def build_linux(dev) {
   init_git()
   sh "bash tests/scripts/build.sh ${dev}"
-  // pack_dgl("${app}-${dev}-linux", app_linux_libs)
 }
 
 def unit_test_linux(backend, dev) {
   init_git()
-  // unpack_dgl("${app}-${dev}-linux", app_linux_libs)
   timeout(time: 10, unit: 'MINUTES') {
     sh "bash tests/scripts/task_unit_test.sh ${backend} ${dev}"
   }

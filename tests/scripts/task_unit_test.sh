@@ -28,3 +28,5 @@ else
 fi
 
 conda activate ${DGLBACKEND}-ci
+
+python3 -m pytest -v --junitxml=pytest_utils.xml tests/utils || fail "utils"
