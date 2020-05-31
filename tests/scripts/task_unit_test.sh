@@ -19,7 +19,8 @@ fi
 export DGLBACKEND=$1
 export PYTHONPATH=${PWD}/python:$PYTHONPATH
 export DGL_DOWNLOAD_DIR=${PWD}
-export LD_LIBRARY_PATH=$CONDA_PREFIX/lib
+
+RUN strings /usr/lib/libstdc++.so.6 | grep CXXABI
 
 if [ $2 == "gpu" ]
 then
