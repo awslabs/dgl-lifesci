@@ -16,3 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# DGL-based package for applications in life science.
+
+from . import data
+from . import model
+from . import utils
+from .libinfo import __version__

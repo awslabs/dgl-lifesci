@@ -1,4 +1,7 @@
 name: pytorch-ci
+channels:
+  - defaults
+  - conda-forge
 dependencies:
   - python=3.6.9
   - pip
@@ -17,3 +20,4 @@ dependencies:
     - tqdm
     - scikit-learn
     - pandas
+  - rdkit==2018.09.3
