@@ -18,8 +18,8 @@
 
 import torch
 
-from dgllife.utils.featurizers import *
 from rdkit import Chem
+from dgllife.utils.featurizers import *
 
 def test_one_hot_encoding():
     x = 1.
