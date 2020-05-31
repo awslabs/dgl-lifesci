@@ -31,4 +31,4 @@ conda activate ${DGLBACKEND}-ci
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib
 
-python3 -m pytest -v --junitxml=pytest_utils.xml tests/utils || fail "utils"
+python -m pytest -v --junitxml=pytest_utils.xml tests/utils || fail "utils"
