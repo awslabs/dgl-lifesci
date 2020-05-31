@@ -1649,6 +1649,9 @@ class PretrainBondFeaturizer(object):
         """
         edge_features = []
         num_bonds = mol.GetNumBonds()
+        if num_bonds == 0:
+            assert self._self_loop, \
+                'The molecule has 0 bonds and we should set self._self_loop to True.'
 
         # Compute features for each bond
         for i in range(num_bonds):
@@ -1668,6 +1671,7 @@ class PretrainBondFeaturizer(object):
         else:
             edge_features = np.stack(edge_features)
             edge_features = F.zerocopy_from_numpy(edge_features.astype(np.int64))
-            edge_features = torch.cat([edge_features, self_loop_features], dim=0)
+            if self._self_loop:
+                edge_features = torch.cat([edge_features, self_loop_features], dim=0)
 
         return {'bond_type': edge_features[:, 0], 'bond_direction_type': edge_features[:, 1]}

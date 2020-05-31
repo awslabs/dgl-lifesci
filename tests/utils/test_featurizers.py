@@ -77,8 +77,8 @@ def test_atom_total_degree():
 
 def test_atom_explicit_valence_one_hot():
     mol = test_mol1()
-    assert atom_implicit_valence_one_hot(mol.GetAtomWithIdx(0), [1, 2, 3]) == [1, 0, 0]
-    assert atom_implicit_valence_one_hot(mol.GetAtomWithIdx(1), [1, 2, 3]) == [0, 1, 0]
+    assert atom_explicit_valence_one_hot(mol.GetAtomWithIdx(0), [1, 2, 3]) == [1, 0, 0]
+    assert atom_explicit_valence_one_hot(mol.GetAtomWithIdx(1), [1, 2, 3]) == [0, 1, 0]
 
 def test_atom_explicit_valence():
     mol = test_mol1()
