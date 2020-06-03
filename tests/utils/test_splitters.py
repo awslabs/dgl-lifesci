@@ -39,30 +39,34 @@ class TestDataset(object):
     def __len__(self):
         return len(self.smiles)
 
-def test_consecutive_splitter(dataset):
+def test_consecutive_splitter():
+    dataset = TestDataset()
     ConsecutiveSplitter.train_val_test_split(dataset)
     ConsecutiveSplitter.k_fold_split(dataset)
 
-def test_random_splitter(dataset):
+def test_random_splitter():
+    dataset = TestDataset()
     RandomSplitter.train_val_test_split(dataset, random_state=0)
     RandomSplitter.k_fold_split(dataset)
 
-def test_molecular_weight_splitter(dataset):
+def test_molecular_weight_splitter():
+    dataset = TestDataset()
     MolecularWeightSplitter.train_val_test_split(dataset)
     MolecularWeightSplitter.k_fold_split(dataset, mols=dataset.mols)
 
-def test_scaffold_splitter(dataset):
+def test_scaffold_splitter():
+    dataset = TestDataset()
     ScaffoldSplitter.train_val_test_split(dataset, include_chirality=True)
     ScaffoldSplitter.k_fold_split(dataset, mols=dataset.mols)
 
-def test_single_task_stratified_splitter(dataset):
+def test_single_task_stratified_splitter():
+    dataset = TestDataset()
     SingleTaskStratifiedSplitter.train_val_test_split(dataset, dataset.labels, 1)
     SingleTaskStratifiedSplitter.k_fold_split(dataset, dataset.labels, 1)
 
 if __name__ == '__main__':
-    dataset = TestDataset()
-    test_consecutive_splitter(dataset)
-    test_random_splitter(dataset)
-    test_molecular_weight_splitter(dataset)
-    test_scaffold_splitter(dataset)
-    test_single_task_stratified_splitter(dataset)
+    test_consecutive_splitter()
+    test_random_splitter()
+    test_molecular_weight_splitter()
+    test_scaffold_splitter()
+    test_single_task_stratified_splitter()
