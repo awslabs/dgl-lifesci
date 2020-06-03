@@ -16,5 +16,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .complex_to_graph import *
 from .featurizers import *
 from .mol_to_graph import *

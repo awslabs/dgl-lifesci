@@ -3,3 +3,6 @@
 
 # Byte-compiled
 __pycache__/
+
+# Distribution / packaging
+dgllife.egg-info/
