@@ -84,7 +84,8 @@ disable=design,
         cyclic-import,       # disabled due to the inevitable dgl.graph -> dgl.subgraph loop
         undefined-variable,  # disabled due to C extension (should enable)
         C0111,               # disable module docstring
-        C0412                # disable grouped import
+        C0412,               # disable grouped import
+        E0001                # Requires python 3.6+
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
