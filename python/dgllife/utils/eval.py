@@ -251,7 +251,7 @@ class Meter(object):
             * If ``reduction == 'sum'``, return the sum of scores for all tasks.
         """
         def score(y_true, y_pred):
-            return np.sqrt(F.mse_loss(y_pred, y_true).cpu().item())
+            return torch.sqrt(F.mse_loss(y_pred, y_true).cpu().item())
         return self.multilabel_score(score, reduction)
 
     def roc_auc_score(self, reduction='none'):

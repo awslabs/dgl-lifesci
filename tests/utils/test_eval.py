@@ -79,8 +79,8 @@ def test_Meter():
     meter = Meter(label_mean, label_std)
     meter.update(pred, label)
     true_scores = [0.41068359261794546, 0.4106836107598449]
-    assert torch.allclose(torch.tensor(meter.rmse()), torch.tensor(true_scores).float())
-    assert torch.allclose(torch.tensor(meter.compute_metric('rmse')), torch.tensor(true_scores).float())
+    assert torch.allclose(torch.tensor(meter.rmse()), torch.tensor(true_scores))
+    assert torch.allclose(torch.tensor(meter.compute_metric('rmse')), torch.tensor(true_scores))
 
     meter = Meter(label_mean, label_std)
     meter.update(pred, label, mask)
