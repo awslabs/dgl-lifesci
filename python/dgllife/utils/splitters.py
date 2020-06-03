@@ -34,8 +34,8 @@ from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem.rdmolops import FastFindRings
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
-import dgl.backend as F
 import numpy as np
+import dgl.backend as F
 from dgl.data.utils import split_dataset, Subset
 
 __all__ = ['ConsecutiveSplitter',
