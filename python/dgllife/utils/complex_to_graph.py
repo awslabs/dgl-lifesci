@@ -18,8 +18,8 @@
 #
 # Convert complexes into DGLHeteroGraphs
 # pylint: disable= no-member, arguments-differ, invalid-name
-import dgl.backend as F
 import numpy as np
+import dgl.backend as F
 
 from dgl import graph, bipartite, hetero_from_relations
 
