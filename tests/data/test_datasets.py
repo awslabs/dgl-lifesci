@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# __init__.py
+# test_datasets.py
 #
 # Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
@@ -16,4 +16,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .alchemy import *
+from dgllife.data import *
+
+def test_alchemy():
+    print('Test Alchemy')
+    dataset = TencentAlchemyDataset(mode='valid',
+                                    node_featurizer=None,
+                                    edge_featurizer=None)
+    dataset = TencentAlchemyDataset(mode='valid',
+                                    node_featurizer=None,
+                                    edge_featurizer=None,
+                                    load=False)
+
+if __name__ == '__main__':
+    test_alchemy()
