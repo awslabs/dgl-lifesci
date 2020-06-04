@@ -31,6 +31,22 @@ def test_graph4():
     return bg, torch.arange(bg.number_of_nodes()).float().reshape(-1, 1), \
            torch.arange(2 * bg.number_of_edges()).float().reshape(-1, 2)
 
+def test_graph7():
+    """Graph with categorical node and edge features."""
+    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    return g1, torch.LongTensor([0, 1, 0]), torch.LongTensor([2, 3, 4]), \
+           torch.LongTensor([0, 0, 1]), torch.LongTensor([2, 3, 2])
+
+def test_graph8():
+    """Batched graph with categorical node and edge features."""
+    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    g2 = DGLGraph([(0, 1), (1, 2), (1, 3), (1, 4)])
+    bg = dgl.batch([g1, g2])
+    return bg, torch.LongTensor([0, 1, 0, 2, 1, 0, 2, 2]), \
+           torch.LongTensor([2, 3, 4, 1, 0, 1, 2, 2]), \
+           torch.LongTensor([0, 0, 1, 2, 1, 0, 0]), \
+           torch.LongTensor([2, 3, 2, 0, 1, 2, 1])
+
 def test_attentive_fp_gnn():
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
@@ -119,7 +135,39 @@ def test_gcn():
     assert gnn(g, node_feats).shape == torch.Size([3, 1])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 1])
 
+def test_gin():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats1, node_feats2, edge_feats1, edge_feats2 = test_graph7()
+    node_feats1, node_feats2 = node_feats1.to(device), node_feats2.to(device)
+    edge_feats1, edge_feats2 = edge_feats1.to(device), edge_feats2.to(device)
+    bg, batch_node_feats1, batch_node_feats2, \
+    batch_edge_feats1, batch_edge_feats2 = test_graph8()
+    batch_node_feats1, batch_node_feats2 = batch_node_feats1.to(device), \
+                                           batch_node_feats2.to(device)
+    batch_edge_feats1, batch_edge_feats2 = batch_edge_feats1.to(device), \
+                                           batch_edge_feats2.to(device)
+
+    # Test default setting
+    gnn = GIN(num_node_emb_list=[3, 5], num_edge_emb_list=[3, 4]).to(device)
+    assert gnn(g, [node_feats1, node_feats2], [edge_feats1, edge_feats2]).shape \
+           == torch.Size([3, 300])
+    assert gnn(bg, [batch_node_feats1, batch_node_feats2],
+               [batch_edge_feats1, batch_edge_feats2]).shape == torch.Size([8, 300])
+
+    # Test configured setting
+    gnn = GIN(num_node_emb_list=[3, 5], num_edge_emb_list=[3, 4],
+              num_layers=2, emb_dim=10, JK='concat', dropout=0.1).to(device)
+    assert gnn(g, [node_feats1, node_feats2], [edge_feats1, edge_feats2]).shape \
+           == torch.Size([3, 30])
+    assert gnn(bg, [batch_node_feats1, batch_node_feats2],
+               [batch_edge_feats1, batch_edge_feats2]).shape == torch.Size([8, 30])
+
 if __name__ == '__main__':
     test_attentive_fp_gnn()
     test_gat()
     test_gcn()
+    test_gin()
