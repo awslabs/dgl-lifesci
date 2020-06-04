@@ -204,9 +204,35 @@ def test_mgcn():
     assert gnn(g, node_types, edge_dists).shape == torch.Size([3, 6])
     assert gnn(bg, batch_node_types, batch_edge_dists).shape == torch.Size([8, 6])
 
+def test_schnet():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_types, edge_dists = test_graph5()
+    g, node_types, edge_dists = g.to(device), node_types.to(device), edge_dists.to(device)
+    bg, batch_node_types, batch_edge_dists = test_graph6()
+    bg, batch_node_types, batch_edge_dists = bg.to(device), batch_node_types.to(device), \
+                                             batch_edge_dists.to(device)
+
+    # Test default setting
+    gnn = SchNetGNN().to(device)
+    assert gnn(g, node_types, edge_dists).shape == torch.Size([3, 64])
+    assert gnn(bg, batch_node_types, batch_edge_dists).shape == torch.Size([8, 64])
+
+    # Test configured setting
+    gnn = SchNetGNN(num_node_types=5,
+                    node_feats=2,
+                    hidden_feats=[3],
+                    cutoff=0.3).to(device)
+    assert gnn(g, node_types, edge_dists).shape == torch.Size([3, 2])
+    assert gnn(bg, batch_node_types, batch_edge_dists).shape == torch.Size([8, 2])
+
 if __name__ == '__main__':
     test_attentivefp()
     test_gat()
     test_gcn()
     test_gin()
     test_mgcn()
+    test_schnet()
