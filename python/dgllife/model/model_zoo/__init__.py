@@ -2,7 +2,7 @@
 #
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
+#
+# Collection of model architectures
 
-from .gnn import *
-from .readout import *
-from .model_zoo import *
+from .acnn import *
