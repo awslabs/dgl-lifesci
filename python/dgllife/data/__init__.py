@@ -18,3 +18,4 @@
 
 from .alchemy import *
 from .csv_dataset import *
+from .pdbbind import *

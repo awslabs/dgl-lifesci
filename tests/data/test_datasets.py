@@ -28,5 +28,10 @@ def test_alchemy():
                                     edge_featurizer=None,
                                     load=False)
 
+def test_pdbbind():
+    print('Test PDBBind')
+    dataset = PDBBind(subset='core', remove_hs=True)
+
 if __name__ == '__main__':
     test_alchemy()
+    test_pdbbind()
