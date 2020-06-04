@@ -7,3 +7,4 @@
 
 from .attentivefp import *
 from .gat import *
+from .gcn import *
