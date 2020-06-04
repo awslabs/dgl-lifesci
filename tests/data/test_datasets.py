@@ -46,7 +46,13 @@ def test_pubchem_aromaticity():
     dataset = PubChemBioAssayAromaticity()
     remove_file('pubchem_aromaticity_dglgraph.bin')
 
+def test_tox21():
+    print('Test Tox21')
+    dataset = Tox21()
+    remove_file('tox21_dglgraph.bin')
+
 if __name__ == '__main__':
     test_alchemy()
     test_pdbbind()
     test_pubchem_aromaticity()
+    test_tox21()
