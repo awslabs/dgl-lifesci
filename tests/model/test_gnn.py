@@ -204,6 +204,33 @@ def test_mgcn():
     assert gnn(g, node_types, edge_dists).shape == torch.Size([3, 6])
     assert gnn(bg, batch_node_types, batch_edge_dists).shape == torch.Size([8, 6])
 
+def test_mpnn():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats, edge_feats = test_graph3()
+    g, node_feats, edge_feats = g.to(device), node_feats.to(device), edge_feats.to(device)
+    bg, batch_node_feats, batch_edge_feats = test_graph4()
+    bg, batch_node_feats, batch_edge_feats = bg.to(device), batch_node_feats.to(device), \
+                                             batch_edge_feats.to(device)
+
+    # Test default setting
+    gnn = MPNNGNN(node_in_feats=1,
+                  edge_in_feats=2).to(device)
+    assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 64])
+    assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 64])
+
+    # Test configured setting
+    gnn = MPNNGNN(node_in_feats=1,
+                  edge_in_feats=2,
+                  node_out_feats=2,
+                  edge_hidden_feats=2,
+                  num_step_message_passing=2).to(device)
+    assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 2])
+    assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 2])
+
 def test_schnet():
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
@@ -235,4 +262,5 @@ if __name__ == '__main__':
     test_gcn()
     test_gin()
     test_mgcn()
+    test_mpnn()
     test_schnet()
