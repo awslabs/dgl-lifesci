@@ -17,3 +17,4 @@
 # limitations under the License.
 
 from .alchemy import *
+from .csv_dataset import *
