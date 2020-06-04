@@ -6,3 +6,4 @@
 # Collection of model architectures
 
 from .acnn import *
+from .attentivefp_predictor import *
