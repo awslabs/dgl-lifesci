@@ -16,7 +16,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 from dgllife.data import *
+
+def remove_file(fname):
+    if os.path.isfile(fname):
+        try:
+            os.remove(fname)
+        except OSError:
+            pass
 
 def test_alchemy():
     print('Test Alchemy')
@@ -32,6 +41,12 @@ def test_pdbbind():
     print('Test PDBBind')
     dataset = PDBBind(subset='core', remove_hs=True)
 
+def test_pubchem_aromaticity():
+    print('Test pubchem aromaticity')
+    dataset = PubChemBioAssayAromaticity()
+    remove_file('pubchem_aromaticity_dglgraph.bin')
+
 if __name__ == '__main__':
     test_alchemy()
     test_pdbbind()
+    test_pubchem_aromaticity()
