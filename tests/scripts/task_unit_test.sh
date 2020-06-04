@@ -34,4 +34,5 @@ else
 fi
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib
+python -m pytest -v -o junit_family=xunit1 --junitxml=pytest_data.xml --disable-pytest-warnings tests/data || fail "data"
 python -m pytest -v -o junit_family=xunit1 --junitxml=pytest_utils.xml --disable-pytest-warnings tests/utils || fail "utils"
