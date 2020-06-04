@@ -70,6 +70,25 @@ def test_mlp_readout():
     assert model(g, node_feats).shape == torch.Size([1, 3])
     assert model(bg, batch_node_feats).shape == torch.Size([2, 3])
 
+def test_weave_readout():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats = test_graph1()
+    g, node_feats = g.to(device), node_feats.to(device)
+    bg, batch_node_feats = test_graph2()
+    bg, batch_node_feats = bg.to(device), batch_node_feats.to(device)
+
+    model = WeaveGather(node_in_feats=1).to(device)
+    assert model(g, node_feats).shape == torch.Size([1, 1])
+    assert model(bg, batch_node_feats).shape == torch.Size([2, 1])
+
+    model = WeaveGather(node_in_feats=1, gaussian_expand=False).to(device)
+    assert model(g, node_feats).shape == torch.Size([1, 1])
+    assert model(bg, batch_node_feats).shape == torch.Size([2, 1])
+
 def test_weighted_sum_and_max():
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
@@ -87,4 +106,5 @@ def test_weighted_sum_and_max():
 if __name__ == '__main__':
     test_attentive_fp_readout()
     test_mlp_readout()
+    test_weave_readout()
     test_weighted_sum_and_max()
