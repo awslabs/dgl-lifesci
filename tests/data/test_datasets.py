@@ -94,7 +94,7 @@ def test_wln_reaction():
             candidate_string += '\n'
             f.write(candidate_string)
 
-    dataset = WLNRankDataset('test.txt.proc', 'test_candidate_bond_changes.txt', 'train')
+    dataset = WLNRankDataset('test.txt', 'test_candidate_bond_changes.txt', 'train')
     remove_file('test.txt')
     remove_file('test.txt.proc')
     remove_file('test_graphs.bin')
