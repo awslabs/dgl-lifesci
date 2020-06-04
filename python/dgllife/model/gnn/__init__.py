@@ -12,3 +12,4 @@ from .gin import *
 from .mgcn import *
 from .mpnn import *
 from .schnet import *
+from .weave import *

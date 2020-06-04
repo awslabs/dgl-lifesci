@@ -256,6 +256,32 @@ def test_schnet():
     assert gnn(g, node_types, edge_dists).shape == torch.Size([3, 2])
     assert gnn(bg, batch_node_types, batch_edge_dists).shape == torch.Size([8, 2])
 
+def test_weave():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats, edge_feats = test_graph3()
+    g, node_feats, edge_feats = g.to(device), node_feats.to(device), edge_feats.to(device)
+    bg, batch_node_feats, batch_edge_feats = test_graph4()
+    bg, batch_node_feats, batch_edge_feats = bg.to(device), batch_node_feats.to(device), \
+                                             batch_edge_feats.to(device)
+
+    # Test default setting
+    gnn = WeaveGNN(node_in_feats=1,
+                   edge_in_feats=2).to(device)
+    assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 50])
+    assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 50])
+
+    # Test configured setting
+    gnn = WeaveGNN(node_in_feats=1,
+                   edge_in_feats=2,
+                   num_layers=1,
+                   hidden_feats=2).to(device)
+    assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 2])
+    assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 2])
+
 if __name__ == '__main__':
     test_attentivefp()
     test_gat()
@@ -264,3 +290,4 @@ if __name__ == '__main__':
     test_mgcn()
     test_mpnn()
     test_schnet()
+    test_weave()
