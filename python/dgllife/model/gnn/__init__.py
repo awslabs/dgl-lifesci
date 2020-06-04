@@ -9,3 +9,4 @@ from .attentivefp import *
 from .gat import *
 from .gcn import *
 from .gin import *
+from .mgcn import *
