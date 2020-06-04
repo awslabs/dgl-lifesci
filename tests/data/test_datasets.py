@@ -19,6 +19,7 @@
 import os
 
 from dgllife.data import *
+from dgllife.data.uspto import get_bond_changes, process_file
 
 def remove_file(fname):
     if os.path.isfile(fname):
