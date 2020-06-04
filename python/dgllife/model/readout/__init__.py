@@ -7,3 +7,4 @@
 # out of node and edge representations.
 
 from .mlp_readout import *
+from .weighted_sum_and_max import *
