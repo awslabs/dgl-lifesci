@@ -37,6 +37,18 @@ def test_graph4():
     return bg, torch.arange(bg.number_of_nodes()).float().reshape(-1, 1), \
            torch.arange(2 * bg.number_of_edges()).float().reshape(-1, 2)
 
+def test_graph5():
+    """Graph with node types and edge distances."""
+    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    return g1, torch.LongTensor([0, 1, 0]), torch.randn(3, 1)
+
+def test_graph6():
+    """Batched graph with node types and edge distances."""
+    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    g2 = DGLGraph([(0, 1), (1, 2), (1, 3), (1, 4)])
+    bg = dgl.batch([g1, g2])
+    return bg, torch.LongTensor([0, 1, 0, 2, 0, 3, 4, 4]), torch.randn(7, 1)
+
 def test_graph7():
     """Graph with categorical node and edge features."""
     g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
@@ -182,9 +194,40 @@ def test_gin_predictor():
             assert model(bg, [batch_node_feats1, batch_node_feats2],
                          [batch_edge_feats1, batch_edge_feats2]).shape == torch.Size([2, 2])
 
+def test_mgcn_predictor():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_types, edge_dists = test_graph5()
+    g, node_types, edge_dists = g.to(device), node_types.to(device), edge_dists.to(device)
+    bg, batch_node_types, batch_edge_dists = test_graph6()
+    bg, batch_node_types, batch_edge_dists = bg.to(device), batch_node_types.to(device), \
+                                             batch_edge_dists.to(device)
+
+    # Test default setting
+    mgcn_predictor = MGCNPredictor().to(device)
+    assert mgcn_predictor(g, node_types, edge_dists).shape == torch.Size([1, 1])
+    assert mgcn_predictor(bg, batch_node_types, batch_edge_dists).shape == \
+           torch.Size([2, 1])
+
+    # Test configured setting
+    mgcn_predictor = MGCNPredictor(feats=2,
+                                   n_layers=2,
+                                   classifier_hidden_feats=3,
+                                   n_tasks=3,
+                                   num_node_types=5,
+                                   num_edge_types=150,
+                                   cutoff=0.3).to(device)
+    assert mgcn_predictor(g, node_types, edge_dists).shape == torch.Size([1, 3])
+    assert mgcn_predictor(bg, batch_node_types, batch_edge_dists).shape == \
+           torch.Size([2, 3])
+
 if __name__ == '__main__':
     test_attentivefp_predictor()
     test_mlp_predictor()
     test_gat_predictor()
     test_gcn_predictor()
     test_gin_predictor()
+    test_mgcn_predictor()
