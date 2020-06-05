@@ -8,3 +8,4 @@
 from .acnn import *
 from .attentivefp_predictor import *
 from .gat_predictor import *
+from .mlp_predictor import *

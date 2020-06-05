@@ -58,6 +58,16 @@ def test_attentivefp_predictor():
     assert attentivefp_predictor(bg, batch_node_feats, batch_edge_feats).shape == \
            torch.Size([2, 2])
 
+def test_mlp_predictor():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g_feats = torch.tensor([[1.], [2.]]).to(device)
+    mlp_predictor = MLPPredictor(in_feats=1, hidden_feats=1, n_tasks=2).to(device)
+    assert mlp_predictor(g_feats).shape == torch.Size([2, 2])
+
 def test_gat_predictor():
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
@@ -93,4 +103,5 @@ def test_gat_predictor():
 
 if __name__ == '__main__':
     test_attentivefp_predictor()
+    test_mlp_predictor()
     test_gat_predictor()
