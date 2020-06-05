@@ -101,7 +101,41 @@ def test_gat_predictor():
     gat_predictor.train()
     assert gat_predictor(bg, batch_node_feats).shape == torch.Size([2, 1])
 
+def test_gcn_predictor():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats = test_graph1()
+    g, node_feats = g.to(device), node_feats.to(device)
+    bg, batch_node_feats = test_graph2()
+    bg, batch_node_feats = bg.to(device), batch_node_feats.to(device)
+
+    # Test default setting
+    gcn_predictor = GCNPredictor(in_feats=1).to(device)
+    gcn_predictor.eval()
+    assert gcn_predictor(g, node_feats).shape == torch.Size([1, 1])
+    gcn_predictor.train()
+    assert gcn_predictor(bg, batch_node_feats).shape == torch.Size([2, 1])
+
+    # Test configured setting
+    gcn_predictor = GCNPredictor(in_feats=1,
+                                 hidden_feats=[1],
+                                 activation=[F.relu],
+                                 residual=[True],
+                                 batchnorm=[True],
+                                 dropout=[0.1],
+                                 classifier_hidden_feats=1,
+                                 classifier_dropout=0.1,
+                                 n_tasks=2).to(device)
+    gcn_predictor.eval()
+    assert gcn_predictor(g, node_feats).shape == torch.Size([1, 2])
+    gcn_predictor.train()
+    assert gcn_predictor(bg, batch_node_feats).shape == torch.Size([2, 2])
+
 if __name__ == '__main__':
     test_attentivefp_predictor()
     test_mlp_predictor()
     test_gat_predictor()
+    test_gcn_predictor()
