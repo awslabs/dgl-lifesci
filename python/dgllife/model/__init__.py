@@ -6,3 +6,4 @@
 from .gnn import *
 from .readout import *
 from .model_zoo import *
+from .pretrain import *
