@@ -6,3 +6,8 @@ __pycache__/
 
 # Distribution / packaging
 dgllife.egg-info/
+
+# Docs
+docs/build
+docs/source/tutorials
+docs/source/generated
