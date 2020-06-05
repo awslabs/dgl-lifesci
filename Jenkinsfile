@@ -26,7 +26,7 @@ pipeline {
     stage("Lint Check") {
       agent {
         docker {
-          label "linux-cpu-node"
+          label "linux-c52x-node"
           image "dgllib/dgl-ci-lint"
         }
       }
@@ -45,7 +45,7 @@ pipeline {
         stage("CPU Build") {
           agent {
             docker {
-              label "linux-cpu-node"
+              label "linux-c52x-node"
               image "dgllib/${app}-ci-cpu"
               alwaysPull true
             }
@@ -62,7 +62,7 @@ pipeline {
         stage("GPU Build") {
           agent {
             docker {
-              label "linux-cpu-node"
+              label "linux-c52x-node"
               image "dgllib/${app}-ci-gpu:latest"
               args "-u root"
               alwaysPull true
@@ -84,7 +84,7 @@ pipeline {
         stage("Torch CPU") {
           agent {
             docker {
-              label "linux-cpu-node"
+              label "linux-c52x-node"
               image "dgllib/${app}-ci-cpu:latest"
             }
           }
