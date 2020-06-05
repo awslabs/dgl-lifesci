@@ -7,3 +7,4 @@
 
 from .acnn import *
 from .attentivefp_predictor import *
+from .gat_predictor import *
