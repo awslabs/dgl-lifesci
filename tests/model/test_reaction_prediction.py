@@ -90,16 +90,42 @@ def test_wln_reaction_center():
                  batch_edge_feats, batch_atom_pair_feats)[0].shape == \
            torch.Size([batch_complete_graph.number_of_edges(), 1])
 
-def test_reactant_product_graph(batch_size, device):
+def test_reactant_product_graph1():
+    edges = (np.array([0, 1, 2]), np.array([1, 2, 2]))
+    reactant_g = DGLGraph(edges)
+    reactant_node_feats = torch.arange(
+        reactant_g.number_of_nodes()).float().reshape(-1, 1)
+    reactant_edge_feats = torch.arange(
+        reactant_g.number_of_edges()).float().reshape(-1, 1)
+
+    product_g = []
+    batch_num_candidate_products = []
+    for i in range(1, 2):
+        product_g.extend([
+            DGLGraph(edges) for _ in range(i)
+        ])
+        batch_num_candidate_products.append(i)
+    product_g = dgl.batch(product_g)
+    product_node_feats = torch.arange(
+        product_g.number_of_nodes()).float().reshape(-1, 1)
+    product_edge_feats = torch.arange(
+        product_g.number_of_edges()).float().reshape(-1, 1)
+    product_scores = torch.randn(sum(batch_num_candidate_products), 1)
+
+    return reactant_g, reactant_node_feats, reactant_edge_feats, product_g, product_node_feats, \
+           product_edge_feats, product_scores, batch_num_candidate_products
+
+def test_reactant_product_graph2():
+    batch_size = 2
     edges = (np.array([0, 1, 2]), np.array([1, 2, 2]))
     reactant_g = []
     for _ in range(batch_size):
         reactant_g.append(DGLGraph(edges))
     reactant_g = dgl.batch(reactant_g)
     reactant_node_feats = torch.arange(
-        reactant_g.number_of_nodes()).float().reshape(-1, 1).to(device)
+        reactant_g.number_of_nodes()).float().reshape(-1, 1)
     reactant_edge_feats = torch.arange(
-        reactant_g.number_of_edges()).float().reshape(-1, 1).to(device)
+        reactant_g.number_of_edges()).float().reshape(-1, 1)
 
     product_g = []
     batch_num_candidate_products = []
@@ -110,10 +136,10 @@ def test_reactant_product_graph(batch_size, device):
         batch_num_candidate_products.append(i)
     product_g = dgl.batch(product_g)
     product_node_feats = torch.arange(
-        product_g.number_of_nodes()).float().reshape(-1, 1).to(device)
+        product_g.number_of_nodes()).float().reshape(-1, 1)
     product_edge_feats = torch.arange(
-        product_g.number_of_edges()).float().reshape(-1, 1).to(device)
-    product_scores = torch.randn(sum(batch_num_candidate_products), 1).to(device)
+        product_g.number_of_edges()).float().reshape(-1, 1)
+    product_scores = torch.randn(sum(batch_num_candidate_products), 1)
 
     return reactant_g, reactant_node_feats, reactant_edge_feats, product_g, product_node_feats, \
            product_edge_feats, product_scores, batch_num_candidate_products
@@ -125,12 +151,20 @@ def test_wln_candidate_ranking():
         device = torch.device('cpu')
 
     reactant_g, reactant_node_feats, reactant_edge_feats, product_g, product_node_feats, \
-    product_edge_feats, product_scores, num_candidate_products = \
-        test_reactant_product_graph(batch_size=1, device=device)
+    product_edge_feats, product_scores, num_candidate_products = test_reactant_product_graph1()
+    reactant_node_feats, reactant_edge_feats = reactant_node_feats.to(device), reactant_edge_feats.to(device)
+    product_node_feats, product_edge_feats, product_scores = product_node_feats.to(device), \
+                                                             product_edge_feats.to(device), \
+                                                             product_scores.to(device)
 
     batch_reactant_g, batch_reactant_node_feats, batch_reactant_edge_feats, batch_product_g, \
     batch_product_node_feats, batch_product_edge_feats, batch_product_scores, \
-    batch_num_candidate_products = test_reactant_product_graph(batch_size=2, device=device)
+    batch_num_candidate_products = test_reactant_product_graph2()
+    batch_reactant_node_feats = batch_reactant_node_feats.to(device)
+    batch_reactant_edge_feats = batch_reactant_edge_feats.to(device)
+    batch_product_node_feats = batch_product_node_feats.to(device)
+    batch_product_edge_feats = batch_product_edge_feats.to(device)
+    batch_product_scores = batch_product_scores.to(device)
 
     # Test default setting
     model = WLNReactionRanking(node_in_feats=1,
