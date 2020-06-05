@@ -15,3 +15,5 @@ from .mlp_predictor import *
 from .mpnn_predictor import *
 from .schnet_predictor import *
 from .weave_predictor import *
+from .wln_reaction_center import *
+from .wln_reaction_ranking import *
