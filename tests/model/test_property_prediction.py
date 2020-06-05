@@ -256,6 +256,35 @@ def test_mpnn_predictor():
     assert mpnn_predictor(bg, batch_node_feats, batch_edge_feats).shape == \
            torch.Size([2, 2])
 
+def test_schnet_predictor():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_types, edge_dists = test_graph5()
+    g, node_types, edge_dists = g.to(device), node_types.to(device), edge_dists.to(device)
+    bg, batch_node_types, batch_edge_dists = test_graph6()
+    bg, batch_node_types, batch_edge_dists = bg.to(device), batch_node_types.to(device), \
+                                             batch_edge_dists.to(device)
+
+    # Test default setting
+    schnet_predictor = SchNetPredictor().to(device)
+    assert schnet_predictor(g, node_types, edge_dists).shape == torch.Size([1, 1])
+    assert schnet_predictor(bg, batch_node_types, batch_edge_dists).shape == \
+           torch.Size([2, 1])
+
+    # Test configured setting
+    schnet_predictor = SchNetPredictor(node_feats=2,
+                                       hidden_feats=[2, 2],
+                                       classifier_hidden_feats=3,
+                                       n_tasks=3,
+                                       num_node_types=5,
+                                       cutoff=0.3).to(device)
+    assert schnet_predictor(g, node_types, edge_dists).shape == torch.Size([1, 3])
+    assert schnet_predictor(bg, batch_node_types, batch_edge_dists).shape == \
+           torch.Size([2, 3])
+
 if __name__ == '__main__':
     test_attentivefp_predictor()
     test_mlp_predictor()
@@ -264,3 +293,4 @@ if __name__ == '__main__':
     test_gin_predictor()
     test_mgcn_predictor()
     test_mpnn_predictor()
+    test_schnet_predictor()
