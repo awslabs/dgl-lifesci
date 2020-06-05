@@ -6,13 +6,14 @@
 # pylint: disable=C0111, C0103, E1101, W0611, W0612, C0200, W0221, E1102
 
 import copy
+import os
 import rdkit.Chem as Chem
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from dgl import batch, unbatch
-from dgl.data.utils import get_download_dir
+from dgl.data.utils import _get_dgl_url, download, get_download_dir, extract_archive
 
 from .chemutils import (attach_mols_nx, copy_edit_mol, decode_stereo,
                         enum_assemble_nx, set_atommap)
@@ -34,11 +35,13 @@ class DGLJTNNVAE(nn.Module):
         super(DGLJTNNVAE, self).__init__()
         if vocab is None:
             if vocab_file is None:
-                vocab_file = '{}/jtnn/{}.txt'.format(
-                    get_download_dir(), 'vocab')
+                default_dir = get_download_dir()
+                vocab_file = '{}/jtnn/{}.txt'.format(default_dir, 'vocab')
+                zip_file_path = '{}/jtnn.zip'.format(default_dir)
+                download(_get_dgl_url('dgllife/jtnn.zip'), path=zip_file_path)
+                extract_archive(zip_file_path, '{}/jtnn'.format(default_dir))
 
-            self.vocab = Vocab([x.strip("\r\n ")
-                                for x in open(vocab_file)])
+            self.vocab = Vocab([x.strip("\r\n ") for x in open(vocab_file)])
         else:
             self.vocab = vocab
 
