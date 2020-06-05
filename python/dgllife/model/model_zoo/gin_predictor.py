@@ -6,7 +6,6 @@
 # GIN-based model for regression and classification on graphs.
 # pylint: disable= no-member, arguments-differ, invalid-name
 
-import dgl
 import torch.nn as nn
 
 from dgl.nn.pytorch.glob import GlobalAttentionPooling, SumPooling, AvgPooling, MaxPooling
