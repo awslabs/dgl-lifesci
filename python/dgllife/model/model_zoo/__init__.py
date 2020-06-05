@@ -18,6 +18,7 @@ from .weave_predictor import *
 
 # Generative models
 from .dgmg import *
+from .jtnn import *
 
 # Reaction prediction
 from .wln_reaction_center import *
