@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import numpy as np
+import shutil
 import torch
 import torch.nn as nn
 
@@ -109,9 +110,7 @@ def bayesian_optimization(args, train_set, val_set, test_set):
     fmin(objective, candidate_hypers, algo=tpe.suggest, max_evals=args['num_evals'])
     results.sort(key=lambda tup: tup[2])
     best_config, best_hyper, best_val_metric = results[-1]
-    with open(args['result_path'] + '/log.txt', 'w') as f:
-        f.write('best val {}: {:.4f}\n'.format(args['metric'], best_val_metric))
-        f.write('result path: {}\n'.format(best_config['trial_path']))
+    shutil.move(best_config['trial_path'], args['result_path'] + '/best')
 
     with open(args['result_path'] + '/best_config.txt', 'w') as f:
         json.dump(best_hyper, f)
@@ -177,3 +176,5 @@ if __name__ == '__main__':
         print('Use the best hyperparameters found before')
         args.update(exp_config)
         main(args, train_set, val_set, test_set)
+
+    # Export model predictions
