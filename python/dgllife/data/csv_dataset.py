@@ -30,10 +30,10 @@ class MoleculeCSVDataset(object):
         One column includes smiles and some other columns include labels.
     smiles_to_graph: callable, str -> DGLGraph
         A function turning a SMILES into a DGLGraph.
-    node_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
+    node_featurizer : None or callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update
         ndata for a DGLGraph.
-    edge_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
+    edge_featurizer : None or callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for edges like bonds in a molecule, which can be used to update
         edata for a DGLGraph.
     smiles_column: str

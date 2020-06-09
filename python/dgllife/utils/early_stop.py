@@ -24,6 +24,8 @@ class EarlyStopping(object):
     mode : str
         * 'higher': Higher metric suggests a better model
         * 'lower': Lower metric suggests a better model
+        If ``metric`` is not None, then mode will be determined
+        automatically from that.
     patience : int
         The early stopping will happen if we do not observe performance
         improvement for ``patience`` consecutive epochs.
@@ -31,6 +33,10 @@ class EarlyStopping(object):
         Filename for storing the model checkpoint. If not specified,
         we will automatically generate a file starting with ``early_stop``
         based on the current time.
+    metric : str or None
+        A metric name that can be used to identify if a higher value is
+        better, or vice versa. Default to None. Valid options include:
+        ``'r2'``, ``'mae'``, ``'rmse'``, ``'roc_auc_score'``.
 
     Examples
     --------
@@ -63,11 +69,22 @@ class EarlyStopping(object):
     >>> # Load the final parameters saved by the model
     >>> stopper.load_checkpoint(model)
     """
-    def __init__(self, mode='higher', patience=10, filename=None):
+    def __init__(self, mode='higher', patience=10, filename=None, metric=None):
         if filename is None:
             dt = datetime.datetime.now()
             filename = 'early_stop_{}_{:02d}-{:02d}-{:02d}.pth'.format(
                 dt.date(), dt.hour, dt.minute, dt.second)
+
+        if metric is not None:
+            assert metric in ['r2', 'mae', 'rmse', 'roc_auc_score'], \
+                "Expect metric to be 'r2' or 'mae' or " \
+                "'rmse' or 'roc_auc_score', got {}".format(metric)
+            if metric in ['r2', 'roc_auc_score']:
+                print('For metric {}, the higher the better'.format(metric))
+                mode = 'higher'
+            if metric in ['mae', 'rmse']:
+                print('For metric {}, the lower the better'.format(metric))
+                mode = 'lower'
 
         assert mode in ['higher', 'lower']
         self.mode = mode

@@ -9,12 +9,12 @@ and biology, on top of PyTorch and DGL. It provides:
 * Pre-trained models for use without training from scratch.
 
 We cover various applications in our
-`examples <https://github.com/dmlc/dgl/tree/master/apps/life_sci/examples>`_, including:
+`examples <https://github.com/awslabs/dgl-lifesci/tree/master/examples>`_, including:
 
-* `Molecular property prediction <https://github.com/dmlc/dgl/tree/master/apps/life_sci/examples/property_prediction>`_
-* `Generative models <https://github.com/dmlc/dgl/tree/master/apps/life_sci/examples/generative_models>`_
-* `Protein-ligand binding affinity prediction <https://github.com/dmlc/dgl/tree/master/apps/life_sci/examples/binding_affinity_prediction>`_
-* `Reaction prediction <https://github.com/dmlc/dgl/tree/master/apps/life_sci/examples/reaction_prediction>`_
+* `Molecular property prediction <https://github.com/awslabs/dgl-lifesci/tree/master/examples/property_prediction>`_
+* `Generative models <https://github.com/awslabs/dgl-lifesci/tree/master/examples/generative_models>`_
+* `Protein-ligand binding affinity prediction <https://github.com/awslabs/dgl-lifesci/tree/master/examples/binding_affinity_prediction>`_
+* `Reaction prediction <https://github.com/awslabs/dgl-lifesci/tree/master/examples/reaction_prediction>`_
 
 Get Started
 ------------
@@ -48,7 +48,7 @@ Follow the :doc:`instructions<install/index>` to install DGL.
 Free software
 -------------
 DGL-LifeSci is free software; you can redistribute it and/or modify it under the terms
-of the Apache License 2.0. We welcome contributions. Join us on `GitHub <https://github.com/dmlc/dgl/tree/master/apps/life_sci>`_.
+of the Apache License 2.0. We welcome contributions. Join us on `GitHub <https://github.com/awslabs/dgl-lifesci>`_.
 
 Index
 -----

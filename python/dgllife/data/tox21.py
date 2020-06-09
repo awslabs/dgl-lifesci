@@ -48,12 +48,15 @@ class Tox21(MoleculeCSVDataset):
         featurization methods and need to preprocess from scratch. Default to True.
     log_every : bool
         Print a message every time ``log_every`` molecules are processed. Default to 1000.
+    cache_file_path : str
+        Path to the cached DGLGraphs, default to 'tox21_dglgraph.bin'.
     """
     def __init__(self, smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,
                  edge_featurizer=None,
                  load=True,
-                 log_every=1000):
+                 log_every=1000,
+                 cache_file_path='tox21_dglgraph.bin'):
         self._url = 'dataset/tox21.csv.gz'
         data_path = get_download_dir() + '/tox21.csv.gz'
         download(_get_dgl_url(self._url), path=data_path)
@@ -63,7 +66,7 @@ class Tox21(MoleculeCSVDataset):
         df = df.drop(columns=['mol_id'])
 
         super(Tox21, self).__init__(df, smiles_to_graph, node_featurizer, edge_featurizer,
-                                    "smiles", "tox21_dglgraph.bin",
+                                    "smiles", cache_file_path,
                                     load=load, log_every=log_every)
         self._weight_balancing()
 

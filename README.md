@@ -45,6 +45,7 @@ pip install dgllife
 ### Conda installation for DGL-LifeSci
 
 ```
+pip install hyperopt
 conda install -c dglteam dgllife
 ```
 
@@ -53,8 +54,8 @@ conda install -c dglteam dgllife
 If you want to try experimental features, you can install from source as follows:
 
 ```
-git clone https://github.com/dmlc/dgl.git
-cd apps/life_sci/python
+git clone https://github.com/awslabs/dgl-lifesci.git
+cd dgl-lifesci/python
 python setup.py install
 ```
 
@@ -66,7 +67,7 @@ Once you have installed the package, you can verify the success of installation 
 import dgllife
 
 print(dgllife.__version__)
-# 0.2.2
+# 0.2.3
 ```
 
 If you are new to DGL, the first time you import dgl a message will pop up as below:
