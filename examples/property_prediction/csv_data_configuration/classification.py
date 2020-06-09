@@ -80,6 +80,10 @@ def main(args, train_set, val_set, test_set):
     test_score = run_an_eval_epoch(args, model, test_loader)
     print('test {} {:.4f}'.format(args['metric'], test_score))
 
+    with open(args['trial_path'] + '/eval.txt', 'w') as f:
+        f.write('Best val {}: {}\n'.format(args['metric'], stopper.best_score))
+        f.write('Test {}: {}\n'.format(args['metric'], test_score))
+
     return args, stopper.best_score
 
 def bayesian_optimization(args, train_set, val_set, test_set):
