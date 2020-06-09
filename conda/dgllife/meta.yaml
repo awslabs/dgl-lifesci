@@ -6,6 +6,10 @@ source:
   url: https://files.pythonhosted.org/packages/42/b6/d6fad243fb8483e87ff9296e088d235f4b932ddf9c1b3fe4b19462dd0efa/dgllife-0.2.3.tar.gz
   sha256: 67a7f7a300107bdfc4e305f54c231f6c44524d1326242069936dc7cb532fc47c
 
+channels:
+  - defaults
+  - conda-forge
+
 requirements:
   build:
     - python {{ python }}
