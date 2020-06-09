@@ -53,8 +53,8 @@ conda install -c dglteam dgllife
 If you want to try experimental features, you can install from source as follows:
 
 ```
-git clone https://github.com/dmlc/dgl.git
-cd apps/life_sci/python
+git clone https://github.com/awslabs/dgl-lifesci.git
+cd dgl-lifesci/python
 python setup.py install
 ```
 
