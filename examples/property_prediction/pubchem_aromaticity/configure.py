@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 # graph construction
 from dgllife.utils import smiles_to_bigraph
 # general featurization
