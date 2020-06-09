@@ -49,7 +49,8 @@ def load_dataset_for_classification(args):
         dataset = Tox21(smiles_to_graph=args['smiles_to_graph'],
                         node_featurizer=args.get('node_featurizer', None),
                         edge_featurizer=args.get('edge_featurizer', None),
-                        load=False)
+                        load=False,
+                        cache_file_path=args['exp'])
         train_set, val_set, test_set = RandomSplitter.train_val_test_split(
             dataset, frac_train=args['frac_train'], frac_val=args['frac_val'],
             frac_test=args['frac_test'], random_state=args['random_seed'])
