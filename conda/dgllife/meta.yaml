@@ -8,7 +8,6 @@ source:
 
 channels:
   - defaults
-  - conda-forge
 
 requirements:
   build:
@@ -17,6 +16,9 @@ requirements:
     - cmake
     - git
     - cython
+    - pip
+    - pip:
+        - hyperopt
   run:
     - python
     - requests
@@ -26,7 +28,6 @@ requirements:
     - numpy
     - scipy
     - networkx
-    - hyperopt
 
 about:
   license: Apache
