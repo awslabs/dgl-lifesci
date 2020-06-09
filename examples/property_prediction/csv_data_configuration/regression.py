@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 import numpy as np
 import torch
@@ -96,7 +97,7 @@ def bayesian_optimization(args, train_set, val_set, test_set):
         configure = deepcopy(args)
         configure.update(hyperparams)
         configure, val_metric = main(configure, train_set, val_set, test_set)
-        results.append((configure, val_metric))
+        results.append((configure, hyperparams, val_metric))
 
         if args['metric'] in ['r2']:
             return -1 * val_metric
@@ -104,11 +105,14 @@ def bayesian_optimization(args, train_set, val_set, test_set):
             return val_metric
 
     fmin(objective, candidate_hypers, algo=tpe.suggest, max_evals=args['num_evals'])
-    results.sort(key=lambda tup: tup[1])
-    best_config, best_val_metric = results[-1]
+    results.sort(key=lambda tup: tup[2])
+    best_config, best_hyper, best_val_metric = results[-1]
     with open(args['result_path'] + '/log.txt', 'w') as f:
         f.write('best val {}: {:.4f}\n'.format(args['metric'], best_val_metric))
         f.write('result path: {}\n'.format(best_config['trial_path']))
+
+    with open(args['result_path'] + '/best_config.txt', 'w') as f:
+        json.dump(best_hyper, f)
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
