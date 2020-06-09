@@ -103,7 +103,7 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--num-epochs', type=int, default=250,
                         help='Maximum number of epochs for training')
     args = parser.parse_args().__dict__
-    args['dataset'] = 'alchemy'
+    args['dataset'] = 'Alchemy'
     args['exp'] = '_'.join([args['model'], args['dataset']])
     args.update(get_exp_configure(args['exp']))
 
