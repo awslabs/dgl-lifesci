@@ -10,6 +10,8 @@ GNN-based molecular property prediction typically consists of the following step
 For those who are familiar with molecular fingerprints, GNN-based molecular representations 
 can be viewed as learnable molecular fingerprints as first introduced in [1].
 
+**To develop a GNN-based molecular property prediction model for your own dataset, see `dataset_configuration`.**
+
 ## References
 
 [1] Duvenaud et al. (2015) Convolutional networks on graphs for learning molecular fingerprints. *Advances in neural 
