@@ -11,7 +11,8 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 
 from hyper import init_hyper_space
-from utils import get_configure, init_trial_path, split_dataset, collate_molgraphs, load_model
+from utils import get_configure, mkdir_p, init_trial_path, \
+    split_dataset, collate_molgraphs, load_model
 
 def predict(args, model, bg):
     node_feats = bg.ndata.pop('h').to(args['device'])
@@ -143,6 +144,7 @@ if __name__ == '__main__':
 
     args['node_featurizer'] = CanonicalAtomFeaturizer()
     df = pd.read_csv(args['csv_path'])
+    mkdir_p(args['result_path'])
     dataset = MoleculeCSVDataset(df=df,
                                  smiles_to_graph=smiles_to_bigraph,
                                  node_featurizer=args['node_featurizer'],
