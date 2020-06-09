@@ -70,6 +70,66 @@ def test_early_stopping_low():
 
     remove_file('test.pkl')
 
+def test_early_stopping_high_metric():
+    for metric in ['r2', 'roc_auc_score']:
+        model1 = nn.Linear(2, 3)
+        stopper = EarlyStopping(mode=None,
+                                patience=1,
+                                filename='test.pkl',
+                                metric=metric)
+
+        # Save model in the first step
+        stopper.step(1., model1)
+        model1.weight.data = model1.weight.data + 1
+        model2 = nn.Linear(2, 3)
+        stopper.load_checkpoint(model2)
+        assert not torch.allclose(model1.weight, model2.weight)
+
+        # Save model checkpoint with performance improvement
+        model1.weight.data = model1.weight.data + 1
+        stopper.step(2., model1)
+        stopper.load_checkpoint(model2)
+        assert torch.allclose(model1.weight, model2.weight)
+
+        # Stop when no improvement observed
+        model1.weight.data = model1.weight.data + 1
+        assert stopper.step(0.5, model1)
+        stopper.load_checkpoint(model2)
+        assert not torch.allclose(model1.weight, model2.weight)
+
+        remove_file('test.pkl')
+
+def test_early_stopping_low_metric():
+    for metric in ['mae', 'rmse']:
+        model1 = nn.Linear(2, 3)
+        stopper = EarlyStopping(mode=None,
+                                patience=1,
+                                filename='test.pkl',
+                                metric=metric)
+
+        # Save model in the first step
+        stopper.step(1., model1)
+        model1.weight.data = model1.weight.data + 1
+        model2 = nn.Linear(2, 3)
+        stopper.load_checkpoint(model2)
+        assert not torch.allclose(model1.weight, model2.weight)
+
+        # Save model checkpoint with performance improvement
+        model1.weight.data = model1.weight.data + 1
+        stopper.step(0.5, model1)
+        stopper.load_checkpoint(model2)
+        assert torch.allclose(model1.weight, model2.weight)
+
+        # Stop when no improvement observed
+        model1.weight.data = model1.weight.data + 1
+        assert stopper.step(2, model1)
+        stopper.load_checkpoint(model2)
+        assert not torch.allclose(model1.weight, model2.weight)
+
+        remove_file('test.pkl')
+
 if __name__ == '__main__':
     test_early_stopping_high()
     test_early_stopping_low()
+    test_early_stopping_high_metric()
+    test_early_stopping_low_metric()
