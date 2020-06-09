@@ -140,9 +140,9 @@ def load_model(args):
         model = GCNPredictor(in_feats=args['node_featurizer'].feat_size(),
                              hidden_feats=[args['gnn_hidden_feats']] * args['num_gnn_layers'],
                              activation=[F.relu] * args['num_gnn_layers'],
-                             residual=args['residual'] * args['num_gnn_layers'],
-                             batchnorm=args['batchnorm'] * args['num_gnn_layers'],
-                             dropout=args['dropout'] * args['num_gnn_layers'],
+                             residual=[args['residual']] * args['num_gnn_layers'],
+                             batchnorm=[args['batchnorm']] * args['num_gnn_layers'],
+                             dropout=[args['dropout']] * args['num_gnn_layers'],
                              classifier_hidden_feats=args['classifier_hidden_feats'],
                              classifier_dropout=args['dropout'],
                              n_tasks=args['n_tasks'])
