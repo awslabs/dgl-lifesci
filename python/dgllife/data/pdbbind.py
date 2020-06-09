@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# PDBBind dataset processed by MoleculeNet.
+# PDBBind dataset processed by moleculenet.
 
 import dgl.backend as F
 import numpy as np
@@ -17,7 +17,7 @@ from ..utils import multiprocess_load_molecules, ACNN_graph_construction_and_fea
 __all__ = ['PDBBind']
 
 class PDBBind(object):
-    """PDBbind dataset processed by MoleculeNet.
+    """PDBbind dataset processed by moleculenet.
 
     The description below is mainly based on
     `[1] <https://pubs.rsc.org/en/content/articlelanding/2018/sc/c7sc02664a#cit50>`__.
@@ -35,7 +35,7 @@ class PDBBind(object):
 
     References:
 
-        * [1] MoleculeNet: a benchmark for molecular machine learning
+        * [1] moleculenet: a benchmark for molecular machine learning
         * [2] The PDBbind database: collection of binding affinities for protein-ligand complexes
           with known three-dimensional structures
         * [3] The PDBbind database: methodologies and updates
@@ -44,7 +44,7 @@ class PDBBind(object):
     Parameters
     ----------
     subset : str
-        In MoleculeNet, we can use either the "refined" subset or the "core" subset. We can
+        In moleculenet, we can use either the "refined" subset or the "core" subset. We can
         retrieve them by setting ``subset`` to be ``'refined'`` or ``'core'``. The size
         of the ``'core'`` set is 195 and the size of the ``'refined'`` set is 3706.
     load_binding_pocket : bool

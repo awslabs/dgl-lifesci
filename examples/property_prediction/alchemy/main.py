@@ -118,7 +118,7 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--model', type=str,
                         choices=['MPNN', 'SchNet', 'MGCN', 'AttentiveFP'],
                         help='Model to use')
-    parser.add_argument('-d', '--dataset', type=str, choices=['Alchemy', 'Aromaticity'],
+    parser.add_argument('-d', '--dataset', type=str, choices=['alchemy', 'Aromaticity'],
                         help='Dataset to use')
     parser.add_argument('-p', '--pre-trained', action='store_true',
                         help='Whether to skip training and use a pre-trained model')

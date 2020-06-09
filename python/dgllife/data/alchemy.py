@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Tencent Alchemy Dataset https://alchemy.tencent.com/
+# Tencent alchemy Dataset https://alchemy.tencent.com/
 
 import numpy as np
 import os
@@ -147,7 +147,7 @@ class TencentAlchemyDataset(object):
     ----------
     mode : str
         'dev', 'valid' or 'test', separately for training, validation and test.
-        Default to be 'dev'. Note that 'test' is not available as the Alchemy
+        Default to be 'dev'. Note that 'test' is not available as the alchemy
         contest is ongoing.
     mol_to_graph: callable, str -> DGLGraph
         A function turning an RDKit molecule instance into a DGLGraph.
@@ -183,7 +183,7 @@ class TencentAlchemyDataset(object):
                  load=True):
         if mode == 'test':
             raise ValueError('The test mode is not supported before '
-                             'the Alchemy contest finishes.')
+                             'the alchemy contest finishes.')
 
         assert mode in ['dev', 'valid', 'test'], \
             'Expect mode to be dev, valid or test, got {}.'.format(mode)

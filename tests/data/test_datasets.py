@@ -16,7 +16,7 @@ def remove_file(fname):
             pass
 
 def test_alchemy():
-    print('Test Alchemy')
+    print('Test alchemy')
     dataset = TencentAlchemyDataset(mode='valid',
                                     node_featurizer=None,
                                     edge_featurizer=None)

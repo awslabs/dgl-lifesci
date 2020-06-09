@@ -70,9 +70,9 @@ def load_dataset_for_regression(args):
     test_set
         Subset for test.
     """
-    assert args['dataset'] in ['Alchemy', 'Aromaticity']
+    assert args['dataset'] in ['alchemy', 'Aromaticity']
 
-    if args['dataset'] == 'Alchemy':
+    if args['dataset'] == 'alchemy':
         from dgllife.data import TencentAlchemyDataset
         train_set = TencentAlchemyDataset(mode='dev')
         val_set = TencentAlchemyDataset(mode='valid')
