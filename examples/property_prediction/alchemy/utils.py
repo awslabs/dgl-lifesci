@@ -42,7 +42,7 @@ def collate_molgraphs(data):
         Batched datapoint labels. B is len(data) and
         T is the number of total tasks.
     """
-    smiles, graphs, labels, masks = map(list, zip(*data))
+    smiles, graphs, labels = map(list, zip(*data))
 
     bg = dgl.batch(graphs)
     bg.set_n_initializer(dgl.init.zero_initializer)
