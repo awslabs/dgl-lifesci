@@ -45,6 +45,7 @@ pip install dgllife
 ### Conda installation for DGL-LifeSci
 
 ```
+pip install hyperopt
 conda install -c dglteam dgllife
 ```
 
