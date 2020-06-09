@@ -13,7 +13,7 @@ gcn_hyperparameters = {
     'classifier_hidden_feats': hp.choice('classifier_hidden_feats', [16, 32, 64, 128]),
     'num_gnn_layers': hp.choice('num_gnn_layers', [1, 2, 3, 4, 5]),
     'residual': hp.choice('residual', [True, False]),
-    'batch_norm': hp.choice('batchnorm', [True, False])
+    'batchnorm': hp.choice('batchnorm', [True, False])
 }
 
 def init_hyper_space(model):
