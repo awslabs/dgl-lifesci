@@ -31,9 +31,10 @@ def run_a_train_epoch(args, epoch, model, data_loader, loss_criterion, optimizer
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        print('epoch {:d}/{:d}, batch {:d}/{:d}, loss {:.4f}'.format(
-            epoch + 1, args['num_epochs'], batch_id + 1, len(data_loader), loss.item()))
         train_meter.update(logits, labels, masks)
+        if batch_id % args['print_every'] == 0:
+            print('epoch {:d}/{:d}, batch {:d}/{:d}, loss {:.4f}'.format(
+                epoch + 1, args['num_epochs'], batch_id + 1, len(data_loader), loss.item()))
     train_score = np.mean(train_meter.compute_metric(args['metric']))
     print('epoch {:d}/{:d}, training {} {:.4f}'.format(
         epoch + 1, args['num_epochs'], args['metric'], train_score))
@@ -138,6 +139,8 @@ if __name__ == '__main__':
                         help='Maximum number of epochs allowed for training. '
                              'We set a large number by default as early stopping '
                              'will be performed. (default: 1000)')
+    parser.add_argument('-pe', '--print-every', type=int, default=20,
+                        help='Print the training progress every X mini-batches')
     parser.add_argument('-p', '--result-path', type=str, default='classification_results',
                         help='Path to save training results (default: classification_results)')
     parser.add_argument('-ne', '--num-evals', type=int, default=64,
