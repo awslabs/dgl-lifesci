@@ -100,10 +100,10 @@ if __name__ == '__main__':
 
     from configure import get_exp_configure
 
-    parser = argparse.ArgumentParser(description='Molecule Classification')
+    parser = argparse.ArgumentParser(description='MoleculeNet')
     parser.add_argument('-m', '--model', type=str, choices=['GCN', 'GAT', 'Weave'],
                         help='Model to use')
-    parser.add_argument('-d', '--dataset', type=str, choices=['Tox21'],
+    parser.add_argument('-d', '--dataset', type=str, choices=['Tox21'], default='Tox21',
                         help='Dataset to use')
     parser.add_argument('-p', '--pre-trained', action='store_true',
                         help='Whether to skip training and use a pre-trained model')
