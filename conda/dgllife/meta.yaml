@@ -8,6 +8,7 @@ source:
 
 channels:
   - defaults
+  - conda-forge
 
 requirements:
   build:
@@ -16,9 +17,7 @@ requirements:
     - cmake
     - git
     - cython
-    - pip
-    - pip:
-        - hyperopt
+    - hyperopt
   run:
     - python
     - requests
