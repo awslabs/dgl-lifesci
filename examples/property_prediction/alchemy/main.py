@@ -32,14 +32,14 @@ def run_a_train_epoch(args, epoch, model, data_loader,
     model.train()
     train_meter = Meter()
     for batch_id, batch_data in enumerate(data_loader):
-        smiles, bg, labels, masks = batch_data
-        labels, masks = labels.to(args['device']), masks.to(args['device'])
+        smiles, bg, labels = batch_data
+        labels = labels.to(args['device'])
         prediction = regress(args, model, bg)
-        loss = (loss_criterion(prediction, labels) * (masks != 0).float()).mean()
+        loss = (loss_criterion(prediction, labels)).mean()
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        train_meter.update(prediction, labels, masks)
+        train_meter.update(prediction, labels)
     total_score = np.mean(train_meter.compute_metric(args['metric_name']))
     print('epoch {:d}/{:d}, training {} {:.4f}'.format(
         epoch + 1, args['num_epochs'], args['metric_name'], total_score))
@@ -49,10 +49,10 @@ def run_an_eval_epoch(args, model, data_loader):
     eval_meter = Meter()
     with torch.no_grad():
         for batch_id, batch_data in enumerate(data_loader):
-            smiles, bg, labels, masks = batch_data
+            smiles, bg, labels = batch_data
             labels = labels.to(args['device'])
             prediction = regress(args, model, bg)
-            eval_meter.update(prediction, labels, masks)
+            eval_meter.update(prediction, labels)
         total_score = np.mean(eval_meter.compute_metric(args['metric_name']))
     return total_score
 
