@@ -116,7 +116,7 @@ if __name__ == '__main__':
     parser = ArgumentParser('Multi-label Binary Classification')
     parser.add_argument('-c', '--csv-path', type=str, required=True,
                         help='Path to a csv file for loading a dataset')
-    parser.add_argument('-s', '--smiles-column', type=str, required=True,
+    parser.add_argument('-sc', '--smiles-column', type=str, required=True,
                         help='Header for the SMILES column in the CSV file')
     parser.add_argument('-t', '--task-names', default=None, type=str,
                         help='Header for the tasks to model. If None, we will model '
