@@ -76,6 +76,7 @@ def main(args, train_set, val_set, test_set):
         print('epoch {:d}/{:d}, validation {} {:.4f}, best validation {} {:.4f}'.format(
             epoch + 1, args['num_epochs'], args['metric'],
             val_score, args['metric'], stopper.best_score))
+
         if early_stop:
             break
 

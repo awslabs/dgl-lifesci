@@ -19,8 +19,7 @@ def predict(args, model, bg):
     node_feats = bg.ndata.pop('h').to(args['device'])
     return model(bg, node_feats)
 
-def run_a_train_epoch(args, epoch, model, data_loader,
-                      loss_criterion, optimizer):
+def run_a_train_epoch(args, epoch, model, data_loader, loss_criterion, optimizer):
     model.train()
     train_meter = Meter()
     for batch_id, batch_data in enumerate(data_loader):
