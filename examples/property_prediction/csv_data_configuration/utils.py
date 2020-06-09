@@ -139,7 +139,7 @@ def load_model(args):
         from dgllife.model import GCNPredictor
         model = GCNPredictor(in_feats=args['node_featurizer'].feat_size(),
                              hidden_feats=[args['gnn_hidden_feats']] * args['num_gnn_layers'],
-                             activation=F.relu,
+                             activation=[F.relu] * args['num_gnn_layers'],
                              residual=args['residual'],
                              batchnorm=args['batchnorm'],
                              dropout=args['dropout'],
