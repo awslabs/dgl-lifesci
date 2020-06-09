@@ -176,5 +176,3 @@ if __name__ == '__main__':
         print('Use the best hyperparameters found before')
         args.update(exp_config)
         main(args, train_set, val_set, test_set)
-
-    # Export model predictions
