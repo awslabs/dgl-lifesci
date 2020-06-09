@@ -9,6 +9,8 @@ We provide various examples across 3 applications -- property prediction, genera
     - [PDBBind with DGL](../python/dgllife/data/pdbbind.py)
 - Alchemy: A Quantum Chemistry Dataset for Benchmarking AI Models [[paper]](https://arxiv.org/abs/1906.09427), [[github]](https://github.com/tencent-alchemy/Alchemy)
     - [Alchemy with DGL](../python/dgllife/data/alchemy.py)
+- PubChem Aromaticity [[paper]](https://pubs.acs.org/doi/10.1021/acs.jmedchem.9b00959)
+    - [PubChem Aromaticity with DGL](../python/dgllife/data/pubchem_aromaticity.py)
 
 ## Property Prediction
 
@@ -32,7 +34,7 @@ We provide various examples across 3 applications -- property prediction, genera
     - [Example for Molecule Regression](property_prediction/pubchem_aromaticity/regression.py)
 - Pushing the Boundaries of Molecular Representation for Drug Discovery with the Graph Attention Mechanism (AttentiveFP) [[paper]](https://pubs.acs.org/doi/abs/10.1021/acs.jmedchem.9b00959)
     - [AttentiveFP with DGL](../python/dgllife/model/model_zoo/attentivefp_predictor.py)
-    - [Example for Molecule Regression](property_prediction/pubchem_aromaticity/regression.py)
+    - [Example for Molecule Regression](property_prediction/pubchem_aromaticity/main.py)
 
 ## Generative Models
 
