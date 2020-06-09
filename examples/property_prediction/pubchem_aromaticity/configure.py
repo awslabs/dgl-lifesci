@@ -10,7 +10,7 @@ from dgllife.utils import BaseAtomFeaturizer, atom_type_one_hot, atom_degree_one
 from dgllife.utils.featurizers import BaseBondFeaturizer
 from functools import partial
 
-from .utils import chirality
+from utils import chirality
 
 attentivefp = {
     'random_seed': 8,
