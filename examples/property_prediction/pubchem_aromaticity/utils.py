@@ -76,8 +76,8 @@ def collate_molgraphs(data):
 def load_model(args):
     if args['model'] == 'AttentiveFP':
         from dgllife.model import AttentiveFPPredictor
-        model = AttentiveFPPredictor(node_feat_size=args['node_featurizer'].feat_size(),
-                                     edge_feat_size=args['edge_featurizer'].feat_size(),
+        model = AttentiveFPPredictor(node_feat_size=args['node_featurizer'].feat_size('hv'),
+                                     edge_feat_size=args['edge_featurizer'].feat_size('he'),
                                      num_layers=args['num_layers'],
                                      num_timesteps=args['num_timesteps'],
                                      graph_feat_size=args['graph_feat_size'],
