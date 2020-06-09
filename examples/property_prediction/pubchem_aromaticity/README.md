@@ -14,7 +14,7 @@ For featurization, we exclude all bond features and all atom aromatic features a
 
 ### Training and Evaluation
 
-To train from scratch, run 
+We currently only support AttentiveFP [1] for this dataset. To train from scratch, run 
 
 ```bash
 python main.py
