@@ -45,8 +45,9 @@ setup(
         'numpy>=1.14.0',
         'scipy>=1.1.0',
         'networkx>=2.1',
+        'hyperopt'
     ],
-    url='https://github.com/dmlc/dgl/tree/master/apps/life_sci',
+    url='https://github.com/awslabs/dgl-lifesci',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 3',

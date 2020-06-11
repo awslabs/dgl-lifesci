@@ -59,6 +59,6 @@ To use the latest experimental features,
 
 .. code:: bash
 
-    git clone https://github.com/dmlc/dgl.git
-    cd apps/life_sci/python
+    git clone https://github.com/awslabs/dgl-lifesci.git
+    cd dgl-lifesci/python
     python setup.py install
