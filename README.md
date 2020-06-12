@@ -36,7 +36,7 @@ DGL-LifeSci requires python 3.6+, DGL 0.4.3+ and PyTorch 1.2.0+.
 Additionally, we require `RDKit 2018.09.3` for cheminformatics. We recommend installing it with
 
 ```
-conda install -c conda-forge rdkit==2018.09.3
+conda install -c rdkit rdkit==2018.09.3
 ```
  
 For other installation recipes for RDKit, see the [official documentation](https://www.rdkit.org/docs/Install.html).
