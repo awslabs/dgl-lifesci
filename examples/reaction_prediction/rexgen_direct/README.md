@@ -21,7 +21,10 @@ in this directory. Below we visualize a reaction prediction by the model:
 
 The example by default works with reactions from USPTO (United States Patent and Trademark) granted patents, 
 collected by Lowe [1]. After removing duplicates and erroneous reactions, the authors obtain a set of 480K reactions. 
-The dataset is divided into 400K, 40K, and 40K for training, validation and test.
+The [dataset](https://data.dgl.ai/dataset/uspto.zip) is divided into 400K, 40K, and 40K for training, validation and test.
+
+dataset:  https://data.dgl.ai/dataset/uspto.zip
+
 
 ## Reaction Center Prediction
 
