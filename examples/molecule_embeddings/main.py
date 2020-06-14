@@ -54,12 +54,12 @@ def graph_construction_and_featurization(smiles):
             if mol is None:
                 success.append(False)
                 continue
-            success.append(True)
             g = mol_to_bigraph(mol, add_self_loop=True,
                                node_featurizer=PretrainAtomFeaturizer(),
                                edge_featurizer=PretrainBondFeaturizer(),
                                canonical_atom_order=False)
             graphs.append(g)
+            success.append(True)
         except:
             success.append(False)
 
