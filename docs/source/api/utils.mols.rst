@@ -5,10 +5,10 @@ Utils for Molecules
 
 Utilities in DGL-LifeSci for working with molecules.
 
-RDKit Utils
------------
+IO Utils
+--------
 
-RDKit utils for loading molecules and accessing their information.
+Utils for loading molecules and accessing their information.
 
 .. autosummary::
     :toctree: ../generated/
@@ -16,6 +16,7 @@ RDKit utils for loading molecules and accessing their information.
     dgllife.utils.get_mol_3d_coordinates
     dgllife.utils.load_molecule
     dgllife.utils.multiprocess_load_molecules
+    dgllife.utils.load_smiles_from_txt
 
 Graph Construction
 ------------------

@@ -16,7 +16,8 @@ from rdkit.Chem import AllChem
 
 __all__ = ['get_mol_3d_coordinates',
            'load_molecule',
-           'multiprocess_load_molecules']
+           'multiprocess_load_molecules',
+           'load_smiles_from_txt']
 
 # pylint: disable=W0702
 def get_mol_3d_coordinates(mol):
@@ -191,3 +192,23 @@ def multiprocess_load_molecules(files, sanitize=False, calc_charges=False,
             mols_loaded = mols_loaded.get()
 
     return mols_loaded
+
+def load_smiles_from_txt(file):
+    """Load SMILES from a txt file.
+
+    Parameters
+    ----------
+    file : str
+        Path to a txt file where each line has a SMILES string.
+
+    Returns
+    -------
+    list of str
+        List of SMILES
+    """
+    smiles = []
+    with open(file, 'r') as f:
+        for line in f.readlines():
+            smiles.append(line.strip())
+
+    return smiles

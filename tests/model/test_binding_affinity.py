@@ -12,7 +12,7 @@ from dgl.data.utils import _get_dgl_url, download, extract_archive
 
 from dgllife.model.model_zoo.acnn import ACNN
 from dgllife.utils.complex_to_graph import ACNN_graph_construction_and_featurization
-from dgllife.utils.rdkit_utils import load_molecule
+from dgllife.utils.io import load_molecule
 
 def remove_dir(dir):
     if os.path.isdir(dir):
