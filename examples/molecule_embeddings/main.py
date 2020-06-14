@@ -72,6 +72,7 @@ def main(args, dataset):
     data_loader = DataLoader(dataset, batch_size=args['batch_size'],
                              collate_fn=collate, shuffle=False)
     model = load_pretrained(args['model']).to(args['device'])
+    model.eval()
     readout = AvgPooling()
 
     mol_emb = []
@@ -84,7 +85,7 @@ def main(args, dataset):
         with torch.no_grad():
             node_repr = model(bg, nfeats, efeats)
         mol_emb.append(readout(bg, node_repr))
-    mol_emb = torch.cat(mol_emb, dim=0).numpy()
+    mol_emb = torch.cat(mol_emb, dim=0).detach().cpu().numpy()
     np.save(args['out_dir'] + '/mol_emb.npy', mol_emb)
 
 if __name__ == '__main__':
