@@ -36,6 +36,12 @@ We provide various examples across 3 applications -- property prediction, genera
     - [AttentiveFP with DGL](../python/dgllife/model/model_zoo/attentivefp_predictor.py)
     - [Example for Molecule Regression](property_prediction/pubchem_aromaticity/main.py)
 
+## Molecule Embeddings
+
+- Strategies for Pre-training Graph Neural Networks [[paper]](https://arxiv.org/abs/1905.12265), [[github]](https://github.com/snap-stanford/pretrain-gnns)
+    - [GIN with DGL](../python/dgllife/model/model_zoo/gin_predictor.py)
+    - [Example for Computing Molecule Embeddings](molecule_embeddings/main.py)
+
 ## Generative Models
 
 - Learning Deep Generative Models of Graphs (DGMG) [[paper]](https://arxiv.org/abs/1803.03324)
