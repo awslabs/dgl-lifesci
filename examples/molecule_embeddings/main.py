@@ -69,7 +69,8 @@ def collate(graphs):
     return dgl.batch(graphs)
 
 def main(args, dataset):
-    data_loader = DataLoader(dataset, batch_size=args['batch_size'], shuffle=False)
+    data_loader = DataLoader(dataset, batch_size=args['batch_size'],
+                             collate_fn=collate, shuffle=False)
     model = load_pretrained(args['model']).to(args['device'])
     readout = AvgPooling()
 
