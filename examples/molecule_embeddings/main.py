@@ -49,16 +49,19 @@ def graph_construction_and_featurization(smiles):
     graphs = []
     success = []
     for smi in smiles:
-        mol = Chem.MolFromSmiles(smi)
-        if mol is None:
+        try:
+            mol = Chem.MolFromSmiles(smi)
+            if mol is None:
+                success.append(False)
+                continue
+            success.append(True)
+            g = mol_to_bigraph(mol, add_self_loop=True,
+                               node_featurizer=PretrainAtomFeaturizer(),
+                               edge_featurizer=PretrainBondFeaturizer(),
+                               canonical_atom_order=False)
+            graphs.append(g)
+        except:
             success.append(False)
-            continue
-        success.append(True)
-        g = mol_to_bigraph(mol, add_self_loop=True,
-                           node_featurizer=PretrainAtomFeaturizer(),
-                           edge_featurizer=PretrainBondFeaturizer(),
-                           canonical_atom_order=False)
-        graphs.append(g)
 
     return graphs, success
 
