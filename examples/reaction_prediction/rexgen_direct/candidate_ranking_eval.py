@@ -28,6 +28,9 @@ def main(args, path_to_candidate_bonds):
     test_loader = DataLoader(test_set, batch_size=1, collate_fn=collate_rank_eval,
                              shuffle=False, num_workers=args['num_workers'])
 
+    if args['num_workers'] > 1:
+        torch.multiprocessing.set_sharing_strategy('file_system')
+
     if args['model_path'] is None:
         model = load_pretrained('wln_rank_uspto')
     else:

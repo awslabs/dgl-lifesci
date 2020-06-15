@@ -274,6 +274,18 @@ python candidate_ranking_train.py --eval-path Z
 
 where `Z` is the path to the new test set as described in the `Reaction Center Prediction` section.
 
+### Common Issues
+
+By default we use a large number of processes for constructing mini-batches so that we can accelerate 
+the training process. If you encounter the following issue 
+
+```
+RuntimeError: received 0 items of ancdata
+```
+
+try using a smaller number of processes with `-nw A`. By default we set `A` to 100 for 
+`candidate_ranking_train.py` and 32 for `candidate_ranking_eval.py`.
+
 ## References
 
 [1] D. M.Lowe, Patent reaction extraction: downloads, 
