@@ -41,6 +41,9 @@ def main(args, path_to_candidate_bonds):
             max_num_change_combos_per_reaction=args['max_num_change_combos_per_reaction_eval'],
             num_processes=args['num_processes'])
 
+    if args['num_workers'] > 1:
+        torch.multiprocessing.set_sharing_strategy('file_system')
+
     train_loader = DataLoader(train_set, batch_size=args['batch_size'],
                               collate_fn=collate_rank_train,
                               shuffle=True, num_workers=args['num_workers'])
