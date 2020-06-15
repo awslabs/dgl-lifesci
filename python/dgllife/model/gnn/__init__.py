@@ -14,3 +14,5 @@ from .mpnn import *
 from .schnet import *
 from .weave import *
 from .wln import *
+from .gcn_ogb import *
+from .gin_ogb import *
