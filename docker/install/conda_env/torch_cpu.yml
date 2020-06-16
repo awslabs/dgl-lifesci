@@ -1,7 +1,7 @@
 name: pytorch-ci
 channels:
   - defaults
-  - conda-forge
+  - rdkit
 dependencies:
   - python=3.6.9
   - pip

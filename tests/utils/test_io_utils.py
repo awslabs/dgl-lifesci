@@ -8,7 +8,7 @@ import os
 import shutil
 
 from dgl.data.utils import download, _get_dgl_url, extract_archive
-from dgllife.utils.rdkit_utils import get_mol_3d_coordinates, load_molecule
+from dgllife.utils.io import get_mol_3d_coordinates, load_molecule, load_smiles_from_txt
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
@@ -49,6 +49,16 @@ def test_load_molecule():
     remove_dir('tmp1')
     remove_dir('tmp2')
 
+def test_load_smiles_from_txt():
+    smiles_list1 = ['CCO', 'O=P(O)(OC1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)CO)O']
+    file = 'smiles.txt'
+    with open(file, 'w') as f:
+        for s in smiles_list1:
+            f.write(s + '\n')
+    smiles_list2 = load_smiles_from_txt(file)
+    assert smiles_list1 == smiles_list2
+
 if __name__ == '__main__':
     test_get_mol_3D_coordinates()
     test_load_molecule()
+    test_load_smiles_from_txt()

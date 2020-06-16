@@ -9,7 +9,7 @@ import torch
 
 from dgl.data.utils import download, _get_dgl_url, extract_archive
 from dgllife.utils.complex_to_graph import *
-from dgllife.utils.rdkit_utils import load_molecule
+from dgllife.utils.io import load_molecule
 
 def remove_dir(dir):
     if os.path.isdir(dir):
