@@ -48,4 +48,5 @@ Using the default parameters, the performance of the two models on the ogbl-ppa 
 ## References
 
 [1] Kipf T N, Welling M. Semi-Supervised Classification with Graph Convolutional Networks[J]. 2016.
+
 [2] Hamilton W L, Ying R, Leskovec J. Inductive Representation Learning on Large Graphs[J]. 2017.
