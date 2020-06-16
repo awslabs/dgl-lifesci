@@ -3,8 +3,8 @@
 
 ## Models
 
-- **Graph Convolutional Networks (GCN)** [1]: Semi-Supervised Classification with Graph Convolutional Networks 
-- **Graph SAmple and aggreGatE (GraphSAGE)** [2]: Inductive Representation Learning on Large Graphs
+- **Graph Convolutional Networks (GCN)** [1] 
+- **Graph SAmple and aggreGatE (GraphSAGE)** [2]
 
 ## Dependencies
 
@@ -39,8 +39,13 @@ Using the default parameters, the performance of the two models on the ogbl-ppa 
 | GraphSAGE| 9.58±0.99| 9.44±0.96| 9.86±1.21|
 
 
+
 | Method  | Average Time/epoch |
 | ------- | -------------------------- |
 | GCN | 1:23:12.86 |
 | GraphSAGE| 1:28:49:46|
 
+## References
+
+[1] Kipf T N, Welling M. Semi-Supervised Classification with Graph Convolutional Networks[J]. 2016.
+[2] Hamilton W L, Ying R, Leskovec J. Inductive Representation Learning on Large Graphs[J]. 2017.
