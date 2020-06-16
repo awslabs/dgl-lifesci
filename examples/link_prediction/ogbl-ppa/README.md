@@ -38,6 +38,7 @@ Using the default parameters, the performance of the two models on the ogbl-ppa 
 | GCN | 12.87±5.07  | 12.39±4.85| 11.65±4.56 |
 | GraphSAGE| 9.58±0.99| 9.44±0.96| 9.86±1.21|
 
+
 | Method  | Average Time/epoch |
 | ------- | -------------------------- |
 | GCN | 1:23:12.86 |
