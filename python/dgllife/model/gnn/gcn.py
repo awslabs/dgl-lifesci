@@ -13,7 +13,7 @@ import torch.nn.functional as F
 import dgl
 from dgl.nn.pytorch import GraphConv
 import dgl.function as fn
-from dgl.nn.pytorch.glob import SumPooling, AvgPooling, MaxPooling
+from dgl.nn.pytorch.glob import SumPooling
 
 
 __all__ = ['GCN']
@@ -111,7 +111,7 @@ class GCNLayer(nn.Module):
 
         self.activation = activation
         self.gcn_type = gcn_type
-        if gcn_type == None:
+        if gcn_type is None:
             self.graph_conv = GraphConv(in_feats=in_feats, out_feats=out_feats,
                                         norm='none', activation=activation)
         elif gcn_type == 'ogbg-ppa':
@@ -152,7 +152,7 @@ class GCNLayer(nn.Module):
         new_feats : FloatTensor of shape (N, M2)
             * M2 is the output node feature size, which must match out_feats in initialization
         """
-        if self.gcn_type == None:
+        if self.gcn_type is None:
             new_feats = self.graph_conv(g, feats)
         elif self.gcn_type == 'ogbg-ppa':
             new_feats = self.graph_conv(g, feats, efeats, degs, norm)
@@ -203,7 +203,8 @@ class GCN(nn.Module):
         Whether to add Virtual Nodes,
         <https://arxiv.org/abs/1704.01212>`__
     JK : string
-        It could be ``last`` or ``sum`` which are the ways of the composition of graph representation.
+        How to choose the node representation.
+        It could be ``last`` or ``sum``.
 
     """
     def __init__(self, in_feats, hidden_feats=None, activation=None, residual=None,
@@ -244,18 +245,19 @@ class GCN(nn.Module):
         self.residual = residual[0]
         self.node_encoder = torch.nn.Embedding(1, hidden_feats[0])
 
-        if VirtualNode == True:
+        if VirtualNode:
             self.virtualnode_embedding = torch.nn.Embedding(1, hidden_feats[0])
             torch.nn.init.constant_(self.virtualnode_embedding.weight.data, 0)
             # List of MLPs to transform virtual node at every layer
             self.mlp_virtualnode_list = torch.nn.ModuleList()
             for layer in range(n_layers - 1):
-                self.mlp_virtualnode_list.append(nn.Sequential(nn.Linear(hidden_feats[layer], 2 * hidden_feats[layer]),
-                                                               nn.BatchNorm1d(2 * hidden_feats[layer]),
-                                                               nn.ReLU(),
-                                                               nn.Linear(2 * hidden_feats[layer], hidden_feats[layer]),
-                                                               nn.BatchNorm1d(hidden_feats[layer]),
-                                                               nn.ReLU()))
+                self.mlp_virtualnode_list.append(
+                    nn.Sequential(nn.Linear(hidden_feats[layer], 2 * hidden_feats[layer]),
+                                  nn.BatchNorm1d(2 * hidden_feats[layer]),
+                                  nn.ReLU(),
+                                  nn.Linear(2 * hidden_feats[layer], hidden_feats[layer]),
+                                  nn.BatchNorm1d(hidden_feats[layer]),
+                                  nn.ReLU()))
 
     def forward(self, g, feats, degs=None):
         """Update node representations.
@@ -286,7 +288,7 @@ class GCN(nn.Module):
             h_list = [self.node_encoder(feats)]
 
             for layer in range(self.n_layers):
-                if self.VirtualNode == True:
+                if self.VirtualNode:
                     virtualnode_embedding_broadcast = dgl.broadcast_nodes(g, virtualnode_embedding)
                     h_list[layer] = h_list[layer] + virtualnode_embedding_broadcast
 
@@ -294,9 +296,10 @@ class GCN(nn.Module):
                     h = self.gnn_layers[layer](g, h_list[layer], efeats, degs, norm)
                 h_list.append(h)
 
-                if self.VirtualNode == True and layer < self.n_layers - 1:
+                if self.VirtualNode and layer < self.n_layers - 1:
                     ### add message from graph nodes to virtual nodes
-                    virtualnode_embedding_temp = self.pool2(g, h_list[layer]) + virtualnode_embedding
+                    virtualnode_embedding_temp = self.pool2(g, h_list[layer]) \
+                                                 + virtualnode_embedding
                     if self.residual:
                         virtualnode_embedding = virtualnode_embedding + self.dropout(
                             self.mlp_virtualnode_list[layer](virtualnode_embedding_temp))
