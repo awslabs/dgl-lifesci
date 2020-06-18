@@ -42,9 +42,15 @@ class RBFExpansion(nn.Module):
         super(RBFExpansion, self).__init__()
 
         num_centers = int(np.ceil((high - low) / gap))
-        centers = np.linspace(low, high, num_centers)
-        self.centers = nn.Parameter(torch.tensor(centers).float(), requires_grad=False)
+        self.centers = np.linspace(low, high, num_centers)
+        self.centers = nn.Parameter(torch.tensor(self.centers).float(), requires_grad=False)
         self.gamma = 1 / gap
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        device = self.centers.device
+        self.centers = nn.Parameter(
+            torch.tensor(self.centers).float(), requires_grad=False).to(device)
 
     def forward(self, edge_dists):
         """Expand distances.

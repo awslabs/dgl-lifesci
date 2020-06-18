@@ -82,6 +82,7 @@ def test_attentivefp():
                          num_layers=1,
                          graph_feat_size=1,
                          dropout=0.).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 1])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 1])
 
@@ -98,6 +99,7 @@ def test_gat():
 
     # Test default setting
     gnn = GAT(in_feats=1).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats).shape == torch.Size([3, 32])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 32])
 
@@ -139,6 +141,7 @@ def test_gcn():
 
     # Test default setting
     gnn = GCN(in_feats=1).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats).shape == torch.Size([3, 64])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 64])
 
@@ -170,6 +173,7 @@ def test_gin():
 
     # Test default setting
     gnn = GIN(num_node_emb_list=[3, 5], num_edge_emb_list=[3, 4]).to(device)
+    gnn.reset_parameters()
     assert gnn(g, [node_feats1, node_feats2], [edge_feats1, edge_feats2]).shape \
            == torch.Size([3, 300])
     assert gnn(bg, [batch_node_feats1, batch_node_feats2],
@@ -197,6 +201,7 @@ def test_mgcn():
 
     # Test default setting
     gnn = MGCNGNN().to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_types, edge_dists).shape == torch.Size([3, 512])
     assert gnn(bg, batch_node_types, batch_edge_dists).shape == torch.Size([8, 512])
 
