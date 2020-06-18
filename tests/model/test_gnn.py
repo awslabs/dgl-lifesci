@@ -229,6 +229,7 @@ def test_mpnn():
     # Test default setting
     gnn = MPNNGNN(node_in_feats=1,
                   edge_in_feats=2).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 64])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 64])
 
