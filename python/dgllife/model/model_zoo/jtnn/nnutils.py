@@ -33,6 +33,13 @@ class GRUUpdate(nn.Module):
         self.U_r = nn.Linear(hidden_size, hidden_size)
         self.W_h = nn.Linear(2 * hidden_size, hidden_size)
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.W_z.reset_parameters()
+        self.W_r.reset_parameters()
+        self.U_r.reset_parameters()
+        self.W_h.reset_parameters()
+
     def update_zm(self, node):
         src_x = node.data['src_x']
         s = node.data['s']

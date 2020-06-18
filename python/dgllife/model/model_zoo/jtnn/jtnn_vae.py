@@ -6,7 +6,6 @@
 # pylint: disable=C0111, C0103, E1101, W0611, W0612, C0200, W0221, E1102
 
 import copy
-import os
 import rdkit.Chem as Chem
 import torch
 import torch.nn as nn
@@ -65,6 +64,18 @@ class DGLJTNNVAE(nn.Module):
         self.n_passes = 0
         self.n_edges_total = 0
         self.n_tree_nodes_total = 0
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.embedding.reset_parameters()
+        self.mpn.reset_parameters()
+        self.jtnn.reset_parameters()
+        self.decoder.reset_parameters()
+        self.jtmpn.reset_parameters()
+        self.T_mean.reset_parameters()
+        self.T_var.reset_parameters()
+        self.G_mean.reset_parameters()
+        self.G_var.reset_parameters()
 
     @staticmethod
     def move_to_cuda(mol_batch):
