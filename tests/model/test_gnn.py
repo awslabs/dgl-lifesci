@@ -256,6 +256,7 @@ def test_schnet():
 
     # Test default setting
     gnn = SchNetGNN().to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_types, edge_dists).shape == torch.Size([3, 64])
     assert gnn(bg, batch_node_types, batch_edge_dists).shape == torch.Size([8, 64])
 
