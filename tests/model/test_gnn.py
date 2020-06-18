@@ -283,6 +283,7 @@ def test_weave():
     # Test default setting
     gnn = WeaveGNN(node_in_feats=1,
                    edge_in_feats=2).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 50])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 50])
 
@@ -309,6 +310,7 @@ def test_wln():
     # Test default setting
     gnn = WLN(node_in_feats=1,
               edge_in_feats=2).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 300])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 300])
 

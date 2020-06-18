@@ -122,6 +122,7 @@ class WLN(nn.Module):
             assert node_in_feats == node_out_feats, \
                 'Expect input node features to have the same size as that of output ' \
                 'node features, got {:d} and {:d}'.format(node_in_feats, node_out_feats)
+            self.project_node_in_feats = None
 
         self.project_concatenated_messages = nn.Sequential(
             WLNLinear(edge_in_feats + node_out_feats, node_out_feats),
@@ -136,6 +137,17 @@ class WLN(nn.Module):
             self.project_edge_messages = WLNLinear(edge_in_feats, node_out_feats, bias=False)
             self.project_node_messages = WLNLinear(node_out_feats, node_out_feats, bias=False)
             self.project_self = WLNLinear(node_out_feats, node_out_feats, bias=False)
+
+    def reset_parameters(self):
+        """Initialize model parameters."""
+        if self.project_node_in_feats is not None:
+            self.project_node_in_feats[0].reset_parameters()
+        self.project_concatenated_messages[0].reset_parameters()
+        self.get_new_node_feats[0].reset_parameters()
+        if self.set_comparison:
+            self.project_edge_messages.reset_parameters()
+            self.project_node_messages.reset_parameters()
+            self.project_self.reset_parameters()
 
     def forward(self, g, node_feats, edge_feats):
         """Performs message passing and updates node representations.
