@@ -37,6 +37,10 @@ class EncoderGatherUpdate(nn.Module):
 
         self.W = nn.Linear(2 * hidden_size, hidden_size)
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.W.reset_parameters()
+
     def forward(self, nodes):
         x = nodes.data['x']
         m = nodes.data['m']
@@ -58,6 +62,12 @@ class DGLJTNNEncoder(nn.Module):
 
         self.enc_tree_update = GRUUpdate(hidden_size)
         self.enc_tree_gather_update = EncoderGatherUpdate(hidden_size)
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.embedding.reset_parameters()
+        self.enc_tree_update.reset_parameters()
+        self.enc_tree_gather_update.reset_parameters()
 
     def forward(self, mol_trees):
         mol_tree_batch = batch(mol_trees)

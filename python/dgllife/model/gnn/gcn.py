@@ -52,6 +52,12 @@ class GCNLayer(nn.Module):
         if batchnorm:
             self.bn_layer = nn.BatchNorm1d(out_feats)
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.graph_conv.reset_parameters()
+        self.res_connection.reset_parameters()
+        self.bn_layer.reset_parameters()
+
     def forward(self, g, feats):
         """Update node representations.
 
@@ -136,6 +142,11 @@ class GCN(nn.Module):
             self.gnn_layers.append(GCNLayer(in_feats, hidden_feats[i], activation[i],
                                             residual[i], batchnorm[i], dropout[i]))
             in_feats = hidden_feats[i]
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        for gnn in self.gnn_layers:
+            gnn.reset_parameters()
 
     def forward(self, g, feats):
         """Update node representations.

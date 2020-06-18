@@ -33,6 +33,10 @@ class EdgeEmbedding(nn.Module):
 
         self.embed = nn.Embedding(num_types, edge_feats)
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.embed.reset_parameters()
+
     def get_edge_types(self, edges):
         """Generates edge types.
 
@@ -112,6 +116,15 @@ class VEConv(nn.Module):
         else:
             self.update_edge_feats = None
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        for layer in self.update_dists:
+            if isinstance(layer, nn.Linear):
+                layer.reset_parameters()
+
+        if self.update_edge_feats is not None:
+            self.update_edge_feats.reset_parameters()
+
     def forward(self, g, node_feats, edge_feats, expanded_dists):
         """Performs message passing and updates node and edge representations.
 
@@ -178,6 +191,15 @@ class MultiLevelInteraction(nn.Module):
             nn.Softplus(beta=0.5, threshold=14)
         )
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.project_in_node_feats.reset_parameters()
+        self.conv.reset_parameters()
+        for layer in self.project_out_node_feats:
+            if isinstance(layer, nn.Linear):
+                layer.reset_parameters()
+        self.project_edge_feats[0].reset_parameters()
+
     def forward(self, g, node_feats, edge_feats, expanded_dists):
         """Performs message passing and updates node and edge representations.
 
@@ -237,11 +259,22 @@ class MGCNGNN(nn.Module):
 
         self.node_embed = nn.Embedding(num_node_types, feats)
         self.edge_embed = EdgeEmbedding(num_edge_types, feats)
+        self.high = cutoff
+        self.gap = gap
         self.rbf = RBFExpansion(high=cutoff, gap=gap)
 
         self.gnn_layers = nn.ModuleList()
         for _ in range(n_layers):
             self.gnn_layers.append(MultiLevelInteraction(feats, len(self.rbf.centers)))
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.node_embed.reset_parameters()
+        self.edge_embed.reset_parameters()
+        self.rbf.reset_parameters()
+
+        for layer in self.gnn_layers:
+            layer.reset_parameters()
 
     def forward(self, g, node_types, edge_dists):
         """Performs message passing and updates node representations.

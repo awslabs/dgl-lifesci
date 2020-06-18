@@ -45,7 +45,6 @@ class GINLayer(nn.Module):
         self.edge_embeddings = nn.ModuleList()
         for num_emb in num_edge_emb_list:
             emb_module = nn.Embedding(num_emb, emb_dim)
-            nn.init.xavier_uniform_(emb_module.weight.data)
             self.edge_embeddings.append(emb_module)
 
         if batch_norm:
@@ -53,6 +52,19 @@ class GINLayer(nn.Module):
         else:
             self.bn = None
         self.activation = activation
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        for layer in self.mlp:
+            if isinstance(layer, nn.Linear):
+                layer.reset_parameters()
+
+        for emb_module in self.edge_embeddings:
+            nn.init.xavier_uniform_(emb_module.weight.data)
+
+        if self.bn is not None:
+            self.bn.reset_parameters()
 
     def forward(self, g, node_feats, categorical_edge_feats):
         """Update node representations.
@@ -143,7 +155,6 @@ class GIN(nn.Module):
         self.node_embeddings = nn.ModuleList()
         for num_emb in num_node_emb_list:
             emb_module = nn.Embedding(num_emb, emb_dim)
-            nn.init.xavier_uniform_(emb_module.weight.data)
             self.node_embeddings.append(emb_module)
 
         self.gnn_layers = nn.ModuleList()
@@ -152,6 +163,16 @@ class GIN(nn.Module):
                 self.gnn_layers.append(GINLayer(num_edge_emb_list, emb_dim))
             else:
                 self.gnn_layers.append(GINLayer(num_edge_emb_list, emb_dim, activation=F.relu))
+
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        for emb_module in self.node_embeddings:
+            nn.init.xavier_uniform_(emb_module.weight.data)
+
+        for layer in self.gnn_layers:
+            layer.reset_parameters()
 
     def forward(self, g, categorical_node_feats, categorical_edge_feats):
         """Update node representations
