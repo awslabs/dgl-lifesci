@@ -122,6 +122,10 @@ class LoopyBPUpdate(nn.Module):
 
         self.W_h = nn.Linear(hidden_size, hidden_size, bias=False)
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.W_h.reset_parameters()
+
     def forward(self, node):
         msg_input = node.data['msg_input']
         msg_delta = self.W_h(node.data['accum_msg'] + node.data['alpha'])
@@ -151,6 +155,10 @@ class GatherUpdate(nn.Module):
 
         self.W_o = nn.Linear(ATOM_FDIM + hidden_size, hidden_size)
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.W_o.reset_parameters()
+
     def forward(self, node):
         if PAPER:
             #m = node['m']
@@ -177,6 +185,12 @@ class DGLJTMPN(nn.Module):
         self.n_nodes_total = 0
         self.n_edges_total = 0
         self.n_passes = 0
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.W_i.reset_parameters()
+        self.loopy_bp_updater.reset_parameters()
+        self.gather_updater.reset_parameters()
 
     def forward(self, cand_batch, mol_tree_batch):
         cand_graphs, tree_mess_src_edges, tree_mess_tgt_edges, tree_mess_tgt_nodes = cand_batch
