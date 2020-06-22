@@ -322,6 +322,32 @@ def test_wln():
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 3])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 3])
 
+def test_graphsage():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats = test_graph1()
+    g, node_feats = g.to(device), node_feats.to(device)
+    bg, batch_node_feats = test_graph2()
+    bg, batch_node_feats = bg.to(device), batch_node_feats.to(device)
+
+    # Test default setting
+    gnn = GraphSAGE(in_feats=1).to(device)
+    gnn.reset_parameters()
+    assert gnn(g, node_feats).shape == torch.Size([3, 64])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 64])
+
+    # Test configured setting
+    gnn = GraphSAGE(in_feats=1,
+                    hidden_feats=[1, 1],
+                    activation=[F.relu, F.relu],
+                    dropout=[0.2, 0.2],
+                    aggregator_type=['gcn', 'gcn']).to(device)
+    assert gnn(g, node_feats).shape == torch.Size([3, 1])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 1])
+
 if __name__ == '__main__':
     test_attentivefp()
     test_gat()
@@ -332,3 +358,4 @@ if __name__ == '__main__':
     test_schnet()
     test_weave()
     test_wln()
+    test_graphsage()

@@ -98,9 +98,9 @@ class GCN(nn.Module):
         ``len(hidden_feats)`` equals the number of GCN layers.  By default, we use
         ``[64, 64]``.
     activation : list of activation functions or None
-        If None, no activation will be applied. If not None, ``activation[i]`` gives the
-        activation function to be used for the i-th GCN layer. ``len(activation)`` equals
-        the number of GCN layers. By default, ReLU is applied for all GCN layers.
+        If not None, ``activation[i]`` gives the activation function to be used for
+        the i-th GCN layer. ``len(activation)`` equals the number of GCN layers.
+        By default, ReLU is applied for all GCN layers.
     residual : list of bool
         ``residual[i]`` decides if residual connection is to be used for the i-th GCN layer.
         ``len(residual)`` equals the number of GCN layers. By default, residual connection

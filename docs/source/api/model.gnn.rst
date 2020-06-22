@@ -49,6 +49,11 @@ GIN
 .. automodule:: dgllife.model.gnn.gin
     :members:
 
+GraphSAGE
+---------
+.. automodule:: dgllife.model.gnn.graphsage
+    :members:
+
 WLN
 ---
 .. automodule:: dgllife.model.gnn.wln

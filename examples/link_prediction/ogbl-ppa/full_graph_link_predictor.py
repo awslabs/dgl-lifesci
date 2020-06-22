@@ -5,102 +5,13 @@
 
 import argparse
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+
+from dgllife.model import GCN, GraphSAGE, HadamardLinkPredictor
+from ogb.linkproppred import DglLinkPropPredDataset, Evaluator
 from torch.utils.data import DataLoader
 
-from ogb.linkproppred import DglLinkPropPredDataset, Evaluator
 from logger import Logger
-
-from dgl.nn.pytorch import GraphConv
-from dgl.nn.pytorch.conv import SAGEConv
-
-class GCN(nn.Module):
-    def __init__(self,
-                 in_feats,
-                 n_hidden,
-                 out_feats,
-                 num_layers,
-                 dropout):
-        super(GCN, self).__init__()
-
-        self.layers = nn.ModuleList()
-        # input layer
-        self.layers.append(GraphConv(in_feats, n_hidden, activation=F.relu))
-        # hidden layers
-        for i in range(num_layers - 2):
-            self.layers.append(GraphConv(n_hidden, n_hidden, activation=F.relu))
-        # output layer
-        self.layers.append(GraphConv(n_hidden, out_feats, activation=None))
-        self.dropout = nn.Dropout(p=dropout)
-
-    def reset_parameters(self):
-        for layer in self.layers:
-            layer.reset_parameters()
-
-    def forward(self, g, x):
-        for i, layer in enumerate(self.layers):
-            if i != 0:
-                x = self.dropout(x)
-            x = layer(g, x)
-        return x
-
-
-class SAGE(nn.Module):
-    def __init__(self,
-                 in_feats,
-                 n_hidden,
-                 out_feats,
-                 num_layers,
-                 dropout,
-                 activation=F.relu):
-        super(SAGE, self).__init__()
-        self.layers = nn.ModuleList()
-
-        # input layer
-        self.layers.append(SAGEConv(in_feats, n_hidden, "mean", feat_drop=0., activation=activation))
-        # hidden layers
-        for i in range(num_layers - 2):
-            self.layers.append(SAGEConv(n_hidden, n_hidden, "mean", feat_drop=dropout, activation=activation))
-        # output layer
-        self.layers.append(SAGEConv(n_hidden, out_feats, "mean", feat_drop=dropout, activation=None)) # activation None
-
-    def reset_parameters(self):
-        for layer in self.layers:
-            layer.reset_parameters()
-
-    def forward(self, g, x):
-        for layer in self.layers:
-            x = layer(g, x)
-        return x
-
-
-class LinkPredictor(nn.Module):
-    def __init__(self, in_channels, hidden_channels, out_channels, num_layers,
-                 dropout):
-        super(LinkPredictor, self).__init__()
-
-        self.lins = nn.ModuleList()
-        self.lins.append(nn.Linear(in_channels, hidden_channels))
-        for _ in range(num_layers - 2):
-            self.lins.append(nn.Linear(hidden_channels, hidden_channels))
-        self.lins.append(nn.Linear(hidden_channels, out_channels))
-
-        self.dropout = nn.Dropout(dropout)
-
-    def reset_parameters(self):
-        for layer in self.lins:
-            layer.reset_parameters()
-
-    def forward(self, x_i, x_j):
-        x = x_i * x_j
-        for lin in self.lins[:-1]:
-            x = lin(x)
-            x = F.relu(x)
-            x = self.dropout(x)
-        x = self.lins[-1](x)
-        return torch.sigmoid(x)
-
 
 def train(model, predictor, g, x, splitted_edge, optimizer, batch_size):
     model.train()
@@ -115,14 +26,14 @@ def train(model, predictor, g, x, splitted_edge, optimizer, batch_size):
         h = model(g, x)
 
         edge = pos_train_edge[perm].t()
-        pos_out = predictor(h[edge[0]], h[edge[1]])
+        pos_out = torch.sigmoid(predictor(h[edge[0]], h[edge[1]]))
         pos_loss = -torch.log(pos_out + 1e-15).mean()
 
         # Just do some trivial random sampling.
         edge = torch.randint(
             0, x.size(0), edge.size(), dtype=torch.long, device=x.device)
 
-        neg_out = predictor(h[edge[0]], h[edge[1]])
+        neg_out = torch.sigmoid(predictor(h[edge[0]], h[edge[1]]))
         neg_loss = -torch.log(1 - neg_out + 1e-15).mean()
 
         loss = pos_loss + neg_loss
@@ -153,35 +64,40 @@ def test(model, predictor, g, x, splitted_edge, evaluator, batch_size):
     pos_train_preds = []
     for perm in DataLoader(range(pos_train_edge.size(0)), batch_size=batch_size):
         edge = pos_train_edge[perm].t()
-        pos_train_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
+        pos_train_preds += [torch.sigmoid(
+            predictor(h[edge[0]], h[edge[1]])).squeeze().cpu()]
     pos_train_preds = torch.cat(pos_train_preds, dim=0)
 
     # Positive validation edges
     pos_valid_preds = []
     for perm in DataLoader(range(pos_valid_edge.size(0)), batch_size=batch_size):
         edge = pos_valid_edge[perm].t()
-        pos_valid_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
+        pos_valid_preds += [torch.sigmoid(
+            predictor(h[edge[0]], h[edge[1]])).squeeze().cpu()]
     pos_valid_preds = torch.cat(pos_valid_preds, dim=0)
 
     # Negative validation edges
     neg_valid_preds = []
     for perm in DataLoader(range(neg_valid_edge.size(0)), batch_size=batch_size):
         edge = neg_valid_edge[perm].t()
-        neg_valid_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
+        neg_valid_preds += [torch.sigmoid(
+            predictor(h[edge[0]], h[edge[1]])).squeeze().cpu()]
     neg_valid_preds = torch.cat(neg_valid_preds, dim=0)
 
     # Positive test edges
     pos_test_preds = []
     for perm in DataLoader(range(pos_test_edge.size(0)), batch_size=batch_size):
         edge = pos_test_edge[perm].t()
-        pos_test_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
+        pos_test_preds += [torch.sigmoid(
+            predictor(h[edge[0]], h[edge[1]])).squeeze().cpu()]
     pos_test_preds = torch.cat(pos_test_preds, dim=0)
 
     # Negative test edges
     neg_test_preds = []
     for perm in DataLoader(range(neg_test_edge.size(0)), batch_size=batch_size):
         edge = neg_test_edge[perm].t()
-        neg_test_preds += [predictor(h[edge[0]], h[edge[1]]).squeeze().cpu()]
+        neg_test_preds += [torch.sigmoid(
+            predictor(h[edge[0]], h[edge[1]])).squeeze().cpu()]
     neg_test_preds = torch.cat(neg_test_preds, dim=0)
 
     results = {}
@@ -207,23 +123,36 @@ def test(model, predictor, g, x, splitted_edge, evaluator, batch_size):
 
 def main():
     parser = argparse.ArgumentParser(description='OGBL-PPA (Full-Batch)')
-    parser.add_argument('--device', type=int, default=0)
-    parser.add_argument('--log_steps', type=int, default=1)
-    parser.add_argument('--use_node_embedding', action='store_true')
-    parser.add_argument('--use_sage', action='store_true')
-    parser.add_argument('--num_layers', type=int, default=3)
-    parser.add_argument('--hidden_channels', type=int, default=256)
-    parser.add_argument('--dropout', type=float, default=0.0)
-    parser.add_argument('--batch_size', type=int, default=64 * 1024)
-    parser.add_argument('--lr', type=float, default=0.01)
-    parser.add_argument('--epochs', type=int, default=20)
-    parser.add_argument('--eval_steps', type=int, default=1)
-    parser.add_argument('--runs', type=int, default=10)
+    parser.add_argument('--use_gpu', action='store_true',
+                        help='Use gpu for computation (default: False)')
+    parser.add_argument('--log_steps', type=int, default=1,
+                        help='Print training progress every {log_steps} epochs (default: 1)')
+    parser.add_argument('--use_sage', action='store_true',
+                        help='Use GraphSAGE rather than GCN (default: False)')
+    parser.add_argument('--num_layers', type=int, default=3,
+                        help='Number of GNN layers to use as well as '
+                             'linear layers to use for final link prediction (default: 3)')
+    parser.add_argument('--hidden_feats', type=int, default=256,
+                        help='Size for hidden representations (default: 256)')
+    parser.add_argument('--dropout', type=float, default=0.0,
+                        help='Dropout (default: 0.0)')
+    parser.add_argument('--batch_size', type=int, default=64 * 1024,
+                        help='Batch size to use for link prediction (default: 64 * 1024)')
+    parser.add_argument('--lr', type=float, default=0.01,
+                        help='Learning rate (default: 0.01)')
+    parser.add_argument('--epochs', type=int, default=20,
+                        help='Number of epochs for training (default: 20)')
+    parser.add_argument('--eval_steps', type=int, default=1,
+                        help='Evaluate hits@100 every {eval_steps} epochs (default: 1)')
+    parser.add_argument('--runs', type=int, default=10,
+                        help='Number of random experiments to perform (default: 10)')
     args = parser.parse_args()
     print(args)
 
-    device = f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu'
-    device = torch.device(device)
+    if args.use_gpu and torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
 
     dataset = DglLinkPropPredDataset(name='ogbl-ppa')
     # Get DGLGraph
@@ -231,26 +160,26 @@ def main():
     data.readonly(False)
     data.add_edges(data.nodes(), data.nodes())
     splitted_edge = dataset.get_edge_split()
-
-    if args.use_node_embedding:
-        # Todo: prepare node embeddings using node2vec
-        x = data.ndata['feat'].float()
-        x = torch.cat([x, torch.load('embedding.pt')], dim=-1)
-        x = x.to(device)
-    else:
-        x = data.ndata['feat'].float().to(device)
+    x = data.ndata['feat'].float().to(device)
 
     if args.use_sage:
-        model = SAGE(
-            x.size(-1), args.hidden_channels, args.hidden_channels,
-            args.num_layers, args.dropout).to(device)
+        model = GraphSAGE(in_feats=x.size(-1),
+                          hidden_feats=[args.hidden_feats for _ in range(args.num_layers)],
+                          activation=[F.relu for _ in range(args.num_layers - 1)] + [None],
+                          dropout=[0] + [args.dropout for _ in range(args.num_layers - 1)]).to(device)
     else:
-        model = GCN(
-            x.size(-1), args.hidden_channels, args.hidden_channels,
-            args.num_layers, args.dropout).to(device)
+        model = GCN(in_feats=x.size(-1),
+                    hidden_feats=[args.hidden_feats for _ in range(args.num_layers)],
+                    activation=[F.relu for _ in range(args.num_layers - 1)] + [None],
+                    residual=[False for _ in range(args.num_layers)],
+                    batchnorm=[False for _ in range(args.num_layers)],
+                    dropout=[args.dropout for _ in range(args.num_layers - 1)] + [0]).to(device)
 
-    predictor = LinkPredictor(args.hidden_channels, args.hidden_channels, 1,
-                              args.num_layers, args.dropout).to(device)
+    predictor = HadamardLinkPredictor(in_feats=args.hidden_feats,
+                                      hidden_feats=args.hidden_feats,
+                                      num_layers=args.num_layers,
+                                      n_tasks=1,
+                                      dropout=args.dropout).to(device)
 
     evaluator = Evaluator(name='ogbl-ppa')
     loggers = {
