@@ -33,7 +33,8 @@ we assume all columns are molecular properties except for the SMILES column.
 - **Split Ratio**: `-sr a,b,c` can be used to specify the proportion of the dataset to be used for training, validation and test. 
 By default we use `0.8,0.1,0.1`.
 - **Evaluation Metric**: `-me metric` can be used to specify the evaluation metric. 
-By default we use `r2` for Pearson correlation coefficient.
+By default we use `r2` for Pearson correlation coefficient. Alternatively, you can use `mae` for mean absolute error, 
+and `rmse` for root mean square error.
 - **Num Epochs**: `-n number` can be used to specify the maximum number of epochs for training. By default we set this to 
 1000 as early stopping will be performed based on validation metric.
 - **Print Every**: `-pe number` decides that the training progress will be printed every `number` minibatches. By default 
