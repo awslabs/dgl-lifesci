@@ -55,8 +55,10 @@ class GCNLayer(nn.Module):
     def reset_parameters(self):
         """Reinitialize model parameters."""
         self.graph_conv.reset_parameters()
-        self.res_connection.reset_parameters()
-        self.bn_layer.reset_parameters()
+        if self.residual:
+            self.res_connection.reset_parameters()
+        if self.bn:
+            self.bn_layer.reset_parameters()
 
     def forward(self, g, feats):
         """Update node representations.
