@@ -59,7 +59,7 @@ def main(args):
     # Interchangeable with other datasets
     dataset, train_set, val_set, test_set = load_dataset_for_classification(args)
     train_loader = DataLoader(train_set, batch_size=args['batch_size'],
-                              collate_fn=collate_molgraphs)
+                              collate_fn=collate_molgraphs, shuffle=True)
     val_loader = DataLoader(val_set, batch_size=args['batch_size'],
                             collate_fn=collate_molgraphs)
     test_loader = DataLoader(test_set, batch_size=args['batch_size'],
