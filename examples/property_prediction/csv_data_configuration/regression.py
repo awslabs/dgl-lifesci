@@ -105,16 +105,20 @@ def bayesian_optimization(args, train_set, val_set, test_set):
         configure = deepcopy(args)
         configure.update(hyperparams)
         configure, val_metric = main(configure, train_set, val_set, test_set)
-        results.append((configure, hyperparams, val_metric))
 
         if args['metric'] in ['r2']:
-            return -1 * val_metric
+            # Maximize R2 is equivalent to minimize the negative of it
+            val_metric_to_minimize = -1 * val_metric
         else:
-            return val_metric
+            val_metric_to_minimize = val_metric
+
+        results.append((configure, hyperparams, val_metric_to_minimize))
+
+        return val_metric_to_minimize
 
     fmin(objective, candidate_hypers, algo=tpe.suggest, max_evals=args['num_evals'])
     results.sort(key=lambda tup: tup[2])
-    best_config, best_hyper, best_val_metric = results[-1]
+    best_config, best_hyper, best_val_metric = results[0]
     shutil.move(best_config['trial_path'], args['result_path'] + '/best')
 
     with open(args['result_path'] + '/best_config.txt', 'w') as f:
