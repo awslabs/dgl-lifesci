@@ -383,9 +383,8 @@ class WLNCenterDataset(object):
         self.complete_graphs = dict()
 
         path_to_reaction_file = raw_file_path + '.proc'
-        if not os.path.isfile(path_to_reaction_file):
-            print('Pre-processing graph edits from reaction data')
-            process_file(raw_file_path, num_processes)
+        print('Pre-processing graph edits from reaction data')
+        process_file(raw_file_path, num_processes)
 
         import time
         t0 = time.time()
@@ -1293,9 +1292,8 @@ class WLNRankDataset(object):
         self.size_cutoff = size_cutoff
 
         path_to_reaction_file = raw_file_path + '.proc'
-        if not os.path.isfile(path_to_reaction_file):
-            print('Pre-processing graph edits from reaction data')
-            process_file(raw_file_path, num_processes)
+        print('Pre-processing graph edits from reaction data')
+        process_file(raw_file_path, num_processes)
 
         self.reactant_mols, self.product_mols, self.real_bond_changes, \
         self.ids_for_small_samples = self.load_reaction_data(path_to_reaction_file, num_processes)
