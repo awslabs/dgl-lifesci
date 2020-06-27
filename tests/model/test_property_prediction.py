@@ -338,7 +338,7 @@ def test_gnn_ogb_predictor():
                           hidden_feats=2).to(device)
     gnn.reset_parameters()
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
-           torch.Size([bg.number_of_nodes(), 1])
+           torch.Size([bg.batch_size, 1])
 
     # Test configured setting
     gnn = GNNOGBPredictor(in_edge_feats=batch_edge_feats.shape[-1],
@@ -356,7 +356,7 @@ def test_gnn_ogb_predictor():
                           readout='max').to(device)
     gnn.reset_parameters()
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
-           torch.Size([bg.number_of_nodes(), 2])
+           torch.Size([bg.batch_size, 2])
 
 if __name__ == '__main__':
     test_attentivefp_predictor()
