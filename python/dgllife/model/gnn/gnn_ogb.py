@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Variant of Graph Convolutional Networks in OGB's Examples
+# Variant of Graph Convolutional Networks/Graph Isomorphism Networks in OGB's Examples
 
 import dgl
 import dgl.function as fn
@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from dgl.nn import SumPooling
+from dgl.nn.pytorch.glob import SumPooling
 
 __all__ = ['GNNOGB']
 
@@ -173,6 +173,9 @@ class GNNOGB(nn.Module):
         Whether to use virtual node. (Default: True)
     residual : bool
         Whether to apply residual connections for virtual node embeddings. (Default: False)
+    JK : bool
+        Whether to sum over the output of all GNN layers as in
+        `JK networks <https://arxiv.org/abs/1806.03536>`__. (Default: False)
     """
     def __init__(self,
                  in_edge_feats,
@@ -184,7 +187,8 @@ class GNNOGB(nn.Module):
                  dropout=0.,
                  gnn_type='gcn',
                  virtual_node=True,
-                 residual=False):
+                 residual=False,
+                 JK=False):
         super(GNNOGB, self).__init__()
 
         assert gnn_type in ['gcn', 'gin'], \
@@ -229,6 +233,7 @@ class GNNOGB(nn.Module):
         self.activation = activation
         self.dropout = nn.Dropout(dropout)
         self.residual = residual
+        self.JK = JK
 
         self.reset_parameters()
 
@@ -263,8 +268,8 @@ class GNNOGB(nn.Module):
 
         Returns
         -------
-        list of FloatTensor of shape (N, hidden_feats)
-            Output node representations for each GNN layer
+        FloatTensor of shape (N, hidden_feats)
+            Output node representations
         """
         if self.gnn_type == 'gcn':
             degs = (g.in_degrees().float() + 1).to(node_feats.device)
@@ -306,4 +311,7 @@ class GNNOGB(nn.Module):
                     virtual_node_feats = self.dropout(
                         self.mlp_virtual_project[l](virtual_node_feats_tmp))
 
-        return h_list
+        if self.JK:
+            return torch.stack(h_list, dim=0).sum(0)
+        else:
+            return h_list[-1]
