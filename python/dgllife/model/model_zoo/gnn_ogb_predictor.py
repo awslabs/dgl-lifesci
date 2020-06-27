@@ -15,6 +15,7 @@ from ..gnn.gnn_ogb import GNNOGB
 
 __all__ = ['GNNOGBPredictor']
 
+# pylint: disable=W0221, C0103
 class GNNOGBPredictor(nn.Module):
     r"""Variant of GCN/GIN from `Open Graph Benchmark: Datasets for Machine Learning on Graphs
     <https://arxiv.org/abs/2005.00687>`__ for graph property prediction
