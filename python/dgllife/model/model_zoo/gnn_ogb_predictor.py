@@ -44,7 +44,7 @@ class GNNOGBPredictor(nn.Module):
         Whether to use virtual node. (Default: True)
     residual : bool
         Whether to apply residual connections for virtual node embeddings. (Default: False)
-    JK : bool
+    jk : bool
         Whether to sum over the output of all GNN layers as in
         `JK networks <https://arxiv.org/abs/1806.03536>`__. (Default: False)
     readout : str
@@ -63,7 +63,7 @@ class GNNOGBPredictor(nn.Module):
                  gnn_type='gcn',
                  virtual_node=True,
                  residual=False,
-                 JK=False,
+                 jk=False,
                  readout='mean'):
         super(GNNOGBPredictor, self).__init__()
 
@@ -82,7 +82,7 @@ class GNNOGBPredictor(nn.Module):
                           gnn_type=gnn_type,
                           virtual_node=virtual_node,
                           residual=residual,
-                          JK=JK)
+                          jk=jk)
 
         if readout == 'mean':
             self.readout = AvgPooling()

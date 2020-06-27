@@ -173,7 +173,7 @@ class GNNOGB(nn.Module):
         Whether to use virtual node. (Default: True)
     residual : bool
         Whether to apply residual connections for virtual node embeddings. (Default: False)
-    JK : bool
+    jk : bool
         Whether to sum over the output of all GNN layers as in
         `JK networks <https://arxiv.org/abs/1806.03536>`__. (Default: False)
     """
@@ -188,7 +188,7 @@ class GNNOGB(nn.Module):
                  gnn_type='gcn',
                  virtual_node=True,
                  residual=False,
-                 JK=False):
+                 jk=False):
         super(GNNOGB, self).__init__()
 
         assert gnn_type in ['gcn', 'gin'], \
@@ -233,7 +233,7 @@ class GNNOGB(nn.Module):
         self.activation = activation
         self.dropout = nn.Dropout(dropout)
         self.residual = residual
-        self.JK = JK
+        self.jk = jk
 
         self.reset_parameters()
 
@@ -311,7 +311,7 @@ class GNNOGB(nn.Module):
                     virtual_node_feats = self.dropout(
                         self.mlp_virtual_project[l](virtual_node_feats_tmp))
 
-        if self.JK:
+        if self.jk:
             return torch.stack(h_list, dim=0).sum(0)
         else:
             return h_list[-1]

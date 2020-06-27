@@ -352,7 +352,7 @@ def test_gnn_ogb_predictor():
                           gnn_type='gin',
                           virtual_node=False,
                           residual=True,
-                          JK=True,
+                          jk=True,
                           readout='max').to(device)
     gnn.reset_parameters()
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
