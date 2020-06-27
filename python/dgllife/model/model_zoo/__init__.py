@@ -15,6 +15,7 @@ from .mlp_predictor import *
 from .mpnn_predictor import *
 from .schnet_predictor import *
 from .weave_predictor import *
+from .gnn_ogb_predictor import *
 
 # Generative models
 from .dgmg import *
