@@ -196,7 +196,7 @@ class GNNOGB(nn.Module):
         # Hidden layers
         self.layers = nn.ModuleList()
         self.gnn_type = gnn_type
-        for l in range(n_layers):
+        for _ in range(n_layers):
             if gnn_type == 'gcn':
                 self.layers.append(GCNOGBLayer(in_node_feats=hidden_feats,
                                                in_edge_feats=in_edge_feats,
