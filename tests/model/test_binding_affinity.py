@@ -50,11 +50,11 @@ def test_acnn():
 
     model = ACNN()
     model.to(device)
-    g1.to(device)
+    g1 = g1.to(device)
     assert model(g1).shape == torch.Size([1, 1])
 
     bg = dgl.batch_hetero([g1, g1])
-    bg.to(device)
+    bg = bg.to(device)
     assert model(bg).shape == torch.Size([2, 1])
 
     model = ACNN(hidden_sizes=[1, 2],
@@ -63,11 +63,11 @@ def test_acnn():
                  features_to_use=torch.tensor([6., 8.]),
                  radial=[[12.0], [0.0, 2.0], [4.0]])
     model.to(device)
-    g1.to(device)
+    g1 = g1.to(device)
     assert model(g1).shape == torch.Size([1, 1])
 
     bg = dgl.batch_hetero([g1, g1])
-    bg.to(device)
+    bg = bg.to(device)
     assert model(bg).shape == torch.Size([2, 1])
 
 if __name__ == '__main__':

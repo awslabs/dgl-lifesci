@@ -27,3 +27,6 @@ from .wln_reaction_ranking import *
 
 # Protein-Ligand Binding
 from .acnn import *
+
+# Link prediction
+from .hadamard_link_predictor import *
