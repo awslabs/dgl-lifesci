@@ -57,6 +57,15 @@ class MPNNGNN(nn.Module):
         )
         self.gru = nn.GRU(node_out_feats, node_out_feats)
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.project_node_feats[0].reset_parameters()
+        self.gnn_layer.reset_parameters()
+        for layer in self.gnn_layer.edge_nn:
+            if isinstance(layer, nn.Linear):
+                layer.reset_parameters()
+        self.gru.reset_parameters()
+
     def forward(self, g, node_feats, edge_feats):
         """Performs message passing and updates node representations.
 

@@ -89,6 +89,10 @@ class LoopyBPUpdate(nn.Module):
 
         self.W_h = nn.Linear(hidden_size, hidden_size, bias=False)
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.W_h.reset_parameters()
+
     def forward(self, nodes):
         msg_input = nodes.data['msg_input']
         msg_delta = self.W_h(nodes.data['accum_msg'])
@@ -104,6 +108,10 @@ class GatherUpdate(nn.Module):
         self.hidden_size = hidden_size
 
         self.W_o = nn.Linear(ATOM_FDIM + hidden_size, hidden_size)
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.W_o.reset_parameters()
 
     def forward(self, nodes):
         m = nodes.data['m']
@@ -127,6 +135,12 @@ class DGLMPN(nn.Module):
         self.n_nodes_total = 0
         self.n_edges_total = 0
         self.n_passes = 0
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.W_i.reset_parameters()
+        self.loopy_bp_updater.reset_parameters()
+        self.gather_updater.reset_parameters()
 
     def forward(self, mol_graph):
         n_samples = mol_graph.batch_size
