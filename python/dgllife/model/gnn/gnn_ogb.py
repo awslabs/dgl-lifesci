@@ -116,7 +116,7 @@ class GINOGBLayer(nn.Module):
         device = self.eps.device
         self.eps = nn.Parameter(torch.Tensor([0])).to(device)
         for layer in self.project_out:
-            if isinstance(layer, nn.Linear) or isinstance(layer, nn.BatchNorm1d):
+            if isinstance(layer, (nn.Linear, nn.BatchNorm1d)):
                 layer.reset_parameters()
 
     def forward(self, g, node_feats, edge_feats):
@@ -202,7 +202,7 @@ class GNNOGB(nn.Module):
         # Hidden layers
         self.layers = nn.ModuleList()
         self.gnn_type = gnn_type
-        for i in range(n_layers):
+        for _ in range(n_layers):
             if gnn_type == 'gcn':
                 self.layers.append(GCNOGBLayer(in_node_feats=hidden_feats,
                                                in_edge_feats=in_edge_feats,
@@ -248,7 +248,7 @@ class GNNOGB(nn.Module):
             nn.init.constant_(self.virtual_node_emb.weight.data, 0)
             for mlp_layer in self.mlp_virtual_project:
                 for layer in mlp_layer:
-                    if isinstance(layer, nn.Linear) or isinstance(layer, nn.BatchNorm1d):
+                    if isinstance(layer, (nn.Linear, nn.BatchNorm1d)):
                         layer.reset_parameters()
 
         if self.batchnorms is not None:
