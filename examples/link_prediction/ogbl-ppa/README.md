@@ -56,6 +56,6 @@ Using the default parameters, the performance of 10 random runs is as follows.
 
 ## References
 
-[1] Kipf T N, Welling M. Semi-Supervised Classification with Graph Convolutional Networks[J]. 2016.
+[1] Kipf T., Welling M. Semi-Supervised Classification with Graph Convolutional Networks. 2016.
 
-[2] Hamilton W L, Ying R, Leskovec J. Inductive Representation Learning on Large Graphs[J]. 2017.
+[2] Hamilton W., Ying R., Leskovec J. Inductive Representation Learning on Large Graphs. 2017.
