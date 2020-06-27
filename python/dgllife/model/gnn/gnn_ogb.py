@@ -72,15 +72,12 @@ class GCNOGBLayer(nn.Module):
 
         g.ndata['feat'] = node_feats
         g.apply_edges(fn.copy_u('feat', 'e'))
-        edge_feats = g.edata['e'] + edge_feats
-        if self.activation is not None:
-            edge_feats = self.activation(edge_feats)
+        edge_feats = F.relu(g.edata['e'] + edge_feats)
         g.edata['e'] = norm * edge_feats
         g.update_all(fn.copy_e('e', 'm'), fn.sum('m', 'feat'))
 
         residual_node_feats = node_feats + self.project_residual.weight
-        if self.activation is not None:
-            residual_node_feats = self.activation(residual_node_feats)
+        residual_node_feats = F.relu(residual_node_feats)
         residual_node_feats = residual_node_feats * 1. / degs.view(-1, 1)
 
         rst = g.ndata['feat'] + residual_node_feats
@@ -141,10 +138,7 @@ class GINOGBLayer(nn.Module):
 
         g.ndata['feat'] = node_feats
         g.apply_edges(fn.copy_u('feat', 'e'))
-        edge_feats = edge_feats + g.edata['e']
-        if self.activation is not None:
-            edge_feats = self.activation(edge_feats)
-        g.edata['e'] = edge_feats
+        g.edata['e'] = F.relu(edge_feats + g.edata['e'])
         g.update_all(fn.copy_e('e', 'm'), fn.sum('m', 'feat'))
 
         rst = g.ndata['feat']
@@ -202,7 +196,7 @@ class GNNOGB(nn.Module):
         # Hidden layers
         self.layers = nn.ModuleList()
         self.gnn_type = gnn_type
-        for _ in range(n_layers):
+        for l in range(n_layers):
             if gnn_type == 'gcn':
                 self.layers.append(GCNOGBLayer(in_node_feats=hidden_feats,
                                                in_edge_feats=in_edge_feats,
