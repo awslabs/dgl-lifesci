@@ -9,6 +9,7 @@ from .attentivefp import *
 from .gat import *
 from .gcn import *
 from .gin import *
+from .gnn_ogb import *
 from .mgcn import *
 from .mpnn import *
 from .schnet import *
