@@ -116,7 +116,7 @@ def main():
     model = GNNOGBPredictor(in_edge_feats=dataset[0][0].edata['feat'].shape[-1],
                             hidden_feats=args.hidden_feats,
                             n_layers=args.n_layers,
-                            n_tasks=dataset.num_classes,
+                            n_tasks=int(dataset.num_classes),
                             dropout=args.dropout,
                             gnn_type=gnn_type,
                             virtual_node=virtual_node).to(device)
