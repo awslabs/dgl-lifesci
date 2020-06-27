@@ -349,7 +349,7 @@ def test_gnn_ogb():
                  gnn_type='gin',
                  virtual_node=False,
                  residual=True,
-                 JK=True).to(device)
+                 jk=True).to(device)
     gnn.reset_parameters()
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
            torch.Size([bg.number_of_nodes(), 2])
