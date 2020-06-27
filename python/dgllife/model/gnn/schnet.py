@@ -42,9 +42,15 @@ class RBFExpansion(nn.Module):
         super(RBFExpansion, self).__init__()
 
         num_centers = int(np.ceil((high - low) / gap))
-        centers = np.linspace(low, high, num_centers)
-        self.centers = nn.Parameter(torch.tensor(centers).float(), requires_grad=False)
+        self.centers = np.linspace(low, high, num_centers)
+        self.centers = nn.Parameter(torch.tensor(self.centers).float(), requires_grad=False)
         self.gamma = 1 / gap
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        device = self.centers.device
+        self.centers = nn.Parameter(
+            torch.tensor(self.centers).float(), requires_grad=False).to(device)
 
     def forward(self, edge_dists):
         """Expand distances.
@@ -86,6 +92,15 @@ class Interaction(nn.Module):
 
         self.conv = CFConv(node_feats, edge_in_feats, hidden_feats, node_feats)
         self.project_out = nn.Linear(node_feats, node_feats)
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        for layer in self.conv.project_edge:
+            if isinstance(layer, nn.Linear):
+                layer.reset_parameters()
+        self.conv.project_node.reset_parameters()
+        self.conv.project_out[0].reset_parameters()
+        self.project_out.reset_parameters()
 
     def forward(self, g, node_feats, edge_feats):
         """Performs message passing and updates node representations.
@@ -144,6 +159,13 @@ class SchNetGNN(nn.Module):
         for i in range(n_layers):
             self.gnn_layers.append(
                 Interaction(node_feats, len(self.rbf.centers), hidden_feats[i]))
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.embed.reset_parameters()
+        self.rbf.reset_parameters()
+        for layer in self.gnn_layers:
+            layer.reset_parameters()
 
     def forward(self, g, node_types, edge_dists):
         """Performs message passing and updates node representations.

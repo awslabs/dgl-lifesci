@@ -43,7 +43,6 @@ class WeaveLayer(nn.Module):
     activation : callable
         Activation function to apply. Default to ReLU.
     """
-
     def __init__(self,
                  node_in_feats,
                  edge_in_feats,
@@ -70,6 +69,16 @@ class WeaveLayer(nn.Module):
         self.edge_to_edge = nn.Linear(edge_in_feats, edge_edge_hidden_feats)
         self.update_edge = nn.Linear(
             2 * node_edge_hidden_feats + edge_edge_hidden_feats, edge_out_feats)
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.node_to_node.reset_parameters()
+        self.edge_to_node.reset_parameters()
+        self.update_node.reset_parameters()
+        self.left_node_to_edge.reset_parameters()
+        self.right_node_to_edge.reset_parameters()
+        self.edge_to_edge.reset_parameters()
+        self.update_edge.reset_parameters()
 
     def forward(self, g, node_feats, edge_feats, node_only=False):
         r"""Update node and edge representations.
@@ -169,6 +178,11 @@ class WeaveGNN(nn.Module):
                                                   edge_edge_hidden_feats=hidden_feats,
                                                   edge_out_feats=hidden_feats,
                                                   activation=activation))
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        for layer in self.gnn_layers:
+            layer.reset_parameters()
 
     def forward(self, g, node_feats, edge_feats, node_only=True):
         """Updates node representations (and edge representations).

@@ -90,6 +90,7 @@ def test_attentivefp():
                          num_layers=1,
                          graph_feat_size=1,
                          dropout=0.).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 1])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 1])
 
@@ -106,6 +107,7 @@ def test_gat():
 
     # Test default setting
     gnn = GAT(in_feats=1).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats).shape == torch.Size([3, 32])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 32])
 
@@ -147,6 +149,7 @@ def test_gcn():
 
     # Test default setting
     gnn = GCN(in_feats=1).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats).shape == torch.Size([3, 64])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 64])
 
@@ -178,6 +181,7 @@ def test_gin():
 
     # Test default setting
     gnn = GIN(num_node_emb_list=[3, 5], num_edge_emb_list=[3, 4]).to(device)
+    gnn.reset_parameters()
     assert gnn(g, [node_feats1, node_feats2], [edge_feats1, edge_feats2]).shape \
            == torch.Size([3, 300])
     assert gnn(bg, [batch_node_feats1, batch_node_feats2],
@@ -205,6 +209,7 @@ def test_mgcn():
 
     # Test default setting
     gnn = MGCNGNN().to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_types, edge_dists).shape == torch.Size([3, 512])
     assert gnn(bg, batch_node_types, batch_edge_dists).shape == torch.Size([8, 512])
 
@@ -232,6 +237,7 @@ def test_mpnn():
     # Test default setting
     gnn = MPNNGNN(node_in_feats=1,
                   edge_in_feats=2).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 64])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 64])
 
@@ -258,6 +264,7 @@ def test_schnet():
 
     # Test default setting
     gnn = SchNetGNN().to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_types, edge_dists).shape == torch.Size([3, 64])
     assert gnn(bg, batch_node_types, batch_edge_dists).shape == torch.Size([8, 64])
 
@@ -284,6 +291,7 @@ def test_weave():
     # Test default setting
     gnn = WeaveGNN(node_in_feats=1,
                    edge_in_feats=2).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 50])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 50])
 
@@ -310,6 +318,7 @@ def test_wln():
     # Test default setting
     gnn = WLN(node_in_feats=1,
               edge_in_feats=2).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 300])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 300])
 
@@ -320,6 +329,33 @@ def test_wln():
               n_layers=1).to(device)
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 3])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 3])
+
+def test_graphsage():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats = test_graph1()
+    g, node_feats = g.to(device), node_feats.to(device)
+    bg, batch_node_feats = test_graph2()
+    bg, batch_node_feats = bg.to(device), batch_node_feats.to(device)
+
+    # Test default setting
+    gnn = GraphSAGE(in_feats=1).to(device)
+    gnn.reset_parameters()
+    assert gnn(g, node_feats).shape == torch.Size([3, 64])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 64])
+
+    # Test configured setting
+    gnn = GraphSAGE(in_feats=1,
+                    hidden_feats=[1, 1],
+                    activation=[F.relu, F.relu],
+                    dropout=[0.2, 0.2],
+                    aggregator_type=['gcn', 'gcn']).to(device)
+    gnn.reset_parameters()
+    assert gnn(g, node_feats).shape == torch.Size([3, 1])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 1])
 
 def test_gnn_ogb():
     if torch.cuda.is_available():
@@ -365,3 +401,4 @@ if __name__ == '__main__':
     test_weave()
     test_wln()
     test_gnn_ogb()
+    test_graphsage()

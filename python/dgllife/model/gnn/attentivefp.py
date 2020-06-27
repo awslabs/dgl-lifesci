@@ -42,6 +42,11 @@ class AttentiveGRU1(nn.Module):
         )
         self.gru = nn.GRUCell(edge_hidden_size, node_feat_size)
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.edge_transform[1].reset_parameters()
+        self.gru.reset_parameters()
+
     def forward(self, g, edge_logits, edge_feats, node_feats):
         """Update node representations.
 
@@ -90,6 +95,11 @@ class AttentiveGRU2(nn.Module):
             nn.Linear(node_feat_size, edge_hidden_size)
         )
         self.gru = nn.GRUCell(edge_hidden_size, node_feat_size)
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.project_node[1].reset_parameters()
+        self.gru.reset_parameters()
 
     def forward(self, g, edge_logits, node_feats):
         """Update node representations.
@@ -153,6 +163,13 @@ class GetContext(nn.Module):
         )
         self.attentive_gru = AttentiveGRU1(graph_feat_size, graph_feat_size,
                                            graph_feat_size, dropout)
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.project_node[0].reset_parameters()
+        self.project_edge1[0].reset_parameters()
+        self.project_edge2[1].reset_parameters()
+        self.attentive_gru.reset_parameters()
 
     def apply_edges1(self, edges):
         """Edge feature update.
@@ -237,6 +254,11 @@ class GNNLayer(nn.Module):
         )
         self.attentive_gru = AttentiveGRU2(node_feat_size, graph_feat_size, dropout)
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.project_edge[1].reset_parameters()
+        self.attentive_gru.reset_parameters()
+
     def apply_edges(self, edges):
         """Edge feature generation.
 
@@ -308,6 +330,12 @@ class AttentiveFPGNN(nn.Module):
         self.gnn_layers = nn.ModuleList()
         for _ in range(num_layers - 1):
             self.gnn_layers.append(GNNLayer(graph_feat_size, graph_feat_size, dropout))
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.init_context.reset_parameters()
+        for gnn in self.gnn_layers:
+            gnn.reset_parameters()
 
     def forward(self, g, node_feats, edge_feats):
         """Performs message passing and updates node representations.

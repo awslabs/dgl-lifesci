@@ -16,6 +16,11 @@ MLP Predictor
 .. automodule:: dgllife.model.model_zoo.mlp_predictor
     :members:
 
+Hadamard Link Predictor
+```````````````````````
+.. automodule:: dgllife.model.model_zoo.hadamard_link_predictor
+    :members:
+
 Molecular Property Prediction
 -----------------------------
 

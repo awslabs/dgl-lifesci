@@ -110,6 +110,15 @@ class DGLJTNNDecoder(nn.Module):
         self.W_o = nn.Linear(hidden_size, self.vocab_size)
         self.U_s = nn.Linear(hidden_size, 1)
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.embedding.reset_parameters()
+        self.dec_tree_edge_update.reset_parameters()
+        self.W.reset_parameters()
+        self.U.reset_parameters()
+        self.W_o.reset_parameters()
+        self.U_s.reset_parameters()
+
     def forward(self, mol_trees, tree_vec):
         '''
         The training procedure which computes the prediction loss given the

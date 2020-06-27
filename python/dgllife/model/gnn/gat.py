@@ -53,6 +53,10 @@ class GATLayer(nn.Module):
         self.agg_mode = agg_mode
         self.activation = activation
 
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        self.gat_conv.reset_parameters()
+
     def forward(self, bg, feats):
         """Update node representations
 
@@ -166,6 +170,11 @@ class GAT(nn.Module):
                 in_feats = hidden_feats[i] * num_heads[i]
             else:
                 in_feats = hidden_feats[i]
+
+    def reset_parameters(self):
+        """Reinitialize model parameters."""
+        for gnn in self.gnn_layers:
+            gnn.reset_parameters()
 
     def forward(self, g, feats):
         """Update node representations.
