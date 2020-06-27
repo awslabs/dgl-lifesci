@@ -11,6 +11,9 @@ We provide various examples across 3 applications -- property prediction, genera
     - [Alchemy with DGL](../python/dgllife/data/alchemy.py)
 - PubChem Aromaticity [[paper]](https://pubs.acs.org/doi/10.1021/acs.jmedchem.9b00959)
     - [PubChem Aromaticity with DGL](../python/dgllife/data/pubchem_aromaticity.py)
+- OGB [[paper]](https://arxiv.org/abs/2005.00687)
+    - [ogbl-ppa](link_prediction/ogbl-ppa)
+    - [ogbg-ppa](property_prediction/ogbg_ppa)
 
 ## Property Prediction
 
