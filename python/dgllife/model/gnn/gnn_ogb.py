@@ -111,7 +111,7 @@ class GINOGBLayer(nn.Module):
         """Reinitialize model parameters."""
         self.project_in_edge_feats.reset_parameters()
         device = self.eps.device
-        self.eps = nn.Parameter(torch.Tensor([0])).to(device)
+        self.eps = nn.Parameter(torch.Tensor([0]).to(device))
         for layer in self.project_out:
             if isinstance(layer, (nn.Linear, nn.BatchNorm1d)):
                 layer.reset_parameters()
