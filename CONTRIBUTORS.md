@@ -10,3 +10,4 @@ Contributors
 * [Chengqiang Lu](https://github.com/geekinglcq): Alchemy dataset; MPNN, MGCN and SchNet
 * [Jiajing Hu](https://github.com/jjhu94): Weave
 * [Zhaoqiang Chen](https://github.com/autodataming): Update RDkit channel for conda installation
+* [Yue Zhong](https://github.com/YueZhong-bio): HadamardLinkPredictor, link prediction for ogbl-ppa
