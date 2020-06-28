@@ -144,7 +144,7 @@ def main():
 
         print({'Train': train_perf, 'Validation': valid_perf, 'Test': test_perf})
         if epoch >= 3:
-            print('Training Time: ', time_curve[epoch - 1])
+            print('Training Time: ', time_curve[-1])
 
         train_curve.append(train_perf['acc'])
         valid_curve.append(valid_perf['acc'])

@@ -9,7 +9,7 @@ For a detailed description of the dataset, see [the OGB website](https://ogb.sta
 
 ## Dependencies
 
-- **OGB v1.1.1**, which can be installed with ```pip install ogb```
+- **OGB v1.2.1**, which can be installed with ```pip install ogb```
 
 ## Usage
 
