@@ -24,7 +24,7 @@ def main(args):
         test_set = USPTOCenter('test', num_processes=args['num_processes'], load=args['load'])
     else:
         test_set = WLNCenterDataset(raw_file_path=args['test_path'],
-                                    mol_graph_path='test.bin',
+                                    mol_graph_path=args['test_path'] + '.bin',
                                     num_processes=args['num_processes'],
                                     load=args['load'])
     test_loader = DataLoader(test_set, batch_size=args['batch_size'],
