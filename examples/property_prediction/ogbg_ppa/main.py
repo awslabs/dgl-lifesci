@@ -68,14 +68,17 @@ def main():
     parser.add_argument('--batch_size', type=int, default=32,
                         help='input batch size for training (default: 32)')
     parser.add_argument('--epochs', type=int, default=100,
-                        help='number of epochs to train (default: 100)')
+                        help='number of epochs for training (default: 100)')
     parser.add_argument('--num_workers', type=int, default=0,
                         help='number of workers (default: 0)')
     parser.add_argument('--dataset', type=str, default="ogbg-ppa",
                         help='dataset name (default: ogbg-ppa)')
-    parser.add_argument('--filename', type=str, default="gin-virtual",
-                        help='filename to output result (default: gin-virtual)')
+    parser.add_argument('--filename', type=str,
+                        help='filename to output result')
     args = parser.parse_args()
+
+    if args.filename is None:
+        args.filename = args.gnn
 
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
