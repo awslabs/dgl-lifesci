@@ -149,6 +149,14 @@ New datasets should be processed such that each line corresponds to the SMILES f
 The reactants are placed before `>>` and the product is placed after `>>`. The reactants are separated by `.`. 
 In addition, atom mapping information is provided.
 
+**Notice**
+
+```
+The map ids in the rxn should be consecutive， or it will report [the molAtomMapNumber issue](https://github.com/awslabs/dgl-lifesci/issues/33).
+
+To avoid the problem, you could convert the raw rxn smiles with explicit hydrgogen atoms to the rxn smiles without hydrogen atoms by RDKit befor adding map ids for the rxn smiles.
+```
+
 You can then train a model on new datasets with 
 
 ```bash
