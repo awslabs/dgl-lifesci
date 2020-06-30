@@ -368,3 +368,4 @@ if __name__ == '__main__':
     test_mpnn_predictor()
     test_schnet_predictor()
     test_weave_predictor()
+    test_gnn_ogb_predictor()
