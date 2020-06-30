@@ -44,7 +44,7 @@ Using the default parameters, the performance of 10 random runs is as follows.
 Hiv_dataset
 | Method      |      ROC-AUC     |
 | ----------- |  --------------- |
-| GCN         | o.7560 +- 0.0178 |
+| GCN         | 0.7560 +- 0.0178 |
 | GIN         | 0.7599 +- 0.0178 |
 | GCN-virtual | 0.7599 +- 0.0178 |
 | GIN-virtual | 0.7598 +- 0.0178 |
@@ -52,7 +52,7 @@ Hiv_dataset
 PCBA_dataset
 | Method      |      PRC-AUC     |
 | ----------- |  --------------- |
-| GCN         | o.1977 +- 0.0026 |
+| GCN         | 0.1977 +- 0.0026 |
 | GIN         | 0.2214 +- 0.0046 |
 | GCN-virtual | 0.2395 +- 0.0042 |
 | GIN-virtual | 0.2672 +- 0.0028 |
