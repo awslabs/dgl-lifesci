@@ -734,7 +734,8 @@ def mol_to_nearest_neighbor_graph(mol,
     >>> AllChem.EmbedMolecule(mol)
     >>> AllChem.MMFFOptimizeMolecule(mol)
     >>> coords = get_mol_3d_coordinates(mol)
-    >>> g = mol_to_nearest_neighbor_graph(mol, coords, neighbor_cutoff=1.25, explicit_hydrogens=True)
+    >>> g = mol_to_nearest_neighbor_graph(mol, coords, neighbor_cutoff=1.25,
+    >>>                                   explicit_hydrogens=True)
     >>> print(g)
     DGLGraph(num_nodes=41, num_edges=42,
              ndata_schemes={}
