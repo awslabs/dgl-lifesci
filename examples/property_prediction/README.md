@@ -1,11 +1,11 @@
-# Molecular Property Prediction
+# Graph Property Prediction
 
-GNN-based molecular property prediction typically consists of the following steps:
-1. Construct graphs for molecules
+GNN-based graph property prediction typically consists of the following steps:
+1. Construct graphs
 2. Prepare initial node (and edge) features for graphs
 3. Use GNNs to update node representations of graphs
-4. Compute molecular representations out of updated node representations
-5. Pass the molecular representations to a MLP for final prediction
+4. Compute graph representations out of updated node representations
+5. Pass the graph representations to a MLP for final prediction
 
 For those who are familiar with molecular fingerprints, GNN-based molecular representations 
 can be viewed as learnable molecular fingerprints as first introduced in [1].
