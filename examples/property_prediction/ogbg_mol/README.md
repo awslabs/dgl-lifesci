@@ -1,6 +1,7 @@
-# ogbg-ppa
+# ogbg-mol
 
 For a detailed description of the dataset, see [the OGB website](https://ogb.stanford.edu/docs/graphprop/).
+We just focus on hiv dataset and pcba dataset.
 
 ## Models
 
@@ -40,12 +41,21 @@ The optional arguments are as follows:
 
 Using the default parameters, the performance of 10 random runs is as follows.
 
-| Method      | Accuracy (%)  |
-| ----------- | ------------- |
-| GCN         | 67.80 +- 0.49 |
-| GIN         | 69.31 +- 1.94 |
-| GCN-virtual | 69.02 +- 0.47 |
-| GIN-virtual | 70.62 +- 0.70 |
+        Hiv_dataset
+| Method      |      ROC-AUC     |
+| ----------- |  --------------- |
+| GCN         | o.7560 +- 0.0178 |
+| GIN         | 0.7599 +- 0.0178 |
+| GCN-virtual | 0.7599 +- 0.0178 |
+| GIN-virtual | 0.7598 +- 0.0178 |
+
+        PCBA_dataset
+| Method      |      PRC-AUC     |
+| ----------- |  --------------- |
+| GCN         | o.1977 +- 0.0026 |
+| GIN         | 0.2214 +- 0.0046 |
+| GCN-virtual | 0.2395 +- 0.0042 |
+| GIN-virtual | 0.2672 +- 0.0028 |
 
 ## References
 
