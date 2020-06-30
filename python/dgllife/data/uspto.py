@@ -399,11 +399,13 @@ class WLNCenterDataset(object):
     check_reaction_validity : bool
         Whether to check the validity of reactions before data pre-processing, which
         will introduce additional overhead. Default to True.
-    reaction_validity_result_path : str or None
-        Path to a directory for saving results for checking validity of reactions.
+    reaction_validity_result_prefix : str or None
+        Prefix for saving results for checking validity of reactions.
         This argument only comes into effect if ``check_reaction_validity`` is True,
-        in which case we will save valid reactions in ``valid_reactions.proc`` and
-        invalid ones in ``invalid_reactions.proc``. Default to the current directory.
+        in which case we will save valid reactions in
+        ``reaction_validity_result_prefix + _valid_reactions.proc`` and
+        invalid ones in ``reaction_validity_result_prefix + _invalid_reactions.proc``.
+        Default to ``''``.
     """
     def __init__(self,
                  raw_file_path,
@@ -415,7 +417,7 @@ class WLNCenterDataset(object):
                  load=True,
                  num_processes=1,
                  check_reaction_validity=True,
-                 reaction_validity_result_path='.'):
+                 reaction_validity_result_prefix=''):
         super(WLNCenterDataset, self).__init__()
 
         self._atom_pair_featurizer = atom_pair_featurizer
@@ -434,8 +436,10 @@ class WLNCenterDataset(object):
                 reaction_validity_full_check(path_to_reaction_file)
             print('# valid reactions {:d}'.format(len(valid_reactions)))
             print('# invalid reactions {:d}'.format(len(invalid_reactions)))
-            path_to_valid_reactions = reaction_validity_result_path + '/valid_reactions.proc'
-            path_to_invalid_reactions = reaction_validity_result_path + '/invalid_reactions.proc'
+            path_to_valid_reactions = reaction_validity_result_prefix + \
+                                      '_valid_reactions.proc'
+            path_to_invalid_reactions = reaction_validity_result_prefix + \
+                                        '_invalid_reactions.proc'
             with open(path_to_valid_reactions, 'w') as f:
                 for line in valid_reactions:
                     f.write(line)
@@ -1300,8 +1304,9 @@ class WLNRankDataset(object):
 
     Parameters
     ----------
-    raw_file_path : str
-        Path to the raw reaction file, where each line is the SMILES for a reaction.
+    path_to_reaction_file : str
+        Path to the processed reaction files, where each line has the reaction SMILES
+        and the corresponding graph edits.
     candidate_bond_path : str
         Path to the candidate bond changes for product enumeration, where each line is
         candidate bond changes for a reaction by a WLN for reaction center prediction.
@@ -1331,7 +1336,7 @@ class WLNRankDataset(object):
         Number of processes to use for data pre-processing. Default to 1.
     """
     def __init__(self,
-                 raw_file_path,
+                 path_to_reaction_file,
                  candidate_bond_path,
                  mode,
                  node_featurizer=default_node_featurizer_rank,
@@ -1349,10 +1354,6 @@ class WLNRankDataset(object):
 
         self.ignore_large_samples = False
         self.size_cutoff = size_cutoff
-
-        path_to_reaction_file = raw_file_path + '.proc'
-        print('Pre-processing graph edits from reaction data')
-        process_file(raw_file_path, num_processes)
 
         self.reactant_mols, self.product_mols, self.real_bond_changes, \
         self.ids_for_small_samples = self.load_reaction_data(path_to_reaction_file, num_processes)
@@ -1602,7 +1603,7 @@ class USPTORank(WLNRankDataset):
         extract_archive(data_path, extracted_data_path)
 
         super(USPTORank, self).__init__(
-            raw_file_path=extracted_data_path + '/{}.txt'.format(subset),
+            path_to_reaction_file=extracted_data_path + '/{}.txt.proc'.format(subset),
             candidate_bond_path=candidate_bond_path,
             mode=mode,
             size_cutoff=size_cutoff,
