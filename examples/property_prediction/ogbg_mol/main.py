@@ -12,7 +12,6 @@ from tqdm import tqdm
 cls_criterion = torch.nn.BCEWithLogitsLoss()
 reg_criterion = torch.nn.MSELoss()
 
-
 def train(gnn, model, feature, device, loader, optimizer, task_type):
     model.train()
 
