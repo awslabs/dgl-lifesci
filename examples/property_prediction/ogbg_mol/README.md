@@ -41,7 +41,7 @@ The optional arguments are as follows:
 
 Using the default parameters, the performance of 10 random runs is as follows.
 
-        Hiv_dataset
+Hiv_dataset
 | Method      |      ROC-AUC     |
 | ----------- |  --------------- |
 | GCN         | o.7560 +- 0.0178 |
@@ -49,7 +49,7 @@ Using the default parameters, the performance of 10 random runs is as follows.
 | GCN-virtual | 0.7599 +- 0.0178 |
 | GIN-virtual | 0.7598 +- 0.0178 |
 
-        PCBA_dataset
+PCBA_dataset
 | Method      |      PRC-AUC     |
 | ----------- |  --------------- |
 | GCN         | o.1977 +- 0.0026 |
