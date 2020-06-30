@@ -26,7 +26,8 @@ def main(args):
         test_set = WLNCenterDataset(raw_file_path=args['test_path'],
                                     mol_graph_path=args['test_path'] + '.bin',
                                     num_processes=args['num_processes'],
-                                    load=args['load'])
+                                    load=args['load'],
+                                    reaction_validity_result_path=args['center_results'])
     test_loader = DataLoader(test_set, batch_size=args['batch_size'],
                              collate_fn=collate_center, shuffle=False)
 

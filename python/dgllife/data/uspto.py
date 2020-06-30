@@ -331,6 +331,38 @@ def load_one_reaction(line):
 
     return mol, reaction, graph_edits
 
+def reaction_validity_full_check(reaction_file):
+    """Tell valid reactions from invalid ones.
+
+    Parameters
+    ----------
+    reaction_file : str
+        Path to a file for reactions, where each line has the reaction SMILES and the
+        corresponding graph edits.
+
+    Returns
+    -------
+    valid_reactions : list
+        Valid reactions for modeling
+    invalid_reactions : list
+        Invalid reactions for modeling
+    """
+    valid_reactions = []
+    invalid_reactions = []
+    with open(reaction_file, 'r') as file:
+        for line in file:
+            try:
+                mol, reaction, graph_edits = load_one_reaction(line)
+                assert mol is not None
+                product_mol = Chem.MolFromSmiles(reaction.split('>')[2])
+                assert product_mol is not None
+                get_pair_label(mol, graph_edits)
+                valid_reactions.append(line)
+            except:
+                invalid_reactions.append(line)
+
+    return valid_reactions, invalid_reactions
+
 class WLNCenterDataset(object):
     """Dataset for reaction center prediction with WLN
 
@@ -364,6 +396,14 @@ class WLNCenterDataset(object):
         featurization methods and need to preprocess from scratch. Default to True.
     num_processes : int
         Number of processes to use for data pre-processing. Default to 1.
+    check_reaction_validity : bool
+        Whether to check the validity of reactions before data pre-processing, which
+        will introduce additional overhead. Default to True.
+    reaction_validity_result_path : str or None
+        Path to a directory for saving results for checking validity of reactions.
+        This argument only comes into effect if ``check_reaction_validity`` is True,
+        in which case we will save valid reactions in ``valid_reactions.proc`` and
+        invalid ones in ``invalid_reactions.proc``. Default to the current directory.
     """
     def __init__(self,
                  raw_file_path,
@@ -373,7 +413,9 @@ class WLNCenterDataset(object):
                  edge_featurizer=default_edge_featurizer_center,
                  atom_pair_featurizer=default_atom_pair_featurizer,
                  load=True,
-                 num_processes=1):
+                 num_processes=1,
+                 check_reaction_validity=True,
+                 reaction_validity_result_path='.'):
         super(WLNCenterDataset, self).__init__()
 
         self._atom_pair_featurizer = atom_pair_featurizer
@@ -385,6 +427,22 @@ class WLNCenterDataset(object):
         path_to_reaction_file = raw_file_path + '.proc'
         print('Pre-processing graph edits from reaction data')
         process_file(raw_file_path, num_processes)
+
+        if check_reaction_validity:
+            print('Start checking validity of input reactions for modeling...')
+            valid_reactions, invalid_reactions = \
+                reaction_validity_full_check(path_to_reaction_file)
+            print('# valid reactions {:d}'.format(len(valid_reactions)))
+            print('# invalid reactions {:d}'.format(len(invalid_reactions)))
+            path_to_valid_reactions = reaction_validity_result_path + '/valid_reactions.proc'
+            path_to_invalid_reactions = reaction_validity_result_path + '/invalid_reactions.proc'
+            with open(path_to_valid_reactions, 'w') as f:
+                for line in valid_reactions:
+                    f.write(line)
+            with open(path_to_invalid_reactions, 'w') as f:
+                for line in invalid_reactions:
+                    f.write(line)
+            path_to_reaction_file = path_to_valid_reactions
 
         import time
         t0 = time.time()
@@ -583,7 +641,8 @@ class USPTOCenter(WLNCenterDataset):
             edge_featurizer=edge_featurizer,
             atom_pair_featurizer=atom_pair_featurizer,
             load=load,
-            num_processes=num_processes)
+            num_processes=num_processes,
+            check_reaction_validity=False)
 
     @property
     def subset(self):
