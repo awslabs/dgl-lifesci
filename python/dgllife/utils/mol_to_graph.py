@@ -25,7 +25,8 @@ __all__ = ['mol_to_graph',
            'smiles_to_nearest_neighbor_graph']
 
 # pylint: disable=I1101
-def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer, canonical_atom_order):
+def mol_to_graph(mol, graph_constructor, node_featurizer,
+                 edge_featurizer, canonical_atom_order, explicit_hydrogens):
     """Convert an RDKit molecule object into a DGLGraph and featurize for it.
 
     This function can be used to construct any arbitrary ``DGLGraph`` from an
@@ -46,6 +47,8 @@ def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer, canon
     canonical_atom_order : bool
         Whether to use a canonical order of atoms returned by RDKit. Setting it
         to true might change the order of atoms in the graph constructed.
+    explicit_hydrogens : bool
+        Whether to explicitly represent hydrogens as nodes in the graph.
 
     Returns
     -------
@@ -58,6 +61,12 @@ def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer, canon
     mol_to_complete_graph
     mol_to_nearest_neighbor_graph
     """
+    # Whether to have hydrogen atoms as explicit nodes
+    if explicit_hydrogens:
+        mol = Chem.AddHs(mol)
+    else:
+        mol = Chem.RemoveHs(mol)
+
     if canonical_atom_order:
         new_order = rdmolfiles.CanonicalRankAtoms(mol)
         mol = rdmolops.RenumberAtoms(mol, new_order)
@@ -124,7 +133,8 @@ def construct_bigraph_from_mol(mol, add_self_loop=False):
 def mol_to_bigraph(mol, add_self_loop=False,
                    node_featurizer=None,
                    edge_featurizer=None,
-                   canonical_atom_order=True):
+                   canonical_atom_order=True,
+                   explicit_hydrogens=False):
     """Convert an RDKit molecule object into a bi-directed DGLGraph and featurize for it.
 
     Parameters
@@ -143,6 +153,8 @@ def mol_to_bigraph(mol, add_self_loop=False,
         Whether to use a canonical order of atoms returned by RDKit. Setting it
         to true might change the order of atoms in the graph constructed. Default
         to True.
+    explicit_hydrogens : bool
+        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
 
     Returns
     -------
@@ -196,17 +208,27 @@ def mol_to_bigraph(mol, add_self_loop=False,
             [0.],
             [0.]])
 
+    By default, we do not explicitly represent hydrogens as nodes, which can be done as follows.
+
+    >>> g = mol_to_bigraph(mol, explicit_hydrogens=True)
+    >>> print(g)
+    DGLGraph(num_nodes=9, num_edges=16,
+             ndata_schemes={}
+             edata_schemes={})
+
     See Also
     --------
     smiles_to_bigraph
     """
     return mol_to_graph(mol, partial(construct_bigraph_from_mol, add_self_loop=add_self_loop),
-                        node_featurizer, edge_featurizer, canonical_atom_order)
+                        node_featurizer, edge_featurizer,
+                        canonical_atom_order, explicit_hydrogens)
 
 def smiles_to_bigraph(smiles, add_self_loop=False,
                       node_featurizer=None,
                       edge_featurizer=None,
-                      canonical_atom_order=True):
+                      canonical_atom_order=True,
+                      explicit_hydrogens=False):
     """Convert a SMILES into a bi-directed DGLGraph and featurize for it.
 
     Parameters
@@ -225,6 +247,8 @@ def smiles_to_bigraph(smiles, add_self_loop=False,
         Whether to use a canonical order of atoms returned by RDKit. Setting it
         to true might change the order of atoms in the graph constructed. Default
         to True.
+    explicit_hydrogens : bool
+        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
 
     Returns
     -------
@@ -275,13 +299,21 @@ def smiles_to_bigraph(smiles, add_self_loop=False,
             [0.],
             [0.]])
 
+    By default, we do not explicitly represent hydrogens as nodes, which can be done as follows.
+
+    >>> g = smiles_to_bigraph('CCO', explicit_hydrogens=True)
+    >>> print(g)
+    DGLGraph(num_nodes=9, num_edges=16,
+             ndata_schemes={}
+             edata_schemes={})
+
     See Also
     --------
     mol_to_bigraph
     """
     mol = Chem.MolFromSmiles(smiles)
     return mol_to_bigraph(mol, add_self_loop, node_featurizer,
-                          edge_featurizer, canonical_atom_order)
+                          edge_featurizer, canonical_atom_order, explicit_hydrogens)
 
 def construct_complete_graph_from_mol(mol, add_self_loop=False):
     """Construct a complete graph with topology only for the molecule
@@ -317,7 +349,8 @@ def construct_complete_graph_from_mol(mol, add_self_loop=False):
 def mol_to_complete_graph(mol, add_self_loop=False,
                           node_featurizer=None,
                           edge_featurizer=None,
-                          canonical_atom_order=True):
+                          canonical_atom_order=True,
+                          explicit_hydrogens=False):
     """Convert an RDKit molecule into a complete DGLGraph and featurize for it.
 
     Parameters
@@ -336,6 +369,8 @@ def mol_to_complete_graph(mol, add_self_loop=False,
         Whether to use a canonical order of atoms returned by RDKit. Setting it
         to true might change the order of atoms in the graph constructed. Default
         to True.
+    explicit_hydrogens : bool
+        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
 
     Returns
     -------
@@ -398,18 +433,28 @@ def mol_to_complete_graph(mol, add_self_loop=False,
             [1.],
             [0.]])
 
+    By default, we do not explicitly represent hydrogens as nodes, which can be done as follows.
+
+    >>> g = mol_to_complete_graph(mol, explicit_hydrogens=True)
+    >>> print(g)
+    DGLGraph(num_nodes=9, num_edges=72,
+             ndata_schemes={}
+             edata_schemes={})
+
     See Also
     --------
     smiles_to_complete_graph
     """
     return mol_to_graph(mol,
                         partial(construct_complete_graph_from_mol, add_self_loop=add_self_loop),
-                        node_featurizer, edge_featurizer, canonical_atom_order)
+                        node_featurizer, edge_featurizer,
+                        canonical_atom_order, explicit_hydrogens)
 
 def smiles_to_complete_graph(smiles, add_self_loop=False,
                              node_featurizer=None,
                              edge_featurizer=None,
-                             canonical_atom_order=True):
+                             canonical_atom_order=True,
+                             explicit_hydrogens=False):
     """Convert a SMILES into a complete DGLGraph and featurize for it.
 
     Parameters
@@ -428,6 +473,8 @@ def smiles_to_complete_graph(smiles, add_self_loop=False,
         Whether to use a canonical order of atoms returned by RDKit. Setting it
         to true might change the order of atoms in the graph constructed. Default
         to True.
+    explicit_hydrogens : bool
+        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
 
     Returns
     -------
@@ -487,13 +534,21 @@ def smiles_to_complete_graph(smiles, add_self_loop=False,
             [1.],
             [0.]])
 
+    By default, we do not explicitly represent hydrogens as nodes, which can be done as follows.
+
+    >>> g = smiles_to_complete_graph('CCO', explicit_hydrogens=True)
+    >>> print(g)
+    DGLGraph(num_nodes=9, num_edges=72,
+             ndata_schemes={}
+             edata_schemes={})
+
     See Also
     --------
     mol_to_complete_graph
     """
     mol = Chem.MolFromSmiles(smiles)
     return mol_to_complete_graph(mol, add_self_loop, node_featurizer,
-                                 edge_featurizer, canonical_atom_order)
+                                 edge_featurizer, canonical_atom_order, explicit_hydrogens)
 
 def k_nearest_neighbors(coordinates, neighbor_cutoff, max_num_neighbors=None,
                         p_distance=2, self_loops=False):
@@ -592,7 +647,8 @@ def mol_to_nearest_neighbor_graph(mol,
                                   edge_featurizer=None,
                                   canonical_atom_order=True,
                                   keep_dists=False,
-                                  dist_field='dist'):
+                                  dist_field='dist',
+                                  explicit_hydrogens=False):
     """Convert an RDKit molecule into a nearest neighbor graph and featurize for it.
 
     Different from bigraph and complete graph, the nearest neighbor graph
@@ -635,6 +691,8 @@ def mol_to_nearest_neighbor_graph(mol,
     dist_field : str
         Field for storing distance between neighboring atoms in ``edata``. This comes
         into effect only when ``keep_dists=True``. Default to ``'dist'``.
+    explicit_hydrogens : bool
+        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
 
     Returns
     -------
@@ -669,12 +727,37 @@ def mol_to_nearest_neighbor_graph(mol,
             [1.2259],
             [1.2259]])
 
+    By default, we do not explicitly represent hydrogens as nodes, which can be done as follows.
+
+    >>> mol = Chem.MolFromSmiles('CC1(C(N2C(S1)C(C2=O)NC(=O)CC3=CC=CC=C3)C(=O)O)C')
+    >>> mol = Chem.AddHs(mol)
+    >>> AllChem.EmbedMolecule(mol)
+    >>> AllChem.MMFFOptimizeMolecule(mol)
+    >>> coords = get_mol_3d_coordinates(mol)
+    >>> g = mol_to_nearest_neighbor_graph(mol, coords, neighbor_cutoff=1.25,
+    >>>                                   explicit_hydrogens=True)
+    >>> print(g)
+    DGLGraph(num_nodes=41, num_edges=42,
+             ndata_schemes={}
+             edata_schemes={})
+
     See Also
     --------
     get_mol_3d_coordinates
     k_nearest_neighbors
     smiles_to_nearest_neighbor_graph
     """
+    if explicit_hydrogens:
+        mol = Chem.AddHs(mol)
+    else:
+        mol = Chem.RemoveHs(mol)
+
+    num_atoms = mol.GetNumAtoms()
+    num_coords = coordinates.shape[0]
+    assert num_atoms == num_coords, \
+        'Expect the number of atoms to match the first dimension of coordinates, ' \
+        'got {:d} and {:d}'.format(num_atoms, num_coords)
+
     if canonical_atom_order:
         new_order = rdmolfiles.CanonicalRankAtoms(mol)
         mol = rdmolops.RenumberAtoms(mol, new_order)
@@ -687,7 +770,6 @@ def mol_to_nearest_neighbor_graph(mol,
     g = DGLGraph()
 
     # Add nodes first since some nodes may be completely isolated
-    num_atoms = mol.GetNumAtoms()
     g.add_nodes(num_atoms)
 
     # Add edges
@@ -716,7 +798,8 @@ def smiles_to_nearest_neighbor_graph(smiles,
                                      edge_featurizer=None,
                                      canonical_atom_order=True,
                                      keep_dists=False,
-                                     dist_field='dist'):
+                                     dist_field='dist',
+                                     explicit_hydrogens=False):
     """Convert a SMILES into a nearest neighbor graph and featurize for it.
 
     Different from bigraph and complete graph, the nearest neighbor graph
@@ -759,6 +842,8 @@ def smiles_to_nearest_neighbor_graph(smiles,
     dist_field : str
         Field for storing distance between neighboring atoms in ``edata``. This comes
         into effect only when ``keep_dists=True``. Default to ``'dist'``.
+    explicit_hydrogens : bool
+        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
 
     Returns
     -------
@@ -794,6 +879,21 @@ def smiles_to_nearest_neighbor_graph(smiles,
             [1.2259],
             [1.2259]])
 
+    By default, we do not explicitly represent hydrogens as nodes, which can be done as follows.
+
+    >>> smiles = 'CC1(C(N2C(S1)C(C2=O)NC(=O)CC3=CC=CC=C3)C(=O)O)C'
+    >>> mol = Chem.MolFromSmiles(smiles)
+    >>> mol = Chem.AddHs(mol)
+    >>> AllChem.EmbedMolecule(mol)
+    >>> AllChem.MMFFOptimizeMolecule(mol)
+    >>> coords = get_mol_3d_coordinates(mol)
+    >>> g = smiles_to_nearest_neighbor_graph(smiles, coords, neighbor_cutoff=1.25,
+    >>>                                      explicit_hydrogens=True)
+    >>> print(g)
+    DGLGraph(num_nodes=41, num_edges=42,
+             ndata_schemes={}
+             edata_schemes={})
+
     See Also
     --------
     get_mol_3d_coordinates
@@ -802,5 +902,6 @@ def smiles_to_nearest_neighbor_graph(smiles,
     """
     mol = Chem.MolFromSmiles(smiles)
     return mol_to_nearest_neighbor_graph(
-        mol, coordinates, neighbor_cutoff, max_num_neighbors, p_distance, add_self_loop,
-        node_featurizer, edge_featurizer, canonical_atom_order, keep_dists, dist_field)
+        mol, coordinates, neighbor_cutoff, max_num_neighbors, p_distance,
+        add_self_loop, node_featurizer, edge_featurizer, canonical_atom_order,
+        keep_dists, dist_field, explicit_hydrogens)
