@@ -20,7 +20,7 @@ def main(args, path_to_candidate_bonds):
             num_processes=args['num_processes'])
     else:
         test_set = WLNRankDataset(
-            raw_file_path=args['test_path'],
+            path_to_reaction_file=args['test_path'],
             candidate_bond_path=path_to_candidate_bonds['test'], mode='test',
             max_num_change_combos_per_reaction=args['max_num_change_combos_per_reaction_eval'],
             num_processes=args['num_processes'])
