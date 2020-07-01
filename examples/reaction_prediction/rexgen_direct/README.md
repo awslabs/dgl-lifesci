@@ -214,8 +214,7 @@ the oxygen atom will be labelled as 15.
 You can then train a model on new datasets with 
 
 ```bash
-python find_
-_center_train.py --train-path X --val-path Y
+python find_reaction_center_train.py --train-path X --val-path Y
 ```
 
 where `X`, `Y` are paths to the new training/validation as described above.
