@@ -141,7 +141,8 @@ python find_reaction_center_eval.py
 
 ### Adapting to a New Dataset
 
-New datasets should be processed such that each line corresponds to the SMILES for a reaction like below:
+New datasets should be processed such that each line corresponds to the SMILES for a reaction (**rxn smiles**) like below:
+
 
 ```bash
 [CH3:14][NH2:15].[N+:1](=[O:2])([O-:3])[c:4]1[cH:5][c:6]([C:7](=[O:8])[OH:9])[cH:10][cH:11][c:12]1[Cl:13].[OH2:16]>>[N+:1](=[O:2])([O-:3])[c:4]1[cH:5][c:6]([C:7](=[O:8])[OH:9])[cH:10][cH:11][c:12]1[NH:15][CH3:14]
@@ -149,6 +150,67 @@ New datasets should be processed such that each line corresponds to the SMILES f
 
 The reactants are placed before `>>` and the product is placed after `>>`. The reactants are separated by `.`. 
 In addition, atom mapping information is provided.
+
+**Notice**
+
+
+The atom mapping numbers in the rxn should be consecutive integers starting from 1, or it will report [the molAtomMapNumber issue](https://github.com/awslabs/dgl-lifesci/issues/33).
+To avoid the problem, you could convert the raw rxn smiles with explicit hydrgogen atoms to the rxn smiles without hydrogen atoms by RDKit befor adding map ids for the rxn smiles.
+
+
+For example, the raw rxn smiles is "[H]C([H])([H])Oc1ccc(CCNC=O)cc1OC([H])([H])[H]>>[H]C([H])([H])Oc1cc2c(cc1OC([H])([H])[H])CCN=C2", if you directly add map for the rxn by [RDT software](https://github.com/asad/ReactionDecoder).
+the mapped rxn smiles is
+```
+[CH2:1]([CH2:2][NH:10][CH:11]=[O:21])[c:8]1[cH:7][cH:6][c:5]([O:4][CH3:3])[c:12]([cH:9]1)[O:13][CH3:14]>>[CH:11]1=[N:10][CH2:2][CH2:1][c:8]2[cH:9][c:12]([O:13][CH3:14])[c:5]([cH:6][c:7]12)[O:4][CH3:3]
+
+```
+
+the oxygen atom will be labelled as 21.
+
+First, convert the raw rxn smiles to rxn smiles without hydrogen atoms.
+```py
+#!python
+
+
+from rdkit import Chem
+def canonicalizatonsmi(smi):
+    newsmi = Chem.MolToSmiles(Chem.MolFromSmiles(smi))
+    return newsmi
+
+
+def canon_reaction(rxnstring):
+    #print("rxnstring:",rxnstring)
+    r,p =rxnstring.split('>>')
+    rs = r.split('.')
+    #print("rs",rs)
+    ps = p.split('.')
+    #print("ps",p)
+    rscans=[]
+    pscans=[]
+    for reactant in rs:
+        temp=canonicalizatonsmi(reactant)
+        #print(reactant,temp)
+        rscans.append(temp)
+    for product in ps:
+        pscans.append(canonicalizatonsmi(product))
+
+
+    rscan='.'.join(sorted(rscans))
+    pscan='.'.join(pscans)
+    newrxnsring='%s>>%s'%(rscan,pscan)
+    return newrxnsring
+from rdkit import Chem
+rxnstring= '[H]C([H])([H])Oc1ccc(CCNC=O)cc1OC([H])([H])[H]>>[H]C([H])([H])Oc1cc2c(cc1OC([H])([H])[H])CCN=C2'
+canon_reaction(rxnstring)
+```
+
+Then, add map for the rxn smiles.
+```
+[O:15]=[CH:1][NH:2][CH2:3][CH2:4][c:5]1[cH:6][cH:7][c:8]([O:9][CH3:10])[c:11]([O:12][CH3:13])[cH:14]1>>[CH:1]1=[N:2][CH2:3][CH2:4][c:5]2[cH:14][c:11]([O:12][CH3:13])[c:8]([O:9][CH3:10])[cH:7][c:6]12
+```
+the oxygen atom will be labelled as 15.
+
+
 
 You can then train a model on new datasets with 
 
