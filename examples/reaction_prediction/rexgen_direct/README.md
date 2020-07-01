@@ -153,7 +153,7 @@ In addition, atom mapping information is provided.
 **Notice**
 
 
-The atom mapping numbers in the rxn should be consecutive integers starting from 1， or it will report [the molAtomMapNumber issue](https://github.com/awslabs/dgl-lifesci/issues/33).
+The atom mapping numbers in the rxn should be consecutive integers starting from 1, or it will report [the molAtomMapNumber issue](https://github.com/awslabs/dgl-lifesci/issues/33).
 To avoid the problem, you could convert the raw rxn smiles with explicit hydrgogen atoms to the rxn smiles without hydrogen atoms by RDKit befor adding map ids for the rxn smiles.
 
 
