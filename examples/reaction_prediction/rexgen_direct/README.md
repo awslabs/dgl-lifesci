@@ -31,7 +31,8 @@ Reaction centers refer to the pairs of atoms that lose/form a bond in the reacti
 (Weisfeiler-Lehman Network in this case) is trained to update the representations of all atoms. Then we combine 
 pairs of atom representations to predict the likelihood for the corresponding atoms to lose a bond or form a particular bond.
 
-In particular, we represent each candidate bond change as a 3-tuple a-b-c, where a and b are atom mapping numbers of two atoms in the reactants and c is the possible change, which can be losing a bond, forming a single bond, forming a double bond, forming a triple bond, and forming an aromatic bond.
+In particular, we represent each candidate bond change as a 3-tuple a-b-c, where a and b are atom mapping numbers of two atoms in the 
+reactants and c is the possible change, which can be losing a bond, forming a single bond, forming a double bond, forming a triple bond, and forming an aromatic bond.
 
 For evaluation, we select candidate bond changes with top-k scores for each reaction and compute the proportion of reactions 
 whose bond changes have all been included.
@@ -227,6 +228,16 @@ python find_reaction_center_eval.py --eval-path Z
 
 where `Z` is the path to the new test set as described above.
 
+Before training/evaluating the model, the script will first check if the model can properly handle 
+the reactions, resulting in the following 6 files:
+
+- train_valid_reactions.proc: Reactions in the training file that can be handled by the model
+- train_invalid_reactions.proc: Reactions in the training file that cannot be handled by the model
+- val_valid_reactions.proc: Reactions in the validation file that can be handled by the model
+- val_invalid_reactions.proc: Reactions in the validation file that cannot be handled by the model
+- test_valid_reactions.proc: Reactions in the test file that can be handled by the model
+- test_invalid_reactions.proc: Reactions in the test file that cannot be handled by the model
+
 ## Candidate Ranking
 
 ### Additional Dependency
@@ -323,18 +334,14 @@ python candidate_ranking_eval.py
 You can train a model on new datasets with
 
 ```bash
-python candidate_ranking_train.py --train-path X --val-path Y
+python candidate_ranking_train.py --train-path train_valid_reactions.proc --val-path val_valid_reactions.proc
 ```
-
-where `X`, `Y` are paths to the new training/validation set as described in the `Reaction Center Prediction` section.
 
 For evaluation,
 
 ```bash
-python candidate_ranking_train.py --eval-path Z
+python candidate_ranking_train.py --eval-path test_valid_reactions.proc
 ```
-
-where `Z` is the path to the new test set as described in the `Reaction Center Prediction` section.
 
 ### Common Issues
 

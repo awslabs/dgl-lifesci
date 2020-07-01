@@ -64,6 +64,11 @@ GIN Predictor
 .. automodule:: dgllife.model.model_zoo.gin_predictor
     :members:
 
+GNN OGB Predictor
+`````````````````
+.. automodule:: dgllife.model.model_zoo.gnn_ogb_predictor
+    :members:
+
 Generative Models
 -----------------
 

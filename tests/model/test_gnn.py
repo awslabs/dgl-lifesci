@@ -64,6 +64,14 @@ def test_graph8():
            torch.LongTensor([0, 0, 1, 2, 1, 0, 0]), \
            torch.LongTensor([2, 3, 2, 0, 1, 2, 1])
 
+def test_graph9():
+    """Batched graph with categorical node features and continuous edge features"""
+    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    g2 = DGLGraph([(0, 1), (1, 2), (1, 3), (1, 4)])
+    bg = dgl.batch([g1, g2])
+    return bg, torch.zeros(bg.number_of_nodes()).long(), \
+           torch.randn(bg.number_of_edges(), 2).float()
+
 def test_attentivefp():
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
@@ -345,8 +353,42 @@ def test_graphsage():
                     activation=[F.relu, F.relu],
                     dropout=[0.2, 0.2],
                     aggregator_type=['gcn', 'gcn']).to(device)
+    gnn.reset_parameters()
     assert gnn(g, node_feats).shape == torch.Size([3, 1])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 1])
+
+def test_gnn_ogb():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    bg, batch_node_feats, batch_edge_feats = test_graph9()
+    bg, batch_node_feats, batch_edge_feats = bg.to(device), batch_node_feats.to(device), \
+                                             batch_edge_feats.to(device)
+
+    # Test default setting
+    gnn = GNNOGB(in_edge_feats=batch_edge_feats.shape[-1],
+                 hidden_feats=2).to(device)
+    gnn.reset_parameters()
+    assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
+           torch.Size([bg.number_of_nodes(), 2])
+
+    # Test configured setting
+    gnn = GNNOGB(in_edge_feats=batch_edge_feats.shape[-1],
+                 num_node_types=2,
+                 hidden_feats=2,
+                 n_layers=2,
+                 batchnorm=False,
+                 activation=None,
+                 dropout=0.1,
+                 gnn_type='gin',
+                 virtual_node=False,
+                 residual=True,
+                 jk=True).to(device)
+    gnn.reset_parameters()
+    assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
+           torch.Size([bg.number_of_nodes(), 2])
 
 if __name__ == '__main__':
     test_attentivefp()
@@ -358,4 +400,5 @@ if __name__ == '__main__':
     test_schnet()
     test_weave()
     test_wln()
+    test_gnn_ogb()
     test_graphsage()

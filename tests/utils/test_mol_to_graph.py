@@ -56,6 +56,18 @@ def test_smiles_to_bigraph():
                                                         [7.], [8.], [8.], [6.], [6.], [6.],
                                                         [6.], [8.], [6.], [6.], [8.]]))
 
+    # Test the case where hydrogen atoms are included explicitly.
+    g4 = smiles_to_bigraph(test_smiles2, add_self_loop=False,
+                           node_featurizer=test_node_featurizer,
+                           edge_featurizer=test_edge_featurizer,
+                           explicit_hydrogens=True)
+    assert torch.allclose(g4.ndata['hv'], torch.tensor([[6.], [1.], [1.], [1.], [6.], [1.],
+                                                        [1.], [6.], [6.], [9.], [6.], [6.]]))
+    assert torch.allclose(g4.edata['he'], torch.tensor([[0.], [0.], [1.], [1.], [1.], [1.],
+                                                        [1.], [1.], [1.], [1.], [1.], [1.],
+                                                        [1.], [1.], [0.], [0.], [0.], [0.],
+                                                        [0.], [0.], [0.], [0.], [0.], [0.]]))
+
 def test_mol_to_bigraph():
     mol1 = Chem.MolFromSmiles(test_smiles1)
     g1 = mol_to_bigraph(mol1, add_self_loop=True)
@@ -87,6 +99,18 @@ def test_mol_to_bigraph():
                                                         [7.], [8.], [8.], [6.], [6.], [6.],
                                                         [6.], [8.], [6.], [6.], [8.]]))
 
+    # Test the case where hydrogen atoms are included explicitly.
+    g4 = mol_to_bigraph(mol2, add_self_loop=False,
+                        node_featurizer=test_node_featurizer,
+                        edge_featurizer=test_edge_featurizer,
+                        explicit_hydrogens=True)
+    assert torch.allclose(g4.ndata['hv'], torch.tensor([[6.], [1.], [1.], [1.], [6.], [1.],
+                                                        [1.], [6.], [6.], [9.], [6.], [6.]]))
+    assert torch.allclose(g4.edata['he'], torch.tensor([[0.], [0.], [1.], [1.], [1.], [1.],
+                                                        [1.], [1.], [1.], [1.], [1.], [1.],
+                                                        [1.], [1.], [0.], [0.], [0.], [0.],
+                                                        [0.], [0.], [0.], [0.], [0.], [0.]]))
+
 def test_smiles_to_complete_graph():
     test_node_featurizer = TestAtomFeaturizer()
     g1 = smiles_to_complete_graph(test_smiles1, add_self_loop=False,
@@ -105,6 +129,12 @@ def test_smiles_to_complete_graph():
                                                         [6.], [6.], [6.], [6.], [6.], [6.],
                                                         [7.], [8.], [8.], [6.], [6.], [6.],
                                                         [6.], [8.], [6.], [6.], [8.]]))
+
+    # Test the case where hydrogen atoms are included explicitly.
+    g3 = smiles_to_complete_graph(test_smiles1, node_featurizer=test_node_featurizer,
+                                  explicit_hydrogens=True)
+    assert torch.allclose(g3.ndata['hv'], torch.tensor([[1.], [1.], [1.], [6.],
+                                                        [8.], [1.], [1.], [1.], [6.]]))
 
 def test_mol_to_complete_graph():
     test_node_featurizer = TestAtomFeaturizer()
@@ -126,6 +156,12 @@ def test_mol_to_complete_graph():
                                                         [6.], [6.], [6.], [6.], [6.], [6.],
                                                         [7.], [8.], [8.], [6.], [6.], [6.],
                                                         [6.], [8.], [6.], [6.], [8.]]))
+
+    # Test the case where hydrogen atoms are included explicitly.
+    g3 = mol_to_complete_graph(mol1, add_self_loop=False,
+                               node_featurizer=test_node_featurizer, explicit_hydrogens=True)
+    assert torch.allclose(g3.ndata['hv'], torch.tensor([[1.], [1.], [1.], [6.], [8.],
+                                                        [1.], [1.], [1.], [6.]]))
 
 def test_k_nearest_neighbors():
     coordinates = np.array([[0.1, 0.1, 0.1],
@@ -202,6 +238,18 @@ def test_smiles_to_nearest_neighbor_graph():
         coordinates[srcs] - coordinates[dsts], dim=1, p=2).float().reshape(-1, 1)
     assert torch.allclose(dist, g.edata['dist'])
 
+    # Test the case where hydrogen atoms are included explicitly.
+    mol = Chem.MolFromSmiles(test_smiles1)
+    mol = Chem.AddHs(mol)
+    AllChem.EmbedMolecule(mol)
+    coordinates = mol.GetConformers()[0].GetPositions()
+    g4 = smiles_to_nearest_neighbor_graph(test_smiles1, coordinates, neighbor_cutoff=10,
+                                          node_featurizer=test_node_featurizer,
+                                          keep_dists=True, explicit_hydrogens=True)
+    assert g4.number_of_edges() == 72
+    assert torch.allclose(g4.ndata['hv'], torch.tensor([[1.], [1.], [1.], [6.],
+                                                        [8.], [1.], [1.], [1.], [6.]]))
+
 def test_mol_to_nearest_neighbor_graph():
     mol = Chem.MolFromSmiles(test_smiles1)
     AllChem.EmbedMolecule(mol)
@@ -232,6 +280,18 @@ def test_mol_to_nearest_neighbor_graph():
     dist = torch.norm(
         coordinates[srcs] - coordinates[dsts], dim=1, p=2).float().reshape(-1, 1)
     assert torch.allclose(dist, g.edata['dist'])
+
+    # Test the case where hydrogen atoms are included explicitly.
+    mol = Chem.MolFromSmiles(test_smiles1)
+    mol = Chem.AddHs(mol)
+    AllChem.EmbedMolecule(mol)
+    coordinates = mol.GetConformers()[0].GetPositions()
+    g4 = mol_to_nearest_neighbor_graph(mol, coordinates, neighbor_cutoff=10,
+                                       node_featurizer=test_node_featurizer,
+                                       explicit_hydrogens=True)
+    assert g4.number_of_edges() == 72
+    assert torch.allclose(g4.ndata['hv'], torch.tensor([[1.], [1.], [1.], [6.],
+                                                        [8.], [1.], [1.], [1.], [6.]]))
 
 if __name__ == '__main__':
     test_smiles_to_bigraph()
