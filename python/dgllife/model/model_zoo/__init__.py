@@ -18,7 +18,11 @@ from .weave_predictor import *
 from .gnn_ogb_predictor import *
 
 # Generative models
-from .dgmg import *
+try:
+    # DGMG requires RDKit support
+    from .dgmg import *
+except:
+    pass
 from .jtnn import *
 
 # Reaction prediction
