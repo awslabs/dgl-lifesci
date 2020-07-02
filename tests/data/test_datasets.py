@@ -39,6 +39,14 @@ def test_tox21():
     dataset = Tox21()
     remove_file('tox21_dglgraph.bin')
 
+def test_esol():
+    print('Test ESOL')
+    dataset = ESOL()
+    remove_file('esol_dglgraph.bin')
+    assert len(dataset[0]) == 3
+    dataset.load_full = True
+    assert len(dataset[0]) == 11
+
 def test_wln_reaction():
     print('Test datasets for reaction prediction with WLN')
 

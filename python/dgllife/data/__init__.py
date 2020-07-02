@@ -8,4 +8,7 @@ from .csv_dataset import *
 from .pdbbind import *
 from .pubchem_aromaticity import *
 from .tox21 import *
+from .esol import *
+from .freesolv import *
+from .lipophilicity import *
 from .uspto import *

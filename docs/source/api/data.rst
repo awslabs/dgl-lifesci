@@ -16,6 +16,13 @@ Tox21
     :members: task_pos_weights, __getitem__, __len__
     :show-inheritance:
 
+ESOL
+````
+
+.. autoclass:: dgllife.data.ESOL
+    :members: __getitem__, __len__
+    :show-inheritance:
+
 Alchemy for Quantum Chemistry
 `````````````````````````````
 
