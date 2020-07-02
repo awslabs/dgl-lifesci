@@ -47,6 +47,14 @@ def test_esol():
     dataset.load_full = True
     assert len(dataset[0]) == 11
 
+def test_freesolv():
+    print('Test FreeSolv')
+    dataset = FreeSolv()
+    remove_file('freesolv_dglgraph.bin')
+    assert len(dataset[0]) == 3
+    dataset.load_full = True
+    assert len(dataset[0]) == 5
+
 def test_wln_reaction():
     print('Test datasets for reaction prediction with WLN')
 
@@ -119,4 +127,6 @@ if __name__ == '__main__':
     test_pdbbind()
     test_pubchem_aromaticity()
     test_tox21()
+    test_esol()
+    test_freesolv()
     test_wln_reaction()

@@ -29,7 +29,7 @@ class MoleculeCSVDataset(object):
         Dataframe including smiles and labels. Can be loaded by pandas.read_csv(file_path).
         One column includes smiles and some other columns include labels.
     smiles_to_graph: callable, str -> DGLGraph
-        A function turning a SMILES into a DGLGraph.
+        A function turning a SMILES string into a DGLGraph.
     node_featurizer : None or callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update
         ndata for a DGLGraph.

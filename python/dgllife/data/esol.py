@@ -32,7 +32,7 @@ class ESOL(MoleculeCSVDataset):
     Parameters
     ----------
     smiles_to_graph: callable, str -> DGLGraph
-        A function turning smiles into a DGLGraph.
+        A function turning a SMILES string into a DGLGraph.
         Default to :func:`dgllife.utils.smiles_to_bigraph`.
     node_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update
@@ -114,6 +114,7 @@ class ESOL(MoleculeCSVDataset):
         download(_get_dgl_url(self._url), path=data_path)
         extract_archive(data_path, dir_path)
         df = pd.read_csv(dir_path + '/delaney-processed.csv')
+
         # Compound names in PubChem
         self.compound_names = df['Compound ID'].tolist()
         # Estimated solubility
@@ -130,6 +131,7 @@ class ESOL(MoleculeCSVDataset):
         self.num_rotatable_bonds = df['Number of Rotatable Bonds'].tolist()
         # Polar Surface Area
         self.polar_surface_area = df['Polar Surface Area'].tolist()
+
         self.load_full = False
 
         super(ESOL, self).__init__(df=df,
@@ -157,8 +159,8 @@ class ESOL(MoleculeCSVDataset):
             SMILES for the ith datapoint
         DGLGraph
             DGLGraph for the ith datapoint
-        Tensor of dtype float32 and shape (T)
-            Labels of the ith datapoint for all tasks
+        Tensor of dtype float32 and shape (1)
+            Labels of the ith datapoint
         str, optional
             Name for the ith compound, returned only when ``self.load_full`` is True.
         float, optional
