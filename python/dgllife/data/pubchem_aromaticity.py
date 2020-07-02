@@ -28,7 +28,7 @@ class PubChemBioAssayAromaticity(MoleculeCSVDataset):
     Parameters
     ----------
     smiles_to_graph: callable, str -> DGLGraph
-        A function turning smiles into a DGLGraph.
+        A function turning a SMILES string into a DGLGraph.
         Default to :func:`dgllife.utils.smiles_to_bigraph`.
     node_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update

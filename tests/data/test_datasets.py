@@ -39,6 +39,30 @@ def test_tox21():
     dataset = Tox21()
     remove_file('tox21_dglgraph.bin')
 
+def test_esol():
+    print('Test ESOL')
+    dataset = ESOL()
+    remove_file('esol_dglgraph.bin')
+    assert len(dataset[0]) == 3
+    dataset.load_full = True
+    assert len(dataset[0]) == 11
+
+def test_freesolv():
+    print('Test FreeSolv')
+    dataset = FreeSolv()
+    remove_file('freesolv_dglgraph.bin')
+    assert len(dataset[0]) == 3
+    dataset.load_full = True
+    assert len(dataset[0]) == 5
+
+def test_lipophilicity():
+    print('Test Lipophilicity')
+    dataset = Lipophilicity()
+    remove_file('lipophilicity_dglgraph.bin')
+    assert len(dataset[0]) == 3
+    dataset.load_full = True
+    assert len(dataset[0]) == 4
+
 def test_wln_reaction():
     print('Test datasets for reaction prediction with WLN')
 
@@ -111,4 +135,7 @@ if __name__ == '__main__':
     test_pdbbind()
     test_pubchem_aromaticity()
     test_tox21()
+    test_esol()
+    test_freesolv()
+    test_lipophilicity()
     test_wln_reaction()
