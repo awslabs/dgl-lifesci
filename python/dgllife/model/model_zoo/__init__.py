@@ -21,9 +21,9 @@ from .gnn_ogb_predictor import *
 try:
     # DGMG requires RDKit support
     from .dgmg import *
+    from .jtnn import *
 except:
     pass
-from .jtnn import *
 
 # Reaction prediction
 from .wln_reaction_center import *
