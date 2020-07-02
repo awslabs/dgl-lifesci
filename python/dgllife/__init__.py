@@ -5,7 +5,13 @@
 #
 # DGL-based package for applications in life science.
 
-from . import data
-from . import model
-from . import utils
 from .libinfo import __version__
+from . import model
+
+try:
+    import rdkit
+except:
+    print('RDKit is not installed, which is required for utils related to Cheminformatics.')
+
+from . import data
+from . import utils
