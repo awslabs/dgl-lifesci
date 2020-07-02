@@ -13,4 +13,4 @@ try:
     from . import data
     from . import utils
 except:
-    print('RDKit is not installed, which is required for utils related to Cheminformatics.')
+    pass

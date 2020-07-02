@@ -15,8 +15,12 @@ import torch.nn.init as init
 
 from dgl import DGLGraph
 from functools import partial
-from rdkit import Chem
 from torch.distributions import Categorical
+
+try:
+    from rdkit import Chem
+except:
+    print('RDKit is not installed, which is required for utils related to Cheminformatics.')
 
 __all__ = ['DGMG']
 
