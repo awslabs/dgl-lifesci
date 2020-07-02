@@ -11,10 +11,14 @@ import torch
 import torch.nn.functional as F
 
 from dgl.data.utils import _get_dgl_url, download, get_download_dir, extract_archive
-from rdkit import Chem
 
 from ..model import GCNPredictor, GATPredictor, AttentiveFPPredictor, DGMG, DGLJTNNVAE, \
     WLNReactionCenter, WLNReactionRanking, WeavePredictor, GIN
+
+try:
+    from rdkit import Chem
+except:
+    pass
 
 __all__ = ['load_pretrained']
 
