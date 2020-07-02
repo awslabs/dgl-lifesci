@@ -12,11 +12,13 @@ import torch.nn.functional as F
 
 from dgl.data.utils import _get_dgl_url, download, get_download_dir, extract_archive
 
-from ..model import GCNPredictor, GATPredictor, AttentiveFPPredictor, DGMG, DGLJTNNVAE, \
+from ..model import GCNPredictor, GATPredictor, AttentiveFPPredictor, \
     WLNReactionCenter, WLNReactionRanking, WeavePredictor, GIN
 
 try:
+    # Things requiring RDKit
     from rdkit import Chem
+    from ..model import DGMG, DGLJTNNVAE
 except:
     pass
 
