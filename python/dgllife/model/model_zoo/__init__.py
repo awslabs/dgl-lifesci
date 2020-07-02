@@ -22,7 +22,7 @@ try:
     # DGMG requires RDKit support
     from .dgmg import *
     from .jtnn import *
-except:
+except ImportError:
     pass
 
 # Reaction prediction

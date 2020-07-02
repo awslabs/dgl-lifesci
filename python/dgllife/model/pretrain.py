@@ -19,7 +19,7 @@ try:
     # Things requiring RDKit
     from rdkit import Chem
     from ..model import DGMG, DGLJTNNVAE
-except:
+except ImportError:
     pass
 
 __all__ = ['load_pretrained']
