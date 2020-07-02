@@ -76,8 +76,8 @@ class FreeSolv(MoleculeCSVDataset):
     >>> dataset.iupac_names[i]
     >>> dataset.calc_energy[i]
 
-    We can also get all these information along with SMILES, DGLGraph and solubility
-    at once.
+    We can also get all these information along with SMILES, DGLGraph and hydration free
+    energy at once.
 
     >>> dataset.load_full = True
     >>> dataset[0]

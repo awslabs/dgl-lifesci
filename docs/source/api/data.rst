@@ -30,6 +30,13 @@ FreeSolv
     :members: __getitem__, __len__
     :show-inheritance:
 
+Lipophilicity
+`````````````
+
+.. autoclass:: dgllife.data.Lipophilicity
+    :members: __getitem__, __len__
+    :show-inheritance:
+
 Alchemy for Quantum Chemistry
 `````````````````````````````
 
