@@ -59,9 +59,28 @@ best hyperparameters found, otherwise it will be just the setting specified in `
 
 ### Inference
 
+To use the model trained above for prediction on new molecules
+
 ```bash
-python classification_train.py -c X -sc Y
+python regression_inference.py -f X
 ```
+
+where `X` specifies the path to a `.csv`/`.txt` file of SMILES strings
+
+Other optional arguments include:
+- **SMILES Column**: `-c column` [default=None]
+    - Specifies the column of SMILES strings in the input `.csv` file. Can be omitted if the input file is a 
+      `.txt` file or the `.csv` file only has one column of SMILES strings
+- **Evaluation Metric**: `-me metric` [default=r2]
+    - Specifies the evaluation metric. 
+    - By default we use Pearson correlation coefficient. Alternatively, we can use `mae` for mean absolute error, 
+    and `rmse` for root mean square error.
+- **Train Result Path**: `-tp path` [default=regression_results]
+    - Path to the training results saved, which will be used for loading the trained-model and related configurations
+- **Inference Result Path**: `-ip path` [default=regression_inference_results]
+    - Path to the inference results, which will be used to save:
+        - `prediction.csv`: A file of predicted properties associated with SMILES strings
+        - `eval_results.txt`: A file of evaluation metric
 
 ## (Multi-label) Binary Classification
 
@@ -103,6 +122,24 @@ best hyperparameters found, otherwise it will be just the setting specified in `
 
 ### Inference
 
+To use the model trained above for prediction on new molecules
+
 ```bash
-python classification_train.py -c X -sc Y
+python classification_inference.py -f X
 ```
+
+where `X` specifies the path to a `.csv`/`.txt` file of SMILES strings
+
+Other optional arguments include:
+- **SMILES Column**: `-c column` [default=None]
+    - Specifies the column of SMILES strings in the input `.csv` file. Can be omitted if the input file is a 
+      `.txt` file or the `.csv` file only has one column of SMILES strings
+- **Evaluation Metric**: `-me metric` [default=roc_auc_score]
+    - Specifies the evaluation metric. 
+    - By default we use ROC AUC score. 
+- **Train Result Path**: `-tp path` [default=classification_results]
+    - Path to the training results saved, which will be used for loading the trained-model and related configurations
+- **Inference Result Path**: `-ip path` [default=classification_inference_results]
+    - Path to the inference results, which will be used to save:
+        - `prediction.csv`: A file of predicted properties associated with SMILES strings
+        - `eval_results.txt`: A file of evaluation metric
