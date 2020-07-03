@@ -28,20 +28,23 @@ python regression.py -c X -sc Y
 where `X` specifies the path to the CSV file and `Y` specifies the header for the SMILES column in the CSV file.
 
 Other optional arguments include:
-- **Task**: `-t task1,task2,task3,...` can be used to specify the headers for task columns in the CSV file. If not specified, 
-we assume all columns are molecular properties except for the SMILES column.
-- **Split Ratio**: `-sr a,b,c` can be used to specify the proportion of the dataset to be used for training, validation and test. 
-By default we use `0.8,0.1,0.1`.
-- **Evaluation Metric**: `-me metric` can be used to specify the evaluation metric. 
-By default we use `r2` for Pearson correlation coefficient. Alternatively, you can use `mae` for mean absolute error, 
-and `rmse` for root mean square error.
-- **Num Epochs**: `-n number` can be used to specify the maximum number of epochs for training. By default we set this to 
-1000 as early stopping will be performed based on validation metric.
-- **Print Every**: `-pe number` decides that the training progress will be printed every `number` minibatches. By default 
-we set this to 20.
-- **Result Path**: `-p path` specifies the path to save training results. By default, we set this to `regression_results`.
-- **Number of Hyperparameter Search Trials**: `-ne num_trials` specifies the number of trials for hyperparameter search, 
-default to 64.
+- **Task**: `-t task1,task2,task3,...`
+    - Specifies the headers for task columns in the CSV file. If not specified, 
+    we assume all columns are molecular properties except for the SMILES column.
+- **Split Ratio**: `-sr a,b,c` [default=0.8,0.1,0.1]
+    - Specifies the proportion of the dataset to be used for training, validation and test. 
+- **Evaluation Metric**: `-me metric` [default=r2]
+    - Specifies the evaluation metric. 
+    - By default we use Pearson correlation coefficient. Alternatively, we can use `mae` for mean absolute error, 
+    and `rmse` for root mean square error.
+- **Num Epochs**: `-n number` [default=1000]
+    - Specifies the maximum number of epochs for training. Early stopping will be performed based on validation metric.
+- **Print Every**: `-pe number` [default=20]
+    - The training progress will be printed every `number` minibatches.
+- **Result Path**: `-p path` [default=regression_results]
+    - Specifies the path to save training results.
+- **Number of Hyperparameter Search Trials**: `-ne num_trials` [default=64]
+    - Specifies the number of trials for hyperparameter search, 
 
 Once the training is completed, the best hyperparameter configuration can be found in `regression_results/best_config.txt`, 
 the model performance numbers and saved model can be found under `regression_results/best`.
