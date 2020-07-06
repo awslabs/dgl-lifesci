@@ -5,11 +5,12 @@
 #
 # Utils for analyzing a collection of molecules
 
+from collections import defaultdict
+from multiprocessing import Pool
+
 import itertools
 import numpy as np
 
-from collections import defaultdict
-from multiprocessing import Pool
 from rdkit import Chem
 
 __all__ = ['analyze_mols']
