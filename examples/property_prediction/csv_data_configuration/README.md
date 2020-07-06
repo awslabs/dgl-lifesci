@@ -5,8 +5,35 @@ prediction on a new CSV dataset.
 
 ## Data Preparation
 
-We assume that the molecular properties are recorded in a CSV file, where one column holds the SMILES strings 
+For training, we assume that the molecular properties are recorded in a CSV file, where one column holds the SMILES strings 
 of molecules and some other column(s) hold one or multiple molecular properties.
+
+For inference, there are two options:
+1) A `.csv` file, where one column holds the SMILES strings of molecules
+2) A `.txt` file, where each line corresponds to the SMILES string of a molecule
+
+## Data Analysis (Optional)
+
+We can do a quick analysis to molecules in a CSV file with 
+
+```bash
+python analysis.py -c X -sc Y
+```
+
+where `X` specifies the path to the CSV file and `Y` specifies the header for the SMILES column in the CSV file.
+
+Other optional arguments include:
+- **Number of Processes**: `-np processes` [default=1]
+    - Specifies the number of processes to use for computing
+- **Result Path**: `-p path` [default=analysis_results]
+    - Specifies the path to save the analysis results
+    
+The analysis results will be saved to the following files in the result path above:
+- `valid_canonical_smiles.txt`: Canonical SMILES for valid molecules
+- `summary.txt`: A file of the analysis summarized, including
+    - Number/percentage of valid molecules
+    - Average number of atoms/bonds/rings per molecule
+    - Number of molecules for a particular atom/bond descriptor value to appear
 
 ## Modeling
 
