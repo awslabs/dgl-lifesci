@@ -56,6 +56,12 @@ Adapting to New Datasets with CSV
 .. autoclass:: dgllife.data.MoleculeCSVDataset
     :members: __getitem__, __len__
 
+Adapting to New Datasets for Inference
+``````````````````````````````````````
+
+.. autoclass:: dgllife.data.UnlabeledSMILES
+    :members: __getitem__, __len__
+
 Reaction Prediction
 -------------------
 

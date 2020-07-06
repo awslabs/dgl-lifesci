@@ -3,6 +3,8 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+import torch
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
@@ -22,3 +24,25 @@ if __name__ == '__main__':
                         help='Task names for saving model predictions in the CSV file to output, '
                              'which should be the same as the ones used for training. If not '
                              'specified, we will simply use task1, task2, ...')
+    args = parser.parse_args().__dict__
+
+    if torch.cuda.is_available():
+        args['device'] = torch.device('cuda:0')
+    else:
+        args['device'] = torch.device('cpu')
+
+    if args['file_path'].endswith('.csv'):
+        import pandas
+        df = pandas.read_csv(args['file_path'])
+        if args['smiles_column'] is not None:
+            smiles = df[args['smiles_column']].tolist()
+        else:
+            assert len(df.columns) == 1, 'The CSV file has more than 1 columns and ' \
+                                         '-sc (smiles-column) needs to be specified.'
+            smiles = df[df.columns[0]].tolist()
+    elif args['file_path'].endswith('.txt'):
+        from dgllife.utils import load_smiles_from_txt
+        smiles = load_smiles_from_txt(args['file_path'])
+    else:
+        raise ValueError('Expect the input data file to be a .csv or a .txt file, '
+                         'got {}'.format(args['file_path']))
