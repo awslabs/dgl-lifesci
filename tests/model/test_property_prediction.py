@@ -162,8 +162,8 @@ def test_gcn_predictor():
                                  residual=[True],
                                  batchnorm=[True],
                                  dropout=[0.1],
-                                 classifier_hidden_feats=1,
-                                 classifier_dropout=0.1,
+                                 predictor_hidden_feats=1,
+                                 predictor_dropout=0.1,
                                  n_tasks=2).to(device)
     gcn_predictor.eval()
     assert gcn_predictor(g, node_feats).shape == torch.Size([1, 2])
@@ -223,7 +223,7 @@ def test_mgcn_predictor():
     # Test configured setting
     mgcn_predictor = MGCNPredictor(feats=2,
                                    n_layers=2,
-                                   classifier_hidden_feats=3,
+                                   predictor_hidden_feats=3,
                                    n_tasks=3,
                                    num_node_types=5,
                                    num_edge_types=150,
@@ -285,7 +285,7 @@ def test_schnet_predictor():
     # Test configured setting
     schnet_predictor = SchNetPredictor(node_feats=2,
                                        hidden_feats=[2, 2],
-                                       classifier_hidden_feats=3,
+                                       predictor_hidden_feats=3,
                                        n_tasks=3,
                                        num_node_types=5,
                                        cutoff=0.3).to(device)

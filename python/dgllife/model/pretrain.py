@@ -124,7 +124,7 @@ def load_pretrained(model_name, log=True):
     if model_name == 'GCN_Tox21':
         model = GCNPredictor(in_feats=74,
                              hidden_feats=[64, 64],
-                             classifier_hidden_feats=64,
+                             predictor_hidden_feats=64,
                              n_tasks=12)
 
     elif model_name == 'GAT_Tox21':
@@ -133,7 +133,7 @@ def load_pretrained(model_name, log=True):
                              num_heads=[4, 4],
                              agg_modes=['flatten', 'mean'],
                              activations=[F.elu, None],
-                             classifier_hidden_feats=64,
+                             predictor_hidden_feats=64,
                              n_tasks=12)
 
     elif model_name == 'Weave_Tox21':

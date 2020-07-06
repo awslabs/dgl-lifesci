@@ -148,8 +148,8 @@ def load_model(args):
                              residual=[args['residual']] * args['num_gnn_layers'],
                              batchnorm=[args['batchnorm']] * args['num_gnn_layers'],
                              dropout=[args['dropout']] * args['num_gnn_layers'],
-                             classifier_hidden_feats=args['classifier_hidden_feats'],
-                             classifier_dropout=args['dropout'],
+                             predictor_hidden_feats=args['predictor_hidden_feats'],
+                             predictor_dropout=args['dropout'],
                              n_tasks=args['n_tasks'])
     else:
         return ValueError("Expect model to be 'GCN', got {}".format(args['model']))

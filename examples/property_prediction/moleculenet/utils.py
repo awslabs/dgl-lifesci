@@ -105,7 +105,7 @@ def load_model(args):
         from dgllife.model import GCNPredictor
         model = GCNPredictor(in_feats=args['node_featurizer'].feat_size(),
                              hidden_feats=args['gcn_hidden_feats'],
-                             classifier_hidden_feats=args['classifier_hidden_feats'],
+                             predictor_hidden_feats=args['predictor_hidden_feats'],
                              n_tasks=args['n_tasks'])
 
     if args['model'] == 'GAT':
@@ -113,7 +113,7 @@ def load_model(args):
         model = GATPredictor(in_feats=args['node_featurizer'].feat_size(),
                              hidden_feats=args['gat_hidden_feats'],
                              num_heads=args['num_heads'],
-                             classifier_hidden_feats=args['classifier_hidden_feats'],
+                             predictor_hidden_feats=args['predictor_hidden_feats'],
                              n_tasks=args['n_tasks'])
 
     if args['model'] == 'Weave':

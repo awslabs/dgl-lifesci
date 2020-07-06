@@ -30,7 +30,8 @@ class SchNetPredictor(nn.Module):
         (gnn) layer. ``len(hidden_feats)`` equals the number of interaction (gnn) layers.
         Default to ``[64, 64, 64]``.
     classifier_hidden_feats : int
-        Size for hidden representations in the classifier. Default to 64.
+        (Deprecated, see ``predictor_hidden_feats``) Size for hidden representations in the
+        classifier. Default to 64.
     n_tasks : int
         Number of tasks, which is also the output size. Default to 1.
     num_node_types : int
@@ -39,13 +40,20 @@ class SchNetPredictor(nn.Module):
         Largest center in RBF expansion. Default to 30.
     gap : float
         Difference between two adjacent centers in RBF expansion. Default to 0.1.
+    predictor_hidden_feats : int
+        Size for hidden representations in the output MLP predictor. Default to 64.
     """
     def __init__(self, node_feats=64, hidden_feats=None, classifier_hidden_feats=64, n_tasks=1,
-                 num_node_types=100, cutoff=30., gap=0.1):
+                 num_node_types=100, cutoff=30., gap=0.1, predictor_hidden_feats=64):
         super(SchNetPredictor, self).__init__()
 
+        if predictor_hidden_feats == 64 and classifier_hidden_feats != 64:
+            print('classifier_hidden_feats is deprecated and will be removed in the future, '
+                  'use predictor_hidden_feats instead')
+            predictor_hidden_feats = classifier_hidden_feats
+
         self.gnn = SchNetGNN(node_feats, hidden_feats, num_node_types, cutoff, gap)
-        self.readout = MLPNodeReadout(node_feats, classifier_hidden_feats, n_tasks,
+        self.readout = MLPNodeReadout(node_feats, predictor_hidden_feats, n_tasks,
                                       activation=ShiftedSoftplus())
 
     def forward(self, g, node_types, edge_dists):
