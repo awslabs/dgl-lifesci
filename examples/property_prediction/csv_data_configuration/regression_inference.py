@@ -42,7 +42,7 @@ def main(args):
     for task_id, task_name in enumerate(args['task_names']):
         output_data[task_name] = predictions[:, task_id]
     df = pd.DataFrame(output_data)
-    df.to_csv(args['inference_result_path'] + '/prediction.csv')
+    df.to_csv(args['inference_result_path'] + '/prediction.csv', index=False)
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
