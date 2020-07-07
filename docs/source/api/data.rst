@@ -37,6 +37,13 @@ Lipophilicity
     :members: __getitem__, __len__
     :show-inheritance:
 
+Experimental solubility determined at AstraZeneca, extracted from ChEMBL
+````````````````````````````````````````````````````````````````````````
+
+.. autoclass:: dgllife.data.AstraZenecaChEMBLSolubility
+    :members: __getitem__, __len__
+    :show-inheritance:
+
 Alchemy for Quantum Chemistry
 `````````````````````````````
 

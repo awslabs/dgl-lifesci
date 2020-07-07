@@ -63,6 +63,14 @@ def test_lipophilicity():
     dataset.load_full = True
     assert len(dataset[0]) == 4
 
+def test_astrazeneca_chembl_solubility():
+    print('Test AstraZenecaChEMBLSolubility')
+    dataset = AstraZenecaChEMBLSolubility()
+    remove_file('AstraZeneca_chembl_solubility_graph.bin')
+    assert len(dataset[0]) == 3
+    dataset.load_full = True
+    assert len(dataset[0]) == 5
+
 def test_wln_reaction():
     print('Test datasets for reaction prediction with WLN')
 
@@ -138,4 +146,5 @@ if __name__ == '__main__':
     test_esol()
     test_freesolv()
     test_lipophilicity()
+    test_astrazeneca_chembl_solubility()
     test_wln_reaction()
