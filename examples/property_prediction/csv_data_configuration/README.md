@@ -43,7 +43,7 @@ Currently we use a default setting as follows:
 [CanonicalAtomFeaturizer](https://lifesci.dgl.ai/generated/dgllife.utils.CanonicalAtomFeaturizer.html#dgllife.utils.CanonicalAtomFeaturizer).
 - The dataset is split using scaffold split
 - Perform early stopping and save the model that achieves the best validation performance
-- Automatically perform hyperparameter search using Bayesian optimization
+- (Optional) Automatically perform hyperparameter search using Bayesian optimization
 
 ## Regression
 

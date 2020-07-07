@@ -25,7 +25,7 @@ def get_configure(model):
     dict
         Returns the manually specified configuration
     """
-    with open('model_configures/{}.json'.format(model), 'w') as f:
+    with open('model_configures/{}.json'.format(model), 'r') as f:
         config = json.load(f)
     return config
 
