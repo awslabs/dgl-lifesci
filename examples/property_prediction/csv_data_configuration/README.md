@@ -81,6 +81,8 @@ Other optional arguments include:
 
 Once the training is completed, we can find the following files in the `Result Path` mentioned above:
 - The trained model `model.pth`. If hyperparameter search is performed, this will be the best model found.
+- The evaluation result `eval.txt`. If hyperparameter search is performed, this will be the result for the best 
+hyperparameters found.
 - The experiment configuration `configure.json`. If hyperparameter search is performed, this will be the 
 best hyperparameters found, otherwise it will be just the setting specified in `model_configuration/{model_name}.json`.
 
@@ -142,6 +144,8 @@ Other optional arguments include:
 
 Once the training is completed, we can find the following files in the `Result Path` mentioned above:
 - The trained model `model.pth`. If hyperparameter search is performed, this will be the best model found.
+- The evaluation result `eval.txt`. If hyperparameter search is performed, this will be the result for the best 
+hyperparameters found.
 - The experiment configuration `configure.json`. If hyperparameter search is performed, this will be the 
 best hyperparameters found, otherwise it will be just the setting specified in `model_configuration/{model_name}.json`.
 

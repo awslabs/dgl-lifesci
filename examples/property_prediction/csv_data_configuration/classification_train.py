@@ -6,7 +6,6 @@
 import json
 import pandas as pd
 import numpy as np
-import shutil
 import torch
 import torch.nn as nn
 
@@ -14,6 +13,7 @@ from copy import deepcopy
 from dgllife.data import MoleculeCSVDataset
 from dgllife.utils import Meter, smiles_to_bigraph, CanonicalAtomFeaturizer, EarlyStopping
 from hyperopt import fmin, tpe
+from shutil import copyfile
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
@@ -53,20 +53,29 @@ def run_an_eval_epoch(args, model, data_loader):
     return np.mean(eval_meter.compute_metric(args['metric']))
 
 def main(args, exp_config, train_set, val_set, test_set):
+    # Record settings
+    exp_config.update({
+        'model': args['model'],
+        'in_feats': args['node_featurizer'].feat_size(),
+        'n_tasks': args['n_tasks']
+    })
+
     # Set up directory for saving results
     args = init_trial_path(args)
 
-    train_loader = DataLoader(dataset=train_set, batch_size=args['batch_size'],
+    train_loader = DataLoader(dataset=train_set, batch_size=exp_config['batch_size'],
                               shuffle=True, collate_fn=collate_molgraphs)
-    val_loader = DataLoader(dataset=val_set, batch_size=args['batch_size'],
+    val_loader = DataLoader(dataset=val_set, batch_size=exp_config['batch_size'],
                             collate_fn=collate_molgraphs)
-    test_loader = DataLoader(dataset=test_set, batch_size=args['batch_size'],
+    test_loader = DataLoader(dataset=test_set, batch_size=exp_config['batch_size'],
                              collate_fn=collate_molgraphs)
-    model = load_model(args).to(args['device'])
+    model = load_model(exp_config).to(args['device'])
 
     loss_criterion = nn.BCEWithLogitsLoss(reduction='none')
-    optimizer = Adam(model.parameters(), lr=args['lr'], weight_decay=args['weight_decay'])
-    stopper = EarlyStopping(patience=args['patience'], filename=args['trial_path'] + '/model.pth')
+    optimizer = Adam(model.parameters(), lr=exp_config['lr'],
+                     weight_decay=exp_config['weight_decay'])
+    stopper = EarlyStopping(patience=exp_config['patience'],
+                            filename=args['trial_path'] + '/model.pth')
 
     for epoch in range(args['num_epochs']):
         # Train
@@ -89,10 +98,10 @@ def main(args, exp_config, train_set, val_set, test_set):
         f.write('Best val {}: {}\n'.format(args['metric'], stopper.best_score))
         f.write('Test {}: {}\n'.format(args['metric'], test_score))
 
-    exp_config['model'] = args['model']
-    with open(args['trial_path'] + '/eval.txt')
+    with open(args['trial_path'] + '/configure.json', 'w') as f:
+        json.dump(exp_config, f, indent=2)
 
-    return stopper.best_score
+    return args['trial_path'], stopper.best_score
 
 def bayesian_optimization(args, train_set, val_set, test_set):
     # Run grid search
@@ -102,7 +111,7 @@ def bayesian_optimization(args, train_set, val_set, test_set):
 
     def objective(hyperparams):
         configure = deepcopy(args)
-        configure, val_metric = main(configure, hyperparams, train_set, val_set, test_set)
+        trial_path, val_metric = main(configure, hyperparams, train_set, val_set, test_set)
 
         if args['metric'] in ['roc_auc_score']:
             # Maximize ROCAUC is equivalent to minimize the negative of it
@@ -110,17 +119,15 @@ def bayesian_optimization(args, train_set, val_set, test_set):
         else:
             val_metric_to_minimize = val_metric
 
-        results.append((configure, hyperparams, val_metric_to_minimize))
+        results.append((trial_path, val_metric_to_minimize))
 
         return val_metric_to_minimize
 
     fmin(objective, candidate_hypers, algo=tpe.suggest, max_evals=args['num_evals'])
-    results.sort(key=lambda tup: tup[2])
-    best_config, best_hyper, best_val_metric = results[0]
-    shutil.move(best_config['trial_path'], args['result_path'] + '/best')
+    results.sort(key=lambda tup: tup[1])
+    best_trial_path, best_val_metric = results[0]
 
-    with open(args['result_path'] + '/best_config.txt', 'w') as f:
-        json.dump(best_hyper, f)
+    return best_trial_path
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -180,8 +187,14 @@ if __name__ == '__main__':
                                       'be greater than 0, got {:d}'.format(args['num_evals'])
         print('Start hyperparameter search with Bayesian '
               'optimization for {:d} trials'.format(args['num_evals']))
-        bayesian_optimization(args, train_set, val_set, test_set)
+        trial_path = bayesian_optimization(args, train_set, val_set, test_set)
     else:
         print('Use the manually specified hyperparameters')
         exp_config = get_configure(args['model'])
         main(args, exp_config, train_set, val_set, test_set)
+        trial_path = args['result_path'] + '/1'
+
+    # Copy final
+    copyfile(trial_path + '/model.pth', args['result_path'] + '/model.pth')
+    copyfile(trial_path + '/configure.json', args['result_path'] + '/configure.json')
+    copyfile(trial_path + '/eval.txt', args['result_path'] + '/eval.txt')

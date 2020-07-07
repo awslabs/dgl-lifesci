@@ -7,11 +7,11 @@ import json
 import os
 import pandas as pd
 import torch
-from tqdm import tqdm
 
 from dgllife.data import UnlabeledSMILES
 from dgllife.utils import CanonicalAtomFeaturizer
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from utils import mkdir_p, collate_molgraphs_unlabeled, load_model, predict
 
@@ -39,6 +39,8 @@ def main(args):
     output_data = {'canonical_smiles': smiles_list}
     if args['task_names'] is None:
         args['task_names'] = ['task_{:d}'.format(t) for t in range(1, args['n_tasks'] + 1)]
+    else:
+        args['task_names'] = args['task_names'].split(',')
     for task_id, task_name in enumerate(args['task_names']):
         output_data[task_name] = predictions[:, task_id]
     df = pd.DataFrame(output_data)
@@ -69,9 +71,6 @@ if __name__ == '__main__':
         args['device'] = torch.device('cuda:0')
     else:
         args['device'] = torch.device('cpu')
-
-    if args['task_names'] is not None:
-        args['task_names'] = args['task_names'].split(',')
 
     if args['file_path'].endswith('.csv'):
         import pandas
