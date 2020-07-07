@@ -135,19 +135,20 @@ def collate_molgraphs(data):
 
     return smiles, bg, labels, masks
 
-def load_model(args):
-    if args['model'] == 'GCN':
+def load_model(exp_configure):
+    if exp_configure['model'] == 'GCN':
         from dgllife.model import GCNPredictor
-        model = GCNPredictor(in_feats=args['node_featurizer'].feat_size(),
-                             hidden_feats=[args['gnn_hidden_feats']] * args['num_gnn_layers'],
-                             activation=[F.relu] * args['num_gnn_layers'],
-                             residual=[args['residual']] * args['num_gnn_layers'],
-                             batchnorm=[args['batchnorm']] * args['num_gnn_layers'],
-                             dropout=[args['dropout']] * args['num_gnn_layers'],
-                             predictor_hidden_feats=args['predictor_hidden_feats'],
-                             predictor_dropout=args['dropout'],
-                             n_tasks=args['n_tasks'])
+        model = GCNPredictor(
+            in_feats=exp_configure['in_feats'],
+            hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
+            activation=[F.relu] * exp_configure['num_gnn_layers'],
+            residual=[exp_configure['residual']] * exp_configure['num_gnn_layers'],
+            batchnorm=[exp_configure['batchnorm']] * exp_configure['num_gnn_layers'],
+            dropout=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
+            predictor_hidden_feats=exp_configure['predictor_hidden_feats'],
+            predictor_dropout=exp_configure['dropout'],
+            n_tasks=exp_configure['n_tasks'])
     else:
-        return ValueError("Expect model to be 'GCN', got {}".format(args['model']))
+        return ValueError("Expect model to be 'GCN', got {}".format(exp_configure['model']))
 
     return model

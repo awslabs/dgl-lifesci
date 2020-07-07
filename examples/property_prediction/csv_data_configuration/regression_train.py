@@ -56,17 +56,24 @@ def run_an_eval_epoch(args, model, data_loader):
         total_score = np.mean(eval_meter.compute_metric(args['metric']))
     return total_score
 
-def main(args, train_set, val_set, test_set):
+def main(args, exp_config, train_set, val_set, test_set):
+    # Record settings
+    exp_config.update({
+        'model': args['model'],
+        'in_feats': args['node_featurizer'].feat_size(),
+        'n_tasks': args['n_tasks']
+    })
+
     # Set up directory for saving results
     args = init_trial_path(args)
 
-    train_loader = DataLoader(dataset=train_set, batch_size=args['batch_size'],
+    train_loader = DataLoader(dataset=train_set, batch_size=exp_config['batch_size'],
                               shuffle=True, collate_fn=collate_molgraphs)
-    val_loader = DataLoader(dataset=val_set, batch_size=args['batch_size'],
+    val_loader = DataLoader(dataset=val_set, batch_size=exp_config['batch_size'],
                             collate_fn=collate_molgraphs)
-    test_loader = DataLoader(dataset=test_set, batch_size=args['batch_size'],
+    test_loader = DataLoader(dataset=test_set, batch_size=exp_config['batch_size'],
                              collate_fn=collate_molgraphs)
-    model = load_model(args).to(args['device'])
+    model = load_model(exp_config).to(args['device'])
 
     loss_criterion = nn.SmoothL1Loss(reduction='none')
     optimizer = Adam(model.parameters(), lr=args['lr'], weight_decay=args['weight_decay'])
@@ -93,7 +100,6 @@ def main(args, train_set, val_set, test_set):
         f.write('Best val {}: {}\n'.format(args['metric'], stopper.best_score))
         f.write('Test {}: {}\n'.format(args['metric'], test_score))
 
-    exp_config['model'] = args['model']
     with open(args['trial_path'] + '/configure.json', 'w') as f:
         json.dump(exp_config, f, indent=2)
 
@@ -107,8 +113,7 @@ def bayesian_optimization(args, train_set, val_set, test_set):
 
     def objective(hyperparams):
         configure = deepcopy(args)
-        configure.update(hyperparams)
-        trial_path, val_metric = main(configure, train_set, val_set, test_set)
+        trial_path, val_metric = main(configure, hyperparams, train_set, val_set, test_set)
 
         if args['metric'] in ['r2']:
             # Maximize R2 is equivalent to minimize the negative of it
@@ -188,8 +193,7 @@ if __name__ == '__main__':
     else:
         print('Use the manually specified hyperparameters')
         exp_config = get_configure(args['model'])
-        args.update(exp_config)
-        main(args, train_set, val_set, test_set)
+        main(args, exp_config, train_set, val_set, test_set)
         trial_path = args['result_path'] + '/1'
 
     # Copy final
