@@ -16,7 +16,7 @@ from torch.utils.data import DataLoader
 from utils import mkdir_p, collate_molgraphs_unlabeled, load_model, predict
 
 def main(args):
-    dataset = UnlabeledSMILES(args['smiles'], args['node_featurizer'])
+    dataset = UnlabeledSMILES(args['smiles'], node_featurizer=args['node_featurizer'])
     dataloader = DataLoader(dataset, batch_size=args['batch_size'],
                             collate_fn=collate_molgraphs_unlabeled)
     model = load_model(args).to(args['device'])
