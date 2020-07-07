@@ -137,6 +137,8 @@ if __name__ == '__main__':
                         help='Path to a csv file for loading a dataset')
     parser.add_argument('-sc', '--smiles-column', type=str, required=True,
                         help='Header for the SMILES column in the CSV file')
+    parser.add_argument('-lv', '--log-values', action='store_true', default=False,
+                        help='Whether to take logarithm of the labels for modeling')
     parser.add_argument('-t', '--task-names', default=None, type=str,
                         help='Header for the tasks to model. If None, we will model '
                              'all the columns except for the smiles_column in the CSV file. '
@@ -179,6 +181,9 @@ if __name__ == '__main__':
                                  smiles_column=args['smiles_column'],
                                  cache_file_path=args['result_path'] + '/graph.bin',
                                  task_names=args['task_names'])
+    # Whether to take the logarithm of labels for narrowing the range of values
+    if args['log_values']:
+        dataset.labels = dataset.labels.log()
     args['n_tasks'] = dataset.n_tasks
     train_set, val_set, test_set = split_dataset(args, dataset)
 
