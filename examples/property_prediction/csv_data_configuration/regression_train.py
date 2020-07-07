@@ -76,8 +76,10 @@ def main(args, exp_config, train_set, val_set, test_set):
     model = load_model(exp_config).to(args['device'])
 
     loss_criterion = nn.SmoothL1Loss(reduction='none')
-    optimizer = Adam(model.parameters(), lr=args['lr'], weight_decay=args['weight_decay'])
-    stopper = EarlyStopping(patience=args['patience'], filename=args['trial_path'] + '/model.pth')
+    optimizer = Adam(model.parameters(), lr=exp_config['lr'],
+                     weight_decay=exp_config['weight_decay'])
+    stopper = EarlyStopping(patience=exp_config['patience'],
+                            filename=args['trial_path'] + '/model.pth')
 
     for epoch in range(args['num_epochs']):
         # Train
