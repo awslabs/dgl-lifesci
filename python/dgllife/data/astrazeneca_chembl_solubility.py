@@ -53,6 +53,39 @@ class AstraZenecaChEMBLSolubility(MoleculeCSVDataset):
 
     Examples
     --------
+
+    >>> from dgllife.data import AstraZenecaChEMBLSolubility
+    >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+
+    >>> dataset = AstraZenecaChEMBLSolubility(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> # Get size of the dataset
+    >>> len(dataset)
+    1763
+    >>> # Get the 0th datapoint, consisting of SMILES, DGLGraph and solubility
+    >>> dataset[0]
+    ('Cc1nc(C)c(-c2ccc([C@H]3CC[C@H](Cc4nnn[nH]4)CC3)cc2)nc1C(N)=O',
+     DGLGraph(num_nodes=29, num_edges=64,
+              ndata_schemes={'h': Scheme(shape=(74,), dtype=torch.float32)}
+              edata_schemes={}),
+     tensor([12.5032]))
+
+    We also provide information for the ChEMBL id and molecular weight of the compound.
+
+    >>> dataset.chembl_ids[i]
+    >>> dataset.mol_weight[i]
+
+    We can also get the ChEMBL id and molecular weight along with SMILES, DGLGraph and
+    solubility at once.
+
+    >>> dataset.load_full = True
+    >>> dataset[0]
+    ('Cc1nc(C)c(-c2ccc([C@H]3CC[C@H](Cc4nnn[nH]4)CC3)cc2)nc1C(N)=O',
+     DGLGraph(num_nodes=29, num_edges=64,
+              ndata_schemes={'h': Scheme(shape=(74,), dtype=torch.float32)}
+              edata_schemes={}),
+     tensor([12.5032]),
+     'CHEMBL2178940',
+     391.48)
     """
     def __init__(self,
                  smiles_to_graph=smiles_to_bigraph,
