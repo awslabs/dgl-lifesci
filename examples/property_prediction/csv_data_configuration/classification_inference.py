@@ -77,7 +77,7 @@ if __name__ == '__main__':
     else:
         args['device'] = torch.device('cpu')
 
-    if args['file_path'].endswith('.csv'):
+    if args['file_path'].endswith('.csv') or args['file_path'].endswith('.csv.gz'):
         import pandas
         df = pandas.read_csv(args['file_path'])
         if args['smiles_column'] is not None:

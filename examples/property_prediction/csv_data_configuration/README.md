@@ -9,7 +9,7 @@ For training, we assume that the molecular properties are recorded in a CSV file
 of molecules and some other column(s) hold one or multiple molecular properties.
 
 For inference, there are two options:
-1) A `.csv` file, where one column holds the SMILES strings of molecules
+1) A `.csv`/`.csv.gz` file, where one column holds the SMILES strings of molecules
 2) A `.txt` file, where each line corresponds to the SMILES string of a molecule
 
 ## Data Analysis (Optional)
