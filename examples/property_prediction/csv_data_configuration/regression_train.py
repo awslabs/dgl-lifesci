@@ -95,7 +95,7 @@ def main(args, train_set, val_set, test_set):
 
     exp_config['model'] = args['model']
     with open(args['trial_path'] + '/configure.json', 'w') as f:
-        json.dump(exp_config, f)
+        json.dump(exp_config, f, indent=2)
 
     return args['trial_path'], stopper.best_score
 
