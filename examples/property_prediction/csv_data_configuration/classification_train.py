@@ -56,7 +56,7 @@ def run_an_eval_epoch(args, model, data_loader):
             eval_meter.update(logits, labels, masks)
     return np.mean(eval_meter.compute_metric(args['metric']))
 
-def main(args, train_set, val_set, test_set):
+def main(args, exp_config, train_set, val_set, test_set):
     # Set up directory for saving results
     args = init_trial_path(args)
 
@@ -93,7 +93,10 @@ def main(args, train_set, val_set, test_set):
         f.write('Best val {}: {}\n'.format(args['metric'], stopper.best_score))
         f.write('Test {}: {}\n'.format(args['metric'], test_score))
 
-    return args, stopper.best_score
+    exp_config['model'] = args['model']
+    with open(args['trial_path'] + '/eval.txt')
+
+    return stopper.best_score
 
 def bayesian_optimization(args, train_set, val_set, test_set):
     # Run grid search
@@ -103,8 +106,7 @@ def bayesian_optimization(args, train_set, val_set, test_set):
 
     def objective(hyperparams):
         configure = deepcopy(args)
-        configure.update(hyperparams)
-        configure, val_metric = main(configure, train_set, val_set, test_set)
+        configure, val_metric = main(configure, hyperparams, train_set, val_set, test_set)
 
         if args['metric'] in ['roc_auc_score']:
             # Maximize ROCAUC is equivalent to minimize the negative of it
@@ -152,8 +154,8 @@ if __name__ == '__main__':
                         help='Print the training progress every X mini-batches')
     parser.add_argument('-p', '--result-path', type=str, default='classification_results',
                         help='Path to save training results (default: classification_results)')
-    parser.add_argument('-ne', '--num-evals', type=int, default=64,
-                        help='Number of trials for hyperparameter search (default: 64)')
+    parser.add_argument('-ne', '--num-evals', type=int, default=None,
+                        help='Number of trials for hyperparameter search (default: None)')
     args = parser.parse_args().__dict__
 
     if torch.cuda.is_available():
@@ -177,11 +179,13 @@ if __name__ == '__main__':
     args['n_tasks'] = dataset.n_tasks
     train_set, val_set, test_set = split_dataset(args, dataset)
 
-    exp_config = get_configure(args)
-    if exp_config is None:
-        print('Start hyperparameter search with Bayesian optimization')
+    if args['num_evals'] is not None:
+        assert args['num_evals'] > 0, 'Expect the number of hyperparameter search trials to ' \
+                                      'be greater than 0, got {:d}'.format(args['num_evals'])
+        print('Start hyperparameter search with Bayesian '
+              'optimization for {:d} trials'.format(args['num_evals']))
         bayesian_optimization(args, train_set, val_set, test_set)
     else:
-        print('Use the best hyperparameters found before')
-        args.update(exp_config)
-        main(args, train_set, val_set, test_set)
+        print('Use the manually specified hyperparameters')
+        exp_config = get_configure(args['model'])
+        main(args, exp_config, train_set, val_set, test_set)

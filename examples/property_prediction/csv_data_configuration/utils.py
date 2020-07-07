@@ -12,26 +12,22 @@ import torch.nn.functional as F
 
 from dgllife.utils import ScaffoldSplitter
 
-def get_configure(args):
-    """Query for the best configuration and return if found
+def get_configure(model):
+    """Query for the manually specified configuration
 
     Parameters
     ----------
-    args : dict
-        Initial settings
+    model : str
+        Model type
 
     Returns
     -------
-    dict or None
-        If best configuration has been found before, return
-        it, otherwise return None.
+    dict
+        Returns the manually specified configuration
     """
-    config_file = args['result_path'] + '/best_config.txt'
-    if os.path.isfile(config_file):
-        with open(config_file) as f:
-            config = json.load(f)
-        return config
-    return None
+    with open('model_configures/{}.json'.format(model), 'w') as f:
+        config = json.load(f)
+    return config
 
 def mkdir_p(path):
     """Create a folder for the given path.

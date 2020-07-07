@@ -9,7 +9,7 @@ from dgllife.data import UnlabeledSMILES
 from dgllife.utils import CanonicalAtomFeaturizer
 
 def main(args):
-    return NotImplementedError
+    dataset = UnlabeledSMILES(args['smiles'], node_featurizer=CanonicalAtomFeaturizer())
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -56,5 +56,6 @@ if __name__ == '__main__':
         raise ValueError('Expect the input data file to be a .csv or a .txt file, '
                          'got {}'.format(args['file_path']))
     args['smiles'] = smiles
+    args['node_featurizer'] = CanonicalAtomFeaturizer()
 
     main(args)
