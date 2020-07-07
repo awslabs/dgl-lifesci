@@ -91,6 +91,7 @@ def main(args, exp_config, train_set, val_set, test_set):
         if early_stop:
             break
 
+    stopper.load_checkpoint(model)
     test_score = run_an_eval_epoch(args, model, test_loader)
     print('test {} {:.4f}'.format(args['metric'], test_score))
 
