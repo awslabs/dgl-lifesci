@@ -31,8 +31,8 @@ def main(args):
         for batch_id, batch_data in enumerate(tqdm(dataloader, desc="Iteration")):
             batch_smiles, bg = batch_data
             smiles_list.extend(batch_smiles)
-            batch_pred = predict(args, model, bg).detach().cpu()
-            predictions.append(batch_pred)
+            batch_pred = predict(args, model, bg)
+            predictions.append(batch_pred.detach().cpu())
 
     predictions = torch.cat(predictions, dim=0)
 

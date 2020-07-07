@@ -33,8 +33,8 @@ def main(args):
             smiles_list.extend(batch_smiles)
             batch_pred = predict(args, model, bg)
             if not args['soft_classification']:
-                batch_pred = (batch_pred >= 0.5).float().detach().cpu()
-            predictions.append(batch_pred)
+                batch_pred = (batch_pred >= 0.5).float()
+            predictions.append(batch_pred.detach().cpu())
 
     predictions = torch.cat(predictions, dim=0)
 
