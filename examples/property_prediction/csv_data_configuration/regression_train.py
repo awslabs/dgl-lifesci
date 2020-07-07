@@ -197,3 +197,4 @@ if __name__ == '__main__':
     # Copy final
     copyfile(trial_path + '/model.pth', args['result_path'] + '/model.pth')
     copyfile(trial_path + '/configure.json', args['result_path'] + '/configure.json')
+    copyfile(trial_path + '/eval.txt', args['result_path'] + '/eval.txt')
