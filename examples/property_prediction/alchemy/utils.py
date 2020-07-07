@@ -56,14 +56,14 @@ def load_model(args):
         from dgllife.model import SchNetPredictor
         model = SchNetPredictor(node_feats=args['node_feats'],
                                 hidden_feats=args['hidden_feats'],
-                                classifier_hidden_feats=args['classifier_hidden_feats'],
+                                predictor_hidden_feats=args['predictor_hidden_feats'],
                                 n_tasks=args['n_tasks'])
 
     if args['model'] == 'MGCN':
         from dgllife.model import MGCNPredictor
         model = MGCNPredictor(feats=args['feats'],
                               n_layers=args['n_layers'],
-                              classifier_hidden_feats=args['classifier_hidden_feats'],
+                              predictor_hidden_feats=args['predictor_hidden_feats'],
                               n_tasks=args['n_tasks'])
 
     if args['model'] == 'MPNN':

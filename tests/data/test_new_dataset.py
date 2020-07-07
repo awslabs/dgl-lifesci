@@ -7,6 +7,7 @@ import os
 import pandas as pd
 
 from dgllife.data.csv_dataset import *
+from dgllife.data.smiles_inference import *
 from dgllife.utils.featurizers import *
 from dgllife.utils.mol_to_graph import *
 
@@ -70,5 +71,15 @@ def test_mol_csv():
 
     remove_file(fname)
 
+def test_unlabeled_smiles():
+    smiles = ['CCO', 'CO']
+    dataset = UnlabeledSMILES(smiles, node_featurizer=CanonicalAtomFeaturizer(),
+                              edge_featurizer=CanonicalBondFeaturizer())
+    assert len(dataset) == 2
+    smiles, graph = dataset[0]
+    assert 'h' in graph.ndata
+    assert 'e' in graph.edata
+
 if __name__ == '__main__':
     test_mol_csv()
+    test_unlabeled_smiles()

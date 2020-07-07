@@ -30,24 +30,29 @@ class WeavePredictor(nn.Module):
     num_gnn_layers : int
         Number of GNN (Weave) layers to use. Default to 2.
     gnn_hidden_feats : int
-        Size for the hidden node and edge representations. Default to 50.
+        Size for the hidden node and edge representations.
+        Default to 50.
     gnn_activation : callable
-        Activation function to be used in GNN (Weave) layers. Default to ReLU.
+        Activation function to be used in GNN (Weave) layers.
+        Default to ReLU.
     graph_feats : int
         Size for the hidden graph representations. Default to 50.
     gaussian_expand : bool
-        Whether to expand each dimension of node features by gaussian histogram in
-        computing graph representations. Default to True.
+        Whether to expand each dimension of node features by
+        gaussian histogram in computing graph representations.
+        Default to True.
     gaussian_memberships : list of 2-tuples
-        For each tuple, the first and second element separately specifies the mean
-        and std for constructing a normal distribution. This argument comes into
-        effect only when ``gaussian_expand==True``. By default, we set this to be
-        ``[(-1.645, 0.283), (-1.080, 0.170), (-0.739, 0.134), (-0.468, 0.118),
-        (-0.228, 0.114), (0., 0.114), (0.228, 0.114), (0.468, 0.118),
-        (0.739, 0.134), (1.080, 0.170), (1.645, 0.283)]``.
+        For each tuple, the first and second element separately
+        specifies the mean and std for constructing a normal
+        distribution. This argument comes into effect only when
+        ``gaussian_expand==True``. By default, we set this to be
+        ``[(-1.645, 0.283), (-1.080, 0.170), (-0.739, 0.134),
+        (-0.468, 0.118), (-0.228, 0.114), (0., 0.114),
+        (0.228, 0.114), (0.468, 0.118), (0.739, 0.134),
+        (1.080, 0.170), (1.645, 0.283)]``.
     readout_activation : callable
-        Activation function to be used in computing graph representations out of
-        node representations. Default to Tanh.
+        Activation function to be used in computing graph
+        representations out of node representations. Default to Tanh.
     n_tasks : int
         Number of tasks, which is also the output size. Default to 1.
     """

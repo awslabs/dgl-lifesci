@@ -12,26 +12,22 @@ import torch.nn.functional as F
 
 from dgllife.utils import ScaffoldSplitter
 
-def get_configure(args):
-    """Query for the best configuration and return if found
+def get_configure(model):
+    """Query for the manually specified configuration
 
     Parameters
     ----------
-    args : dict
-        Initial settings
+    model : str
+        Model type
 
     Returns
     -------
-    dict or None
-        If best configuration has been found before, return
-        it, otherwise return None.
+    dict
+        Returns the manually specified configuration
     """
-    config_file = args['result_path'] + '/best_config.txt'
-    if os.path.isfile(config_file):
-        with open(config_file) as f:
-            config = json.load(f)
-        return config
-    return None
+    with open('model_configures/{}.json'.format(model), 'r') as f:
+        config = json.load(f)
+    return config
 
 def mkdir_p(path):
     """Create a folder for the given path.
@@ -139,19 +135,47 @@ def collate_molgraphs(data):
 
     return smiles, bg, labels, masks
 
-def load_model(args):
-    if args['model'] == 'GCN':
+def collate_molgraphs_unlabeled(data):
+    """Batching a list of datapoints without labels
+
+    Parameters
+    ----------
+    data : list of 2-tuples.
+        Each tuple is for a single datapoint, consisting of
+        a SMILES and a DGLGraph.
+
+    Returns
+    -------
+    smiles : list
+        List of smiles
+    bg : DGLGraph
+        The batched DGLGraph.
+    """
+    smiles, graphs = map(list, zip(*data))
+    bg = dgl.batch(graphs)
+    bg.set_n_initializer(dgl.init.zero_initializer)
+    bg.set_e_initializer(dgl.init.zero_initializer)
+
+    return smiles, bg
+
+def load_model(exp_configure):
+    if exp_configure['model'] == 'GCN':
         from dgllife.model import GCNPredictor
-        model = GCNPredictor(in_feats=args['node_featurizer'].feat_size(),
-                             hidden_feats=[args['gnn_hidden_feats']] * args['num_gnn_layers'],
-                             activation=[F.relu] * args['num_gnn_layers'],
-                             residual=[args['residual']] * args['num_gnn_layers'],
-                             batchnorm=[args['batchnorm']] * args['num_gnn_layers'],
-                             dropout=[args['dropout']] * args['num_gnn_layers'],
-                             classifier_hidden_feats=args['classifier_hidden_feats'],
-                             classifier_dropout=args['dropout'],
-                             n_tasks=args['n_tasks'])
+        model = GCNPredictor(
+            in_feats=exp_configure['in_feats'],
+            hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
+            activation=[F.relu] * exp_configure['num_gnn_layers'],
+            residual=[exp_configure['residual']] * exp_configure['num_gnn_layers'],
+            batchnorm=[exp_configure['batchnorm']] * exp_configure['num_gnn_layers'],
+            dropout=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
+            predictor_hidden_feats=exp_configure['predictor_hidden_feats'],
+            predictor_dropout=exp_configure['dropout'],
+            n_tasks=exp_configure['n_tasks'])
     else:
-        return ValueError("Expect model to be 'GCN', got {}".format(args['model']))
+        return ValueError("Expect model to be 'GCN', got {}".format(exp_configure['model']))
 
     return model
+
+def predict(args, model, bg):
+    node_feats = bg.ndata.pop('h').to(args['device'])
+    return model(bg, node_feats)

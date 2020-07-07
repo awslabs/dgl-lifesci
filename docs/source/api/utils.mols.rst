@@ -18,6 +18,16 @@ Utils for loading molecules and accessing their information.
     dgllife.utils.multiprocess_load_molecules
     dgllife.utils.load_smiles_from_txt
 
+Analysis
+--------
+
+Utils for analyzing a collection of molecules.
+
+.. autosummary::
+    :toctree: ../generated/
+
+    dgllife.utils.analyze_mols
+
 Graph Construction
 ------------------
 

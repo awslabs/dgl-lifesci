@@ -52,15 +52,32 @@ class GCNPredictor(nn.Module):
         ``len(dropout)`` equals the number of GCN layers. By default, no dropout is
         performed for all layers.
     classifier_hidden_feats : int
-        Size of hidden graph representations in the classifier. Default to 128.
+        (Deprecated, see ``predictor_hidden_feats``) Size of hidden graph representations
+        in the classifier. Default to 128.
     classifier_dropout : float
-        The probability for dropout in the classifier. Default to 0.
+        (Deprecated, see ``predictor_dropout``) The probability for dropout in the classifier.
+        Default to 0.
     n_tasks : int
         Number of tasks, which is also the output size. Default to 1.
+    predictor_hidden_feats : int
+        Size for hidden representations in the output MLP predictor. Default to 128.
+    predictor_dropout : float
+        The probability for dropout in the output MLP predictor. Default to 0.
     """
     def __init__(self, in_feats, hidden_feats=None, activation=None, residual=None, batchnorm=None,
-                 dropout=None, classifier_hidden_feats=128, classifier_dropout=0., n_tasks=1):
+                 dropout=None, classifier_hidden_feats=128, classifier_dropout=0., n_tasks=1,
+                 predictor_hidden_feats=128, predictor_dropout=0.):
         super(GCNPredictor, self).__init__()
+
+        if predictor_hidden_feats == 128 and classifier_hidden_feats != 128:
+            print('classifier_hidden_feats is deprecated and will be removed in the future, '
+                  'use predictor_hidden_feats instead')
+            predictor_hidden_feats = classifier_hidden_feats
+
+        if predictor_dropout == 0. and classifier_dropout != 0.:
+            print('classifier_dropout is deprecated and will be removed in the future, '
+                  'use predictor_dropout instead')
+            predictor_dropout = classifier_dropout
 
         self.gnn = GCN(in_feats=in_feats,
                        hidden_feats=hidden_feats,
@@ -70,8 +87,8 @@ class GCNPredictor(nn.Module):
                        dropout=dropout)
         gnn_out_feats = self.gnn.hidden_feats[-1]
         self.readout = WeightedSumAndMax(gnn_out_feats)
-        self.predict = MLPPredictor(2 * gnn_out_feats, classifier_hidden_feats,
-                                    n_tasks, classifier_dropout)
+        self.predict = MLPPredictor(2 * gnn_out_feats, predictor_hidden_feats,
+                                    n_tasks, predictor_dropout)
 
     def forward(self, bg, feats):
         """Graph-level regression/soft classification.

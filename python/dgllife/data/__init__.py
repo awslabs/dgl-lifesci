@@ -5,6 +5,7 @@
 
 from .alchemy import *
 from .csv_dataset import *
+from .smiles_inference import *
 from .pdbbind import *
 from .pubchem_aromaticity import *
 from .tox21 import *
