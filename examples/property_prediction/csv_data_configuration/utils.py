@@ -135,6 +135,29 @@ def collate_molgraphs(data):
 
     return smiles, bg, labels, masks
 
+def collate_molgraphs_unlabeled(data):
+    """Batching a list of datapoints without labels
+
+    Parameters
+    ----------
+    data : list of 2-tuples.
+        Each tuple is for a single datapoint, consisting of
+        a SMILES and a DGLGraph.
+
+    Returns
+    -------
+    smiles : list
+        List of smiles
+    bg : DGLGraph
+        The batched DGLGraph.
+    """
+    smiles, graphs = map(list, zip(*data))
+    bg = dgl.batch(graphs)
+    bg.set_n_initializer(dgl.init.zero_initializer)
+    bg.set_e_initializer(dgl.init.zero_initializer)
+
+    return smiles, bg
+
 def load_model(exp_configure):
     if exp_configure['model'] == 'GCN':
         from dgllife.model import GCNPredictor
@@ -152,3 +175,7 @@ def load_model(exp_configure):
         return ValueError("Expect model to be 'GCN', got {}".format(exp_configure['model']))
 
     return model
+
+def predict(args, model, bg):
+    node_feats = bg.ndata.pop('h').to(args['device'])
+    return model(bg, node_feats)

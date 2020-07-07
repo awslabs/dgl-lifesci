@@ -19,11 +19,7 @@ from torch.utils.data import DataLoader
 
 from hyper import init_hyper_space
 from utils import get_configure, mkdir_p, init_trial_path, \
-    split_dataset, collate_molgraphs, load_model
-
-def predict(args, model, bg):
-    node_feats = bg.ndata.pop('h').to(args['device'])
-    return model(bg, node_feats)
+    split_dataset, collate_molgraphs, load_model, predict
 
 def run_a_train_epoch(args, epoch, model, data_loader, loss_criterion, optimizer):
     model.train()

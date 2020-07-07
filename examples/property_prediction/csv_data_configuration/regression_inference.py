@@ -3,13 +3,46 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+import json
+import os
+import pandas as pd
 import torch
+from tqdm import tqdm
 
 from dgllife.data import UnlabeledSMILES
 from dgllife.utils import CanonicalAtomFeaturizer
+from torch.utils.data import DataLoader
+
+from utils import mkdir_p, collate_molgraphs_unlabeled, load_model, predict
 
 def main(args):
-    dataset = UnlabeledSMILES(args['smiles'], node_featurizer=CanonicalAtomFeaturizer())
+    dataset = UnlabeledSMILES(args['smiles'], args['node_featurizer'])
+    dataloader = DataLoader(dataset, batch_size=args['batch_size'],
+                            collate_fn=collate_molgraphs_unlabeled)
+    model = load_model(args).to(args['device'])
+    checkpoint = torch.load(args['train_result_path'] + '/model.pth', map_location='cpu')
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.eval()
+
+    smiles_list = []
+    predictions = []
+
+    with torch.no_grad():
+        for batch_id, batch_data in enumerate(tqdm(dataloader, desc="Iteration")):
+            batch_smiles, bg = batch_data
+            smiles_list.extend(batch_smiles)
+            batch_pred = predict(args, model, bg).detach().cpu()
+            predictions.append(batch_pred)
+
+    predictions = torch.cat(predictions, dim=0)
+
+    output_data = {'canonical_smiles': smiles_list}
+    if args['task_names'] is None:
+        args['task_names'] = ['task_{:d}'.format(t) for t in range(1, args['n_tasks'] + 1)]
+    for task_id, task_name in enumerate(args['task_names']):
+        output_data[task_name] = predictions[:, task_id]
+    df = pd.DataFrame(output_data)
+    df.to_csv(args['inference_result_path'] + '/prediction.csv')
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -37,6 +70,9 @@ if __name__ == '__main__':
     else:
         args['device'] = torch.device('cpu')
 
+    if args['task_names'] is not None:
+        args['task_names'] = args['task_names'].split(',')
+
     if args['file_path'].endswith('.csv'):
         import pandas
         df = pandas.read_csv(args['file_path'])
@@ -54,5 +90,14 @@ if __name__ == '__main__':
                          'got {}'.format(args['file_path']))
     args['smiles'] = smiles
     args['node_featurizer'] = CanonicalAtomFeaturizer()
+
+    # Handle directories
+    mkdir_p(args['inference_result_path'])
+    assert os.path.exists(args['train_result_path']), \
+        'The path to the saved training results does not exist.'
+
+    # Load configuration
+    with open(args['train_result_path'] + '/configure.json', 'r') as f:
+        args.update(json.load(f))
 
     main(args)
