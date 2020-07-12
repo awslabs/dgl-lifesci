@@ -12,6 +12,32 @@ import torch.nn.functional as F
 
 from dgllife.utils import ScaffoldSplitter
 
+def init_featurizer(args):
+    """Initialize node/edge featurizer
+
+    Parameters
+    ----------
+    args : dict
+        Settings
+
+    Returns
+    -------
+    args : dict
+        Settings with featurizers updated
+    """
+    if args['atom_featurizer_type'] == 'canonical':
+        from dgllife.utils import CanonicalAtomFeaturizer
+        args['node_featurizer'] = CanonicalAtomFeaturizer()
+    elif args['atom_featurizer_type'] == 'attentivefp':
+        from dgllife.utils import AttentiveFPAtomFeaturizer
+        args['node_featurizer'] = AttentiveFPAtomFeaturizer()
+    else:
+        return ValueError(
+            "Expect node_featurizer to be in ['canonical', 'attentivefp'], "
+            "got {}".format(args['atom_featurizer_type']))
+
+    return args
+
 def get_configure(model):
     """Query for the manually specified configuration
 

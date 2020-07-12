@@ -9,11 +9,10 @@ import pandas as pd
 import torch
 
 from dgllife.data import UnlabeledSMILES
-from dgllife.utils import CanonicalAtomFeaturizer
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from utils import mkdir_p, collate_molgraphs_unlabeled, load_model, predict
+from utils import mkdir_p, collate_molgraphs_unlabeled, load_model, predict, init_featurizer
 
 def main(args):
     dataset = UnlabeledSMILES(args['smiles'], node_featurizer=args['node_featurizer'])
@@ -67,6 +66,10 @@ if __name__ == '__main__':
                              'specified, we will simply use task1, task2, ...')
     args = parser.parse_args().__dict__
 
+    # Load configuration
+    with open(args['train_result_path'] + '/configure.json', 'r') as f:
+        args.update(json.load(f))
+
     if torch.cuda.is_available():
         args['device'] = torch.device('cuda:0')
     else:
@@ -88,15 +91,11 @@ if __name__ == '__main__':
         raise ValueError('Expect the input data file to be a .csv or a .txt file, '
                          'got {}'.format(args['file_path']))
     args['smiles'] = smiles
-    args['node_featurizer'] = CanonicalAtomFeaturizer()
+    args = init_featurizer(args)
 
     # Handle directories
     mkdir_p(args['inference_result_path'])
     assert os.path.exists(args['train_result_path']), \
         'The path to the saved training results does not exist.'
-
-    # Load configuration
-    with open(args['train_result_path'] + '/configure.json', 'r') as f:
-        args.update(json.load(f))
 
     main(args)

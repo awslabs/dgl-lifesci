@@ -19,7 +19,7 @@ from torch.utils.data import DataLoader
 
 from hyper import init_hyper_space
 from utils import get_configure, mkdir_p, init_trial_path, \
-    split_dataset, collate_molgraphs, load_model, predict
+    split_dataset, collate_molgraphs, load_model, predict, init_featurizer
 
 def run_a_train_epoch(args, epoch, model, data_loader, loss_criterion, optimizer):
     model.train()
@@ -57,7 +57,8 @@ def main(args, exp_config, train_set, val_set, test_set):
     exp_config.update({
         'model': args['model'],
         'in_feats': args['node_featurizer'].feat_size(),
-        'n_tasks': args['n_tasks']
+        'n_tasks': args['n_tasks'],
+        'atom_featurizer_type': args['atom_featurizer_type']
     })
 
     # Set up directory for saving results
@@ -150,6 +151,9 @@ if __name__ == '__main__':
                         help='Metric for evaluation (default: roc_auc_score)')
     parser.add_argument('-ml', '--model', choices=['GCN'], default='GCN',
                         help='Model to use (default: GCN)')
+    parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
+                        default='canonical',
+                        help='Featurization for atoms (default: CanonicalAtomFeaturizer)')
     parser.add_argument('-n', '--num-epochs', type=int, default=1000,
                         help='Maximum number of epochs allowed for training. '
                              'We set a large number by default as early stopping '
@@ -170,7 +174,7 @@ if __name__ == '__main__':
     if args['task_names'] is not None:
         args['task_names'] = args['task_names'].split(',')
 
-    args['node_featurizer'] = CanonicalAtomFeaturizer()
+    args = init_featurizer(args)
     df = pd.read_csv(args['csv_path'])
     mkdir_p(args['result_path'])
     dataset = MoleculeCSVDataset(df=df,

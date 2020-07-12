@@ -39,8 +39,6 @@ The analysis results will be saved to the following files in the result path abo
 
 Currently we use a default setting as follows:
 - Construct molecular graphs for each molecule, where nodes are atoms and edges are bonds
-- Prepare initial atom features with 
-[CanonicalAtomFeaturizer](https://lifesci.dgl.ai/generated/dgllife.utils.CanonicalAtomFeaturizer.html#dgllife.utils.CanonicalAtomFeaturizer).
 - The dataset is split using scaffold split
 - Perform early stopping and save the model that achieves the best validation performance
 - (Optional) Automatically perform hyperparameter search using Bayesian optimization
@@ -60,6 +58,10 @@ where `X` specifies the path to the CSV file and `Y` specifies the header for th
 Other optional arguments include:
 - **Model**: `-m model` [default=gcn]
     - Specifies the model to use. 
+- **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
+    - Specifies the initial featurization for atoms.
+    - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 
+      the atom featurizer used in AttentiveFP.
 - **Number of Hyperparameter Search Trials**: `-ne num_trials` [default=None]
     - Specifies the number of trials for hyperparameter search. If not specified, we use the setting specified in 
     `model_configuration/{model_name}.json`
@@ -126,6 +128,10 @@ where `X` specifies the path to the CSV file and `Y` specifies the header for th
 Other optional arguments include:
 - **Model**: `-m model` [default=gcn]
     - Specifies the model to use. 
+- **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
+    - Specifies the initial featurization for atoms.
+    - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 
+      the atom featurizer used in AttentiveFP.
 - **Number of Hyperparameter Search Trials**: `-ne num_trials` [default=None]
     - Specifies the number of trials for hyperparameter search. If not specified, we use the setting specified in 
     `model_configuration/{model_name}.json`
