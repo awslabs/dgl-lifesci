@@ -11,7 +11,7 @@ import torch.nn as nn
 
 from copy import deepcopy
 from dgllife.data import MoleculeCSVDataset
-from dgllife.utils import Meter, smiles_to_bigraph, CanonicalAtomFeaturizer, EarlyStopping
+from dgllife.utils import Meter, smiles_to_bigraph, EarlyStopping
 from hyperopt import fmin, tpe
 from shutil import copyfile
 from torch.optim import Adam
@@ -19,7 +19,7 @@ from torch.utils.data import DataLoader
 
 from hyper import init_hyper_space
 from utils import get_configure, mkdir_p, init_trial_path, \
-    split_dataset, collate_molgraphs, load_model, predict
+    split_dataset, collate_molgraphs, load_model, predict, init_featurizer
 
 def run_a_train_epoch(args, epoch, model, data_loader, loss_criterion, optimizer):
     model.train()
@@ -57,7 +57,8 @@ def main(args, exp_config, train_set, val_set, test_set):
     exp_config.update({
         'model': args['model'],
         'in_feats': args['node_featurizer'].feat_size(),
-        'n_tasks': args['n_tasks']
+        'n_tasks': args['n_tasks'],
+        'atom_featurizer_type': args['atom_featurizer_type']
     })
 
     # Set up directory for saving results
@@ -74,7 +75,8 @@ def main(args, exp_config, train_set, val_set, test_set):
     loss_criterion = nn.SmoothL1Loss(reduction='none')
     optimizer = Adam(model.parameters(), lr=exp_config['lr'],
                      weight_decay=exp_config['weight_decay'])
-    stopper = EarlyStopping(patience=exp_config['patience'],
+    stopper = EarlyStopping(mode=args['early_stop_mode'],
+                            patience=exp_config['patience'],
                             filename=args['trial_path'] + '/model.pth')
 
     for epoch in range(args['num_epochs']):
@@ -150,8 +152,11 @@ if __name__ == '__main__':
                         help='Proportion of the dataset used for training, validation and test')
     parser.add_argument('-me', '--metric', choices=['r2', 'mae', 'rmse'], default='r2',
                         help='Metric for evaluation (default: r2)')
-    parser.add_argument('-ml', '--model', choices=['GCN'], default='GCN',
+    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT'], default='GCN',
                         help='Model to use (default: GCN)')
+    parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
+                        default='canonical',
+                        help='Featurization for atoms (default: CanonicalAtomFeaturizer)')
     parser.add_argument('-n', '--num-epochs', type=int, default=1000,
                         help='Maximum number of epochs allowed for training. '
                              'We set a large number by default as early stopping '
@@ -172,7 +177,12 @@ if __name__ == '__main__':
     if args['task_names'] is not None:
         args['task_names'] = args['task_names'].split(',')
 
-    args['node_featurizer'] = CanonicalAtomFeaturizer()
+    if args['metric'] == 'r2':
+        args['early_stop_mode'] = 'higher'
+    else:
+        args['early_stop_mode'] = 'lower'
+
+    args = init_featurizer(args)
     df = pd.read_csv(args['csv_path'])
     mkdir_p(args['result_path'])
     dataset = MoleculeCSVDataset(df=df,

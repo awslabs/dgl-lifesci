@@ -17,3 +17,12 @@ To manually set the hyperparameters for a model, modify the corresponding json f
 - `num_gnn_layers`: (int) Number of GCN layers to use
 - `residual`: (bool) Whether to use residual connection for each GCN layer
 - `batchnorm`: (bool) Whether to apply batch normalization to the output of each GCN layer
+
+## GAT
+
+- `gnn_hidden_feats`: (int) Hidden size for each attention head in GNN layers
+- `num_heads`: (int) Number of attention heads in each GNN layer
+- `alpha`: (float) Slope for negative values in LeakyReLU
+- `predictor_hidden_feats`: (int) Hidden size for the MLP predictor
+- `num_gnn_layers`: (int) Number of GNN layers to use
+- `residual`: (bool) Whether to use residual connection for each GAT layer

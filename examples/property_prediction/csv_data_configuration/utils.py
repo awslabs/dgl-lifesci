@@ -12,6 +12,32 @@ import torch.nn.functional as F
 
 from dgllife.utils import ScaffoldSplitter
 
+def init_featurizer(args):
+    """Initialize node/edge featurizer
+
+    Parameters
+    ----------
+    args : dict
+        Settings
+
+    Returns
+    -------
+    args : dict
+        Settings with featurizers updated
+    """
+    if args['atom_featurizer_type'] == 'canonical':
+        from dgllife.utils import CanonicalAtomFeaturizer
+        args['node_featurizer'] = CanonicalAtomFeaturizer()
+    elif args['atom_featurizer_type'] == 'attentivefp':
+        from dgllife.utils import AttentiveFPAtomFeaturizer
+        args['node_featurizer'] = AttentiveFPAtomFeaturizer()
+    else:
+        return ValueError(
+            "Expect node_featurizer to be in ['canonical', 'attentivefp'], "
+            "got {}".format(args['atom_featurizer_type']))
+
+    return args
+
 def get_configure(model):
     """Query for the manually specified configuration
 
@@ -171,8 +197,23 @@ def load_model(exp_configure):
             predictor_hidden_feats=exp_configure['predictor_hidden_feats'],
             predictor_dropout=exp_configure['dropout'],
             n_tasks=exp_configure['n_tasks'])
+    elif exp_configure['model'] == 'GAT':
+        from dgllife.model import GATPredictor
+        model = GATPredictor(
+            in_feats=exp_configure['in_feats'],
+            hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
+            num_heads=[exp_configure['num_heads']] * exp_configure['num_gnn_layers'],
+            feat_drops=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
+            attn_drops=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
+            alphas=[exp_configure['alpha']] * exp_configure['num_gnn_layers'],
+            residuals=[exp_configure['residual']] * exp_configure['num_gnn_layers'],
+            predictor_hidden_feats=exp_configure['predictor_hidden_feats'],
+            predictor_dropout=exp_configure['dropout'],
+            n_tasks=exp_configure['n_tasks']
+        )
     else:
-        return ValueError("Expect model to be 'GCN', got {}".format(exp_configure['model']))
+        return ValueError("Expect model to be from ['GCN', 'GAT'], "
+                          "got {}".format(exp_configure['model']))
 
     return model
 
