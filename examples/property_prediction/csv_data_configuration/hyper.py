@@ -15,7 +15,7 @@ common_hyperparameters = {
 
 gcn_hyperparameters = {
     'gnn_hidden_feats': hp.choice('gnn_hidden_feats', [32, 64, 128, 256]),
-    'predictor_hidden_feats': hp.choice('predictor_hidden_feats', [16, 32, 64, 128, 256]),
+    'predictor_hidden_feats': hp.choice('predictor_hidden_feats', [16, 32, 64, 128, 256, 512]),
     'num_gnn_layers': hp.choice('num_gnn_layers', [1, 2, 3, 4, 5]),
     'residual': hp.choice('residual', [True, False]),
     'batchnorm': hp.choice('batchnorm', [True, False])
