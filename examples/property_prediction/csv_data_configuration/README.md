@@ -58,6 +58,8 @@ where `X` specifies the path to the CSV file and `Y` specifies the header for th
 Other optional arguments include:
 - **Model**: `-mo model` [default=GCN]
     - Specifies the model to use. 
+    - By default we use `GCN` for `GCNPredictor`, other options include:
+        - `GAT` for `GATPredictor`
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Specifies the initial featurization for atoms.
     - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 
@@ -128,6 +130,8 @@ where `X` specifies the path to the CSV file and `Y` specifies the header for th
 Other optional arguments include:
 - **Model**: `-mo model` [default=GCN]
     - Specifies the model to use. 
+    - By default we use `GCN` for `GCNPredictor`, other options include:
+        - `GAT` for `GATPredictor`
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Specifies the initial featurization for atoms.
     - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 
