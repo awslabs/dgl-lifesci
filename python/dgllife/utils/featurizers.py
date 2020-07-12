@@ -48,6 +48,7 @@ __all__ = ['one_hot_encoding',
            'CanonicalAtomFeaturizer',
            'WeaveAtomFeaturizer',
            'PretrainAtomFeaturizer',
+           'AttentiveFPAtomFeaturizer',
            'bond_type_one_hot',
            'bond_is_conjugated_one_hot',
            'bond_is_conjugated',
@@ -1248,7 +1249,7 @@ class AttentiveFPAtomFeaturizer(BaseAtomFeaturizer):
     BaseAtomFeaturizer
     """
     def __init__(self, atom_data_field='h'):
-        super(CanonicalAtomFeaturizer, self).__init__(
+        super(AttentiveFPAtomFeaturizer, self).__init__(
             featurizer_funcs={atom_data_field: ConcatFeaturizer(
                 [atom_type_one_hot,
                  atom_degree_one_hot,

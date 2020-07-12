@@ -126,6 +126,8 @@ For using featurization methods like above in creating node features:
     dgllife.utils.CanonicalAtomFeaturizer
     dgllife.utils.CanonicalAtomFeaturizer.feat_size
     dgllife.utils.PretrainAtomFeaturizer
+    dgllife.utils.AttentiveFPAtomFeaturizer
+    dgllife.utils.AttentiveFPAtomFeaturizer.feat_size
 
 Featurization for Edges
 ```````````````````````
