@@ -197,8 +197,23 @@ def load_model(exp_configure):
             predictor_hidden_feats=exp_configure['predictor_hidden_feats'],
             predictor_dropout=exp_configure['dropout'],
             n_tasks=exp_configure['n_tasks'])
+    elif exp_configure['model'] == 'GAT':
+        from dgllife.model import GATPredictor
+        model = GATPredictor(
+            in_feats=exp_configure['in_feats'],
+            hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
+            num_heads=[exp_configure['num_heads']] * exp_configure['num_gnn_layers'],
+            feat_drops=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
+            attn_drops=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
+            alphas=[exp_configure['alpha']] * exp_configure['num_gnn_layers'],
+            residuals=[exp_configure['residual']] * exp_configure['num_gnn_layers'],
+            predictor_hidden_feats=exp_configure['predictor_hidden_feats'],
+            predictor_dropout=exp_configure['dropout'],
+            n_tasks=exp_configure['n_tasks']
+        )
     else:
-        return ValueError("Expect model to be 'GCN', got {}".format(exp_configure['model']))
+        return ValueError("Expect model to be from ['GCN', 'GAT'], "
+                          "got {}".format(exp_configure['model']))
 
     return model
 

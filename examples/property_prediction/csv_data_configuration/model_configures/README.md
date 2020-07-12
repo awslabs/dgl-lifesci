@@ -17,3 +17,5 @@ To manually set the hyperparameters for a model, modify the corresponding json f
 - `num_gnn_layers`: (int) Number of GCN layers to use
 - `residual`: (bool) Whether to use residual connection for each GCN layer
 - `batchnorm`: (bool) Whether to apply batch normalization to the output of each GCN layer
+
+## GAT
