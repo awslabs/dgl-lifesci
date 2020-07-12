@@ -56,7 +56,7 @@ python regression_train.py -c X -sc Y
 where `X` specifies the path to the CSV file and `Y` specifies the header for the SMILES column in the CSV file.
 
 Other optional arguments include:
-- **Model**: `-mo model` [default=gcn]
+- **Model**: `-mo model` [default=GCN]
     - Specifies the model to use. 
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Specifies the initial featurization for atoms.
@@ -126,7 +126,7 @@ python classification_train.py -c X -sc Y
 where `X` specifies the path to the CSV file and `Y` specifies the header for the SMILES column in the CSV file.
 
 Other optional arguments include:
-- **Model**: `-mo model` [default=gcn]
+- **Model**: `-mo model` [default=GCN]
     - Specifies the model to use. 
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Specifies the initial featurization for atoms.
