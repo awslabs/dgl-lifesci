@@ -24,7 +24,7 @@ gcn_hyperparameters = {
 gat_hyperparameters = {
     'gnn_hidden_feats': hp.choice('gnn_hidden_feats', [32, 64, 128, 256]),
     'num_heads': hp.choice('gnn_hidden_feats', [4, 6, 8]),
-    'alpha': hp.uniform('dropout', low=0., high=1),
+    'alpha': hp.uniform('alpha', low=0., high=1),
     'predictor_hidden_feats': hp.choice('predictor_hidden_feats', [16, 32, 64, 128, 256]),
     'num_gnn_layers': hp.choice('num_gnn_layers', [1, 2, 3, 4, 5]),
     'residual': hp.choice('residual', [True, False]),
