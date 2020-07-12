@@ -160,8 +160,8 @@ def test_atom_mass():
 
 def test_atom_is_chiral_center():
     mol = test_mol4()
-    assert not atom_is_chiral_center(mol.GetAtomWithIdx(0))
-    assert atom_is_chiral_center(mol.GetAtomWithIdx(1))
+    assert not atom_is_chiral_center(mol.GetAtomWithIdx(0))[0]
+    assert atom_is_chiral_center(mol.GetAtomWithIdx(1))[0]
 
 def test_concat_featurizer():
     test_featurizer = ConcatFeaturizer(
