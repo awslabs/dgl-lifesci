@@ -75,7 +75,8 @@ def main(args, exp_config, train_set, val_set, test_set):
     loss_criterion = nn.BCEWithLogitsLoss(reduction='none')
     optimizer = Adam(model.parameters(), lr=exp_config['lr'],
                      weight_decay=exp_config['weight_decay'])
-    stopper = EarlyStopping(patience=exp_config['patience'],
+    stopper = EarlyStopping(mode=args['early_stop_mode'],
+                            patience=exp_config['patience'],
                             filename=args['trial_path'] + '/model.pth')
 
     for epoch in range(args['num_epochs']):
@@ -173,6 +174,9 @@ if __name__ == '__main__':
 
     if args['task_names'] is not None:
         args['task_names'] = args['task_names'].split(',')
+
+    if args['metric'] == 'roc_auc_score':
+        args['early_stop_mode'] = 'higher'
 
     args = init_featurizer(args)
     df = pd.read_csv(args['csv_path'])

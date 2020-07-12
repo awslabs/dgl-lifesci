@@ -8,7 +8,7 @@ from hyperopt import hp
 common_hyperparameters = {
     'lr': hp.uniform('lr', low=3e-4, high=3e-2),
     'weight_decay': hp.uniform('weight_decay', low=0, high=1e-4),
-    'patience': hp.choice('patience', [30, 50, 100]),
+    'patience': hp.choice('patience', [100]),
     'batch_size': hp.choice('batch_size', [32, 64, 128, 256, 512]),
     'dropout': hp.uniform('dropout', low=0., high=0.15)
 }
