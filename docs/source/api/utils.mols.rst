@@ -158,3 +158,5 @@ For using featurization methods like above in creating edge features:
     dgllife.utils.CanonicalBondFeaturizer
     dgllife.utils.CanonicalBondFeaturizer.feat_size
     dgllife.utils.PretrainBondFeaturizer
+    dgllife.utils.AttentiveFPBondFeaturizer
+    dgllife.utils.AttentiveFPBondFeaturizer.feat_size

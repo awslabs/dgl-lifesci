@@ -347,6 +347,18 @@ def test_pretrain_bond_featurizer():
     assert torch.allclose(feats['bond_direction_type'].nonzero(),
                           torch.tensor([[4], [5], [8], [9]]))
 
+def test_attentivefp_bond_featurizer():
+    test_featurizer = AttentiveFPBondFeaturizer()
+    assert test_featurizer.feat_size() == 10
+    assert test_featurizer.feat_size('e') == 10
+    mol = test_mol1()
+    feats = test_featurizer(mol)
+    assert torch.allclose(feats['e'], torch.tensor([
+        [1., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
+        [1., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
+        [1., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
+        [1., 0., 0., 0., 0., 0., 1., 0., 0., 0.]]))
+
 if __name__ == '__main__':
     test_one_hot_encoding()
     test_atom_type_one_hot()
@@ -388,3 +400,4 @@ if __name__ == '__main__':
     test_canonical_bond_featurizer()
     test_weave_edge_featurizer()
     test_pretrain_bond_featurizer()
+    test_attentivefp_bond_featurizer()
