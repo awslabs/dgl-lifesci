@@ -42,7 +42,9 @@ __all__ = ['one_hot_encoding',
            'atom_is_in_ring_one_hot',
            'atom_is_in_ring',
            'atom_chiral_tag_one_hot',
+           'atom_chirality_type_one_hot',
            'atom_mass',
+           'atom_is_chiral_center',
            'ConcatFeaturizer',
            'BaseAtomFeaturizer',
            'CanonicalAtomFeaturizer',
@@ -674,6 +676,9 @@ def atom_chiral_tag_one_hot(atom, allowable_set=None, encode_unknown=False):
         ``rdkit.Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW``,
         ``rdkit.Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW``,
         ``rdkit.Chem.rdchem.ChiralType.CHI_OTHER``.
+    encode_unknown : bool
+        If True, map inputs not in the allowable set to the
+        additional last element. (Default: False)
 
     Returns
     -------
@@ -683,6 +688,7 @@ def atom_chiral_tag_one_hot(atom, allowable_set=None, encode_unknown=False):
     See Also
     --------
     one_hot_encoding
+    atom_chirality_type_one_hot
     """
     if allowable_set is None:
         allowable_set = [Chem.rdchem.ChiralType.CHI_UNSPECIFIED,
@@ -690,6 +696,36 @@ def atom_chiral_tag_one_hot(atom, allowable_set=None, encode_unknown=False):
                          Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW,
                          Chem.rdchem.ChiralType.CHI_OTHER]
     return one_hot_encoding(atom.GetChiralTag(), allowable_set, encode_unknown)
+
+def atom_chirality_type_one_hot(atom, allowable_set=None, encode_unknown=False):
+    """One hot encoding for the chirality type of an atom.
+
+    Parameters
+    ----------
+    atom : rdkit.Chem.rdchem.Atom
+        RDKit atom instance.
+    allowable_set : list of str
+        Chirality types to consider. Default: ``R``, ``S``.
+    encode_unknown : bool
+        If True, map inputs not in the allowable set to the
+        additional last element. (Default: False)
+
+    Returns
+    -------
+    list
+        List containing one bool only.
+
+    See Also
+    --------
+    one_hot_encoding
+    atom_chiral_tag_one_hot
+    """
+    if not atom.HasProp('_CIPCode'):
+        return [False, False]
+
+    if allowable_set is None:
+        allowable_set = ['R', 'S']
+    return one_hot_encoding(atom.GetProp('_CIPCode'), allowable_set, encode_unknown)
 
 def atom_mass(atom, coef=0.01):
     """Get the mass of an atom and scale it.
@@ -707,6 +743,21 @@ def atom_mass(atom, coef=0.01):
         List containing one float only.
     """
     return [atom.GetMass() * coef]
+
+def atom_is_chiral_center(atom):
+    """Get whether the atom is chiral center
+
+    Parameters
+    ----------
+    atom : rdkit.Chem.rdchem.Atom
+        RDKit atom instance.
+
+    Returns
+    -------
+    list
+        List containing one bool only.
+    """
+    return [atom.HasProp('_ChiralityPossible')]
 
 class ConcatFeaturizer(object):
     """Concatenate the evaluation results of multiple functions as a single feature.
@@ -780,6 +831,9 @@ class BaseAtomFeaturizer(object):
     See Also
     --------
     CanonicalAtomFeaturizer
+    WeaveAtomFeaturizer
+    PretrainAtomFeaturizer
+    AttentiveFPAtomFeaturizer
     """
     def __init__(self, featurizer_funcs, feat_sizes=None):
         self.featurizer_funcs = featurizer_funcs
@@ -911,6 +965,9 @@ class CanonicalAtomFeaturizer(BaseAtomFeaturizer):
     See Also
     --------
     BaseAtomFeaturizer
+    WeaveAtomFeaturizer
+    PretrainAtomFeaturizer
+    AttentiveFPAtomFeaturizer
     """
     def __init__(self, atom_data_field='h'):
         super(CanonicalAtomFeaturizer, self).__init__(
@@ -983,6 +1040,13 @@ class WeaveAtomFeaturizer(object):
     >>> # Get feature size for nodes
     >>> print(atom_featurizer.feat_size())
     27
+
+    See Also
+    --------
+    BaseAtomFeaturizer
+    CanonicalAtomFeaturizer
+    PretrainAtomFeaturizer
+    AttentiveFPAtomFeaturizer
     """
     def __init__(self, atom_data_field='h', atom_types=None, chiral_types=None,
                  hybridization_types=None):
@@ -1140,6 +1204,13 @@ class PretrainAtomFeaturizer(object):
     >>> atom_featurizer = PretrainAtomFeaturizer()
     >>> atom_featurizer(mol)
     {'atomic_number': tensor([5, 5, 7]), 'chirality_type': tensor([0, 0, 0])}
+
+    See Also
+    --------
+    BaseAtomFeaturizer
+    CanonicalAtomFeaturizer
+    WeaveAtomFeaturizer
+    AttentiveFPAtomFeaturizer
     """
     def __init__(self, atomic_number_types=None, chiral_types=None):
         if atomic_number_types is None:
@@ -1186,27 +1257,29 @@ class PretrainAtomFeaturizer(object):
         }
 
 class AttentiveFPAtomFeaturizer(BaseAtomFeaturizer):
-    """A default featurizer for atoms.
+    """The atom featurizer used in AttentiveFP
+
+    AttentiveFP is introduced in
+    `Pushing the Boundaries of Molecular Representation for Drug Discovery with the Graph
+    Attention Mechanism. <https://www.ncbi.nlm.nih.gov/pubmed/31408336>`__
 
     The atom features include:
 
     * **One hot encoding of the atom type**. The supported atom types include
-      ``C``, ``N``, ``O``, ``S``, ``F``, ``Si``, ``P``, ``Cl``, ``Br``, ``Mg``,
-      ``Na``, ``Ca``, ``Fe``, ``As``, ``Al``, ``I``, ``B``, ``V``, ``K``, ``Tl``,
-      ``Yb``, ``Sb``, ``Sn``, ``Ag``, ``Pd``, ``Co``, ``Se``, ``Ti``, ``Zn``,
-      ``H``, ``Li``, ``Ge``, ``Cu``, ``Au``, ``Ni``, ``Cd``, ``In``, ``Mn``, ``Zr``,
-      ``Cr``, ``Pt``, ``Hg``, ``Pb``.
+      ``B``, ``C``, ``N``, ``O``, ``F``, ``Si``, ``P``, ``S``, ``Cl``, ``As``,
+      ``Se``, ``Br``, ``Te``, ``I``, ``At``, and ``other``.
     * **One hot encoding of the atom degree**. The supported possibilities
-      include ``0 - 10``.
-    * **One hot encoding of the number of implicit Hs on the atom**. The supported
-      possibilities include ``0 - 6``.
+      include ``0 - 5``.
     * **Formal charge of the atom**.
     * **Number of radical electrons of the atom**.
     * **One hot encoding of the atom hybridization**. The supported possibilities include
-      ``SP``, ``SP2``, ``SP3``, ``SP3D``, ``SP3D2``.
+      ``SP``, ``SP2``, ``SP3``, ``SP3D``, ``SP3D2``, and ``other``.
     * **Whether the atom is aromatic**.
     * **One hot encoding of the number of total Hs on the atom**. The supported possibilities
       include ``0 - 4``.
+    * **Whether the atom is chiral center**
+    * **One hot encoding of the atom chirality type**. The supported possibilities include
+      ``R``, and ``S``.
 
     **We assume the resulting DGLGraph will not contain any virtual nodes.**
 
@@ -1219,46 +1292,46 @@ class AttentiveFPAtomFeaturizer(BaseAtomFeaturizer):
     --------
 
     >>> from rdkit import Chem
-    >>> from dgllife.utils import CanonicalAtomFeaturizer
+    >>> from dgllife.utils import AttentiveFPAtomFeaturizer
 
     >>> mol = Chem.MolFromSmiles('CCO')
-    >>> atom_featurizer = CanonicalAtomFeaturizer(atom_data_field='feat')
+    >>> atom_featurizer = AttentiveFPAtomFeaturizer(atom_data_field='feat')
     >>> atom_featurizer(mol)
-    {'feat': tensor([[1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.,
-                      1., 0.],
-                     [1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0.,
-                      0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 1.,
-                      0., 0.],
-                     [0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                      0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0.,
-                      0., 0.]])}
+    {'feat': tensor([[0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.,
+                      0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 1., 0.,
+                      0., 0., 0.],
+                     [0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                      1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0., 0.,
+                      0., 0., 0.],
+                     [0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.,
+                      0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 1., 0., 0., 0.,
+                      0., 0., 0.]])}
 
     >>> # Get feature size for nodes
     >>> print(atom_featurizer.feat_size('feat'))
-    74
+    39
 
     See Also
     --------
     BaseAtomFeaturizer
+    CanonicalAtomFeaturizer
+    WeaveAtomFeaturizer
+    PretrainAtomFeaturizer
     """
     def __init__(self, atom_data_field='h'):
         super(AttentiveFPAtomFeaturizer, self).__init__(
             featurizer_funcs={atom_data_field: ConcatFeaturizer(
-                [atom_type_one_hot,
-                 atom_degree_one_hot,
-                 atom_implicit_valence_one_hot,
+                [partial(atom_type_one_hot, allowable_set=[
+                    'B', 'C', 'N', 'O', 'F', 'Si', 'P', 'S',
+                    'Cl', 'As', 'Se', 'Br', 'Te', 'I', 'At'], encode_unknown=True),
+                 partial(atom_degree_one_hot, allowable_set=list(range(6))),
                  atom_formal_charge,
                  atom_num_radical_electrons,
-                 atom_hybridization_one_hot,
+                 partial(atom_hybridization_one_hot, encode_unknown=True),
                  atom_is_aromatic,
-                 atom_total_num_H_one_hot]
+                 atom_total_num_H_one_hot,
+                 atom_is_chiral_center,
+                 atom_chirality_type_one_hot]
             )})
 
 def bond_type_one_hot(bond, allowable_set=None, encode_unknown=False):

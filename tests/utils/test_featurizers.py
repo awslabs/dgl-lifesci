@@ -27,6 +27,9 @@ def test_mol2():
 def test_mol3():
     return Chem.MolFromSmiles('O=C(O)/C=C/C(=O)O')
 
+def test_mol4():
+    return Chem.MolFromSmiles('N[C@@H](C)C(=O)O')
+
 def test_atom_type_one_hot():
     mol = test_mol1()
     assert atom_type_one_hot(mol.GetAtomWithIdx(0), ['C', 'O']) == [1, 0]
@@ -140,12 +143,25 @@ def test_atom_chiral_tag_one_hot():
     mol = test_mol1()
     assert atom_chiral_tag_one_hot(mol.GetAtomWithIdx(0)) == [1, 0, 0, 0]
 
+def test_atom_chirality_type_one_hot():
+    mol = test_mol4()
+    assert atom_chirality_type_one_hot(mol.GetAtomWithIdx(1)) == [False, True]
+    assert atom_chirality_type_one_hot(mol.GetAtomWithIdx(0)) == [False, False]
+    assert atom_chirality_type_one_hot(mol.GetAtomWithIdx(1), ['R']) == [False]
+    assert atom_chirality_type_one_hot\
+               (mol.GetAtomWithIdx(1), ['R'], encode_unknown=True) == [False, True]
+
 def test_atom_mass():
     mol = test_mol1()
     atom = mol.GetAtomWithIdx(0)
     assert atom_mass(atom) == [atom.GetMass() * 0.01]
     atom = mol.GetAtomWithIdx(1)
     assert atom_mass(atom) == [atom.GetMass() * 0.01]
+
+def test_atom_is_chiral_center():
+    mol = test_mol4()
+    assert not atom_is_chiral_center(mol.GetAtomWithIdx(0))
+    assert atom_is_chiral_center(mol.GetAtomWithIdx(1))
 
 def test_concat_featurizer():
     test_featurizer = ConcatFeaturizer(
@@ -241,6 +257,23 @@ def test_pretrain_atom_featurizer():
     assert list(feats.keys()) == ['atomic_number', 'chirality_type']
     assert torch.allclose(feats['atomic_number'], torch.tensor([[5, 5, 7]]))
     assert torch.allclose(feats['chirality_type'], torch.tensor([[0, 0, 0]]))
+
+def test_attentivefp_atom_featurizer():
+    featurizer = AttentiveFPAtomFeaturizer()
+    assert featurizer.feat_size() == 39
+    mol = test_mol1()
+    feats = featurizer(mol)
+    assert list(feats.keys()) == ['h']
+    assert torch.allclose(feats['h'],
+                          torch.tensor([[0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0.,
+                                         0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+                                        [0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 1., 0.,
+                                         0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+                                        [0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0.,
+                                         0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.]]), rtol=1e-3)
 
 def test_bond_type_one_hot():
     mol = test_mol1()
@@ -383,12 +416,15 @@ if __name__ == '__main__':
     test_atom_is_in_ring_one_hot()
     test_atom_is_in_ring()
     test_atom_chiral_tag_one_hot()
+    test_atom_chirality_type_one_hot()
     test_atom_mass()
+    test_atom_is_chiral_center()
     test_concat_featurizer()
     test_base_atom_featurizer()
     test_canonical_atom_featurizer()
     test_weave_atom_featurizer()
     test_pretrain_atom_featurizer()
+    test_attentivefp_atom_featurizer()
     test_bond_type_one_hot()
     test_bond_is_conjugated_one_hot()
     test_bond_is_conjugated()

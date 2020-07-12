@@ -114,7 +114,9 @@ We can employ their numerical values directly or with one-hot encoding.
     dgllife.utils.atom_is_in_ring_one_hot
     dgllife.utils.atom_is_in_ring
     dgllife.utils.atom_chiral_tag_one_hot
+    dgllife.utils.atom_chirality_type_one_hot
     dgllife.utils.atom_mass
+    dgllife.utils.atom_is_chiral_center
 
 For using featurization methods like above in creating node features:
 
