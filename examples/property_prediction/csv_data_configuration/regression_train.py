@@ -65,12 +65,12 @@ def main(args, exp_config, train_set, val_set, test_set):
     # Set up directory for saving results
     args = init_trial_path(args)
 
-    train_loader = DataLoader(dataset=train_set, batch_size=exp_config['batch_size'],
-                              shuffle=True, collate_fn=collate_molgraphs)
+    train_loader = DataLoader(dataset=train_set, batch_size=exp_config['batch_size'], shuffle=True,
+                              collate_fn=collate_molgraphs, num_workers=args['num_workers'])
     val_loader = DataLoader(dataset=val_set, batch_size=exp_config['batch_size'],
-                            collate_fn=collate_molgraphs)
+                            collate_fn=collate_molgraphs, num_workers=args['num_workers'])
     test_loader = DataLoader(dataset=test_set, batch_size=exp_config['batch_size'],
-                             collate_fn=collate_molgraphs)
+                             collate_fn=collate_molgraphs, num_workers=args['num_workers'])
     model = load_model(exp_config).to(args['device'])
 
     loss_criterion = nn.SmoothL1Loss(reduction='none')
@@ -165,6 +165,8 @@ if __name__ == '__main__':
                         help='Maximum number of epochs allowed for training. '
                              'We set a large number by default as early stopping '
                              'will be performed. (default: 1000)')
+    parser.add_argument('-nw', '--num-workers', type=int, default=1,
+                        help='Number of processes for data loading (default: 1)')
     parser.add_argument('-pe', '--print-every', type=int, default=20,
                         help='Print the training progress every X mini-batches')
     parser.add_argument('-p', '--result-path', type=str, default='regression_results',

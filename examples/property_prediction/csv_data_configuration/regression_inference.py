@@ -18,7 +18,7 @@ def main(args):
     dataset = UnlabeledSMILES(args['smiles'], node_featurizer=args['node_featurizer'],
                               edge_featurizer=args['edge_featurizer'])
     dataloader = DataLoader(dataset, batch_size=args['batch_size'],
-                            collate_fn=collate_molgraphs_unlabeled)
+                            collate_fn=collate_molgraphs_unlabeled, num_workers=args['num_workers'])
     model = load_model(args).to(args['device'])
     checkpoint = torch.load(args['train_result_path'] + '/model.pth', map_location='cpu')
     model.load_state_dict(checkpoint['model_state_dict'])
@@ -65,6 +65,8 @@ if __name__ == '__main__':
                         help='Task names for saving model predictions in the CSV file to output, '
                              'which should be the same as the ones used for training. If not '
                              'specified, we will simply use task1, task2, ...')
+    parser.add_argument('-nw', '--num-workers', type=int, default=1,
+                        help='Number of processes for data loading (default: 1)')
     args = parser.parse_args().__dict__
 
     # Load configuration
