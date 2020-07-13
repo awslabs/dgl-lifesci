@@ -198,7 +198,7 @@ def load_model(exp_configure):
     if exp_configure['model'] == 'GCN':
         from dgllife.model import GCNPredictor
         model = GCNPredictor(
-            in_feats=exp_configure['in_feats'],
+            in_feats=exp_configure['in_node_feats'],
             hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
             activation=[F.relu] * exp_configure['num_gnn_layers'],
             residual=[exp_configure['residual']] * exp_configure['num_gnn_layers'],
@@ -210,7 +210,7 @@ def load_model(exp_configure):
     elif exp_configure['model'] == 'GAT':
         from dgllife.model import GATPredictor
         model = GATPredictor(
-            in_feats=exp_configure['in_feats'],
+            in_feats=exp_configure['in_node_feats'],
             hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
             num_heads=[exp_configure['num_heads']] * exp_configure['num_gnn_layers'],
             feat_drops=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
@@ -224,7 +224,13 @@ def load_model(exp_configure):
     elif exp_configure['model'] == 'Weave':
         from dgllife.model import WeavePredictor
         model = WeavePredictor(
-
+            node_in_feats=exp_configure['in_node_feats'],
+            edge_in_feats=exp_configure['in_edge_feats'],
+            num_gnn_layers=exp_configure['num_gnn_layers'],
+            gnn_hidden_feats=exp_configure['gnn_hidden_feats'],
+            graph_feats=exp_configure['graph_feats'],
+            gaussian_expand=exp_configure['gaussian_expand'],
+            n_tasks=exp_configure['n_tasks']
         )
     else:
         return ValueError("Expect model to be from ['GCN', 'GAT'], "

@@ -56,11 +56,13 @@ def main(args, exp_config, train_set, val_set, test_set):
     # Record settings
     exp_config.update({
         'model': args['model'],
-        'in_feats': args['node_featurizer'].feat_size(),
+        'in_node_feats': args['node_featurizer'].feat_size(),
         'n_tasks': args['n_tasks'],
         'atom_featurizer_type': args['atom_featurizer_type'],
         'bond_featurizer_type': args['bond_featurizer_type']
     })
+    if args['edge_featurizer'] is not None:
+        exp_config['in_edge_feats'] = args['edge_featurizer'].feat_size()
 
     # Set up directory for saving results
     args = init_trial_path(args)
