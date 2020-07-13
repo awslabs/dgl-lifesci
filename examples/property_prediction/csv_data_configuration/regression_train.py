@@ -58,7 +58,8 @@ def main(args, exp_config, train_set, val_set, test_set):
         'model': args['model'],
         'in_feats': args['node_featurizer'].feat_size(),
         'n_tasks': args['n_tasks'],
-        'atom_featurizer_type': args['atom_featurizer_type']
+        'atom_featurizer_type': args['atom_featurizer_type'],
+        'bond_featurizer_type': args['bond_featurizer_type']
     })
 
     # Set up directory for saving results
@@ -156,7 +157,10 @@ if __name__ == '__main__':
                         help='Model to use (default: GCN)')
     parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
                         default='canonical',
-                        help='Featurization for atoms (default: CanonicalAtomFeaturizer)')
+                        help='Featurization for atoms (default: canonical)')
+    parser.add_argument('-b', '--bond-featurizer-type', choices=['canonical', 'attentivefp'],
+                        default='canonical',
+                        help='Featurization for bonds (default: canonical)')
     parser.add_argument('-n', '--num-epochs', type=int, default=1000,
                         help='Maximum number of epochs allowed for training. '
                              'We set a large number by default as early stopping '
@@ -188,7 +192,7 @@ if __name__ == '__main__':
     dataset = MoleculeCSVDataset(df=df,
                                  smiles_to_graph=smiles_to_bigraph,
                                  node_featurizer=args['node_featurizer'],
-                                 edge_featurizer=None,
+                                 edge_featurizer=args['edge_featurizer'],
                                  smiles_column=args['smiles_column'],
                                  cache_file_path=args['result_path'] + '/graph.bin',
                                  task_names=args['task_names'])

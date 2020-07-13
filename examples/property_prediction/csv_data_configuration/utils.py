@@ -36,6 +36,16 @@ def init_featurizer(args):
             "Expect node_featurizer to be in ['canonical', 'attentivefp'], "
             "got {}".format(args['atom_featurizer_type']))
 
+    if args['model'] in ['Weave']:
+        if args['bond_featurizer_type'] == 'canonical':
+            from dgllife.utils import CanonicalBondFeaturizer
+            args['edge_featurizer'] = CanonicalBondFeaturizer()
+        elif args['bond_featurizer_type'] == 'attentivefp':
+            from dgllife.utils import AttentiveFPBondFeaturizer
+            args['edge_featurizer'] = AttentiveFPBondFeaturizer()
+    else:
+        args['edge_featurizer'] = None
+
     return args
 
 def get_configure(model):
@@ -211,6 +221,11 @@ def load_model(exp_configure):
             predictor_dropout=exp_configure['dropout'],
             n_tasks=exp_configure['n_tasks']
         )
+    elif exp_configure['model'] == 'Weave':
+        from dgllife.model import WeavePredictor
+        model = WeavePredictor(
+
+        )
     else:
         return ValueError("Expect model to be from ['GCN', 'GAT'], "
                           "got {}".format(exp_configure['model']))
@@ -219,4 +234,8 @@ def load_model(exp_configure):
 
 def predict(args, model, bg):
     node_feats = bg.ndata.pop('h').to(args['device'])
-    return model(bg, node_feats)
+    if args['edge_featurizer'] is None:
+        return model(bg, node_feats)
+    else:
+        edge_feats = bg.edata.pop('e').to(args['device'])
+        return model(bg, node_feats, edge_feats)

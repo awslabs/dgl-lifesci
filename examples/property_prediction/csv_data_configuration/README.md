@@ -60,10 +60,16 @@ Other optional arguments include:
     - Specifies the model to use. 
     - By default we use `GCN` for `GCNPredictor`, other options include:
         - `GAT` for `GATPredictor`
+        - `Weave` for `WeavePredictor`
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Specifies the initial featurization for atoms.
     - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 
       the atom featurizer used in AttentiveFP.
+- **Bond Featurizer Type**: `-b feaurizer` [default=canonical]
+    - Comes into effect only when the model used is `Weave`
+    - Specifies the initial featurization for bonds.
+    - By default we use `canonical` for CanonicalBondFeaturizer. Alternatively, we can use `attentivefp` for 
+      the bond featurizer used in AttentiveFP.
 - **Number of Hyperparameter Search Trials**: `-ne num_trials` [default=None]
     - Specifies the number of trials for hyperparameter search. If not specified, we use the setting specified in 
     `model_configuration/{model_name}.json`
@@ -132,10 +138,16 @@ Other optional arguments include:
     - Specifies the model to use. 
     - By default we use `GCN` for `GCNPredictor`, other options include:
         - `GAT` for `GATPredictor`
+        - `Weave` for `WeavePredictor`
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Specifies the initial featurization for atoms.
     - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 
       the atom featurizer used in AttentiveFP.
+- **Bond Featurizer Type**: `-b feaurizer` [default=canonical]
+    - Comes into effect only when the model used is `Weave`
+    - Specifies the initial featurization for bonds.
+    - By default we use `canonical` for CanonicalBondFeaturizer. Alternatively, we can use `attentivefp` for 
+      the bond featurizer used in AttentiveFP.
 - **Number of Hyperparameter Search Trials**: `-ne num_trials` [default=None]
     - Specifies the number of trials for hyperparameter search. If not specified, we use the setting specified in 
     `model_configuration/{model_name}.json`

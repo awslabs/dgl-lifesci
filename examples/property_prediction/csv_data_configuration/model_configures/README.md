@@ -26,3 +26,11 @@ To manually set the hyperparameters for a model, modify the corresponding json f
 - `predictor_hidden_feats`: (int) Hidden size for the MLP predictor
 - `num_gnn_layers`: (int) Number of GNN layers to use
 - `residual`: (bool) Whether to use residual connection for each GAT layer
+
+## Weave
+
+- `num_gnn_layers`: (int) Number of GNN layers to use
+- `gnn_hidden_feats`: (int) Hidden size for GNN layers
+- `graph_feats`: (int) Hidden size for the MLP predictor
+- `gaussian_expand`: (bool) Whether to expand each dimension of node features by 
+gaussian histogram in computing graph representations.
