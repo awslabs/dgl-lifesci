@@ -153,7 +153,7 @@ if __name__ == '__main__':
                         help='Proportion of the dataset used for training, validation and test')
     parser.add_argument('-me', '--metric', choices=['roc_auc_score'], default='roc_auc_score',
                         help='Metric for evaluation (default: roc_auc_score)')
-    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT'], default='GCN',
+    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave'], default='GCN',
                         help='Model to use (default: GCN)')
     parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
                         default='canonical',
