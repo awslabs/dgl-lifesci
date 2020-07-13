@@ -155,7 +155,7 @@ if __name__ == '__main__':
                         help='Model to use (default: GCN)')
     parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
                         default='canonical',
-                        help='Featurization for atoms (default: CanonicalAtomFeaturizer)')
+                        help='Featurization for atoms (default: canonical)')
     parser.add_argument('-b', '--bond-featurizer-type', choices=['canonical', 'attentivefp'],
                         default='canonical',
                         help='Featurization for bonds (default: canonical)')
