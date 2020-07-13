@@ -155,7 +155,7 @@ if __name__ == '__main__':
                         help='Proportion of the dataset used for training, validation and test')
     parser.add_argument('-me', '--metric', choices=['r2', 'mae', 'rmse'], default='r2',
                         help='Metric for evaluation (default: r2)')
-    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave'], default='GCN',
+    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN'], default='GCN',
                         help='Model to use (default: GCN)')
     parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
                         default='canonical',

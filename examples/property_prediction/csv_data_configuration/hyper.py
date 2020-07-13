@@ -37,6 +37,14 @@ weave_hyperparameters = {
     'gaussian_expand': hp.choice('gaussian_expand', [True, False]),
 }
 
+mpnn_hyperparameters = {
+    'node_out_feats': hp.choice('node_out_feats', [32, 64, 128, 256]),
+    'edge_hidden_feats': hp.choice('edge_hidden_feats', [32, 64, 128, 256]),
+    'num_step_message_passing': hp.choice('num_step_message_passing', [1, 2, 3, 4, 5, 6]),
+    'num_step_set2set': hp.choice('num_step_message_passing', [1, 2, 3, 4, 5, 6]),
+    'num_layer_set2set': hp.choice('num_step_message_passing', [1, 2, 3])
+}
+
 def init_hyper_space(model):
     """Initialize the hyperparameter search space
 
@@ -58,6 +66,8 @@ def init_hyper_space(model):
         candidate_hypers.update(gat_hyperparameters)
     elif model == 'Weave':
         candidate_hypers.update(weave_hyperparameters)
+    elif model == 'MPNN':
+        candidate_hypers.update(mpnn_hyperparameters)
     else:
         return ValueError('Unexpected model: {}'.format(model))
     return candidate_hypers
