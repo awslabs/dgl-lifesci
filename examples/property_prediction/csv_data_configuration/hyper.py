@@ -15,7 +15,7 @@ common_hyperparameters = {
 
 gcn_hyperparameters = {
     'gnn_hidden_feats': hp.choice('gnn_hidden_feats', [32, 64, 128, 256]),
-    'predictor_hidden_feats': hp.choice('predictor_hidden_feats', [16, 32, 64, 128, 256]),
+    'predictor_hidden_feats': hp.choice('predictor_hidden_feats', [16, 32, 64, 128, 256, 512]),
     'num_gnn_layers': hp.choice('num_gnn_layers', [1, 2, 3, 4, 5]),
     'residual': hp.choice('residual', [True, False]),
     'batchnorm': hp.choice('batchnorm', [True, False])
@@ -28,6 +28,13 @@ gat_hyperparameters = {
     'predictor_hidden_feats': hp.choice('predictor_hidden_feats', [16, 32, 64, 128, 256]),
     'num_gnn_layers': hp.choice('num_gnn_layers', [1, 2, 3, 4, 5]),
     'residual': hp.choice('residual', [True, False]),
+}
+
+weave_hyperparameters = {
+    'gnn_hidden_feats': hp.choice('gnn_hidden_feats', [32, 64, 128, 256]),
+    'num_gnn_layers': hp.choice('num_gnn_layers', [1, 2, 3, 4, 5]),
+    'graph_feats': hp.choice('graph_feats', [16, 32, 64, 128, 256]),
+    'gaussian_expand': hp.choice('gaussian_expand', [True, False]),
 }
 
 def init_hyper_space(model):
@@ -49,6 +56,8 @@ def init_hyper_space(model):
         candidate_hypers.update(gcn_hyperparameters)
     elif model == 'GAT':
         candidate_hypers.update(gat_hyperparameters)
+    elif model == 'Weave':
+        candidate_hypers.update(weave_hyperparameters)
     else:
         return ValueError('Unexpected model: {}'.format(model))
     return candidate_hypers

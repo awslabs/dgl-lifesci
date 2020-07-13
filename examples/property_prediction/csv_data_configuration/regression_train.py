@@ -56,20 +56,23 @@ def main(args, exp_config, train_set, val_set, test_set):
     # Record settings
     exp_config.update({
         'model': args['model'],
-        'in_feats': args['node_featurizer'].feat_size(),
+        'in_node_feats': args['node_featurizer'].feat_size(),
         'n_tasks': args['n_tasks'],
-        'atom_featurizer_type': args['atom_featurizer_type']
+        'atom_featurizer_type': args['atom_featurizer_type'],
+        'bond_featurizer_type': args['bond_featurizer_type']
     })
+    if args['edge_featurizer'] is not None:
+        exp_config['in_edge_feats'] = args['edge_featurizer'].feat_size()
 
     # Set up directory for saving results
     args = init_trial_path(args)
 
-    train_loader = DataLoader(dataset=train_set, batch_size=exp_config['batch_size'],
-                              shuffle=True, collate_fn=collate_molgraphs)
+    train_loader = DataLoader(dataset=train_set, batch_size=exp_config['batch_size'], shuffle=True,
+                              collate_fn=collate_molgraphs, num_workers=args['num_workers'])
     val_loader = DataLoader(dataset=val_set, batch_size=exp_config['batch_size'],
-                            collate_fn=collate_molgraphs)
+                            collate_fn=collate_molgraphs, num_workers=args['num_workers'])
     test_loader = DataLoader(dataset=test_set, batch_size=exp_config['batch_size'],
-                             collate_fn=collate_molgraphs)
+                             collate_fn=collate_molgraphs, num_workers=args['num_workers'])
     model = load_model(exp_config).to(args['device'])
 
     loss_criterion = nn.SmoothL1Loss(reduction='none')
@@ -152,15 +155,20 @@ if __name__ == '__main__':
                         help='Proportion of the dataset used for training, validation and test')
     parser.add_argument('-me', '--metric', choices=['r2', 'mae', 'rmse'], default='r2',
                         help='Metric for evaluation (default: r2)')
-    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT'], default='GCN',
+    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave'], default='GCN',
                         help='Model to use (default: GCN)')
     parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
                         default='canonical',
-                        help='Featurization for atoms (default: CanonicalAtomFeaturizer)')
+                        help='Featurization for atoms (default: canonical)')
+    parser.add_argument('-b', '--bond-featurizer-type', choices=['canonical', 'attentivefp'],
+                        default='canonical',
+                        help='Featurization for bonds (default: canonical)')
     parser.add_argument('-n', '--num-epochs', type=int, default=1000,
                         help='Maximum number of epochs allowed for training. '
                              'We set a large number by default as early stopping '
                              'will be performed. (default: 1000)')
+    parser.add_argument('-nw', '--num-workers', type=int, default=1,
+                        help='Number of processes for data loading (default: 1)')
     parser.add_argument('-pe', '--print-every', type=int, default=20,
                         help='Print the training progress every X mini-batches')
     parser.add_argument('-p', '--result-path', type=str, default='regression_results',
@@ -188,7 +196,7 @@ if __name__ == '__main__':
     dataset = MoleculeCSVDataset(df=df,
                                  smiles_to_graph=smiles_to_bigraph,
                                  node_featurizer=args['node_featurizer'],
-                                 edge_featurizer=None,
+                                 edge_featurizer=args['edge_featurizer'],
                                  smiles_column=args['smiles_column'],
                                  cache_file_path=args['result_path'] + '/graph.bin',
                                  task_names=args['task_names'])

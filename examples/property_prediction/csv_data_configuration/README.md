@@ -60,10 +60,16 @@ Other optional arguments include:
     - Specifies the model to use. 
     - By default we use `GCN` for `GCNPredictor`, other options include:
         - `GAT` for `GATPredictor`
+        - `Weave` for `WeavePredictor`
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Specifies the initial featurization for atoms.
     - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 
       the atom featurizer used in AttentiveFP.
+- **Bond Featurizer Type**: `-b feaurizer` [default=canonical]
+    - Comes into effect only when the model used is `Weave`
+    - Specifies the initial featurization for bonds.
+    - By default we use `canonical` for CanonicalBondFeaturizer. Alternatively, we can use `attentivefp` for 
+      the bond featurizer used in AttentiveFP.
 - **Number of Hyperparameter Search Trials**: `-ne num_trials` [default=None]
     - Specifies the number of trials for hyperparameter search. If not specified, we use the setting specified in 
     `model_configuration/{model_name}.json`
@@ -80,6 +86,8 @@ Other optional arguments include:
     and `rmse` for root mean square error.
 - **Num Epochs**: `-n number` [default=1000]
     - Specifies the maximum number of epochs for training. Early stopping will be performed based on validation metric.
+- **Num of Processes for Data Loading**: `-nw number` [default=1]
+    - Specifies the number of processes to use for data loading. A larger number might yield a faster speed.
 - **Print Every**: `-pe number` [default=20]
     - The training progress will be printed every `number` minibatches.
 - **Result Path**: `-p path` [default=regression_results]
@@ -114,6 +122,8 @@ Other optional arguments include:
 - **Task**: `-t task1,task2,task3,...`
     - Task names for saving model predictions in the CSV file to output, which should be the same as the ones 
     used for training. If not specified, we will simply use task1, task2, ...
+- **Num of Processes for Data Loading**: `-nw number` [default=1]
+    - Specifies the number of processes to use for data loading. A larger number might yield a faster speed.
 
 ## (Multi-label) Binary Classification
 
@@ -132,10 +142,16 @@ Other optional arguments include:
     - Specifies the model to use. 
     - By default we use `GCN` for `GCNPredictor`, other options include:
         - `GAT` for `GATPredictor`
+        - `Weave` for `WeavePredictor`
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Specifies the initial featurization for atoms.
     - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 
       the atom featurizer used in AttentiveFP.
+- **Bond Featurizer Type**: `-b feaurizer` [default=canonical]
+    - Comes into effect only when the model used is `Weave`
+    - Specifies the initial featurization for bonds.
+    - By default we use `canonical` for CanonicalBondFeaturizer. Alternatively, we can use `attentivefp` for 
+      the bond featurizer used in AttentiveFP.
 - **Number of Hyperparameter Search Trials**: `-ne num_trials` [default=None]
     - Specifies the number of trials for hyperparameter search. If not specified, we use the setting specified in 
     `model_configuration/{model_name}.json`
@@ -149,6 +165,8 @@ Other optional arguments include:
     - By default we use ROC AUC score. 
 - **Num Epochs**: `-n number` [default=1000]
     - Specifies the maximum number of epochs for training. Early stopping will be performed based on validation metric.
+- **Num of Processes for Data Loading**: `-nw number` [default=1]
+    - Specifies the number of processes to use for data loading. A larger number might yield a faster speed.
 - **Print Every**: `-pe number` [default=20]
     - The training progress will be printed every `number` minibatches.
 - **Result Path**: `-p path` [default=classification_results]
@@ -186,3 +204,5 @@ Other optional arguments include:
 - **Soft Classification**: `-s` [default=False]
     - By default we will perform hard classification with binary labels. 
     This flag allows performing soft classification instead.
+- **Num of Processes for Data Loading**: `-nw number` [default=1]
+    - Specifies the number of processes to use for data loading. A larger number might yield a faster speed.

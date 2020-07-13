@@ -36,6 +36,16 @@ def init_featurizer(args):
             "Expect node_featurizer to be in ['canonical', 'attentivefp'], "
             "got {}".format(args['atom_featurizer_type']))
 
+    if args['model'] in ['Weave']:
+        if args['bond_featurizer_type'] == 'canonical':
+            from dgllife.utils import CanonicalBondFeaturizer
+            args['edge_featurizer'] = CanonicalBondFeaturizer()
+        elif args['bond_featurizer_type'] == 'attentivefp':
+            from dgllife.utils import AttentiveFPBondFeaturizer
+            args['edge_featurizer'] = AttentiveFPBondFeaturizer()
+    else:
+        args['edge_featurizer'] = None
+
     return args
 
 def get_configure(model):
@@ -188,7 +198,7 @@ def load_model(exp_configure):
     if exp_configure['model'] == 'GCN':
         from dgllife.model import GCNPredictor
         model = GCNPredictor(
-            in_feats=exp_configure['in_feats'],
+            in_feats=exp_configure['in_node_feats'],
             hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
             activation=[F.relu] * exp_configure['num_gnn_layers'],
             residual=[exp_configure['residual']] * exp_configure['num_gnn_layers'],
@@ -200,7 +210,7 @@ def load_model(exp_configure):
     elif exp_configure['model'] == 'GAT':
         from dgllife.model import GATPredictor
         model = GATPredictor(
-            in_feats=exp_configure['in_feats'],
+            in_feats=exp_configure['in_node_feats'],
             hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
             num_heads=[exp_configure['num_heads']] * exp_configure['num_gnn_layers'],
             feat_drops=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
@@ -211,6 +221,17 @@ def load_model(exp_configure):
             predictor_dropout=exp_configure['dropout'],
             n_tasks=exp_configure['n_tasks']
         )
+    elif exp_configure['model'] == 'Weave':
+        from dgllife.model import WeavePredictor
+        model = WeavePredictor(
+            node_in_feats=exp_configure['in_node_feats'],
+            edge_in_feats=exp_configure['in_edge_feats'],
+            num_gnn_layers=exp_configure['num_gnn_layers'],
+            gnn_hidden_feats=exp_configure['gnn_hidden_feats'],
+            graph_feats=exp_configure['graph_feats'],
+            gaussian_expand=exp_configure['gaussian_expand'],
+            n_tasks=exp_configure['n_tasks']
+        )
     else:
         return ValueError("Expect model to be from ['GCN', 'GAT'], "
                           "got {}".format(exp_configure['model']))
@@ -219,4 +240,8 @@ def load_model(exp_configure):
 
 def predict(args, model, bg):
     node_feats = bg.ndata.pop('h').to(args['device'])
-    return model(bg, node_feats)
+    if args['edge_featurizer'] is None:
+        return model(bg, node_feats)
+    else:
+        edge_feats = bg.edata.pop('e').to(args['device'])
+        return model(bg, node_feats, edge_feats)
