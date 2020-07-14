@@ -38,7 +38,7 @@ weave_hyperparameters = {
 }
 
 mpnn_hyperparameters = {
-    'node_out_feats': hp.choice('node_out_feats', [32, 64, 128]),
+    'node_out_feats': hp.choice('node_out_feats', [32, 64]),
     'edge_hidden_feats': hp.choice('edge_hidden_feats', [32, 64]),
     'num_step_message_passing': hp.choice('num_step_message_passing', [1, 2, 3, 4, 5]),
     'num_step_set2set': hp.choice('num_step_set2set', [1, 2]),
