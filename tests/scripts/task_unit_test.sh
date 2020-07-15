@@ -31,8 +31,9 @@ then
 else
   export CUDA_VISIBLE_DEVICES=-1
   pip uninstall -y dgl
+  pip uninstall -y dgl-cu101
   # pip install --pre dgl
-  pip install dgl-cu101
+  pip install dgl
 fi
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib
