@@ -152,7 +152,8 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--split', choices=['scaffold'], default='scaffold',
                         help='Dataset splitting method')
     parser.add_argument('-sr', '--split-ratio', default='0.8,0.1,0.1', type=str,
-                        help='Proportion of the dataset used for training, validation and test')
+                        help='Proportion of the dataset used for training, validation and test '
+                             '(default: 0.8,0.1,0.1)')
     parser.add_argument('-me', '--metric', choices=['r2', 'mae', 'rmse'], default='r2',
                         help='Metric for evaluation (default: r2)')
     parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP'],

@@ -36,7 +36,7 @@ def init_featurizer(args):
             "Expect node_featurizer to be in ['canonical', 'attentivefp'], "
             "got {}".format(args['atom_featurizer_type']))
 
-    if args['model'] in ['Weave', 'MPNN']:
+    if args['model'] in ['Weave', 'MPNN', 'AttentiveFP']:
         if args['bond_featurizer_type'] == 'canonical':
             from dgllife.utils import CanonicalBondFeaturizer
             args['edge_featurizer'] = CanonicalBondFeaturizer()
@@ -243,6 +243,16 @@ def load_model(exp_configure):
             num_step_set2set=exp_configure['num_step_set2set'],
             num_layer_set2set=exp_configure['num_layer_set2set'],
             n_tasks=exp_configure['n_tasks']
+        )
+    elif exp_configure['model'] == 'AttentiveFP':
+        from dgllife.model import AttentiveFPPredictor
+        model = AttentiveFPPredictor(
+            node_feat_size=exp_configure['in_node_feats'],
+            edge_feat_size=exp_configure['in_edge_feats'],
+            num_layers=exp_configure['num_layers'],
+            num_timesteps=exp_configure['num_timesteps'],
+            graph_feat_size=exp_configure['graph_feat_size'],
+            dropout=exp_configure['dropout']
         )
     else:
         return ValueError("Expect model to be from ['GCN', 'GAT'], "
