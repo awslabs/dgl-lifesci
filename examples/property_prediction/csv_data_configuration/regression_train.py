@@ -10,8 +10,7 @@ import torch
 import torch.nn as nn
 
 from copy import deepcopy
-from dgllife.data import MoleculeCSVDataset
-from dgllife.utils import Meter, smiles_to_bigraph, EarlyStopping
+from dgllife.utils import Meter, EarlyStopping
 from hyperopt import fmin, tpe
 from shutil import copyfile
 from torch.optim import Adam
@@ -19,7 +18,7 @@ from torch.utils.data import DataLoader
 
 from hyper import init_hyper_space
 from utils import get_configure, mkdir_p, init_trial_path, \
-    split_dataset, collate_molgraphs, load_model, predict, init_featurizer
+    split_dataset, collate_molgraphs, load_model, predict, init_featurizer, load_dataset
 
 def run_a_train_epoch(args, epoch, model, data_loader, loss_criterion, optimizer):
     model.train()
@@ -198,13 +197,7 @@ if __name__ == '__main__':
     args = init_featurizer(args)
     df = pd.read_csv(args['csv_path'])
     mkdir_p(args['result_path'])
-    dataset = MoleculeCSVDataset(df=df,
-                                 smiles_to_graph=smiles_to_bigraph,
-                                 node_featurizer=args['node_featurizer'],
-                                 edge_featurizer=args['edge_featurizer'],
-                                 smiles_column=args['smiles_column'],
-                                 cache_file_path=args['result_path'] + '/graph.bin',
-                                 task_names=args['task_names'])
+    dataset = load_dataset(args, df)
     # Whether to take the logarithm of labels for narrowing the range of values
     if args['log_values']:
         dataset.labels = dataset.labels.log()

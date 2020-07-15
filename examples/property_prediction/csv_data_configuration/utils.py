@@ -10,7 +10,9 @@ import os
 import torch
 import torch.nn.functional as F
 
-from dgllife.utils import ScaffoldSplitter
+from dgllife.data import MoleculeCSVDataset
+from dgllife.utils import smiles_to_bigraph, ScaffoldSplitter
+from functools import partial
 
 def init_featurizer(args):
     """Initialize node/edge featurizer
@@ -57,6 +59,23 @@ def init_featurizer(args):
         args['edge_featurizer'] = None
 
     return args
+
+def load_dataset(args, df):
+    if args['model'] in ['gin_supervised_contextpred', 'gin_supervised_infomax',
+                         'gin_supervised_edgepred', 'gin_supervised_masking']:
+        self_loop = True
+    else:
+        self_loop = False
+
+    dataset = MoleculeCSVDataset(df=df,
+                                 smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=self_loop),
+                                 node_featurizer=args['node_featurizer'],
+                                 edge_featurizer=args['edge_featurizer'],
+                                 smiles_column=args['smiles_column'],
+                                 cache_file_path=args['result_path'] + '/graph.bin',
+                                 task_names=args['task_names'])
+
+    return dataset
 
 def get_configure(model):
     """Query for the manually specified configuration
