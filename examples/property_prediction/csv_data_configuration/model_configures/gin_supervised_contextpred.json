@@ -1,0 +1,8 @@
+{
+  "lr": 2e-2,
+  "weight_decay": 0,
+  "patience": 30,
+  "batch_size": 128,
+  "jk": "last",
+  "readout": "sum"
+}

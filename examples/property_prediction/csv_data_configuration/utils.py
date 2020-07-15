@@ -25,6 +25,14 @@ def init_featurizer(args):
     args : dict
         Settings with featurizers updated
     """
+    if args['model'] in ['gin_supervised_contextpred', 'gin_supervised_infomax',
+                         'gin_supervised_edgepred', 'gin_supervised_masking']:
+        from dgllife.utils import PretrainAtomFeaturizer, PretrainBondFeaturizer
+        args['atom_featurizer_type'] = 'pre_train'
+        args['bond_featurizer_type'] = 'pre_train'
+        args['node_featurizer'] = PretrainAtomFeaturizer()
+        args['edge_featurizer'] = PretrainBondFeaturizer()
+
     if args['atom_featurizer_type'] == 'canonical':
         from dgllife.utils import CanonicalAtomFeaturizer
         args['node_featurizer'] = CanonicalAtomFeaturizer()
@@ -254,6 +262,22 @@ def load_model(exp_configure):
             graph_feat_size=exp_configure['graph_feat_size'],
             dropout=exp_configure['dropout']
         )
+    elif exp_configure['model'] in ['gin_supervised_contextpred', 'gin_supervised_infomax',
+                                    'gin_supervised_edgepred', 'gin_supervised_masking']:
+        from dgllife.model import GINPredictor
+        from dgllife.model import load_pretrained
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=exp_configure['jk'],
+            dropout=0.5,
+            readout=exp_configure['readout'],
+            n_tasks=exp_configure['n_tasks']
+        )
+        model.gnn = load_pretrained(exp_configure['model'])
+        model.gnn.JK = exp_configure['jk']
     else:
         return ValueError("Expect model to be from ['GCN', 'GAT'], "
                           "got {}".format(exp_configure['model']))
@@ -261,9 +285,20 @@ def load_model(exp_configure):
     return model
 
 def predict(args, model, bg):
-    node_feats = bg.ndata.pop('h').to(args['device'])
     if args['edge_featurizer'] is None:
+        node_feats = bg.ndata.pop('h').to(args['device'])
         return model(bg, node_feats)
+    elif args['bond_featurizer_type'] == 'pre_train':
+        node_feats = [
+            bg.ndata.pop('atomic_number').to(args['device']),
+            bg.ndata.pop('chirality_type').to(args['device'])
+        ]
+        edge_feats = [
+            bg.edata.pop('bond_type').to(args['device']),
+            bg.edata.pop('bond_direction_type').to(args['device'])
+        ]
+        return model(bg, node_feats, edge_feats)
     else:
+        node_feats = bg.ndata.pop('h').to(args['device'])
         edge_feats = bg.edata.pop('e').to(args['device'])
         return model(bg, node_feats, edge_feats)

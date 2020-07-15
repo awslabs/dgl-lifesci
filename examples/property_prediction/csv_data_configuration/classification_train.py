@@ -154,7 +154,11 @@ if __name__ == '__main__':
                              '(default: 0.8,0.1,0.1)')
     parser.add_argument('-me', '--metric', choices=['roc_auc_score'], default='roc_auc_score',
                         help='Metric for evaluation (default: roc_auc_score)')
-    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP'],
+    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP',
+                                                   'gin_supervised_contextpred',
+                                                   'gin_supervised_infomax',
+                                                   'gin_supervised_edgepred',
+                                                   'gin_supervised_masking'],
                         default='GCN', help='Model to use (default: GCN)')
     parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
                         default='canonical',

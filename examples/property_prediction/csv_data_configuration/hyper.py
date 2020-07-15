@@ -10,7 +10,6 @@ common_hyperparameters = {
     'weight_decay': hp.uniform('weight_decay', low=0, high=1e-4),
     'patience': hp.choice('patience', [30]),
     'batch_size': hp.choice('batch_size', [32, 64, 128, 256, 512]),
-    'dropout': hp.uniform('dropout', low=0., high=0.15)
 }
 
 gcn_hyperparameters = {
@@ -18,7 +17,8 @@ gcn_hyperparameters = {
     'predictor_hidden_feats': hp.choice('predictor_hidden_feats', [16, 32, 64, 128, 256, 512]),
     'num_gnn_layers': hp.choice('num_gnn_layers', [1, 2, 3, 4, 5]),
     'residual': hp.choice('residual', [True, False]),
-    'batchnorm': hp.choice('batchnorm', [True, False])
+    'batchnorm': hp.choice('batchnorm', [True, False]),
+    'dropout': hp.uniform('dropout', low=0., high=0.15)
 }
 
 gat_hyperparameters = {
@@ -28,6 +28,7 @@ gat_hyperparameters = {
     'predictor_hidden_feats': hp.choice('predictor_hidden_feats', [16, 32, 64, 128, 256]),
     'num_gnn_layers': hp.choice('num_gnn_layers', [1, 2, 3, 4, 5]),
     'residual': hp.choice('residual', [True, False]),
+    'dropout': hp.uniform('dropout', low=0., high=0.15)
 }
 
 weave_hyperparameters = {
@@ -49,6 +50,12 @@ attentivefp_hyperparameters = {
     'num_layers': hp.choice('num_layers', [1, 2, 3, 4, 5]),
     'num_timesteps': hp.choice('num_timesteps', [1, 2, 3, 4, 5]),
     'graph_feat_size': hp.choice('graph_feat_size', [16, 32, 64, 128, 256]),
+    'dropout': hp.uniform('dropout', low=0., high=0.15)
+}
+
+gin_pretrained_hyperparameters = {
+    'jk': hp.choice('jk', ['concat', 'last', 'max', 'sum']),
+    'readout': hp.choice('readout', ['sum', 'mean', 'max', 'attention', 'set2set'])
 }
 
 def init_hyper_space(model):
@@ -76,6 +83,9 @@ def init_hyper_space(model):
         candidate_hypers.update(mpnn_hyperparameters)
     elif model == 'AttentiveFP':
         candidate_hypers.update(attentivefp_hyperparameters)
+    elif model in ['gin_supervised_contextpred', 'gin_supervised_infomax',
+                   'gin_supervised_edgepred', 'gin_supervised_masking']:
+        candidate_hypers.update(gin_pretrained_hyperparameters)
     else:
         return ValueError('Unexpected model: {}'.format(model))
     return candidate_hypers

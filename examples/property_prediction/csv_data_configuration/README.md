@@ -58,17 +58,24 @@ where `X` specifies the path to the CSV file and `Y` specifies the header for th
 Other optional arguments include:
 - **Model**: `-mo model` [default=GCN]
     - Specifies the model to use. 
-    - By default we use `GCN` for `GCNPredictor`, other options include:
-        - `GAT` for `GATPredictor`
-        - `Weave` for `WeavePredictor`
-        - `MPNN` for `MPNNPredictor`
-        - `AttentiveFP` for `AttentiveFPPredictor`
+    - By default we use `GCN` for [GCN](https://arxiv.org/abs/1609.02907) followed by weighted sum and max pooling, 
+    other options include:
+        - `GAT` for [GAT](https://arxiv.org/abs/1710.10903) followed by weighted sum and max pooling
+        - `Weave` for [Weave](https://arxiv.org/abs/1603.00856)
+        - `MPNN` for [MPNN](https://arxiv.org/abs/1704.01212)
+        - `AttentiveFP` for [AttentiveFP](https://pubs.acs.org/doi/abs/10.1021/acs.jmedchem.9b00959)
+        - `gin_supervised_contextpred` for 
+        [GIN pre-trained with supervised learning and context prediction](https://arxiv.org/abs/1905.12265)
+        - `gin_supervised_infomax` for [GIN pre-trained with supervised learning and mutual information maximization](https://arxiv.org/abs/1905.12265)
+        - `gin_supervised_edgepred` for [GIN pre-trained with supervised learning and edge prediction](https://arxiv.org/abs/1905.12265)
+        - `gin_supervised_masking` for [GIN pre-trained with supervised learning and attribute masking](https://arxiv.org/abs/1905.12265)
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
+    - Comes into effect only when the model is not a pre-trained GIN
     - Specifies the initial featurization for atoms.
     - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 
       the atom featurizer used in AttentiveFP.
 - **Bond Featurizer Type**: `-b feaurizer` [default=canonical]
-    - Comes into effect only when the model used is `Weave`
+    - Comes into effect only when the model used is one of `Weave`, `MPNN` and `AttentiveFP`
     - Specifies the initial featurization for bonds.
     - By default we use `canonical` for CanonicalBondFeaturizer. Alternatively, we can use `attentivefp` for 
       the bond featurizer used in AttentiveFP.
@@ -142,17 +149,24 @@ where `X` specifies the path to the CSV file and `Y` specifies the header for th
 Other optional arguments include:
 - **Model**: `-mo model` [default=GCN]
     - Specifies the model to use. 
-    - By default we use `GCN` for `GCNPredictor`, other options include:
-        - `GAT` for `GATPredictor`
-        - `Weave` for `WeavePredictor`
-        - `MPNN` for `MPNNPredictor`
-        - `AttentiveFP` for `AttentiveFPPredictor`
+    - By default we use `GCN` for [GCN](https://arxiv.org/abs/1609.02907) followed by weighted sum and max pooling, 
+    other options include:
+        - `GAT` for [GAT](https://arxiv.org/abs/1710.10903) followed by weighted sum and max pooling
+        - `Weave` for [Weave](https://arxiv.org/abs/1603.00856)
+        - `MPNN` for [MPNN](https://arxiv.org/abs/1704.01212)
+        - `AttentiveFP` for [AttentiveFP](https://pubs.acs.org/doi/abs/10.1021/acs.jmedchem.9b00959)
+        - `gin_supervised_contextpred` for 
+        [GIN pre-trained with supervised learning and context prediction](https://arxiv.org/abs/1905.12265)
+        - `gin_supervised_infomax` for [GIN pre-trained with supervised learning and mutual information maximization](https://arxiv.org/abs/1905.12265)
+        - `gin_supervised_edgepred` for [GIN pre-trained with supervised learning and edge prediction](https://arxiv.org/abs/1905.12265)
+        - `gin_supervised_masking` for [GIN pre-trained with supervised learning and attribute masking](https://arxiv.org/abs/1905.12265)
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
+    - Comes into effect only when the model is not a pre-trained GIN
     - Specifies the initial featurization for atoms.
     - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 
       the atom featurizer used in AttentiveFP.
 - **Bond Featurizer Type**: `-b feaurizer` [default=canonical]
-    - Comes into effect only when the model used is `Weave`
+    - Comes into effect only when the model used is one of `Weave`, `MPNN` and `AttentiveFP`
     - Specifies the initial featurization for bonds.
     - By default we use `canonical` for CanonicalBondFeaturizer. Alternatively, we can use `attentivefp` for 
       the bond featurizer used in AttentiveFP.
