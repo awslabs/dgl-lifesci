@@ -8,8 +8,7 @@ from hyperopt import hp
 common_hyperparameters = {
     'lr': hp.uniform('lr', low=1e-4, high=3e-2),
     'weight_decay': hp.uniform('weight_decay', low=0, high=1e-4),
-    'patience': hp.uniform('patience', [30]),
-    'batch_size': hp.uniform('batch_size', [32, 64, 128, 256, 512]),
+    'batch_size': hp.choice('batch_size', [32, 64, 128, 256, 512]),
 }
 
 gcn_hyperparameters = {
