@@ -215,10 +215,10 @@ class GIN(nn.Module):
         elif self.JK == 'last':
             final_node_feats = all_layer_node_feats[-1]
         elif self.JK == 'max':
-            all_layer_node_feats = [h.unsqueeze_(0) for h in all_layer_node_feats]
+            all_layer_node_feats = [h.unsqueeze(0) for h in all_layer_node_feats]
             final_node_feats = torch.max(torch.cat(all_layer_node_feats, dim=0), dim=0)[0]
         elif self.JK == 'sum':
-            all_layer_node_feats = [h.unsqueeze_(0) for h in all_layer_node_feats]
+            all_layer_node_feats = [h.unsqueeze(0) for h in all_layer_node_feats]
             final_node_feats = torch.sum(torch.cat(all_layer_node_feats, dim=0), dim=0)
         else:
             return ValueError("Expect self.JK to be 'concat', 'last', "
