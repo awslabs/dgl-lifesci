@@ -61,6 +61,7 @@ Other optional arguments include:
     - By default we use `GCN` for `GCNPredictor`, other options include:
         - `GAT` for `GATPredictor`
         - `Weave` for `WeavePredictor`
+        - `MPNN` for `MPNNPredictor`
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Specifies the initial featurization for atoms.
     - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 
@@ -143,6 +144,7 @@ Other optional arguments include:
     - By default we use `GCN` for `GCNPredictor`, other options include:
         - `GAT` for `GATPredictor`
         - `Weave` for `WeavePredictor`
+        - `MPNN` for `MPNNPredictor`
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Specifies the initial featurization for atoms.
     - By default we use `canonical` for CanonicalAtomFeaturizer. Alternatively, we can use `attentivefp` for 

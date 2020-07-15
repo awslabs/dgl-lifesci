@@ -6,7 +6,7 @@
 from hyperopt import hp
 
 common_hyperparameters = {
-    'lr': hp.uniform('lr', low=3e-4, high=3e-2),
+    'lr': hp.uniform('lr', low=1e-4, high=3e-2),
     'weight_decay': hp.uniform('weight_decay', low=0, high=1e-4),
     'patience': hp.choice('patience', [30]),
     'batch_size': hp.choice('batch_size', [32, 64, 128, 256, 512]),
@@ -37,6 +37,14 @@ weave_hyperparameters = {
     'gaussian_expand': hp.choice('gaussian_expand', [True, False]),
 }
 
+mpnn_hyperparameters = {
+    'node_out_feats': hp.choice('node_out_feats', [32, 64]),
+    'edge_hidden_feats': hp.choice('edge_hidden_feats', [32, 64]),
+    'num_step_message_passing': hp.choice('num_step_message_passing', [1, 2, 3, 4, 5]),
+    'num_step_set2set': hp.choice('num_step_set2set', [1, 2, 3]),
+    'num_layer_set2set': hp.choice('num_layer_set2set', [1, 2, 3])
+}
+
 def init_hyper_space(model):
     """Initialize the hyperparameter search space
 
@@ -58,6 +66,8 @@ def init_hyper_space(model):
         candidate_hypers.update(gat_hyperparameters)
     elif model == 'Weave':
         candidate_hypers.update(weave_hyperparameters)
+    elif model == 'MPNN':
+        candidate_hypers.update(mpnn_hyperparameters)
     else:
         return ValueError('Unexpected model: {}'.format(model))
     return candidate_hypers

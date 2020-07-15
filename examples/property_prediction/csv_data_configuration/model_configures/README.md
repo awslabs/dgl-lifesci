@@ -34,3 +34,11 @@ To manually set the hyperparameters for a model, modify the corresponding json f
 - `graph_feats`: (int) Hidden size for the MLP predictor
 - `gaussian_expand`: (bool) Whether to expand each dimension of node features by 
 gaussian histogram in computing graph representations.
+
+## MPNN
+
+- `node_out_feats`: (int) Hidden size for node representations in GNN layers
+- `edge_hidden_feats`: (int) Hidden size for edge representations in GNN layers
+- `num_step_message_passing` (int) Number of times for message passing, which is equivalent to the number of GNN layers
+- `num_step_set2set`: (int) Number of set2set steps
+- `num_layer_set2set`: (int) Number of set2set layers

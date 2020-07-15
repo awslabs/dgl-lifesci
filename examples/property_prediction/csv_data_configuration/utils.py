@@ -36,7 +36,7 @@ def init_featurizer(args):
             "Expect node_featurizer to be in ['canonical', 'attentivefp'], "
             "got {}".format(args['atom_featurizer_type']))
 
-    if args['model'] in ['Weave']:
+    if args['model'] in ['Weave', 'MPNN']:
         if args['bond_featurizer_type'] == 'canonical':
             from dgllife.utils import CanonicalBondFeaturizer
             args['edge_featurizer'] = CanonicalBondFeaturizer()
@@ -230,6 +230,18 @@ def load_model(exp_configure):
             gnn_hidden_feats=exp_configure['gnn_hidden_feats'],
             graph_feats=exp_configure['graph_feats'],
             gaussian_expand=exp_configure['gaussian_expand'],
+            n_tasks=exp_configure['n_tasks']
+        )
+    elif exp_configure['model'] == 'MPNN':
+        from dgllife.model import MPNNPredictor
+        model = MPNNPredictor(
+            node_in_feats=exp_configure['in_node_feats'],
+            edge_in_feats=exp_configure['in_edge_feats'],
+            node_out_feats=exp_configure['node_out_feats'],
+            edge_hidden_feats=exp_configure['edge_hidden_feats'],
+            num_step_message_passing=exp_configure['num_step_message_passing'],
+            num_step_set2set=exp_configure['num_step_set2set'],
+            num_layer_set2set=exp_configure['num_layer_set2set'],
             n_tasks=exp_configure['n_tasks']
         )
     else:
