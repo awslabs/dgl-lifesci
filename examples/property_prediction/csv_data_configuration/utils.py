@@ -292,9 +292,9 @@ def load_model(exp_configure):
             num_edge_emb_list=[6, 3],
             num_layers=5,
             emb_dim=300,
-            JK=exp_configure['jk'],
+            JK='last',
             dropout=0.5,
-            readout=exp_configure['readout'],
+            readout='sum',
             n_tasks=exp_configure['n_tasks']
         )
         model.gnn = load_pretrained(exp_configure['model'])

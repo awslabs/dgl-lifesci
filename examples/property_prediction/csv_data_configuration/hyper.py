@@ -53,11 +53,6 @@ attentivefp_hyperparameters = {
     'dropout': hp.uniform('dropout', low=0., high=0.15)
 }
 
-gin_pretrained_hyperparameters = {
-    'jk': hp.choice('jk', ['concat', 'last', 'max', 'sum']),
-    'readout': hp.choice('readout', ['sum', 'mean', 'max', 'attention'])
-}
-
 def init_hyper_space(model):
     """Initialize the hyperparameter search space
 
@@ -83,9 +78,6 @@ def init_hyper_space(model):
         candidate_hypers.update(mpnn_hyperparameters)
     elif model == 'AttentiveFP':
         candidate_hypers.update(attentivefp_hyperparameters)
-    elif model in ['gin_supervised_contextpred', 'gin_supervised_infomax',
-                   'gin_supervised_edgepred', 'gin_supervised_masking']:
-        candidate_hypers.update(gin_pretrained_hyperparameters)
     else:
         return ValueError('Unexpected model: {}'.format(model))
     return candidate_hypers
