@@ -154,6 +154,7 @@ if __name__ == '__main__':
     parser.add_argument('-me', '--metric', choices=['roc_auc_score'], default='roc_auc_score',
                         help='Metric for evaluation (default: roc_auc_score)')
     parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN'], default='GCN',
+    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave'], default='GCN',
                         help='Model to use (default: GCN)')
     parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
                         default='canonical',
