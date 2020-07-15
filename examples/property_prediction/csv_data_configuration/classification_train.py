@@ -54,7 +54,6 @@ def run_an_eval_epoch(args, model, data_loader):
 def main(args, exp_config, train_set, val_set, test_set):
     # Record settings
     exp_config.update({
-        'patience': 30,
         'model': args['model'],
         'n_tasks': args['n_tasks'],
         'atom_featurizer_type': args['atom_featurizer_type'],
