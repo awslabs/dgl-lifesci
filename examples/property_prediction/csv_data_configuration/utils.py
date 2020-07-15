@@ -33,6 +33,8 @@ def init_featurizer(args):
         args['node_featurizer'] = PretrainAtomFeaturizer()
         args['edge_featurizer'] = PretrainBondFeaturizer()
 
+        return args
+
     if args['atom_featurizer_type'] == 'canonical':
         from dgllife.utils import CanonicalAtomFeaturizer
         args['node_featurizer'] = CanonicalAtomFeaturizer()
@@ -279,7 +281,9 @@ def load_model(exp_configure):
         model.gnn = load_pretrained(exp_configure['model'])
         model.gnn.JK = exp_configure['jk']
     else:
-        return ValueError("Expect model to be from ['GCN', 'GAT'], "
+        return ValueError("Expect model to be from ['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP', "
+                          "'gin_supervised_contextpred', 'gin_supervised_infomax', "
+                          "'gin_supervised_edgepred', 'gin_supervised_masking'], "
                           "got {}".format(exp_configure['model']))
 
     return model
