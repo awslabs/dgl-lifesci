@@ -57,4 +57,4 @@ gaussian histogram in computing graph representations.
 `'sum'`, separately for taking the concatenation of all GNN layer output, taking the output of the last 
 GNN layer, performing max pooling across all GNN layer output, and summing all GNN layer output.
 - `readout`: (str) The way to compute graph-level representations out of node-level representations, which 
-can be one of `'sum'`, `'mean'`, `'max'`, `'attention'`, and `'set2set'`.
+can be one of `'sum'`, `'mean'`, `'max'`, and `'attention'`.

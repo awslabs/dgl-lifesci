@@ -55,7 +55,7 @@ attentivefp_hyperparameters = {
 
 gin_pretrained_hyperparameters = {
     'jk': hp.choice('jk', ['concat', 'last', 'max', 'sum']),
-    'readout': hp.choice('readout', ['sum', 'mean', 'max', 'attention', 'set2set'])
+    'readout': hp.choice('readout', ['sum', 'mean', 'max', 'attention'])
 }
 
 def init_hyper_space(model):
