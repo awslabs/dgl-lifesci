@@ -31,7 +31,6 @@ then
 else
   export CUDA_VISIBLE_DEVICES=-1
   pip uninstall -y dgl
-  pip uninstall -y dgl-cu101
   # pip install --pre dgl
   pip install dgl
 fi
