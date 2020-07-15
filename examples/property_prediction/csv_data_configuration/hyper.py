@@ -45,6 +45,12 @@ mpnn_hyperparameters = {
     'num_layer_set2set': hp.choice('num_layer_set2set', [1, 2, 3])
 }
 
+attentivefp_hyperparameters = {
+    'num_layers': hp.choice('num_layers', [1, 2, 3, 4, 5]),
+    'num_timesteps': hp.choice('num_timesteps', [1, 2, 3, 4, 5]),
+    'graph_feat_size': hp.choice('graph_feat_size', [16, 32, 64, 128, 256]),
+}
+
 def init_hyper_space(model):
     """Initialize the hyperparameter search space
 
@@ -68,6 +74,8 @@ def init_hyper_space(model):
         candidate_hypers.update(weave_hyperparameters)
     elif model == 'MPNN':
         candidate_hypers.update(mpnn_hyperparameters)
+    elif model == 'AttentiveFP':
+        candidate_hypers.update(attentivefp_hyperparameters)
     else:
         return ValueError('Unexpected model: {}'.format(model))
     return candidate_hypers

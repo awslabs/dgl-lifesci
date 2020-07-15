@@ -150,12 +150,12 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--split', choices=['scaffold'], default='scaffold',
                         help='Dataset splitting method')
     parser.add_argument('-sr', '--split-ratio', default='0.8,0.1,0.1', type=str,
-                        help='Proportion of the dataset used for training, validation and test')
+                        help='Proportion of the dataset used for training, validation and test, '
+                             '(default: 0.8,0.1,0.1)')
     parser.add_argument('-me', '--metric', choices=['roc_auc_score'], default='roc_auc_score',
                         help='Metric for evaluation (default: roc_auc_score)')
-    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN'], default='GCN',
-    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave'], default='GCN',
-                        help='Model to use (default: GCN)')
+    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP'],
+                        default='GCN', help='Model to use (default: GCN)')
     parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
                         default='canonical',
                         help='Featurization for atoms (default: canonical)')
