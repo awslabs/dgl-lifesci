@@ -61,7 +61,7 @@ def main(args, exp_config, train_set, val_set, test_set):
     })
     if args['atom_featurizer_type'] != 'pre_train':
         exp_config['in_node_feats'] = args['node_featurizer'].feat_size()
-    if args['bond_featurizer_type'] not in [None, 'pre_train']:
+    if args['edge_featurizer'] is not None and args['bond_featurizer_type'] != 'pre_train':
         exp_config['in_edge_feats'] = args['edge_featurizer'].feat_size()
 
     # Set up directory for saving results
