@@ -10,8 +10,7 @@ import torch
 import torch.nn as nn
 
 from copy import deepcopy
-from dgllife.data import MoleculeCSVDataset
-from dgllife.utils import Meter, smiles_to_bigraph, CanonicalAtomFeaturizer, EarlyStopping
+from dgllife.utils import Meter, CanonicalAtomFeaturizer, EarlyStopping
 from hyperopt import fmin, tpe
 from shutil import copyfile
 from torch.optim import Adam
@@ -19,7 +18,7 @@ from torch.utils.data import DataLoader
 
 from hyper import init_hyper_space
 from utils import get_configure, mkdir_p, init_trial_path, \
-    split_dataset, collate_molgraphs, load_model, predict, init_featurizer
+    split_dataset, collate_molgraphs, load_model, predict, init_featurizer, load_dataset
 
 def run_a_train_epoch(args, epoch, model, data_loader, loss_criterion, optimizer):
     model.train()
@@ -56,12 +55,13 @@ def main(args, exp_config, train_set, val_set, test_set):
     # Record settings
     exp_config.update({
         'model': args['model'],
-        'in_node_feats': args['node_featurizer'].feat_size(),
         'n_tasks': args['n_tasks'],
         'atom_featurizer_type': args['atom_featurizer_type'],
         'bond_featurizer_type': args['bond_featurizer_type']
     })
-    if args['edge_featurizer'] is not None:
+    if args['atom_featurizer_type'] != 'pre_train':
+        exp_config['in_node_feats'] = args['node_featurizer'].feat_size()
+    if args['bond_featurizer_type'] != 'pre_train':
         exp_config['in_edge_feats'] = args['edge_featurizer'].feat_size()
 
     # Set up directory for saving results
@@ -154,7 +154,11 @@ if __name__ == '__main__':
                              '(default: 0.8,0.1,0.1)')
     parser.add_argument('-me', '--metric', choices=['roc_auc_score'], default='roc_auc_score',
                         help='Metric for evaluation (default: roc_auc_score)')
-    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP'],
+    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP',
+                                                   'gin_supervised_contextpred',
+                                                   'gin_supervised_infomax',
+                                                   'gin_supervised_edgepred',
+                                                   'gin_supervised_masking'],
                         default='GCN', help='Model to use (default: GCN)')
     parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
                         default='canonical',
@@ -190,13 +194,7 @@ if __name__ == '__main__':
     args = init_featurizer(args)
     df = pd.read_csv(args['csv_path'])
     mkdir_p(args['result_path'])
-    dataset = MoleculeCSVDataset(df=df,
-                                 smiles_to_graph=smiles_to_bigraph,
-                                 node_featurizer=args['node_featurizer'],
-                                 edge_featurizer=args['edge_featurizer'],
-                                 smiles_column=args['smiles_column'],
-                                 cache_file_path=args['result_path'] + '/graph.bin',
-                                 task_names=args['task_names'])
+    dataset = load_dataset(args, df)
     args['n_tasks'] = dataset.n_tasks
     train_set, val_set, test_set = split_dataset(args, dataset)
 
