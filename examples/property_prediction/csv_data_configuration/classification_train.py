@@ -25,6 +25,10 @@ def run_a_train_epoch(args, epoch, model, data_loader, loss_criterion, optimizer
     train_meter = Meter()
     for batch_id, batch_data in enumerate(data_loader):
         smiles, bg, labels, masks = batch_data
+        if len(smiles) == 1:
+            # Avoid potential issues with batch normalization
+            continue
+
         labels, masks = labels.to(args['device']), masks.to(args['device'])
         logits = predict(args, model, bg)
         # Mask non-existing labels
