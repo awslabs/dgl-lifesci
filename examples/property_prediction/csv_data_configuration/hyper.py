@@ -7,7 +7,7 @@ from hyperopt import hp
 
 common_hyperparameters = {
     'lr': hp.uniform('lr', low=1e-4, high=3e-2),
-    'weight_decay': hp.uniform('weight_decay', low=0, high=1e-4),
+    'weight_decay': hp.uniform('weight_decay', low=0, high=3e-4),
     'patience': hp.choice('patience', [30]),
     'batch_size': hp.choice('batch_size', [32, 64, 128, 256, 512]),
 }
@@ -18,7 +18,7 @@ gcn_hyperparameters = {
     'num_gnn_layers': hp.choice('num_gnn_layers', [1, 2, 3, 4, 5]),
     'residual': hp.choice('residual', [True, False]),
     'batchnorm': hp.choice('batchnorm', [True, False]),
-    'dropout': hp.uniform('dropout', low=0., high=0.15)
+    'dropout': hp.uniform('dropout', low=0., high=0.6)
 }
 
 gat_hyperparameters = {
@@ -28,7 +28,7 @@ gat_hyperparameters = {
     'predictor_hidden_feats': hp.choice('predictor_hidden_feats', [16, 32, 64, 128, 256]),
     'num_gnn_layers': hp.choice('num_gnn_layers', [1, 2, 3, 4, 5]),
     'residual': hp.choice('residual', [True, False]),
-    'dropout': hp.uniform('dropout', low=0., high=0.15)
+    'dropout': hp.uniform('dropout', low=0., high=0.6)
 }
 
 weave_hyperparameters = {
@@ -50,7 +50,7 @@ attentivefp_hyperparameters = {
     'num_layers': hp.choice('num_layers', [1, 2, 3, 4, 5]),
     'num_timesteps': hp.choice('num_timesteps', [1, 2, 3, 4, 5]),
     'graph_feat_size': hp.choice('graph_feat_size', [16, 32, 64, 128, 256]),
-    'dropout': hp.uniform('dropout', low=0., high=0.15)
+    'dropout': hp.uniform('dropout', low=0., high=0.6)
 }
 
 gin_pretrained_hyperparameters = {
