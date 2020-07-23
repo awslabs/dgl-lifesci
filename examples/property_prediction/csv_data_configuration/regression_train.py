@@ -25,6 +25,10 @@ def run_a_train_epoch(args, epoch, model, data_loader, loss_criterion, optimizer
     train_meter = Meter()
     for batch_id, batch_data in enumerate(data_loader):
         smiles, bg, labels, masks = batch_data
+        if len(smiles) == 1:
+            # Avoid potential issues with batch normalization
+            continue
+
         labels, masks = labels.to(args['device']), masks.to(args['device'])
         prediction = predict(args, model, bg)
         loss = (loss_criterion(prediction, labels) * (masks != 0).float()).mean()
@@ -149,8 +153,8 @@ if __name__ == '__main__':
                         help='Header for the tasks to model. If None, we will model '
                              'all the columns except for the smiles_column in the CSV file. '
                              '(default: None)')
-    parser.add_argument('-s', '--split', choices=['scaffold'], default='scaffold',
-                        help='Dataset splitting method')
+    parser.add_argument('-s', '--split', choices=['scaffold', 'random'], default='scaffold',
+                        help='Dataset splitting method (default: scaffold)')
     parser.add_argument('-sr', '--split-ratio', default='0.8,0.1,0.1', type=str,
                         help='Proportion of the dataset used for training, validation and test '
                              '(default: 0.8,0.1,0.1)')
