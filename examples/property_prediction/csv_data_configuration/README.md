@@ -39,7 +39,6 @@ The analysis results will be saved to the following files in the result path abo
 
 Currently we use a default setting as follows:
 - Construct molecular graphs for each molecule, where nodes are atoms and edges are bonds
-- The dataset is split using scaffold split
 - Perform early stopping and save the model that achieves the best validation performance
 - (Optional) Automatically perform hyperparameter search using Bayesian optimization
 
@@ -87,6 +86,10 @@ Other optional arguments include:
     we assume all columns are molecular properties except for the SMILES column.
 - **Take the logarithm of the labels** `-lv` [default=False]
     - Whether to take logarithm of the labels for modeling
+- **Split**: `-s split` [default=scaffold]
+    - Specifies the split for the dataset
+    - By default we use `'scaffold'` for dataset splitting based on Bemis-Murcko scaffolds, alternatively we can 
+      use `'random'` for random split.
 - **Split Ratio**: `-sr a,b,c` [default=0.8,0.1,0.1]
     - Specifies the proportion of the dataset to be used for training, validation and test. 
 - **Evaluation Metric**: `-me metric` [default=r2]
@@ -176,6 +179,10 @@ Other optional arguments include:
 - **Task**: `-t task1,task2,task3,...` 
     - Specifies the headers for task columns in the CSV file. If not specified, 
     we assume all columns are molecular properties except for the SMILES column.
+- **Split**: `-s split` [default=scaffold]
+    - Specifies the split for the dataset
+    - By default we use `'scaffold'` for dataset splitting based on Bemis-Murcko scaffolds, alternatively we can 
+      use `'random'` for random split.
 - **Split Ratio**: `-sr a,b,c` [default=0.8,0.1,0.1]
     - Specifies the proportion of the dataset to be used for training, validation and test. 
 - **Evaluation Metric**: `-me metric` [default=roc_auc_score]

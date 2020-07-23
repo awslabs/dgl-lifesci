@@ -11,7 +11,7 @@ import torch
 import torch.nn.functional as F
 
 from dgllife.data import MoleculeCSVDataset
-from dgllife.utils import smiles_to_bigraph, ScaffoldSplitter
+from dgllife.utils import smiles_to_bigraph, ScaffoldSplitter, RandomSplitter
 from functools import partial
 
 def init_featurizer(args):
@@ -157,6 +157,9 @@ def split_dataset(args, dataset):
     train_ratio, val_ratio, test_ratio = map(float, args['split_ratio'].split(','))
     if args['split'] == 'scaffold':
         train_set, val_set, test_set = ScaffoldSplitter.train_val_test_split(
+            dataset, frac_train=train_ratio, frac_val=val_ratio, frac_test=test_ratio)
+    elif args['split'] == 'random':
+        train_set, val_set, test_set = RandomSplitter.train_val_test_split(
             dataset, frac_train=train_ratio, frac_val=val_ratio, frac_test=test_ratio)
     else:
         return ValueError("Expect the splitting method to be 'scaffold', got {}".format(args['split']))
