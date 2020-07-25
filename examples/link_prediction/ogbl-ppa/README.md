@@ -27,6 +27,7 @@ The optional arguments are as follows:
 ```
 --use_gpu, use gpu for computation
 --use_sage, use GraphSAGE rather than GCN
+--use_node_embedding, prepare node embeddings using node2vec
 --num_layers, number of GNN layers to use as well as linear layers for final link prediction (default=3)
 --hidden_feats, size for hidden representations (default=256)
 --dropout, (default=0.0)
@@ -44,10 +45,11 @@ negative edges, and counting the ratio of positive edges that are ranked at 100-
 
 Using the default parameters, the performance of 10 random runs is as follows.
 
-| Method    | Train hits@100 | Validation hits@100 | Test hits@100 |
-| --------- | -------------- | ------------------- | ------------- |
-| GCN       | 12.87 ± 5.07   | 12.39 ± 4.85        | 11.65 ± 4.56  |
-| GraphSAGE | 9.58 ± 0.99    | 9.44 ± 0.96         | 9.86 ± 1.21   |
+| Method       | Train hits@100 | Validation hits@100 | Test hits@100 |
+| -----------  | -------------- | ------------------- | ------------- |
+| GCN          | 23.95 ± 2.80   | 22.60 ± 2.59        | 21.30 ± 3.41  |
+| GraphSAGE    | 9.58 ± 0.99    | 9.44 ± 0.96         | 9.86 ± 1.21   |
+| Node2vec+GCN | 27.98 ± 2.63   | 26.45 ± 2.49        | 25.81 ± 2.58  |
 
 | Method    | Average Time (hour) / epoch |
 | --------- | --------------------------- |
