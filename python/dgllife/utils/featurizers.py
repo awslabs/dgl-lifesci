@@ -42,12 +42,15 @@ __all__ = ['one_hot_encoding',
            'atom_is_in_ring_one_hot',
            'atom_is_in_ring',
            'atom_chiral_tag_one_hot',
+           'atom_chirality_type_one_hot',
            'atom_mass',
+           'atom_is_chiral_center',
            'ConcatFeaturizer',
            'BaseAtomFeaturizer',
            'CanonicalAtomFeaturizer',
            'WeaveAtomFeaturizer',
            'PretrainAtomFeaturizer',
+           'AttentiveFPAtomFeaturizer',
            'bond_type_one_hot',
            'bond_is_conjugated_one_hot',
            'bond_is_conjugated',
@@ -58,7 +61,8 @@ __all__ = ['one_hot_encoding',
            'BaseBondFeaturizer',
            'CanonicalBondFeaturizer',
            'WeaveEdgeFeaturizer',
-           'PretrainBondFeaturizer']
+           'PretrainBondFeaturizer',
+           'AttentiveFPBondFeaturizer']
 
 def one_hot_encoding(x, allowable_set, encode_unknown=False):
     """One-hot encoding.
@@ -672,6 +676,9 @@ def atom_chiral_tag_one_hot(atom, allowable_set=None, encode_unknown=False):
         ``rdkit.Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW``,
         ``rdkit.Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW``,
         ``rdkit.Chem.rdchem.ChiralType.CHI_OTHER``.
+    encode_unknown : bool
+        If True, map inputs not in the allowable set to the
+        additional last element. (Default: False)
 
     Returns
     -------
@@ -681,6 +688,7 @@ def atom_chiral_tag_one_hot(atom, allowable_set=None, encode_unknown=False):
     See Also
     --------
     one_hot_encoding
+    atom_chirality_type_one_hot
     """
     if allowable_set is None:
         allowable_set = [Chem.rdchem.ChiralType.CHI_UNSPECIFIED,
@@ -688,6 +696,36 @@ def atom_chiral_tag_one_hot(atom, allowable_set=None, encode_unknown=False):
                          Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW,
                          Chem.rdchem.ChiralType.CHI_OTHER]
     return one_hot_encoding(atom.GetChiralTag(), allowable_set, encode_unknown)
+
+def atom_chirality_type_one_hot(atom, allowable_set=None, encode_unknown=False):
+    """One hot encoding for the chirality type of an atom.
+
+    Parameters
+    ----------
+    atom : rdkit.Chem.rdchem.Atom
+        RDKit atom instance.
+    allowable_set : list of str
+        Chirality types to consider. Default: ``R``, ``S``.
+    encode_unknown : bool
+        If True, map inputs not in the allowable set to the
+        additional last element. (Default: False)
+
+    Returns
+    -------
+    list
+        List containing one bool only.
+
+    See Also
+    --------
+    one_hot_encoding
+    atom_chiral_tag_one_hot
+    """
+    if not atom.HasProp('_CIPCode'):
+        return [False, False]
+
+    if allowable_set is None:
+        allowable_set = ['R', 'S']
+    return one_hot_encoding(atom.GetProp('_CIPCode'), allowable_set, encode_unknown)
 
 def atom_mass(atom, coef=0.01):
     """Get the mass of an atom and scale it.
@@ -705,6 +743,21 @@ def atom_mass(atom, coef=0.01):
         List containing one float only.
     """
     return [atom.GetMass() * coef]
+
+def atom_is_chiral_center(atom):
+    """Get whether the atom is chiral center
+
+    Parameters
+    ----------
+    atom : rdkit.Chem.rdchem.Atom
+        RDKit atom instance.
+
+    Returns
+    -------
+    list
+        List containing one bool only.
+    """
+    return [atom.HasProp('_ChiralityPossible')]
 
 class ConcatFeaturizer(object):
     """Concatenate the evaluation results of multiple functions as a single feature.
@@ -778,6 +831,9 @@ class BaseAtomFeaturizer(object):
     See Also
     --------
     CanonicalAtomFeaturizer
+    WeaveAtomFeaturizer
+    PretrainAtomFeaturizer
+    AttentiveFPAtomFeaturizer
     """
     def __init__(self, featurizer_funcs, feat_sizes=None):
         self.featurizer_funcs = featurizer_funcs
@@ -879,6 +935,7 @@ class CanonicalAtomFeaturizer(BaseAtomFeaturizer):
 
     Examples
     --------
+
     >>> from rdkit import Chem
     >>> from dgllife.utils import CanonicalAtomFeaturizer
 
@@ -908,6 +965,9 @@ class CanonicalAtomFeaturizer(BaseAtomFeaturizer):
     See Also
     --------
     BaseAtomFeaturizer
+    WeaveAtomFeaturizer
+    PretrainAtomFeaturizer
+    AttentiveFPAtomFeaturizer
     """
     def __init__(self, atom_data_field='h'):
         super(CanonicalAtomFeaturizer, self).__init__(
@@ -938,6 +998,8 @@ class WeaveAtomFeaturizer(object):
     * hydrogen bond acceptor
     * the number of rings the atom belongs to for ring size between 3 and 8
 
+    **We assume the resulting DGLGraph will not contain any virtual nodes.**
+
     Parameters
     ----------
     atom_data_field : str
@@ -953,6 +1015,38 @@ class WeaveAtomFeaturizer(object):
         Atom hybridization types to consider for one-hot encoding. If None, we will use a
         default choice of ``Chem.rdchem.HybridizationType.SP, Chem.rdchem.HybridizationType.SP2,
         Chem.rdchem.HybridizationType.SP3``.
+
+    Examples
+    --------
+
+    >>> from rdkit import Chem
+    >>> from dgllife.utils import WeaveAtomFeaturizer
+
+    >>> mol = Chem.MolFromSmiles('CCO')
+    >>> atom_featurizer = WeaveAtomFeaturizer(atom_data_field='feat')
+    >>> atom_featurizer(mol)
+    {'feat': tensor([[ 0.0000,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+                       0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000, -0.0418,  0.0000,
+                       0.0000,  0.0000,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+                       0.0000,  0.0000,  0.0000],
+                     [ 0.0000,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+                       0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0402,  0.0000,
+                       0.0000,  0.0000,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+                       0.0000,  0.0000,  0.0000],
+                     [ 0.0000,  0.0000,  0.0000,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+                       0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000, -0.3967,  0.0000,
+                       0.0000,  0.0000,  1.0000,  1.0000,  1.0000,  0.0000,  0.0000,  0.0000,
+                       0.0000,  0.0000,  0.0000]])}
+    >>> # Get feature size for nodes
+    >>> print(atom_featurizer.feat_size())
+    27
+
+    See Also
+    --------
+    BaseAtomFeaturizer
+    CanonicalAtomFeaturizer
+    PretrainAtomFeaturizer
+    AttentiveFPAtomFeaturizer
     """
     def __init__(self, atom_data_field='h', atom_types=None, chiral_types=None,
                  hybridization_types=None):
@@ -1087,6 +1181,8 @@ class PretrainAtomFeaturizer(object):
     * atomic number
     * chirality
 
+    **We assume the resulting DGLGraph will not contain any virtual nodes.**
+
     Parameters
     ----------
     atomic_number_types : list of int or None
@@ -1097,6 +1193,24 @@ class PretrainAtomFeaturizer(object):
         choice of ``Chem.rdchem.ChiralType.CHI_UNSPECIFIED,
         Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW,
         Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW, Chem.rdchem.ChiralType.CHI_OTHER``.
+
+    Examples
+    --------
+
+    >>> from rdkit import Chem
+    >>> from dgllife.utils import PretrainAtomFeaturizer
+
+    >>> mol = Chem.MolFromSmiles('CCO')
+    >>> atom_featurizer = PretrainAtomFeaturizer()
+    >>> atom_featurizer(mol)
+    {'atomic_number': tensor([5, 5, 7]), 'chirality_type': tensor([0, 0, 0])}
+
+    See Also
+    --------
+    BaseAtomFeaturizer
+    CanonicalAtomFeaturizer
+    WeaveAtomFeaturizer
+    AttentiveFPAtomFeaturizer
     """
     def __init__(self, atomic_number_types=None, chiral_types=None):
         if atomic_number_types is None:
@@ -1141,6 +1255,84 @@ class PretrainAtomFeaturizer(object):
             'atomic_number': atom_features[:, 0],
             'chirality_type': atom_features[:, 1]
         }
+
+class AttentiveFPAtomFeaturizer(BaseAtomFeaturizer):
+    """The atom featurizer used in AttentiveFP
+
+    AttentiveFP is introduced in
+    `Pushing the Boundaries of Molecular Representation for Drug Discovery with the Graph
+    Attention Mechanism. <https://www.ncbi.nlm.nih.gov/pubmed/31408336>`__
+
+    The atom features include:
+
+    * **One hot encoding of the atom type**. The supported atom types include
+      ``B``, ``C``, ``N``, ``O``, ``F``, ``Si``, ``P``, ``S``, ``Cl``, ``As``,
+      ``Se``, ``Br``, ``Te``, ``I``, ``At``, and ``other``.
+    * **One hot encoding of the atom degree**. The supported possibilities
+      include ``0 - 5``.
+    * **Formal charge of the atom**.
+    * **Number of radical electrons of the atom**.
+    * **One hot encoding of the atom hybridization**. The supported possibilities include
+      ``SP``, ``SP2``, ``SP3``, ``SP3D``, ``SP3D2``, and ``other``.
+    * **Whether the atom is aromatic**.
+    * **One hot encoding of the number of total Hs on the atom**. The supported possibilities
+      include ``0 - 4``.
+    * **Whether the atom is chiral center**
+    * **One hot encoding of the atom chirality type**. The supported possibilities include
+      ``R``, and ``S``.
+
+    **We assume the resulting DGLGraph will not contain any virtual nodes.**
+
+    Parameters
+    ----------
+    atom_data_field : str
+        Name for storing atom features in DGLGraphs, default to 'h'.
+
+    Examples
+    --------
+
+    >>> from rdkit import Chem
+    >>> from dgllife.utils import AttentiveFPAtomFeaturizer
+
+    >>> mol = Chem.MolFromSmiles('CCO')
+    >>> atom_featurizer = AttentiveFPAtomFeaturizer(atom_data_field='feat')
+    >>> atom_featurizer(mol)
+    {'feat': tensor([[0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.,
+                      0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 1., 0.,
+                      0., 0., 0.],
+                     [0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                      1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0., 0.,
+                      0., 0., 0.],
+                     [0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.,
+                      0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 1., 0., 0., 0.,
+                      0., 0., 0.]])}
+
+    >>> # Get feature size for nodes
+    >>> print(atom_featurizer.feat_size('feat'))
+    39
+
+    See Also
+    --------
+    BaseAtomFeaturizer
+    CanonicalAtomFeaturizer
+    WeaveAtomFeaturizer
+    PretrainAtomFeaturizer
+    """
+    def __init__(self, atom_data_field='h'):
+        super(AttentiveFPAtomFeaturizer, self).__init__(
+            featurizer_funcs={atom_data_field: ConcatFeaturizer(
+                [partial(atom_type_one_hot, allowable_set=[
+                    'B', 'C', 'N', 'O', 'F', 'Si', 'P', 'S',
+                    'Cl', 'As', 'Se', 'Br', 'Te', 'I', 'At'], encode_unknown=True),
+                 partial(atom_degree_one_hot, allowable_set=list(range(6))),
+                 atom_formal_charge,
+                 atom_num_radical_electrons,
+                 partial(atom_hybridization_one_hot, encode_unknown=True),
+                 atom_is_aromatic,
+                 atom_total_num_H_one_hot,
+                 atom_is_chiral_center,
+                 atom_chirality_type_one_hot]
+            )})
 
 def bond_type_one_hot(bond, allowable_set=None, encode_unknown=False):
     """One hot encoding for the type of a bond.
@@ -1370,6 +1562,9 @@ class BaseBondFeaturizer(object):
     See Also
     --------
     CanonicalBondFeaturizer
+    WeaveEdgeFeaturizer
+    PretrainBondFeaturizer
+    AttentiveFPBondFeaturizer
     """
     def __init__(self, featurizer_funcs, feat_sizes=None):
         self.featurizer_funcs = featurizer_funcs
@@ -1457,6 +1652,7 @@ class CanonicalBondFeaturizer(BaseBondFeaturizer):
 
     Examples
     --------
+
     >>> from dgllife.utils import CanonicalBondFeaturizer
     >>> from rdkit import Chem
 
@@ -1468,12 +1664,15 @@ class CanonicalBondFeaturizer(BaseBondFeaturizer):
                      [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
                      [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.]])}
     >>> # Get feature size
-    >>> bond_featurizer.feat_size('type')
+    >>> bond_featurizer.feat_size('feat')
     12
 
     See Also
     --------
     BaseBondFeaturizer
+    WeaveEdgeFeaturizer
+    PretrainBondFeaturizer
+    AttentiveFPBondFeaturizer
     """
     def __init__(self, bond_data_field='e'):
         super(CanonicalBondFeaturizer, self).__init__(
@@ -1508,6 +1707,29 @@ class WeaveEdgeFeaturizer(object):
     bond_types : list of Chem.rdchem.BondType or None
         Bond types to consider for one hot encoding. If None, we consider by
         default single, double, triple and aromatic bonds.
+
+    Examples
+    --------
+
+    >>> from dgllife.utils import WeaveEdgeFeaturizer
+    >>> from rdkit import Chem
+
+    >>> mol = Chem.MolFromSmiles('CO')
+    >>> edge_featurizer = WeaveEdgeFeaturizer(edge_data_field='feat')
+    >>> edge_featurizer(mol)
+    {'feat': tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                     [1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+                     [1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+                     [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]])}
+    >>> edge_featurizer.feat_size()
+    12
+
+    See Also
+    --------
+    BaseBondFeaturizer
+    CanonicalBondFeaturizer
+    PretrainBondFeaturizer
+    AttentiveFPBondFeaturizer
     """
     def __init__(self, edge_data_field='e', max_distance=7, bond_types=None):
         super(WeaveEdgeFeaturizer, self).__init__()
@@ -1602,6 +1824,18 @@ class PretrainBondFeaturizer(object):
         ``Chem.rdchem.BondDir.ENDUPRIGHT``, ``Chem.rdchem.BondDir.ENDDOWNRIGHT``.
     self_loop : bool
         Whether self loops will be added. Default to True.
+
+    Examples
+    --------
+
+    >>> from dgllife.utils import PretrainBondFeaturizer
+    >>> from rdkit import Chem
+
+    >>> mol = Chem.MolFromSmiles('CO')
+    >>> bond_featurizer = PretrainBondFeaturizer()
+    >>> bond_featurizer(mol)
+    {'bond_type': tensor([0, 0, 4, 4]),
+     'bond_direction_type': tensor([0, 0, 0, 0])}
     """
     def __init__(self, bond_types=None, bond_direction_types=None, self_loop=True):
         if bond_types is None:
@@ -1662,3 +1896,57 @@ class PretrainBondFeaturizer(object):
                 edge_features = torch.cat([edge_features, self_loop_features], dim=0)
 
         return {'bond_type': edge_features[:, 0], 'bond_direction_type': edge_features[:, 1]}
+
+class AttentiveFPBondFeaturizer(BaseBondFeaturizer):
+    """The bond featurizer used in AttentiveFP
+
+    AttentiveFP is introduced in
+    `Pushing the Boundaries of Molecular Representation for Drug Discovery with the Graph
+    Attention Mechanism. <https://www.ncbi.nlm.nih.gov/pubmed/31408336>`__
+
+    The bond features include:
+    * **One hot encoding of the bond type**. The supported bond types include
+      ``SINGLE``, ``DOUBLE``, ``TRIPLE``, ``AROMATIC``.
+    * **Whether the bond is conjugated.**.
+    * **Whether the bond is in a ring of any size.**
+    * **One hot encoding of the stereo configuration of a bond**. The supported bond stereo
+      configurations include ``STEREONONE``, ``STEREOANY``, ``STEREOZ``, ``STEREOE``.
+
+    **We assume the resulting DGLGraph will be created with :func:`smiles_to_bigraph` without
+    self loops.**
+
+    Examples
+    --------
+
+    >>> from dgllife.utils import AttentiveFPBondFeaturizer
+    >>> from rdkit import Chem
+
+    >>> mol = Chem.MolFromSmiles('CCO')
+    >>> bond_featurizer = AttentiveFPBondFeaturizer(bond_data_field='feat')
+    >>> bond_featurizer(mol)
+    {'feat': tensor([[1., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
+                     [1., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
+                     [1., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
+                     [1., 0., 0., 0., 0., 0., 1., 0., 0., 0.]])}
+    >>> # Get feature size
+    >>> bond_featurizer.feat_size('feat')
+    10
+
+    See Also
+    --------
+    BaseBondFeaturizer
+    CanonicalBondFeaturizer
+    WeaveEdgeFeaturizer
+    PretrainBondFeaturizer
+    """
+    def __init__(self, bond_data_field='e'):
+        super(AttentiveFPBondFeaturizer, self).__init__(
+            featurizer_funcs={bond_data_field: ConcatFeaturizer(
+                [bond_type_one_hot,
+                 bond_is_conjugated,
+                 bond_is_in_ring,
+                 partial(bond_stereo_one_hot, allowable_set=[Chem.rdchem.BondStereo.STEREONONE,
+                                                             Chem.rdchem.BondStereo.STEREOANY,
+                                                             Chem.rdchem.BondStereo.STEREOZ,
+                                                             Chem.rdchem.BondStereo.STEREOE])]
+            )})

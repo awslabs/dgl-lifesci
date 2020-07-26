@@ -39,6 +39,38 @@ def test_tox21():
     dataset = Tox21()
     remove_file('tox21_dglgraph.bin')
 
+def test_esol():
+    print('Test ESOL')
+    dataset = ESOL()
+    remove_file('esol_dglgraph.bin')
+    assert len(dataset[0]) == 3
+    dataset.load_full = True
+    assert len(dataset[0]) == 11
+
+def test_freesolv():
+    print('Test FreeSolv')
+    dataset = FreeSolv()
+    remove_file('freesolv_dglgraph.bin')
+    assert len(dataset[0]) == 3
+    dataset.load_full = True
+    assert len(dataset[0]) == 5
+
+def test_lipophilicity():
+    print('Test Lipophilicity')
+    dataset = Lipophilicity()
+    remove_file('lipophilicity_dglgraph.bin')
+    assert len(dataset[0]) == 3
+    dataset.load_full = True
+    assert len(dataset[0]) == 4
+
+def test_astrazeneca_chembl_solubility():
+    print('Test AstraZenecaChEMBLSolubility')
+    dataset = AstraZenecaChEMBLSolubility()
+    remove_file('AstraZeneca_chembl_solubility_graph.bin')
+    assert len(dataset[0]) == 3
+    dataset.load_full = True
+    assert len(dataset[0]) == 5
+
 def test_wln_reaction():
     print('Test datasets for reaction prediction with WLN')
 
@@ -81,15 +113,38 @@ def test_wln_reaction():
             candidate_string += '\n'
             f.write(candidate_string)
 
-    dataset = WLNRankDataset('test.txt', 'test_candidate_bond_changes.txt', 'train')
+    dataset = WLNRankDataset('test.txt.proc', 'test_candidate_bond_changes.txt', 'train')
     remove_file('test.txt')
     remove_file('test.txt.proc')
     remove_file('test_graphs.bin')
     remove_file('test_candidate_bond_changes.txt')
+
+    # Test a file of both valid and invalid reactions
+    reaction1 = '[CH2:15]([CH:16]([CH3:17])[CH3:18])[Mg+:19].[CH2:20]1[O:21][CH2:22][CH2:23]' \
+                '[CH2:24]1.[Cl-:14].[OH:1][c:2]1[n:3][cH:4][c:5]([C:6](=[O:7])[N:8]([O:9]' \
+                '[CH3:10])[CH3:11])[cH:12][cH:13]1>>[OH:1][c:2]1[n:3][cH:4][c:5]([C:6](=[O:7])' \
+                '[CH2:15][CH:16]([CH3:17])[CH3:18])[cH:12][cH:13]1\n'
+    reaction2 = '[CH3:14][NH2:15].[N+:1](=[O:2])([O-:3])[c:4]1[cH:5][c:6]([C:7](=[O:8])[OH:9])' \
+                '[cH:10][cH:11][c:12]1[Cl:44].[OH2:16]>>[N+:1](=[O:2])([O-:3])[c:4]1[cH:5][c:6]' \
+                '([C:7](=[O:8])[OH:9])[cH:10][cH:11][c:12]1[NH:15][CH3:14]\n'
+    reactions = [reaction1, reaction2]
+    with open('test.txt', 'w') as f:
+        for reac in reactions:
+            f.write(reac)
+    dataset = WLNCenterDataset('test.txt', 'test_graphs.bin')
+    remove_file('test.txt')
+    remove_file('test.txt.proc')
+    remove_file('test_graphs.bin')
+    remove_file('_valid_reactions.proc')
+    remove_file('_invalid_reactions.proc')
 
 if __name__ == '__main__':
     test_alchemy()
     test_pdbbind()
     test_pubchem_aromaticity()
     test_tox21()
+    test_esol()
+    test_freesolv()
+    test_lipophilicity()
+    test_astrazeneca_chembl_solubility()
     test_wln_reaction()

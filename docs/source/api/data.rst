@@ -16,6 +16,34 @@ Tox21
     :members: task_pos_weights, __getitem__, __len__
     :show-inheritance:
 
+ESOL
+````
+
+.. autoclass:: dgllife.data.ESOL
+    :members: __getitem__, __len__
+    :show-inheritance:
+
+FreeSolv
+````````
+
+.. autoclass:: dgllife.data.FreeSolv
+    :members: __getitem__, __len__
+    :show-inheritance:
+
+Lipophilicity
+`````````````
+
+.. autoclass:: dgllife.data.Lipophilicity
+    :members: __getitem__, __len__
+    :show-inheritance:
+
+Experimental solubility determined at AstraZeneca, extracted from ChEMBL
+````````````````````````````````````````````````````````````````````````
+
+.. autoclass:: dgllife.data.AstraZenecaChEMBLSolubility
+    :members: __getitem__, __len__
+    :show-inheritance:
+
 Alchemy for Quantum Chemistry
 `````````````````````````````
 
@@ -33,6 +61,12 @@ Adapting to New Datasets with CSV
 `````````````````````````````````
 
 .. autoclass:: dgllife.data.MoleculeCSVDataset
+    :members: __getitem__, __len__
+
+Adapting to New Datasets for Inference
+``````````````````````````````````````
+
+.. autoclass:: dgllife.data.UnlabeledSMILES
     :members: __getitem__, __len__
 
 Reaction Prediction

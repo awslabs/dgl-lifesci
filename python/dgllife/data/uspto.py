@@ -331,6 +331,38 @@ def load_one_reaction(line):
 
     return mol, reaction, graph_edits
 
+def reaction_validity_full_check(reaction_file):
+    """Tell valid reactions from invalid ones.
+
+    Parameters
+    ----------
+    reaction_file : str
+        Path to a file for reactions, where each line has the reaction SMILES and the
+        corresponding graph edits.
+
+    Returns
+    -------
+    valid_reactions : list
+        Valid reactions for modeling
+    invalid_reactions : list
+        Invalid reactions for modeling
+    """
+    valid_reactions = []
+    invalid_reactions = []
+    with open(reaction_file, 'r') as file:
+        for line in file:
+            try:
+                mol, reaction, graph_edits = load_one_reaction(line)
+                assert mol is not None
+                product_mol = Chem.MolFromSmiles(reaction.split('>')[2])
+                assert product_mol is not None
+                get_pair_label(mol, graph_edits)
+                valid_reactions.append(line)
+            except:
+                invalid_reactions.append(line)
+
+    return valid_reactions, invalid_reactions
+
 class WLNCenterDataset(object):
     """Dataset for reaction center prediction with WLN
 
@@ -364,6 +396,16 @@ class WLNCenterDataset(object):
         featurization methods and need to preprocess from scratch. Default to True.
     num_processes : int
         Number of processes to use for data pre-processing. Default to 1.
+    check_reaction_validity : bool
+        Whether to check the validity of reactions before data pre-processing, which
+        will introduce additional overhead. Default to True.
+    reaction_validity_result_prefix : str or None
+        Prefix for saving results for checking validity of reactions.
+        This argument only comes into effect if ``check_reaction_validity`` is True,
+        in which case we will save valid reactions in
+        ``reaction_validity_result_prefix + _valid_reactions.proc`` and
+        invalid ones in ``reaction_validity_result_prefix + _invalid_reactions.proc``.
+        Default to ``''``.
     """
     def __init__(self,
                  raw_file_path,
@@ -373,7 +415,9 @@ class WLNCenterDataset(object):
                  edge_featurizer=default_edge_featurizer_center,
                  atom_pair_featurizer=default_atom_pair_featurizer,
                  load=True,
-                 num_processes=1):
+                 num_processes=1,
+                 check_reaction_validity=True,
+                 reaction_validity_result_prefix=''):
         super(WLNCenterDataset, self).__init__()
 
         self._atom_pair_featurizer = atom_pair_featurizer
@@ -383,9 +427,26 @@ class WLNCenterDataset(object):
         self.complete_graphs = dict()
 
         path_to_reaction_file = raw_file_path + '.proc'
-        if not os.path.isfile(path_to_reaction_file):
-            print('Pre-processing graph edits from reaction data')
-            process_file(raw_file_path, num_processes)
+        print('Pre-processing graph edits from reaction data')
+        process_file(raw_file_path, num_processes)
+
+        if check_reaction_validity:
+            print('Start checking validity of input reactions for modeling...')
+            valid_reactions, invalid_reactions = \
+                reaction_validity_full_check(path_to_reaction_file)
+            print('# valid reactions {:d}'.format(len(valid_reactions)))
+            print('# invalid reactions {:d}'.format(len(invalid_reactions)))
+            path_to_valid_reactions = reaction_validity_result_prefix + \
+                                      '_valid_reactions.proc'
+            path_to_invalid_reactions = reaction_validity_result_prefix + \
+                                        '_invalid_reactions.proc'
+            with open(path_to_valid_reactions, 'w') as f:
+                for line in valid_reactions:
+                    f.write(line)
+            with open(path_to_invalid_reactions, 'w') as f:
+                for line in invalid_reactions:
+                    f.write(line)
+            path_to_reaction_file = path_to_valid_reactions
 
         import time
         t0 = time.time()
@@ -584,7 +645,8 @@ class USPTOCenter(WLNCenterDataset):
             edge_featurizer=edge_featurizer,
             atom_pair_featurizer=atom_pair_featurizer,
             load=load,
-            num_processes=num_processes)
+            num_processes=num_processes,
+            check_reaction_validity=False)
 
     @property
     def subset(self):
@@ -1242,8 +1304,9 @@ class WLNRankDataset(object):
 
     Parameters
     ----------
-    raw_file_path : str
-        Path to the raw reaction file, where each line is the SMILES for a reaction.
+    path_to_reaction_file : str
+        Path to the processed reaction files, where each line has the reaction SMILES
+        and the corresponding graph edits.
     candidate_bond_path : str
         Path to the candidate bond changes for product enumeration, where each line is
         candidate bond changes for a reaction by a WLN for reaction center prediction.
@@ -1273,7 +1336,7 @@ class WLNRankDataset(object):
         Number of processes to use for data pre-processing. Default to 1.
     """
     def __init__(self,
-                 raw_file_path,
+                 path_to_reaction_file,
                  candidate_bond_path,
                  mode,
                  node_featurizer=default_node_featurizer_rank,
@@ -1291,11 +1354,6 @@ class WLNRankDataset(object):
 
         self.ignore_large_samples = False
         self.size_cutoff = size_cutoff
-
-        path_to_reaction_file = raw_file_path + '.proc'
-        if not os.path.isfile(path_to_reaction_file):
-            print('Pre-processing graph edits from reaction data')
-            process_file(raw_file_path, num_processes)
 
         self.reactant_mols, self.product_mols, self.real_bond_changes, \
         self.ids_for_small_samples = self.load_reaction_data(path_to_reaction_file, num_processes)
@@ -1545,7 +1603,7 @@ class USPTORank(WLNRankDataset):
         extract_archive(data_path, extracted_data_path)
 
         super(USPTORank, self).__init__(
-            raw_file_path=extracted_data_path + '/{}.txt'.format(subset),
+            path_to_reaction_file=extracted_data_path + '/{}.txt.proc'.format(subset),
             candidate_bond_path=candidate_bond_path,
             mode=mode,
             size_cutoff=size_cutoff,

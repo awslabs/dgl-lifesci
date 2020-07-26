@@ -1,0 +1,10 @@
+{
+  "lr": 3e-4,
+  "weight_decay": 0,
+  "patience": 30,
+  "batch_size": 128,
+  "num_layers": 2,
+  "num_timesteps": 2,
+  "graph_feat_size": 200,
+  "dropout": 0
+}

@@ -15,10 +15,15 @@ from .mlp_predictor import *
 from .mpnn_predictor import *
 from .schnet_predictor import *
 from .weave_predictor import *
+from .gnn_ogb_predictor import *
 
 # Generative models
-from .dgmg import *
-from .jtnn import *
+try:
+    # DGMG requires RDKit support
+    from .dgmg import *
+    from .jtnn import *
+except ImportError:
+    pass
 
 # Reaction prediction
 from .wln_reaction_center import *

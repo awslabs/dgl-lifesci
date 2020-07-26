@@ -2,6 +2,8 @@
 
 [Documentation](https://lifesci.dgl.ai/index.html) | [Discussion Forum](https://discuss.dgl.ai)
 
+We also have a **slack channel** for real-time discussion. If you want to join the channel, contact mufeili1996@gmail.com.
+
 ## Introduction
 
 Deep learning on graphs has been an arising trend in the past few years. There are a lot of graphs in 
@@ -33,7 +35,7 @@ DGL-LifeSci requires python 3.6+, DGL 0.4.3+ and PyTorch 1.2.0+.
 [Install dgl](https://www.dgl.ai/pages/start.html)
 
 
-Additionally, we require `RDKit 2018.09.3` for cheminformatics. We recommend installing it with
+Additionally, we require `RDKit 2018.09.3` for utils related to cheminformatics. We recommend installing it with
 
 ```
 conda install -c rdkit rdkit==2018.09.3

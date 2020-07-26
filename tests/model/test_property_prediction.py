@@ -65,6 +65,14 @@ def test_graph8():
            torch.LongTensor([0, 0, 1, 2, 1, 0, 0]), \
            torch.LongTensor([2, 3, 2, 0, 1, 2, 1])
 
+def test_graph9():
+    """Batched graph with categorical node features and continuous edge features"""
+    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    g2 = DGLGraph([(0, 1), (1, 2), (1, 3), (1, 4)])
+    bg = dgl.batch([g1, g2])
+    return bg, torch.zeros(bg.number_of_nodes()).long(), \
+           torch.randn(bg.number_of_edges(), 2).float()
+
 def test_attentivefp_predictor():
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
@@ -154,8 +162,8 @@ def test_gcn_predictor():
                                  residual=[True],
                                  batchnorm=[True],
                                  dropout=[0.1],
-                                 classifier_hidden_feats=1,
-                                 classifier_dropout=0.1,
+                                 predictor_hidden_feats=1,
+                                 predictor_dropout=0.1,
                                  n_tasks=2).to(device)
     gcn_predictor.eval()
     assert gcn_predictor(g, node_feats).shape == torch.Size([1, 2])
@@ -215,7 +223,7 @@ def test_mgcn_predictor():
     # Test configured setting
     mgcn_predictor = MGCNPredictor(feats=2,
                                    n_layers=2,
-                                   classifier_hidden_feats=3,
+                                   predictor_hidden_feats=3,
                                    n_tasks=3,
                                    num_node_types=5,
                                    num_edge_types=150,
@@ -277,7 +285,7 @@ def test_schnet_predictor():
     # Test configured setting
     schnet_predictor = SchNetPredictor(node_feats=2,
                                        hidden_feats=[2, 2],
-                                       classifier_hidden_feats=3,
+                                       predictor_hidden_feats=3,
                                        n_tasks=3,
                                        num_node_types=5,
                                        cutoff=0.3).to(device)
@@ -315,6 +323,41 @@ def test_weave_predictor():
     assert weave_predictor(bg, batch_node_feats, batch_edge_feats).shape == \
            torch.Size([2, 2])
 
+def test_gnn_ogb_predictor():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    bg, batch_node_feats, batch_edge_feats = test_graph9()
+    bg, batch_node_feats, batch_edge_feats = bg.to(device), batch_node_feats.to(device), \
+                                             batch_edge_feats.to(device)
+
+    # Test default setting
+    gnn = GNNOGBPredictor(in_edge_feats=batch_edge_feats.shape[-1],
+                          hidden_feats=2).to(device)
+    gnn.reset_parameters()
+    assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
+           torch.Size([bg.batch_size, 1])
+
+    # Test configured setting
+    gnn = GNNOGBPredictor(in_edge_feats=batch_edge_feats.shape[-1],
+                          num_node_types=2,
+                          hidden_feats=2,
+                          n_layers=2,
+                          n_tasks=2,
+                          batchnorm=False,
+                          activation=None,
+                          dropout=0.1,
+                          gnn_type='gin',
+                          virtual_node=False,
+                          residual=True,
+                          jk=True,
+                          readout='max').to(device)
+    gnn.reset_parameters()
+    assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
+           torch.Size([bg.batch_size, 2])
+
 if __name__ == '__main__':
     test_attentivefp_predictor()
     test_mlp_predictor()
@@ -325,3 +368,4 @@ if __name__ == '__main__':
     test_mpnn_predictor()
     test_schnet_predictor()
     test_weave_predictor()
+    test_gnn_ogb_predictor()

@@ -10,28 +10,89 @@ import os
 import torch
 import torch.nn.functional as F
 
-from dgllife.utils import ScaffoldSplitter
+from dgllife.data import MoleculeCSVDataset
+from dgllife.utils import smiles_to_bigraph, ScaffoldSplitter, RandomSplitter
+from functools import partial
 
-def get_configure(args):
-    """Query for the best configuration and return if found
+def init_featurizer(args):
+    """Initialize node/edge featurizer
 
     Parameters
     ----------
     args : dict
-        Initial settings
+        Settings
 
     Returns
     -------
-    dict or None
-        If best configuration has been found before, return
-        it, otherwise return None.
+    args : dict
+        Settings with featurizers updated
     """
-    config_file = args['result_path'] + '/best_config.txt'
-    if os.path.isfile(config_file):
-        with open(config_file) as f:
-            config = json.load(f)
-        return config
-    return None
+    if args['model'] in ['gin_supervised_contextpred', 'gin_supervised_infomax',
+                         'gin_supervised_edgepred', 'gin_supervised_masking']:
+        from dgllife.utils import PretrainAtomFeaturizer, PretrainBondFeaturizer
+        args['atom_featurizer_type'] = 'pre_train'
+        args['bond_featurizer_type'] = 'pre_train'
+        args['node_featurizer'] = PretrainAtomFeaturizer()
+        args['edge_featurizer'] = PretrainBondFeaturizer()
+
+        return args
+
+    if args['atom_featurizer_type'] == 'canonical':
+        from dgllife.utils import CanonicalAtomFeaturizer
+        args['node_featurizer'] = CanonicalAtomFeaturizer()
+    elif args['atom_featurizer_type'] == 'attentivefp':
+        from dgllife.utils import AttentiveFPAtomFeaturizer
+        args['node_featurizer'] = AttentiveFPAtomFeaturizer()
+    else:
+        return ValueError(
+            "Expect node_featurizer to be in ['canonical', 'attentivefp'], "
+            "got {}".format(args['atom_featurizer_type']))
+
+    if args['model'] in ['Weave', 'MPNN', 'AttentiveFP']:
+        if args['bond_featurizer_type'] == 'canonical':
+            from dgllife.utils import CanonicalBondFeaturizer
+            args['edge_featurizer'] = CanonicalBondFeaturizer()
+        elif args['bond_featurizer_type'] == 'attentivefp':
+            from dgllife.utils import AttentiveFPBondFeaturizer
+            args['edge_featurizer'] = AttentiveFPBondFeaturizer()
+    else:
+        args['edge_featurizer'] = None
+
+    return args
+
+def load_dataset(args, df):
+    if args['model'] in ['gin_supervised_contextpred', 'gin_supervised_infomax',
+                         'gin_supervised_edgepred', 'gin_supervised_masking']:
+        self_loop = True
+    else:
+        self_loop = False
+
+    dataset = MoleculeCSVDataset(df=df,
+                                 smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=self_loop),
+                                 node_featurizer=args['node_featurizer'],
+                                 edge_featurizer=args['edge_featurizer'],
+                                 smiles_column=args['smiles_column'],
+                                 cache_file_path=args['result_path'] + '/graph.bin',
+                                 task_names=args['task_names'])
+
+    return dataset
+
+def get_configure(model):
+    """Query for the manually specified configuration
+
+    Parameters
+    ----------
+    model : str
+        Model type
+
+    Returns
+    -------
+    dict
+        Returns the manually specified configuration
+    """
+    with open('model_configures/{}.json'.format(model), 'r') as f:
+        config = json.load(f)
+    return config
 
 def mkdir_p(path):
     """Create a folder for the given path.
@@ -97,6 +158,9 @@ def split_dataset(args, dataset):
     if args['split'] == 'scaffold':
         train_set, val_set, test_set = ScaffoldSplitter.train_val_test_split(
             dataset, frac_train=train_ratio, frac_val=val_ratio, frac_test=test_ratio)
+    elif args['split'] == 'random':
+        train_set, val_set, test_set = RandomSplitter.train_val_test_split(
+            dataset, frac_train=train_ratio, frac_val=val_ratio, frac_test=test_ratio)
     else:
         return ValueError("Expect the splitting method to be 'scaffold', got {}".format(args['split']))
 
@@ -139,19 +203,128 @@ def collate_molgraphs(data):
 
     return smiles, bg, labels, masks
 
-def load_model(args):
-    if args['model'] == 'GCN':
+def collate_molgraphs_unlabeled(data):
+    """Batching a list of datapoints without labels
+
+    Parameters
+    ----------
+    data : list of 2-tuples.
+        Each tuple is for a single datapoint, consisting of
+        a SMILES and a DGLGraph.
+
+    Returns
+    -------
+    smiles : list
+        List of smiles
+    bg : DGLGraph
+        The batched DGLGraph.
+    """
+    smiles, graphs = map(list, zip(*data))
+    bg = dgl.batch(graphs)
+    bg.set_n_initializer(dgl.init.zero_initializer)
+    bg.set_e_initializer(dgl.init.zero_initializer)
+
+    return smiles, bg
+
+def load_model(exp_configure):
+    if exp_configure['model'] == 'GCN':
         from dgllife.model import GCNPredictor
-        model = GCNPredictor(in_feats=args['node_featurizer'].feat_size(),
-                             hidden_feats=[args['gnn_hidden_feats']] * args['num_gnn_layers'],
-                             activation=[F.relu] * args['num_gnn_layers'],
-                             residual=[args['residual']] * args['num_gnn_layers'],
-                             batchnorm=[args['batchnorm']] * args['num_gnn_layers'],
-                             dropout=[args['dropout']] * args['num_gnn_layers'],
-                             classifier_hidden_feats=args['classifier_hidden_feats'],
-                             classifier_dropout=args['dropout'],
-                             n_tasks=args['n_tasks'])
+        model = GCNPredictor(
+            in_feats=exp_configure['in_node_feats'],
+            hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
+            activation=[F.relu] * exp_configure['num_gnn_layers'],
+            residual=[exp_configure['residual']] * exp_configure['num_gnn_layers'],
+            batchnorm=[exp_configure['batchnorm']] * exp_configure['num_gnn_layers'],
+            dropout=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
+            predictor_hidden_feats=exp_configure['predictor_hidden_feats'],
+            predictor_dropout=exp_configure['dropout'],
+            n_tasks=exp_configure['n_tasks'])
+    elif exp_configure['model'] == 'GAT':
+        from dgllife.model import GATPredictor
+        model = GATPredictor(
+            in_feats=exp_configure['in_node_feats'],
+            hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
+            num_heads=[exp_configure['num_heads']] * exp_configure['num_gnn_layers'],
+            feat_drops=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
+            attn_drops=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
+            alphas=[exp_configure['alpha']] * exp_configure['num_gnn_layers'],
+            residuals=[exp_configure['residual']] * exp_configure['num_gnn_layers'],
+            predictor_hidden_feats=exp_configure['predictor_hidden_feats'],
+            predictor_dropout=exp_configure['dropout'],
+            n_tasks=exp_configure['n_tasks']
+        )
+    elif exp_configure['model'] == 'Weave':
+        from dgllife.model import WeavePredictor
+        model = WeavePredictor(
+            node_in_feats=exp_configure['in_node_feats'],
+            edge_in_feats=exp_configure['in_edge_feats'],
+            num_gnn_layers=exp_configure['num_gnn_layers'],
+            gnn_hidden_feats=exp_configure['gnn_hidden_feats'],
+            graph_feats=exp_configure['graph_feats'],
+            gaussian_expand=exp_configure['gaussian_expand'],
+            n_tasks=exp_configure['n_tasks']
+        )
+    elif exp_configure['model'] == 'MPNN':
+        from dgllife.model import MPNNPredictor
+        model = MPNNPredictor(
+            node_in_feats=exp_configure['in_node_feats'],
+            edge_in_feats=exp_configure['in_edge_feats'],
+            node_out_feats=exp_configure['node_out_feats'],
+            edge_hidden_feats=exp_configure['edge_hidden_feats'],
+            num_step_message_passing=exp_configure['num_step_message_passing'],
+            num_step_set2set=exp_configure['num_step_set2set'],
+            num_layer_set2set=exp_configure['num_layer_set2set'],
+            n_tasks=exp_configure['n_tasks']
+        )
+    elif exp_configure['model'] == 'AttentiveFP':
+        from dgllife.model import AttentiveFPPredictor
+        model = AttentiveFPPredictor(
+            node_feat_size=exp_configure['in_node_feats'],
+            edge_feat_size=exp_configure['in_edge_feats'],
+            num_layers=exp_configure['num_layers'],
+            num_timesteps=exp_configure['num_timesteps'],
+            graph_feat_size=exp_configure['graph_feat_size'],
+            dropout=exp_configure['dropout']
+        )
+    elif exp_configure['model'] in ['gin_supervised_contextpred', 'gin_supervised_infomax',
+                                    'gin_supervised_edgepred', 'gin_supervised_masking']:
+        from dgllife.model import GINPredictor
+        from dgllife.model import load_pretrained
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=exp_configure['jk'],
+            dropout=0.5,
+            readout=exp_configure['readout'],
+            n_tasks=exp_configure['n_tasks']
+        )
+        model.gnn = load_pretrained(exp_configure['model'])
+        model.gnn.JK = exp_configure['jk']
     else:
-        return ValueError("Expect model to be 'GCN', got {}".format(args['model']))
+        return ValueError("Expect model to be from ['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP', "
+                          "'gin_supervised_contextpred', 'gin_supervised_infomax', "
+                          "'gin_supervised_edgepred', 'gin_supervised_masking'], "
+                          "got {}".format(exp_configure['model']))
 
     return model
+
+def predict(args, model, bg):
+    if args['edge_featurizer'] is None:
+        node_feats = bg.ndata.pop('h').to(args['device'])
+        return model(bg, node_feats)
+    elif args['bond_featurizer_type'] == 'pre_train':
+        node_feats = [
+            bg.ndata.pop('atomic_number').to(args['device']),
+            bg.ndata.pop('chirality_type').to(args['device'])
+        ]
+        edge_feats = [
+            bg.edata.pop('bond_type').to(args['device']),
+            bg.edata.pop('bond_direction_type').to(args['device'])
+        ]
+        return model(bg, node_feats, edge_feats)
+    else:
+        node_feats = bg.ndata.pop('h').to(args['device'])
+        edge_feats = bg.edata.pop('e').to(args['device'])
+        return model(bg, node_feats, edge_feats)

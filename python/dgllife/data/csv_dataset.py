@@ -29,7 +29,7 @@ class MoleculeCSVDataset(object):
         Dataframe including smiles and labels. Can be loaded by pandas.read_csv(file_path).
         One column includes smiles and some other columns include labels.
     smiles_to_graph: callable, str -> DGLGraph
-        A function turning a SMILES into a DGLGraph.
+        A function turning a SMILES string into a DGLGraph.
     node_featurizer : None or callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update
         ndata for a DGLGraph.
@@ -49,9 +49,11 @@ class MoleculeCSVDataset(object):
         featurization methods and need to preprocess from scratch. Default to True.
     log_every : bool
         Print a message every time ``log_every`` molecules are processed. Default to 1000.
+    init_mask : bool
+        Whether to initialize a binary mask indicating the existence of labels. Default to True.
     """
-    def __init__(self, df, smiles_to_graph, node_featurizer, edge_featurizer,
-                 smiles_column, cache_file_path, task_names=None, load=True, log_every=1000):
+    def __init__(self, df, smiles_to_graph, node_featurizer, edge_featurizer, smiles_column,
+                 cache_file_path, task_names=None, load=True, log_every=1000, init_mask=True):
         self.df = df
         self.smiles = self.df[smiles_column].tolist()
         if task_names is None:
@@ -60,9 +62,11 @@ class MoleculeCSVDataset(object):
             self.task_names = task_names
         self.n_tasks = len(self.task_names)
         self.cache_file_path = cache_file_path
-        self._pre_process(smiles_to_graph, node_featurizer, edge_featurizer, load, log_every)
+        self._pre_process(smiles_to_graph, node_featurizer, edge_featurizer,
+                          load, log_every, init_mask)
 
-    def _pre_process(self, smiles_to_graph, node_featurizer, edge_featurizer, load, log_every):
+    def _pre_process(self, smiles_to_graph, node_featurizer,
+                     edge_featurizer, load, log_every, init_mask):
         """Pre-process the dataset
 
         * Convert molecules from smiles format into DGLGraphs
@@ -86,13 +90,16 @@ class MoleculeCSVDataset(object):
             featurization methods and need to preprocess from scratch. Default to True.
         log_every : bool
             Print a message every time ``log_every`` molecules are processed.
+        init_mask : bool
+            Whether to initialize a binary mask indicating the existence of labels.
         """
         if os.path.exists(self.cache_file_path) and load:
             # DGLGraphs have been constructed before, reload them
             print('Loading previously saved dgl graphs...')
             self.graphs, label_dict = load_graphs(self.cache_file_path)
             self.labels = label_dict['labels']
-            self.mask = label_dict['mask']
+            if init_mask:
+                self.mask = label_dict['mask']
         else:
             print('Processing dgl graphs from scratch...')
             self.graphs = []
@@ -104,9 +111,14 @@ class MoleculeCSVDataset(object):
             _label_values = self.df[self.task_names].values
             # np.nan_to_num will also turn inf into a very large number
             self.labels = F.zerocopy_from_numpy(np.nan_to_num(_label_values).astype(np.float32))
-            self.mask = F.zerocopy_from_numpy((~np.isnan(_label_values)).astype(np.float32))
-            save_graphs(self.cache_file_path, self.graphs,
-                        labels={'labels': self.labels, 'mask': self.mask})
+            if init_mask:
+                self.mask = F.zerocopy_from_numpy((~np.isnan(_label_values)).astype(np.float32))
+                save_graphs(self.cache_file_path, self.graphs,
+                            labels={'labels': self.labels, 'mask': self.mask})
+            else:
+                self.mask = None
+                save_graphs(self.cache_file_path, self.graphs,
+                            labels={'labels': self.labels})
 
     def __getitem__(self, item):
         """Get datapoint with index
@@ -124,10 +136,14 @@ class MoleculeCSVDataset(object):
             DGLGraph for the ith datapoint
         Tensor of dtype float32 and shape (T)
             Labels of the datapoint for all tasks
-        Tensor of dtype float32 and shape (T)
-            Binary masks indicating the existence of labels for all tasks
+        Tensor of dtype float32 and shape (T), optional
+            Binary masks indicating the existence of labels for all tasks. This is only
+            generated when ``init_mask`` is True in the initialization.
         """
-        return self.smiles[item], self.graphs[item], self.labels[item], self.mask[item]
+        if self.mask is not None:
+            return self.smiles[item], self.graphs[item], self.labels[item], self.mask[item]
+        else:
+            return self.smiles[item], self.graphs[item], self.labels[item]
 
     def __len__(self):
         """Size for the dataset

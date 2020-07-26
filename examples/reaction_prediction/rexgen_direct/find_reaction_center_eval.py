@@ -21,11 +21,13 @@ def main(args):
     torch.cuda.set_device(args['device'])
 
     if args['test_path'] is None:
-        test_set = USPTOCenter('test', num_processes=args['num_processes'])
+        test_set = USPTOCenter('test', num_processes=args['num_processes'], load=args['load'])
     else:
         test_set = WLNCenterDataset(raw_file_path=args['test_path'],
-                                    mol_graph_path='test.bin',
-                                    num_processes=args['num_processes'])
+                                    mol_graph_path=args['test_path'] + '.bin',
+                                    num_processes=args['num_processes'],
+                                    load=args['load'],
+                                    reaction_validity_result_prefix='test')
     test_loader = DataLoader(test_set, batch_size=args['batch_size'],
                              collate_fn=collate_center, shuffle=False)
 
@@ -69,6 +71,9 @@ if __name__ == '__main__':
                              'task easier.')
     parser.add_argument('-np', '--num-processes', type=int, default=32,
                         help='Number of processes to use for data pre-processing')
+    parser.add_argument('--load', action='store_true', default=False,
+                        help='Whether to load constructed DGLGraphs. This is desired when the '
+                             'evaluation is performed multiple times and the dataset is large.')
     args = parser.parse_args().__dict__
     args.update(reaction_center_config)
 

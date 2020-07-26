@@ -5,6 +5,9 @@ We provide various examples across 3 applications -- property prediction, genera
 ## Datasets/Benchmarks
 
 - MoleculeNet: A Benchmark for Molecular Machine Learning [[paper]](https://arxiv.org/abs/1703.00564), [[website]](http://moleculenet.ai/)
+    - [ESOL with DGL](../python/dgllife/data/esol.py)
+    - [FreeSolv with DGL](../python/dgllife/data/freesolv.py)
+    - [Lipophilicity with DGL](../python/dgllife/data/lipophilicity.py)
     - [Tox21 with DGL](../python/dgllife/data/tox21.py)
     - [PDBBind with DGL](../python/dgllife/data/pdbbind.py)
 - Alchemy: A Quantum Chemistry Dataset for Benchmarking AI Models [[paper]](https://arxiv.org/abs/1906.09427), [[github]](https://github.com/tencent-alchemy/Alchemy)
@@ -13,6 +16,8 @@ We provide various examples across 3 applications -- property prediction, genera
     - [PubChem Aromaticity with DGL](../python/dgllife/data/pubchem_aromaticity.py)
 - OGB [[paper]](https://arxiv.org/abs/2005.00687)
     - [ogbl-ppa](link_prediction/ogbl-ppa)
+- AstraZeneca Experimental Solubility from ChEMBL [[record]](https://www.ebi.ac.uk/chembl/document_report_card/CHEMBL3301361/)
+    - [Dataset](../python/dgllife/data/astrazeneca_chembl_solubility.py)
 
 ## Property Prediction
 

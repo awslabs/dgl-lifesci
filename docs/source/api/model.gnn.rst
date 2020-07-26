@@ -58,3 +58,8 @@ WLN
 ---
 .. automodule:: dgllife.model.gnn.wln
     :members:
+
+GNNOGB
+------
+.. automodule:: dgllife.model.gnn.gnn_ogb
+    :members:
