@@ -1,6 +1,6 @@
 package:
   name: dgllife{{ environ.get('APP_PACKAGE_SUFFIX', '') }}
-  version: "0.2.3"
+  version: "0.2.4"
 
 source:
   url: https://files.pythonhosted.org/packages/42/b6/d6fad243fb8483e87ff9296e088d235f4b932ddf9c1b3fe4b19462dd0efa/dgllife-0.2.3.tar.gz
