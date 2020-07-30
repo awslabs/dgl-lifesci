@@ -56,6 +56,28 @@ class Tox21(MoleculeCSVDataset):
 
     >>> from dgllife.data import Tox21
     >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+
+    >>> dataset = Tox21(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> # Get size of the dataset
+    >>> len(dataset)
+    7831
+    >>> # Get the 0th datapoint, consisting of SMILES, DGLGraph, labels, and masks
+    >>> dataset[0]
+    ('CCOc1ccc2nc(S(N)(=O)=O)sc2c1',
+     DGLGraph(num_nodes=16, num_edges=34,
+              ndata_schemes={}
+              edata_schemes={}),
+     tensor([0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0.]),
+     tensor([1., 1., 1., 0., 0., 1., 1., 1., 1., 1., 1., 1.]))
+
+    The dataset instance also contains information about molecule ids.
+
+    >>> dataset.id[i]
+
+    We can also get the id along with SMILES, DGLGraph, labels, and masks at once.
+
+    >>> dataset.load_full = True
+    >>> dataset[0]
     """
     def __init__(self, smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,
@@ -71,6 +93,35 @@ class Tox21(MoleculeCSVDataset):
 
         df = df.drop(columns=['mol_id'])
 
+        self.load_full = False
+
         super(Tox21, self).__init__(df, smiles_to_graph, node_featurizer, edge_featurizer,
                                     "smiles", cache_file_path,
                                     load=load, log_every=log_every)
+
+    def __getitem__(self, item):
+        """Get datapoint with index
+
+        Parameters
+        ----------
+        item : int
+            Datapoint index
+
+        Returns
+        -------
+        str
+            SMILES for the ith datapoint
+        DGLGraph
+            DGLGraph for the ith datapoint
+        Tensor of dtype float32 and shape (T)
+            Labels of the ith datapoint for all tasks. T for the number of tasks.
+        Tensor of dtype float32 and shape (T)
+            Binary masks of the ith datapoint indicating the existence of labels for all tasks.
+        str, optional
+            Id for the ith datapoint, returned only when ``self.load_full`` is True.
+        """
+        if self.load_full:
+            return self.smiles[item], self.graphs[item], self.labels[item], \
+                   self.mask[item], self.id[item]
+        else:
+            return self.smiles[item], self.graphs[item], self.labels[item], self.mask[item]
