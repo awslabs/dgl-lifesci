@@ -85,6 +85,12 @@ class Tox21(MoleculeCSVDataset):
      tensor([0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0.]),
      tensor([1., 1., 1., 0., 0., 1., 1., 1., 1., 1., 1., 1.]),
      'TOX3021')
+
+    To address the imbalance between positive and negative samples, we can re-weight
+    positive samples for each task based on the training datapoints.
+
+    >>> train_ids = torch.arange(1000)
+    >>> dataset.task_pos_weights(train_ids)
     """
     def __init__(self, smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,

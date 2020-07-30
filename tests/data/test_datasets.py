@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import torch
 
 from dgllife.data import *
 from dgllife.data.uspto import get_bond_changes, process_file
@@ -38,6 +39,12 @@ def test_tox21():
     print('Test Tox21')
     dataset = Tox21()
     remove_file('tox21_dglgraph.bin')
+    assert len(dataset[0]) == 4
+    dataset.load_full = True
+    assert len(dataset[0]) == 5
+    train_ids = torch.tensor([10, 20])
+    assert torch.allclose(dataset.task_pos_weights(train_ids),
+                          torch.tensor([0., 0., 0., 0., 1., 1., 0., 0., 0., 0., 0., 0.]))
 
 def test_esol():
     print('Test ESOL')
