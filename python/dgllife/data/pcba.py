@@ -49,6 +49,7 @@ class PCBA(MoleculeCSVDataset):
     Examples
     --------
 
+    >>> import torch
     >>> from dgllife.data import PCBA
     >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
 
@@ -79,6 +80,12 @@ class PCBA(MoleculeCSVDataset):
      tensor([0., ..., 0.]),
      tensor([1., ..., 0.]),
      'CID1511280')
+
+    To address the imbalance between positive and negative samples, we can re-weight
+    positive samples for each task based on the training datapoints.
+
+    >>> train_ids = torch.tensor([10, 20, 30])
+    >>> dataset.task_pos_weights(train_ids)
     """
     def __init__(self,
                  smiles_to_graph=smiles_to_bigraph,
