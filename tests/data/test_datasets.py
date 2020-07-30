@@ -42,9 +42,10 @@ def test_tox21():
     assert len(dataset[0]) == 4
     dataset.load_full = True
     assert len(dataset[0]) == 5
-    train_ids = torch.tensor([10, 20])
+    train_ids = torch.arange(1000)
     assert torch.allclose(dataset.task_pos_weights(train_ids),
-                          torch.tensor([0., 0., 0., 0., 1., 1., 0., 0., 0., 0., 0., 0.]))
+                          torch.tensor([26.9706, 35.3750, 5.9756, 21.6364, 6.4404, 21.4500,
+                                        26.0000, 5.0826, 21.4390, 14.7692, 6.1442, 12.4308]))
 
 def test_esol():
     print('Test ESOL')

@@ -91,6 +91,8 @@ class Tox21(MoleculeCSVDataset):
 
     >>> train_ids = torch.arange(1000)
     >>> dataset.task_pos_weights(train_ids)
+    tensor([26.9706, 35.3750,  5.9756, 21.6364,  6.4404, 21.4500, 26.0000,  5.0826,
+            21.4390, 14.7692,  6.1442, 12.4308])
     """
     def __init__(self, smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,
