@@ -189,6 +189,6 @@ class MoleculeCSVDataset(object):
             self._task_pos_weights = torch.zeros(self.labels.shape[1])
             num_pos = F.sum(self.labels[indices], dim=0)
             num_indices = F.sum(self.mask[indices], dim=0)
-            self._task_pos_weights[num_indices > 0] = \
-                ((num_indices - num_pos) / num_pos)[num_indices > 0]
+            self._task_pos_weights[num_pos > 0] = \
+                ((num_indices - num_pos) / num_pos)[num_pos > 0]
         return self._task_pos_weights
