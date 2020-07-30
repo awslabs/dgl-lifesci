@@ -63,6 +63,14 @@ def test_lipophilicity():
     dataset.load_full = True
     assert len(dataset[0]) == 4
 
+def test_pcba():
+    print('Test PCBA')
+    dataset = PCBA()
+    remove_file('pcba_dglgraph.bin')
+    assert len(dataset[0]) == 4
+    dataset.load_full = True
+    assert len(dataset[0]) == 5
+
 def test_astrazeneca_chembl_solubility():
     print('Test AstraZenecaChEMBLSolubility')
     dataset = AstraZenecaChEMBLSolubility()
@@ -146,5 +154,6 @@ if __name__ == '__main__':
     test_esol()
     test_freesolv()
     test_lipophilicity()
+    test_pcba()
     test_astrazeneca_chembl_solubility()
     test_wln_reaction()

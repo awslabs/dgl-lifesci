@@ -13,4 +13,5 @@ from .tox21 import *
 from .esol import *
 from .freesolv import *
 from .lipophilicity import *
+from .pcba import *
 from .uspto import *
