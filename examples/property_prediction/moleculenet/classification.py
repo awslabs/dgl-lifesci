@@ -71,8 +71,9 @@ def main(args):
     else:
         args['n_tasks'] = dataset.n_tasks
         model = load_model(args)
-        loss_criterion = BCEWithLogitsLoss(pos_weight=dataset.task_pos_weights.to(args['device']),
-                                           reduction='none')
+        loss_criterion = BCEWithLogitsLoss(
+            pos_weight=dataset.task_pos_weights(
+                torch.tensor(train_set.indices)).to(args['device']), reduction='none')
         optimizer = Adam(model.parameters(), lr=args['lr'])
         stopper = EarlyStopping(patience=args['patience'])
     model.to(args['device'])

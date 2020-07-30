@@ -175,7 +175,7 @@ class MoleculeCSVDataset(object):
 
         Parameters
         ----------
-        indices : list of int
+        indices : 1D LongTensor
             The function will compute the weights on the data subset specified by
             the indices, e.g. the indices for the training set.
 
@@ -185,7 +185,7 @@ class MoleculeCSVDataset(object):
             Weight of positive samples on all tasks
         """
         if self._task_pos_weights is None:
-            num_pos = F.sum(self.labels, dim=0)
-            num_indices = F.sum(self.mask, dim=0)
+            num_pos = F.sum(self.labels[indices], dim=0)
+            num_indices = F.sum(self.mask[indices], dim=0)
             self._task_pos_weights = (num_indices - num_pos) / num_pos
         return self._task_pos_weights

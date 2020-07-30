@@ -50,6 +50,12 @@ class Tox21(MoleculeCSVDataset):
         Print a message every time ``log_every`` molecules are processed. Default to 1000.
     cache_file_path : str
         Path to the cached DGLGraphs, default to 'tox21_dglgraph.bin'.
+
+    Examples
+    --------
+
+    >>> from dgllife.data import Tox21
+    >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
     """
     def __init__(self, smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,
