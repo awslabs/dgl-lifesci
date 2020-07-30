@@ -78,6 +78,13 @@ class Tox21(MoleculeCSVDataset):
 
     >>> dataset.load_full = True
     >>> dataset[0]
+    ('CCOc1ccc2nc(S(N)(=O)=O)sc2c1',
+     DGLGraph(num_nodes=16, num_edges=34,
+              ndata_schemes={}
+              edata_schemes={}),
+     tensor([0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0.]),
+     tensor([1., 1., 1., 0., 0., 1., 1., 1., 1., 1., 1., 1.]),
+     'TOX3021')
     """
     def __init__(self, smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,

@@ -48,6 +48,37 @@ class PCBA(MoleculeCSVDataset):
 
     Examples
     --------
+
+    >>> from dgllife.data import PCBA
+    >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+
+    >>> dataset = PCBA(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> # Get size of the dataset
+    >>> len(dataset)
+    437929
+    >>> # Get the 0th datapoint, consisting of SMILES, DGLGraph, labels, and masks
+    >>> dataset[0]
+    ('CC(=O)N1CCC2(CC1)NC(=O)N(c1ccccc1)N2',
+     DGLGraph(num_nodes=20, num_edges=44,
+              ndata_schemes={'h': Scheme(shape=(74,), dtype=torch.float32)}
+              edata_schemes={}),
+     tensor([0., ..., 0.]),
+     tensor([1., ..., 0.]))
+
+    The dataset instance also contains information about molecule ids.
+
+    >>> dataset.ids[i]
+
+    We can also get the id along with SMILES, DGLGraph, labels, and masks at once.
+
+    >>> dataset[0]
+    ('CC(=O)N1CCC2(CC1)NC(=O)N(c1ccccc1)N2',
+     DGLGraph(num_nodes=20, num_edges=44,
+              ndata_schemes={'h': Scheme(shape=(74,), dtype=torch.float32)}
+              edata_schemes={}),
+     tensor([0., ..., 0.]),
+     tensor([1., ..., 0.]),
+     'CID1511280')
     """
     def __init__(self,
                  smiles_to_graph=smiles_to_bigraph,
