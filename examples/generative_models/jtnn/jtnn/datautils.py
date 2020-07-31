@@ -48,7 +48,10 @@ class JTNNDataset(Dataset):
             data_file = data
         with open(data_file) as f:
             self.data = [line.strip("\r\n ").split()[0] for line in f]
-        self.vocab_file = '{}/jtnn/{}.txt'.format(self.dir, vocab)
+        if vocab == 'vocab':
+            self.vocab_file = '{}/jtnn/{}.txt'.format(self.dir, vocab)
+        else:
+            self.vocab_file = vocab
         print('Loading finished.')
         print('\tNum samples:', len(self.data))
         print('\tVocab file:', self.vocab_file)
@@ -118,7 +121,10 @@ class JTNNDataset(Dataset):
         else:
             stereo_cand_graphs = []
             stereo_atom_x_enc = torch.zeros(0, atom_x_enc.shape[1])
-            stereo_bond_x_enc = torch.zeros(0, bond_x_enc.shape[1])
+            try:
+                stereo_bond_x_enc = torch.zeros(0, bond_x_enc.shape[1])
+            except:
+                stereo_bond_x_enc = bond_x_enc
             stereo_cand_label = []
 
         result.update({
