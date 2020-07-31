@@ -84,8 +84,9 @@ class PCBA(MoleculeCSVDataset):
     To address the imbalance between positive and negative samples, we can re-weight
     positive samples for each task based on the training datapoints.
 
-    >>> train_ids = torch.arange(100000)
+    >>> train_ids = torch.arange(1000)
     >>> dataset.task_pos_weights(train_ids)
+    tensor([7.3400, 489.0000, ..., 1.0000])
     """
     def __init__(self,
                  smiles_to_graph=smiles_to_bigraph,
