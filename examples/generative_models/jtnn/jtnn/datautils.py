@@ -121,10 +121,11 @@ class JTNNDataset(Dataset):
         else:
             stereo_cand_graphs = []
             stereo_atom_x_enc = torch.zeros(0, atom_x_enc.shape[1])
-            try:
+            # handle molecule consisting of a single atom
+            if bond_x_enc.shape[0] == 0:
+                stereo_bond_x_enc = torch.tensor([])
+            else:
                 stereo_bond_x_enc = torch.zeros(0, bond_x_enc.shape[1])
-            except:
-                stereo_bond_x_enc = bond_x_enc
             stereo_cand_label = []
 
         result.update({
