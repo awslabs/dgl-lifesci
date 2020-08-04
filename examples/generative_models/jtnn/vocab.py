@@ -41,7 +41,7 @@ if __name__ == '__main__':
     vocab_file = '{}/jtnn/{}.txt'.format(default_dir, 'vocab')
     if not os.path.exists(vocab_file):
         zip_file_path = '{}/jtnn.zip'.format(default_dir)
-        download(_get_dgl_url('dgllife/jtnn.zip'), path=zip_file_path)
+        download(_get_dgl_url('dataset/jtnn.zip'), path=zip_file_path)
         extract_archive(zip_file_path, '{}/jtnn'.format(default_dir))
     default_vocab = set()
     with open(vocab_file, 'r') as f:
