@@ -16,7 +16,7 @@ from utils import mkdir_p, collate_molgraphs_unlabeled, load_model, predict, ini
 
 def main(args):
     dataset = UnlabeledSMILES(args['smiles'], node_featurizer=args['node_featurizer'],
-                              edge_featurizer=args['edge_featurizer'])
+                              edge_featurizer=args['edge_featurizer'], mol_to_graph=args['mol_to_graph'])
     dataloader = DataLoader(dataset, batch_size=args['batch_size'],
                             collate_fn=collate_molgraphs_unlabeled, num_workers=args['num_workers'])
     model = load_model(args).to(args['device'])
