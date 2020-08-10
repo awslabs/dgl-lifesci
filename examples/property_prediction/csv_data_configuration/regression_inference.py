@@ -95,7 +95,6 @@ if __name__ == '__main__':
                          'got {}'.format(args['file_path']))
     args['smiles'] = smiles
     args = init_featurizer(args)
-    print(args['mol_to_graph'])
     # Handle directories
     mkdir_p(args['inference_result_path'])
     assert os.path.exists(args['train_result_path']), \
