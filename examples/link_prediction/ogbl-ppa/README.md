@@ -48,13 +48,14 @@ Using the default parameters, the performance of 10 random runs is as follows.
 | Method       | Train hits@100 | Validation hits@100 | Test hits@100 |
 | -----------  | -------------- | ------------------- | ------------- |
 | GCN          | 23.95 ± 2.80   | 22.60 ± 2.59        | 21.30 ± 3.41  |
-| GraphSAGE    | 9.58 ± 0.99    | 9.44 ± 0.96         | 9.86 ± 1.21   |
+| GraphSAGE    | 13.88 ± 1.73   | 13.06 ± 1.51        | 11.90 ± 1.34  |
 | Node2vec+GCN | 27.98 ± 2.63   | 26.45 ± 2.49        | 25.81 ± 2.58  |
 
-| Method    | Average Time (hour) / epoch |
-| --------- | --------------------------- |
-| GCN       | 1.38                        |
-| GraphSAGE | 1.47                        |
+| Method       | Average Time (hour) / epoch |
+| -----------  | --------------------------- |
+| GCN          | 1.25                        |
+| GraphSAGE    | 1.28                        |
+| Node2vec+GCN | 1.29                        |
 
 ## References
 
