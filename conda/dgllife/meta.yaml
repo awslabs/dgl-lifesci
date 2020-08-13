@@ -1,10 +1,10 @@
 package:
   name: dgllife{{ environ.get('APP_PACKAGE_SUFFIX', '') }}
-  version: "0.2.3"
+  version: "0.2.4"
 
 source:
-  url: https://files.pythonhosted.org/packages/42/b6/d6fad243fb8483e87ff9296e088d235f4b932ddf9c1b3fe4b19462dd0efa/dgllife-0.2.3.tar.gz
-  sha256: 67a7f7a300107bdfc4e305f54c231f6c44524d1326242069936dc7cb532fc47c
+  url: https://files.pythonhosted.org/packages/94/fc/931ccf09805bf1a4e66b7ce75ed7756769c5824c9e0bb3b7ce18c82e1a99/dgllife-0.2.4.tar.gz
+  sha256: b893669f5fc83d77af64d1d7b3a95b5ca37f5a22d00e36ff4d4bcb636a5bae39
 
 channels:
   - defaults

@@ -7,7 +7,7 @@ import dgl
 import os
 import torch
 
-from dgl.data.utils import download, extract_archive, get_download_dir
+from dgl.data.utils import download, extract_archive, get_download_dir, _get_dgl_url
 from torch.utils.data import Dataset
 
 from .mol_tree import Vocab, DGLMolTree
@@ -22,7 +22,7 @@ MAX_NB = 10
 
 PAPER = os.getenv('PAPER', False)
 
-_url = 'https://s3-ap-southeast-1.amazonaws.com/dgl-data-cn/dataset/jtnn.zip'
+_url = _get_dgl_url('dataset/jtnn.zip')
 
 def _unpack_field(examples, field):
     return [e[field] for e in examples]
@@ -38,7 +38,7 @@ def _set_node_id(mol_tree, vocab):
 class JTNNDataset(Dataset):
     def __init__(self, data, vocab, training=True):
         self.dir = get_download_dir()
-        self.zip_file_path='{}/jtnn.zip'.format(self.dir)
+        self.zip_file_path = '{}/jtnn.zip'.format(self.dir)
         download(_url, path=self.zip_file_path)
         extract_archive(self.zip_file_path, '{}/jtnn'.format(self.dir))
         print('Loading data...')
@@ -48,7 +48,14 @@ class JTNNDataset(Dataset):
             data_file = data
         with open(data_file) as f:
             self.data = [line.strip("\r\n ").split()[0] for line in f]
-        self.vocab_file = '{}/jtnn/{}.txt'.format(self.dir, vocab)
+
+        if vocab == 'zinc':
+            self.vocab_file = '{}/jtnn/vocab.txt'
+        elif vocab == 'guacamol':
+            self.vocab_file = '{}/jtnn/vocab_guacamol.txt'
+        else:
+            self.vocab_file = vocab
+
         print('Loading finished.')
         print('\tNum samples:', len(self.data))
         print('\tVocab file:', self.vocab_file)
@@ -118,7 +125,11 @@ class JTNNDataset(Dataset):
         else:
             stereo_cand_graphs = []
             stereo_atom_x_enc = torch.zeros(0, atom_x_enc.shape[1])
-            stereo_bond_x_enc = torch.zeros(0, bond_x_enc.shape[1])
+            # handle molecule consisting of a single atom
+            if bond_x_enc.shape[0] == 0:
+                stereo_bond_x_enc = torch.tensor([])
+            else:
+                stereo_bond_x_enc = torch.zeros(0, bond_x_enc.shape[1])
             stereo_cand_label = []
 
         result.update({
