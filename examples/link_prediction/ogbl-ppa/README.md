@@ -38,6 +38,11 @@ The optional arguments are as follows:
 --runs, number of random experiments to perform (default=1)
 ```
 
+
+Full-batch GCN training based on Node2Vec features.
+To generate Node2Vec features, please run ```python node2vec.py```. This script requires node embeddings be saved in ```embedding.pt```. 
+
+
 ## Performance
 
 For model evaluation, we consider hits@100 -- ranking each true link against 3,000,000 randomly-sampled 
