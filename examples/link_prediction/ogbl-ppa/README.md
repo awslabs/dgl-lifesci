@@ -42,6 +42,19 @@ The optional arguments are as follows:
 Full-batch GCN training based on Node2Vec features.
 To generate Node2Vec features, please run ```python node2vec.py```. This script requires node embeddings be saved in ```embedding.pt```. 
 
+The optional arguments are as follows:
+
+```
+--embedding_dim, the size of each embedding vector (default=128)
+--walk_length, the walk length (default=40)
+--context_size, the actual context size which is considered for positive samples (default=20)
+--walks_per_node, the number of walks to sample for each node (default=10)
+--batch_size, batch size to use for sampling (default=256)
+--lr, learning rate (default=0.01)
+--epochs, number of epochs for training (default=2)
+--log_steps, number of steps log (default=1)
+```
+
 
 ## Performance
 
