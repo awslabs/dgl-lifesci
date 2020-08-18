@@ -50,9 +50,9 @@ class JTNNDataset(Dataset):
             self.data = [line.strip("\r\n ").split()[0] for line in f]
 
         if vocab == 'zinc':
-            self.vocab_file = '{}/jtnn/vocab.txt'
+            self.vocab_file = '{}/jtnn/vocab.txt'.format(self.dir)
         elif vocab == 'guacamol':
-            self.vocab_file = '{}/jtnn/vocab_guacamol.txt'
+            self.vocab_file = '{}/jtnn/vocab_guacamol.txt'.format(self.dir)
         else:
             self.vocab_file = vocab
 
