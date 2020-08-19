@@ -25,7 +25,7 @@ molecules for training and 5000 molecules for validation.
 
 ### GuacaMol
 
-> The dataset are used by a series of baseline model implementations for the [guacamol](https://github.com/BenevolentAI/guacamol) benchmark for training generative models. The datasets are derived from the ChEMBL 24 database.
+> The dataset is used by the [GuacaMol](https://github.com/BenevolentAI/guacamol) benchmark of generative models.  The dataset is derived from the [ChEMBL](https://www.ebi.ac.uk/chembl/) 24 database.
 
 Generally speaking, the advantage of ChEMBL is that it contains only molecules that have been synthesized and
 tested against biological targets. Other datasets, such as ZINC, contain, at least to some
@@ -41,11 +41,11 @@ The dataset will be downloaded automatically.
 
 For GuacaMol dataset, you can download the training-set and validation-set with 
 ```
-mkdir -p $FILENAME
-wget https://ndownloader.figshare.com/files/13612760 -O $FILENAME/guacamol_v1_train.smiles
-wget https://ndownloader.figshare.com/files/13612766 -O $FILENAME/guacamol_v1_valid.smiles
+mkdir -p $DIRECTORY
+wget https://ndownloader.figshare.com/files/13612760 -O $DIRECTORY/guacamol_v1_train.smiles
+wget https://ndownloader.figshare.com/files/13612766 -O $DIRECTORY/guacamol_v1_valid.smiles
 ``` 
-`$FILENAME` specifies the filename to save the dataset.
+`$DIRECTORY` specifies the directory to save the dataset files.
 
 
 ### Preprocessing
@@ -56,25 +56,19 @@ encoded nodes(atoms) and edges(bonds), and other information for model to use.
 ## Usage
 
 ### Training
-####ZINC
+#### ZINC
 For ZINC dataset, to start training, use `python train.py`. By default, the script will use ZINC dataset
  with preprocessed vocabulary, and save model checkpoint periodically in the current working directory. 
  
-####GuacaMol
-For GuacaMol dataset, you need to process the training dataset to get vocabulary first with
+#### GuacaMol
+For GuacaMol dataset, you need to specify the downloaded training-set file and the preprocessed vocabulary. To start training, use
 ```
-python vocab.py -d $DATASET -v  $VOCABULARY
+python train.py -t $DIRECTORY/guacamol_v1_train.smiles -v guacamol -s $CHECKPOINTS
 ```
-`$DATASET` specifies the filename of the training-set.  
-`$VOCABULARY` specifies the filename to save the processed vocabulary.  
-  
-To start training on GuacaMol, use
-```
-python train.py -t $DATASET -v  $VOCABULARY -s $CHECKPOINTS
-```
-`$DATASET` specifies the filename of the training-set.  
-`$VOCABULARY` specifies the filename of processed vocabulary.    
-`$CHECKPOINTS` specifies the filename to save model checkpoint periodically. 
+`$DIRECTORY` specifies the directory of downloaded dataset files.  
+`$CHECKPOINTS` specifies the directory to save model checkpoint periodically. 
+
+
 ### Evaluation
 
 To start evaluation, use `python reconstruct_eval.py`. By default, we will perform evaluation with 
