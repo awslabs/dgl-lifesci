@@ -35,7 +35,7 @@ def remove_file(fname):
 
 def test_mol_csv():
     df = test_data_frame1()
-    fname = 'test.bin'
+    fname = './test.bin'
     dataset = MoleculeCSVDataset(df=df, smiles_to_graph=smiles_to_bigraph,
                                  node_featurizer=CanonicalAtomFeaturizer(),
                                  edge_featurizer=CanonicalBondFeaturizer(),
@@ -79,7 +79,7 @@ def test_mol_csv():
     assert 'e' not in graph.edata
 
     df2 = test_data_frame2()
-    fname = 'test.bin'
+    fname = './test.bin'
     dataset = MoleculeCSVDataset(df=df2, smiles_to_graph=smiles_to_bigraph,
                                  node_featurizer=CanonicalAtomFeaturizer(),
                                  edge_featurizer=CanonicalBondFeaturizer(),
