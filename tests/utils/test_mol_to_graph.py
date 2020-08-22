@@ -31,8 +31,8 @@ def test_smiles_to_bigraph():
     # Test the case with self loops added.
     g1 = smiles_to_bigraph(test_smiles1, add_self_loop=True)
     src, dst = g1.edges()
-    assert torch.allclose(src, torch.LongTensor([0, 2, 2, 1, 0, 1, 2]))
-    assert torch.allclose(dst, torch.LongTensor([2, 0, 1, 2, 0, 1, 2]))
+    assert torch.allclose(src, torch.IntTensor([0, 2, 2, 1, 0, 1, 2]))
+    assert torch.allclose(dst, torch.IntTensor([2, 0, 1, 2, 0, 1, 2]))
 
     # Test the case without self loops.
     test_node_featurizer = TestAtomFeaturizer()
@@ -72,8 +72,8 @@ def test_mol_to_bigraph():
     mol1 = Chem.MolFromSmiles(test_smiles1)
     g1 = mol_to_bigraph(mol1, add_self_loop=True)
     src, dst = g1.edges()
-    assert torch.allclose(src, torch.LongTensor([0, 2, 2, 1, 0, 1, 2]))
-    assert torch.allclose(dst, torch.LongTensor([2, 0, 1, 2, 0, 1, 2]))
+    assert torch.allclose(src, torch.IntTensor([0, 2, 2, 1, 0, 1, 2]))
+    assert torch.allclose(dst, torch.IntTensor([2, 0, 1, 2, 0, 1, 2]))
 
     # Test the case without self loops.
     mol2 = Chem.MolFromSmiles(test_smiles2)
@@ -116,8 +116,8 @@ def test_smiles_to_complete_graph():
     g1 = smiles_to_complete_graph(test_smiles1, add_self_loop=False,
                                  node_featurizer=test_node_featurizer)
     src, dst = g1.edges()
-    assert torch.allclose(src, torch.LongTensor([0, 0, 1, 1, 2, 2]))
-    assert torch.allclose(dst, torch.LongTensor([1, 2, 0, 2, 0, 1]))
+    assert torch.allclose(src, torch.IntTensor([0, 0, 1, 1, 2, 2]))
+    assert torch.allclose(dst, torch.IntTensor([1, 2, 0, 2, 0, 1]))
     assert torch.allclose(g1.ndata['hv'], torch.tensor([[6.], [8.], [6.]]))
 
     # Test the case where atoms come with a default order and we do not
@@ -142,8 +142,8 @@ def test_mol_to_complete_graph():
     g1 = mol_to_complete_graph(mol1, add_self_loop=False,
                                node_featurizer=test_node_featurizer)
     src, dst = g1.edges()
-    assert torch.allclose(src, torch.LongTensor([0, 0, 1, 1, 2, 2]))
-    assert torch.allclose(dst, torch.LongTensor([1, 2, 0, 2, 0, 1]))
+    assert torch.allclose(src, torch.IntTensor([0, 0, 1, 1, 2, 2]))
+    assert torch.allclose(dst, torch.IntTensor([1, 2, 0, 2, 0, 1]))
     assert torch.allclose(g1.ndata['hv'], torch.tensor([[6.], [8.], [6.]]))
 
     # Test the case where atoms come with a default order and we do not
@@ -234,6 +234,7 @@ def test_smiles_to_nearest_neighbor_graph():
     assert 'dist' in g.edata
     coordinates = torch.from_numpy(coordinates)
     srcs, dsts = g.edges()
+    srcs, dsts = srcs.long(), dsts.long()
     dist = torch.norm(
         coordinates[srcs] - coordinates[dsts], dim=1, p=2).float().reshape(-1, 1)
     assert torch.allclose(dist, g.edata['dist'])
@@ -277,6 +278,7 @@ def test_mol_to_nearest_neighbor_graph():
     assert 'dist' in g.edata
     coordinates = torch.from_numpy(coordinates)
     srcs, dsts = g.edges()
+    srcs, dsts = srcs.long(), dsts.long()
     dist = torch.norm(
         coordinates[srcs] - coordinates[dsts], dim=1, p=2).float().reshape(-1, 1)
     assert torch.allclose(dist, g.edata['dist'])

@@ -108,10 +108,10 @@ class WLNReactionRanking(nn.Module):
         batch_diff_node_feats = []
 
         for i, num_candidate_products in enumerate(batch_num_candidate_products):
-            reactant_node_end = reactant_node_start + reactant_graph.batch_num_nodes[i]
+            reactant_node_end = reactant_node_start + reactant_graph.batch_num_nodes()[i]
             product_graph_end = product_graph_start + num_candidate_products
             product_node_end = product_node_start + sum(
-                product_graphs.batch_num_nodes[product_graph_start: product_graph_end])
+                product_graphs.batch_num_nodes()[product_graph_start: product_graph_end])
 
             # (N, node_out_feats)
             reactant_node_feats = batch_reactant_node_feats[reactant_node_start:

@@ -8,7 +8,7 @@
 import numpy as np
 import dgl.backend as F
 
-from dgl import graph, bipartite, hetero_from_relations
+from dgl import heterograph
 
 from ..utils.mol_to_graph import k_nearest_neighbors
 
@@ -126,23 +126,22 @@ def ACNN_graph_construction_and_featurization(ligand_mol,
     else:
         num_protein_atoms = max_num_protein_atoms
 
-    # Construct graph for atoms in the ligand
+    data_dict = dict()
+    num_nodes_dict = dict()
+
+    # graph data for atoms in the ligand
     ligand_srcs, ligand_dsts, ligand_dists = k_nearest_neighbors(
         ligand_coordinates, neighbor_cutoff, max_num_neighbors)
-    ligand_graph = graph((ligand_srcs, ligand_dsts),
-                         'ligand_atom', 'ligand', num_ligand_atoms)
-    ligand_graph.edata['distance'] = F.reshape(F.zerocopy_from_numpy(
-        np.array(ligand_dists).astype(np.float32)), (-1, 1))
+    data_dict[('ligand_atom', 'ligand', 'ligand_atom')] = (ligand_srcs, ligand_dsts)
+    num_nodes_dict['ligand_atom'] = num_ligand_atoms
 
-    # Construct graph for atoms in the protein
+    # graph data for atoms in the protein
     protein_srcs, protein_dsts, protein_dists = k_nearest_neighbors(
         protein_coordinates, neighbor_cutoff, max_num_neighbors)
-    protein_graph = graph((protein_srcs, protein_dsts),
-                          'protein_atom', 'protein', num_protein_atoms)
-    protein_graph.edata['distance'] = F.reshape(F.zerocopy_from_numpy(
-        np.array(protein_dists).astype(np.float32)), (-1, 1))
+    data_dict[('protein_atom', 'protein', 'protein_atom')] = (protein_srcs, protein_dsts)
+    num_nodes_dict['protein_atom'] = num_protein_atoms
 
-    # Construct 4 graphs for complex representation, including the connection within
+    # 4 graphs for complex representation, including the connection within
     # protein atoms, the connection within ligand atoms and the connection between
     # protein and ligand atoms.
     complex_srcs, complex_dsts, complex_dists = k_nearest_neighbors(
@@ -158,60 +157,54 @@ def ACNN_graph_construction_and_featurization(ligand_mol,
         (complex_srcs < offset).nonzero()[0],
         (complex_dsts < offset).nonzero()[0],
         assume_unique=True)
-    inter_ligand_graph = graph(
+    data_dict[('ligand_atom', 'complex', 'ligand_atom')] = \
         (complex_srcs[inter_ligand_indices].tolist(),
-         complex_dsts[inter_ligand_indices].tolist()),
-        'ligand_atom', 'complex', num_ligand_atoms)
-    inter_ligand_graph.edata['distance'] = F.reshape(F.zerocopy_from_numpy(
-        complex_dists[inter_ligand_indices].astype(np.float32)), (-1, 1))
+         complex_dsts[inter_ligand_indices].tolist())
 
     # ('protein_atom', 'complex', 'protein_atom')
     inter_protein_indices = np.intersect1d(
         (complex_srcs >= offset).nonzero()[0],
         (complex_dsts >= offset).nonzero()[0],
         assume_unique=True)
-    inter_protein_graph = graph(
+    data_dict[('protein_atom', 'complex', 'protein_atom')] = \
         ((complex_srcs[inter_protein_indices] - offset).tolist(),
-         (complex_dsts[inter_protein_indices] - offset).tolist()),
-        'protein_atom', 'complex', num_protein_atoms)
-    inter_protein_graph.edata['distance'] = F.reshape(F.zerocopy_from_numpy(
-        complex_dists[inter_protein_indices].astype(np.float32)), (-1, 1))
+         (complex_dsts[inter_protein_indices] - offset).tolist())
 
     # ('ligand_atom', 'complex', 'protein_atom')
     ligand_protein_indices = np.intersect1d(
         (complex_srcs < offset).nonzero()[0],
         (complex_dsts >= offset).nonzero()[0],
         assume_unique=True)
-    ligand_protein_graph = bipartite(
+    data_dict[('ligand_atom', 'complex', 'protein_atom')] = \
         (complex_srcs[ligand_protein_indices].tolist(),
-         (complex_dsts[ligand_protein_indices] - offset).tolist()),
-        'ligand_atom', 'complex', 'protein_atom',
-        (num_ligand_atoms, num_protein_atoms))
-    ligand_protein_graph.edata['distance'] = F.reshape(F.zerocopy_from_numpy(
-        complex_dists[ligand_protein_indices].astype(np.float32)), (-1, 1))
+         (complex_dsts[ligand_protein_indices] - offset).tolist())
 
     # ('protein_atom', 'complex', 'ligand_atom')
     protein_ligand_indices = np.intersect1d(
         (complex_srcs >= offset).nonzero()[0],
         (complex_dsts < offset).nonzero()[0],
         assume_unique=True)
-    protein_ligand_graph = bipartite(
+    data_dict[('protein_atom', 'complex', 'ligand_atom')] = \
         ((complex_srcs[protein_ligand_indices] - offset).tolist(),
-         complex_dsts[protein_ligand_indices].tolist()),
-        'protein_atom', 'complex', 'ligand_atom',
-        (num_protein_atoms, num_ligand_atoms))
-    protein_ligand_graph.edata['distance'] = F.reshape(F.zerocopy_from_numpy(
-        complex_dists[protein_ligand_indices].astype(np.float32)), (-1, 1))
+         complex_dsts[protein_ligand_indices].tolist())
 
-    # Merge the graphs
-    g = hetero_from_relations(
-        [protein_graph,
-         ligand_graph,
-         inter_ligand_graph,
-         inter_protein_graph,
-         ligand_protein_graph,
-         protein_ligand_graph]
-    )
+    g = heterograph(data_dict, num_nodes_dict=num_nodes_dict)
+    g.edges['ligand'].data['distance'] = F.reshape(F.zerocopy_from_numpy(
+        np.array(ligand_dists).astype(np.float32)), (-1, 1))
+    g.edges['protein'].data['distance'] = F.reshape(F.zerocopy_from_numpy(
+        np.array(protein_dists).astype(np.float32)), (-1, 1))
+    g.edges[('ligand_atom', 'complex', 'ligand_atom')].data['distance'] = \
+        F.reshape(F.zerocopy_from_numpy(
+            complex_dists[inter_ligand_indices].astype(np.float32)), (-1, 1))
+    g.edges[('protein_atom', 'complex', 'protein_atom')].data['distance'] = \
+        F.reshape(F.zerocopy_from_numpy(
+            complex_dists[inter_protein_indices].astype(np.float32)), (-1, 1))
+    g.edges[('ligand_atom', 'complex', 'protein_atom')].data['distance'] = \
+        F.reshape(F.zerocopy_from_numpy(
+            complex_dists[ligand_protein_indices].astype(np.float32)), (-1, 1))
+    g.edges[('protein_atom', 'complex', 'ligand_atom')].data['distance'] = \
+        F.reshape(F.zerocopy_from_numpy(
+            complex_dists[protein_ligand_indices].astype(np.float32)), (-1, 1))
 
     # Get atomic numbers for all atoms left and set node features
     ligand_atomic_numbers = np.array(get_atomic_numbers(ligand_mol, ligand_atom_indices_left))

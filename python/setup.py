@@ -46,7 +46,6 @@ setup(
         'scipy>=1.1.0',
         'networkx>=2.1',
         'hyperopt',
-        'dgl',
         'joblib'
     ],
     url='https://github.com/awslabs/dgl-lifesci',
