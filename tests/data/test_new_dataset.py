@@ -85,6 +85,7 @@ def test_mol_csv():
                                  edge_featurizer=CanonicalBondFeaturizer(),
                                  smiles_column='smiles',
                                  cache_file_path=fname,
+                                 load=False,
                                  n_jobs=cpu_count() - 1)
     assert dataset.task_names == ['task1', 'task2']
     smiles, graph, label, mask = dataset[0]

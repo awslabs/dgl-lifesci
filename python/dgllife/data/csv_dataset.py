@@ -48,7 +48,7 @@ class MoleculeCSVDataset(object):
     load : bool
         Whether to load the previously pre-processed dataset or pre-process from scratch.
         ``load`` should be False when we want to try different graph construction and
-        featurization methods and need to preprocess from scratch. Default to True.
+        featurization methods and need to preprocess from scratch. Default to False.
     log_every : bool
         Print a message every time ``log_every`` molecules are processed. It only comes
         into effect when :attr:`n_jobs` is greater than 1. Default to 1000.
@@ -59,7 +59,7 @@ class MoleculeCSVDataset(object):
         using joblib backend. Default to 1.
     """
     def __init__(self, df, smiles_to_graph, node_featurizer, edge_featurizer, smiles_column,
-                 cache_file_path, task_names=None, load=True, log_every=1000, init_mask=True,
+                 cache_file_path, task_names=None, load=False, log_every=1000, init_mask=True,
                  n_jobs=1):
         self.df = df
         self.smiles = self.df[smiles_column].tolist()

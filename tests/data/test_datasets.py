@@ -101,7 +101,7 @@ def test_wln_reaction():
     remove_file('test.txt.proc')
 
     # Test configured dataset
-    dataset = WLNCenterDataset('test.txt', 'test_graphs.bin')
+    dataset = WLNCenterDataset('test.txt', './test_graphs.bin')
     remove_file('test_graphs.bin')
 
     with open('test_candidate_bond_changes.txt', 'w') as f:

@@ -771,7 +771,7 @@ def mol_to_nearest_neighbor_graph(mol,
                                             max_num_neighbors=max_num_neighbors,
                                             p_distance=p_distance,
                                             self_loops=add_self_loop)
-    g = DGLGraph()
+    g = dgl.graph(([], []), idtype=torch.int32)
 
     # Add nodes first since some nodes may be completely isolated
     g.add_nodes(num_atoms)
