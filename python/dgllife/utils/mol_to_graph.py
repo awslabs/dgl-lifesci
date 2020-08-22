@@ -106,7 +106,7 @@ def construct_bigraph_from_mol(mol, add_self_loop=False):
     g : DGLGraph
         Empty bigraph topology of the molecule
     """
-    g = dgl.graph(([], []), dtype=torch.int32)
+    g = dgl.graph(([], []), idtype=torch.int32)
 
     # Add nodes
     num_atoms = mol.GetNumAtoms()
@@ -346,7 +346,7 @@ def construct_complete_graph_from_mol(mol, add_self_loop=False):
             if i != j or add_self_loop:
                 src.append(i)
                 dst.append(j)
-    g = dgl.graph((torch.IntTensor(src), torch.IntTensor(dst)), dtype=torch.int32)
+    g = dgl.graph((torch.IntTensor(src), torch.IntTensor(dst)), idtype=torch.int32)
 
     return g
 
