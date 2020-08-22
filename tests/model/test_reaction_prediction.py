@@ -152,6 +152,8 @@ def test_wln_candidate_ranking():
 
     reactant_g, reactant_node_feats, reactant_edge_feats, product_g, product_node_feats, \
     product_edge_feats, product_scores, num_candidate_products = test_reactant_product_graph1()
+    reactant_g = reactant_g.to(device)
+    product_g = product_g.to(device)
     reactant_node_feats, reactant_edge_feats = reactant_node_feats.to(device), reactant_edge_feats.to(device)
     product_node_feats, product_edge_feats, product_scores = product_node_feats.to(device), \
                                                              product_edge_feats.to(device), \
@@ -160,6 +162,8 @@ def test_wln_candidate_ranking():
     batch_reactant_g, batch_reactant_node_feats, batch_reactant_edge_feats, batch_product_g, \
     batch_product_node_feats, batch_product_edge_feats, batch_product_scores, \
     batch_num_candidate_products = test_reactant_product_graph2()
+    batch_reactant_g = batch_reactant_g.to(device)
+    batch_product_g = batch_product_g.to(device)
     batch_reactant_node_feats = batch_reactant_node_feats.to(device)
     batch_reactant_edge_feats = batch_reactant_edge_feats.to(device)
     batch_product_node_feats = batch_product_node_feats.to(device)
