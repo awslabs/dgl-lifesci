@@ -13,7 +13,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
 
-from dgl import DGLGraph
 from functools import partial
 from rdkit import Chem
 from torch.distributions import Categorical
