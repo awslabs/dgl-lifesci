@@ -11,4 +11,5 @@ Contributors
 * [Jiajing Hu](https://github.com/jjhu94): Weave
 * [Zhaoqiang Chen](https://github.com/autodataming): Update RDkit channel for conda installation; Suggestions and improvement for rexgen_direct
 * [Yue Zhong](https://github.com/YueZhong-bio): HadamardLinkPredictor, link prediction for ogbl-ppa
-* [Yangkang Zhang](https://github.com/yangkang98): GNNOGBPredictor, graph property prediction for ogbg-ppa
+* [Yangkang Zhang](https://github.com/yangkang98): GNNOGBPredictor, graph property prediction for ogbg-ppa, support for GuacaMol in JTNN
+* [Sooheon Kim](https://github.com/sooheon): Parallel processing for dataset construction from a CSV file

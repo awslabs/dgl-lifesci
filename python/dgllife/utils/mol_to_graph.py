@@ -9,8 +9,8 @@
 
 from functools import partial
 import torch
+import dgl
 
-from dgl import DGLGraph
 from rdkit import Chem
 from rdkit.Chem import rdmolfiles, rdmolops
 from sklearn.neighbors import NearestNeighbors
@@ -106,7 +106,7 @@ def construct_bigraph_from_mol(mol, add_self_loop=False):
     g : DGLGraph
         Empty bigraph topology of the molecule
     """
-    g = DGLGraph()
+    g = dgl.graph(([], []))
 
     # Add nodes
     num_atoms = mol.GetNumAtoms()
@@ -337,12 +337,15 @@ def construct_complete_graph_from_mol(mol, add_self_loop=False):
         Empty complete graph topology of the molecule
     """
     num_atoms = mol.GetNumAtoms()
+    src = []
+    dst = []
     edge_list = []
     for i in range(num_atoms):
         for j in range(num_atoms):
             if i != j or add_self_loop:
-                edge_list.append((i, j))
-    g = DGLGraph(edge_list)
+                src.append(i)
+                dst.append(j)
+    g = dgl.graph((src, dst))
 
     return g
 

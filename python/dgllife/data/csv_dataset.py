@@ -49,12 +49,13 @@ class MoleculeCSVDataset(object):
         ``load`` should be False when we want to try different graph construction and
         featurization methods and need to preprocess from scratch. Default to True.
     log_every : bool
-        Print a message every time ``log_every`` molecules are processed. Default to 1000.
+        Print a message every time ``log_every`` molecules are processed. It only comes
+        into effect when :attr:`n_jobs` is greater than 1. Default to 1000.
     init_mask : bool
         Whether to initialize a binary mask indicating the existence of labels. Default to True.
     n_jobs : int
-        Degree of parallelism for pre processing. Uses joblib backend. Default to 1.
-        Should not be greater than num_cpus for efficiency.
+        The maximum number of concurrently running jobs for graph construction and featurization,
+        using joblib backend. Default to 1.
     """
     def __init__(self, df, smiles_to_graph, node_featurizer, edge_featurizer, smiles_column,
                  cache_file_path, task_names=None, load=True, log_every=1000, init_mask=True,
@@ -94,11 +95,12 @@ class MoleculeCSVDataset(object):
             ``load`` should be False when we want to try different graph construction and
             featurization methods and need to preprocess from scratch. Default to True.
         log_every : bool
-            Print a message every time ``log_every`` molecules are processed.
+            Print a message every time ``log_every`` molecules are processed. It only comes
+            into effect when :attr:`n_jobs` is greater than 1.
         init_mask : bool
             Whether to initialize a binary mask indicating the existence of labels.
         n_jobs : int
-            Degree of parallelism for pre processing.
+            Degree of parallelism for pre processing. Default to 1.
         """
         if os.path.exists(self.cache_file_path) and load:
             # DGLGraphs have been constructed before, reload them

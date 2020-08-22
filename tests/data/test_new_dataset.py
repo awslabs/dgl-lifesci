@@ -10,9 +10,18 @@ from dgllife.data.csv_dataset import *
 from dgllife.data.smiles_inference import *
 from dgllife.utils.featurizers import *
 from dgllife.utils.mol_to_graph import *
+from joblib import cpu_count
 
-def test_data_frame():
+def test_data_frame1():
     data = [['CCO', 0, 1], ['CO', 2, 3]]
+    df = pd.DataFrame(data, columns = ['smiles', 'task1', 'task2'])
+
+    return df
+
+def test_data_frame2():
+    data = []
+    for _ in range(500):
+        data.extend([['CCO', 0, 1], ['CO', 2, 3]])
     df = pd.DataFrame(data, columns = ['smiles', 'task1', 'task2'])
 
     return df
@@ -25,7 +34,7 @@ def remove_file(fname):
             pass
 
 def test_mol_csv():
-    df = test_data_frame()
+    df = test_data_frame1()
     fname = 'test.bin'
     dataset = MoleculeCSVDataset(df=df, smiles_to_graph=smiles_to_bigraph,
                                  node_featurizer=CanonicalAtomFeaturizer(),
@@ -68,6 +77,21 @@ def test_mol_csv():
     smiles, graph, label, mask = dataset[0]
     assert 'h' in graph.ndata
     assert 'e' not in graph.edata
+
+    df2 = test_data_frame2()
+    fname = 'test.bin'
+    dataset = MoleculeCSVDataset(df=df2, smiles_to_graph=smiles_to_bigraph,
+                                 node_featurizer=CanonicalAtomFeaturizer(),
+                                 edge_featurizer=CanonicalBondFeaturizer(),
+                                 smiles_column='smiles',
+                                 cache_file_path=fname,
+                                 n_job=cpu_count() - 1)
+    assert dataset.task_names == ['task1', 'task2']
+    smiles, graph, label, mask = dataset[0]
+    assert label.shape[0] == 2
+    assert mask.shape[0] == 2
+    assert 'h' in graph.ndata
+    assert 'e' in graph.edata
 
     remove_file(fname)
 

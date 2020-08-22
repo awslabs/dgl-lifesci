@@ -11,7 +11,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from dgl import BatchedDGLHeteroGraph
 from dgl.nn.pytorch import AtomicConv
 
 __all__ = ['ACNN']
@@ -249,10 +248,6 @@ class ACNN(nn.Module):
         frag1_node_indices_in_complex = torch.where(complex_graph.ndata['_TYPE'] == 0)[0]
         frag2_node_indices_in_complex = list(set(range(complex_graph.number_of_nodes())) -
                                              set(frag1_node_indices_in_complex.tolist()))
-
-        # Hack the case when we are working with a single graph.
-        if not isinstance(graph, BatchedDGLHeteroGraph):
-            graph.batch_size = 1
 
         return self.predictor(
             graph.batch_size,
