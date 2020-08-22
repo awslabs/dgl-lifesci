@@ -93,7 +93,7 @@ class AstraZenecaChEMBLSolubility(MoleculeCSVDataset):
                  edge_featurizer=None,
                  load=True,
                  log_every=1000,
-                 cache_file_path='AstraZeneca_chembl_solubility_graph.bin',
+                 cache_file_path='./AstraZeneca_chembl_solubility_graph.bin',
                  log_of_values=True):
 
         self._url = 'dataset/AstraZeneca_ChEMBL_Solubility.csv'
