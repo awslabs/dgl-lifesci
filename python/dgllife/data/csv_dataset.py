@@ -10,7 +10,8 @@ import numpy as np
 import os
 
 from dgl.data.utils import save_graphs, load_graphs
-from dgllife.utils import pmap
+
+from ..utils.io import pmap
 
 __all__ = ['MoleculeCSVDataset']
 
