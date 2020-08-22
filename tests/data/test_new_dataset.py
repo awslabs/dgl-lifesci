@@ -62,11 +62,10 @@ def test_mol_csv():
                                  node_featurizer=CanonicalAtomFeaturizer(),
                                  edge_featurizer=None,
                                  smiles_column='smiles',
-                                 cache_file_path=fname,
-                                 load=True)
+                                 cache_file_path=fname)
     smiles, graph, label, mask = dataset[0]
     assert 'h' in graph.ndata
-    assert 'e' in graph.edata
+    assert 'e' not in graph.edata
 
     dataset = MoleculeCSVDataset(df=df, smiles_to_graph=smiles_to_bigraph,
                                  node_featurizer=CanonicalAtomFeaturizer(),
