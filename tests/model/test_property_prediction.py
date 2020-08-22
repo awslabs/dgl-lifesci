@@ -176,10 +176,12 @@ def test_gin_predictor():
         device = torch.device('cpu')
 
     g, node_feats1, node_feats2, edge_feats1, edge_feats2 = test_graph7()
+    g = g.to(device)
     node_feats1, node_feats2 = node_feats1.to(device), node_feats2.to(device)
     edge_feats1, edge_feats2 = edge_feats1.to(device), edge_feats2.to(device)
     bg, batch_node_feats1, batch_node_feats2, \
     batch_edge_feats1, batch_edge_feats2 = test_graph8()
+    bg = bg.to(device)
     batch_node_feats1, batch_node_feats2 = batch_node_feats1.to(device), \
                                            batch_node_feats2.to(device)
     batch_edge_feats1, batch_edge_feats2 = batch_edge_feats1.to(device), \
