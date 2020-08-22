@@ -122,11 +122,13 @@ def construct_bigraph_from_mol(mol, add_self_loop=False):
         v = bond.GetEndAtomIdx()
         src_list.extend([u, v])
         dst_list.extend([v, u])
-    g.add_edges(src_list, dst_list)
 
     if add_self_loop:
-        nodes = g.nodes()
-        g.add_edges(nodes, nodes)
+        nodes = g.nodes().tolist()
+        src_list.extend(nodes)
+        dst_list.extend(nodes)
+
+    g.add_edges(torch.IntTensor(src_list), torch.IntTensor(dst_list))
 
     return g
 
@@ -344,7 +346,7 @@ def construct_complete_graph_from_mol(mol, add_self_loop=False):
             if i != j or add_self_loop:
                 src.append(i)
                 dst.append(j)
-    g = dgl.graph((src, dst))
+    g = dgl.graph((torch.IntTensor(src), torch.IntTensor(dst)))
 
     return g
 

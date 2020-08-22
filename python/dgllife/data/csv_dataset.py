@@ -9,7 +9,7 @@ import dgl.backend as F
 import numpy as np
 import os
 
-from dgl.data.utils import save_graphs, load_graphs
+from dgl import save_graphs, load_graphs
 
 from ..utils.io import pmap
 
