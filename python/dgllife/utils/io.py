@@ -10,8 +10,8 @@
 import warnings
 
 from functools import partial
-from joblib import Parallel, delayed, cpu_count
 from multiprocessing import Pool
+from joblib import Parallel, delayed, cpu_count
 from rdkit import Chem
 from rdkit.Chem import AllChem
 

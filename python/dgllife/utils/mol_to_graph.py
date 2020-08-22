@@ -339,7 +339,6 @@ def construct_complete_graph_from_mol(mol, add_self_loop=False):
     num_atoms = mol.GetNumAtoms()
     src = []
     dst = []
-    edge_list = []
     for i in range(num_atoms):
         for j in range(num_atoms):
             if i != j or add_self_loop:
