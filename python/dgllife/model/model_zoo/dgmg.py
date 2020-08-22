@@ -98,7 +98,7 @@ class MoleculeEnv(object):
             Whether to keep a Chem.rdchem.Mol object so
             that we know what molecule is being generated
         """
-        self.dgl_graph = DGLGraph()
+        self.dgl_graph = dgl.graph(([], []), idtype=torch.int32)
         # If there are some features for nodes and edges,
         # zero tensors will be set for those of new nodes and edges.
         self.dgl_graph.set_n_initializer(dgl.frame.zero_initializer)

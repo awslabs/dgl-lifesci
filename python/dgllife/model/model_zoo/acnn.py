@@ -6,6 +6,7 @@
 # Atomic Convolutional Networks for Predicting Protein-Ligand Binding Affinity"""
 # pylint: disable=C0103, C0123, W0221, E1101, R1721
 
+import dgl
 import itertools
 import numpy as np
 import torch
@@ -237,7 +238,13 @@ class ACNN(nn.Module):
                                              protein_graph_node_feats,
                                              protein_graph_distances)
 
-        complex_graph = graph[:, 'complex', :]
+        complex_graph = dgl.edge_type_subgraph(graph,
+                                               [('ligand_atom', 'complex', 'ligand_atom'),
+                                                ('ligand_atom', 'complex', 'protein_atom'),
+                                                ('protein_atom', 'complex', 'ligand_atom'),
+                                                ('protein_atom', 'complex', 'protein_atom')])
+        complex_graph = dgl.to_homogeneous(
+            complex_graph, ndata=['atomic_number'], edata=['distance'])
         complex_graph_node_feats = complex_graph.ndata['atomic_number']
         assert complex_graph_node_feats.shape[-1] == 1
         complex_graph_distances = complex_graph.edata['distance']

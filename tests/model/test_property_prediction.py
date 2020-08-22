@@ -7,58 +7,57 @@ import dgl
 import torch
 import torch.nn.functional as F
 
-from dgl import DGLGraph
-
 from dgllife.model.model_zoo import *
 
 def test_graph1():
     """Graph with node features."""
-    g = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    g = dgl.graph(([0, 0, 1, 0, 1, 2], [1, 2, 2, 0, 1, 2]), idtype=torch.int32)
     return g, torch.arange(g.number_of_nodes()).float().reshape(-1, 1)
 
 def test_graph2():
     """Batched graph with node features."""
-    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
-    g2 = DGLGraph([(0, 1), (1, 2), (1, 3), (1, 4)])
+    g1 = dgl.graph(([0, 0, 1, 0, 1, 2], [1, 2, 2, 0, 1, 2]), idtype=torch.int32)
+    g2 = dgl.graph(([0, 1, 1, 1, 0, 1, 2, 3, 4],
+                    [1, 2, 3, 4, 0, 1, 2, 3, 4]), idtype=torch.int32)
     bg = dgl.batch([g1, g2])
     return bg, torch.arange(bg.number_of_nodes()).float().reshape(-1, 1)
 
 def test_graph3():
     """Graph with node features and edge features."""
-    g = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    g = dgl.graph(([0, 0, 1], [1, 2, 2]), idtype=torch.int32)
     return g, torch.arange(g.number_of_nodes()).float().reshape(-1, 1), \
            torch.arange(2 * g.number_of_edges()).float().reshape(-1, 2)
 
 def test_graph4():
     """Batched graph with node features and edge features."""
-    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
-    g2 = DGLGraph([(0, 1), (1, 2), (1, 3), (1, 4)])
+    g1 = dgl.graph(([0, 0, 1], [1, 2, 2]), idtype=torch.int32)
+    g2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]), idtype=torch.int32)
     bg = dgl.batch([g1, g2])
     return bg, torch.arange(bg.number_of_nodes()).float().reshape(-1, 1), \
            torch.arange(2 * bg.number_of_edges()).float().reshape(-1, 2)
 
 def test_graph5():
     """Graph with node types and edge distances."""
-    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    g1 = dgl.graph(([0, 0, 1], [1, 2, 2]), idtype=torch.int32)
     return g1, torch.LongTensor([0, 1, 0]), torch.randn(3, 1)
 
 def test_graph6():
     """Batched graph with node types and edge distances."""
-    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
-    g2 = DGLGraph([(0, 1), (1, 2), (1, 3), (1, 4)])
+    g1 = dgl.graph(([0, 0, 1], [1, 2, 2]))
+    g2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]))
     bg = dgl.batch([g1, g2])
     return bg, torch.LongTensor([0, 1, 0, 2, 0, 3, 4, 4]), torch.randn(7, 1)
 
 def test_graph7():
     """Graph with categorical node and edge features."""
-    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    g1 = dgl.graph(([0, 0, 1], [1, 2, 2]))
     return g1, torch.LongTensor([0, 1, 0]), torch.LongTensor([2, 3, 4]), \
            torch.LongTensor([0, 0, 1]), torch.LongTensor([2, 3, 2])
 
 def test_graph8():
     """Batched graph with categorical node and edge features."""
-    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
-    g2 = DGLGraph([(0, 1), (1, 2), (1, 3), (1, 4)])
+    g1 = dgl.graph(([0, 0, 1], [1, 2, 2]))
+    g2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]))
     bg = dgl.batch([g1, g2])
     return bg, torch.LongTensor([0, 1, 0, 2, 1, 0, 2, 2]), \
            torch.LongTensor([2, 3, 4, 1, 0, 1, 2, 2]), \
@@ -67,8 +66,8 @@ def test_graph8():
 
 def test_graph9():
     """Batched graph with categorical node features and continuous edge features"""
-    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
-    g2 = DGLGraph([(0, 1), (1, 2), (1, 3), (1, 4)])
+    g1 = dgl.graph(([0, 0, 1], [1, 2, 2]))
+    g2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]))
     bg = dgl.batch([g1, g2])
     return bg, torch.zeros(bg.number_of_nodes()).long(), \
            torch.randn(bg.number_of_edges(), 2).float()

@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 
 import dgl.function as DGLF
-from dgl import DGLGraph, mean_nodes
+from dgl import graph, mean_nodes
 
 from .nnutils import cuda
 
@@ -63,7 +63,7 @@ def mol2dgl_single(cand_batch):
     for mol, mol_tree, ctr_node_id in cand_batch:
         n_atoms = mol.GetNumAtoms()
 
-        g = DGLGraph()
+        g = graph(([], []), idtype=torch.int32)
 
         for i, atom in enumerate(mol.GetAtoms()):
             assert i == atom.GetIdx()
