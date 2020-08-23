@@ -56,7 +56,7 @@ class Tox21(MoleculeCSVDataset):
                  edge_featurizer=None,
                  load=True,
                  log_every=1000,
-                 cache_file_path='tox21_dglgraph.bin'):
+                 cache_file_path='./tox21_dglgraph.bin'):
         self._url = 'dataset/tox21.csv.gz'
         data_path = get_download_dir() + '/tox21.csv.gz'
         download(_get_dgl_url(self._url), path=data_path)

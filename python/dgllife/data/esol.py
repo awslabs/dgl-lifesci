@@ -106,7 +106,7 @@ class ESOL(MoleculeCSVDataset):
                  edge_featurizer=None,
                  load=True,
                  log_every=1000,
-                 cache_file_path='esol_dglgraph.bin'):
+                 cache_file_path='./esol_dglgraph.bin'):
 
         self._url = 'dataset/ESOL.zip'
         data_path = get_download_dir() + '/ESOL.zip'

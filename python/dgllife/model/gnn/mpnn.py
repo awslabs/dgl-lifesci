@@ -61,7 +61,7 @@ class MPNNGNN(nn.Module):
         """Reinitialize model parameters."""
         self.project_node_feats[0].reset_parameters()
         self.gnn_layer.reset_parameters()
-        for layer in self.gnn_layer.edge_nn:
+        for layer in self.gnn_layer.edge_func:
             if isinstance(layer, nn.Linear):
                 layer.reset_parameters()
         self.gru.reset_parameters()

@@ -52,4 +52,4 @@ class PubChemBioAssayAromaticity(MoleculeCSVDataset):
 
         super(PubChemBioAssayAromaticity, self).__init__(
             df, smiles_to_graph, node_featurizer, edge_featurizer, "cano_smiles",
-            "pubchem_aromaticity_dglgraph.bin", load=load, log_every=log_every)
+            './pubchem_aromaticity_dglgraph.bin', load=load, log_every=log_every)
