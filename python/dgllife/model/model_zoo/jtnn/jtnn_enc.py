@@ -5,12 +5,12 @@
 #
 # pylint: disable=C0111, C0103, E1101, W0611, W0612, W0221
 
-import dgl
 import numpy as np
 import os
 import torch
 import torch.nn as nn
 
+import dgl
 import dgl.function as DGLF
 from dgl import batch, bfs_edges_generator
 
