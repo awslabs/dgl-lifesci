@@ -83,6 +83,7 @@ def main(args, dataset):
     mol_emb = []
     for batch_id, bg in enumerate(data_loader):
         print('Processing batch {:d}/{:d}'.format(batch_id + 1, len(data_loader)))
+        bg = bg.to(args['device'])
         nfeats = [bg.ndata.pop('atomic_number').to(args['device']),
                   bg.ndata.pop('chirality_type').to(args['device'])]
         efeats = [bg.edata.pop('bond_type').to(args['device']),

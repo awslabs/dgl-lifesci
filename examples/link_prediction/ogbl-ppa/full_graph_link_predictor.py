@@ -159,6 +159,7 @@ def main():
     data = dataset[0]
     data.readonly(False)
     data.add_edges(data.nodes(), data.nodes())
+    data = data.to(device)
     splitted_edge = dataset.get_edge_split()
     x = data.ndata['feat'].float().to(device)
 
