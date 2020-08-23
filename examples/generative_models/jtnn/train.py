@@ -96,7 +96,6 @@ def train():
 
         for it, batch in enumerate(dataloader):
             batch['mol_graph_batch'] = batch['mol_graph_batch'].to('cuda:0')
-            batch['mol_graph_batch'].ndata['wid'] = batch['mol_graph_batch'].ndata['wid'].to('cuda:0')
             model.zero_grad()
             try:
                 loss, kl_div, wacc, tacc, sacc, dacc = model(batch, beta)
