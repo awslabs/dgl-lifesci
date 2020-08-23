@@ -311,6 +311,7 @@ def load_model(exp_configure):
     return model
 
 def predict(args, model, bg):
+    bg = bg.to(args['device'])
     if args['edge_featurizer'] is None:
         node_feats = bg.ndata.pop('h').to(args['device'])
         return model(bg, node_feats)
