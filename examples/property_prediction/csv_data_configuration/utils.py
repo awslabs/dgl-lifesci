@@ -61,14 +61,8 @@ def init_featurizer(args):
     return args
 
 def load_dataset(args, df):
-    if args['model'] in ['gin_supervised_contextpred', 'gin_supervised_infomax',
-                         'gin_supervised_edgepred', 'gin_supervised_masking']:
-        self_loop = True
-    else:
-        self_loop = False
-
     dataset = MoleculeCSVDataset(df=df,
-                                 smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=self_loop),
+                                 smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
                                  node_featurizer=args['node_featurizer'],
                                  edge_featurizer=args['edge_featurizer'],
                                  smiles_column=args['smiles_column'],
