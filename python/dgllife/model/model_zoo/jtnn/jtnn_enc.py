@@ -72,6 +72,7 @@ class DGLJTNNEncoder(nn.Module):
 
     def forward(self, mol_trees):
         mol_tree_batch = batch(mol_trees)
+        mol_tree_batch = mol_tree_batch.to('cuda:0')
 
         # Build line graph to prepare for belief propagation
         mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
@@ -88,7 +89,7 @@ class DGLJTNNEncoder(nn.Module):
 
         # Assign structure embeddings to tree nodes
         mol_tree_batch.ndata.update({
-            'x': self.embedding(cuda(mol_tree_batch.ndata['wid'])),
+            'x': self.embedding(mol_tree_batch.ndata['wid']),
             'h': cuda(torch.zeros(n_nodes, self.hidden_size)),
         })
 
