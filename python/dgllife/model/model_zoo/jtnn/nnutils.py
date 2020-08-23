@@ -63,6 +63,6 @@ class GRUUpdate(nn.Module):
         return dic
 
 def move_dgl_to_cuda(g):
-    g.to('cuda:0')
+    g = g.to('cuda:0')
     g.ndata.update({k: cuda(g.ndata[k]) for k in g.ndata})
     g.edata.update({k: cuda(g.edata[k]) for k in g.edata})
