@@ -11,7 +11,7 @@ import torch
 import torch.nn.functional as F
 
 from dgllife.data import MoleculeCSVDataset
-from dgllife.utils import smiles_to_bigraph, ScaffoldSplitter, RandomSplitter
+from dgllife.utils import smiles_to_bigraph, ScaffoldSplitter, RandomSplitter, mol_to_bigraph
 from functools import partial
 
 def init_featurizer(args):
@@ -34,7 +34,7 @@ def init_featurizer(args):
         args['bond_featurizer_type'] = 'pre_train'
         args['node_featurizer'] = PretrainAtomFeaturizer()
         args['edge_featurizer'] = PretrainBondFeaturizer()
-
+        args['mol_to_graph'] = partial(mol_to_bigraph, add_self_loop=True)
         return args
 
     if args['atom_featurizer_type'] == 'canonical':
