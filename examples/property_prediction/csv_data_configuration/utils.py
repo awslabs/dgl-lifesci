@@ -66,7 +66,8 @@ def load_dataset(args, df):
                                  edge_featurizer=args['edge_featurizer'],
                                  smiles_column=args['smiles_column'],
                                  cache_file_path=args['result_path'] + '/graph.bin',
-                                 task_names=args['task_names'])
+                                 task_names=args['task_names'],
+                                 n_jobs=args['num_workers'])
 
     return dataset
 
