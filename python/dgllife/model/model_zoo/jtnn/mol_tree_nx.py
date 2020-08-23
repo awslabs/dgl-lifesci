@@ -63,10 +63,10 @@ class DGLMolTree(DGLGraph):
 
         for i in self.nodes_dict:
             self.nodes_dict[i]['nid'] = i + 1
-            if self.out_degree(i) > 1:    # Leaf node mol is not marked
+            if self.out_degrees(i) > 1:    # Leaf node mol is not marked
                 set_atommap(self.nodes_dict[i]['mol'],
                             self.nodes_dict[i]['nid'])
-            self.nodes_dict[i]['is_leaf'] = (self.out_degree(i) == 1)
+            self.nodes_dict[i]['is_leaf'] = (self.out_degrees(i) == 1)
 
     def treesize(self):
         return self.number_of_nodes()

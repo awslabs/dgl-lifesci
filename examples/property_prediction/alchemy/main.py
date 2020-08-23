@@ -15,6 +15,7 @@ from dgllife.utils import EarlyStopping, Meter
 from utils import set_random_seed, collate_molgraphs, load_model
 
 def regress(args, model, bg):
+    bg = bg.to(args['device'])
     if args['model'] == 'MPNN':
         h = bg.ndata.pop('n_feat')
         e = bg.edata.pop('e_feat')

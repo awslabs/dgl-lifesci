@@ -16,6 +16,7 @@ from dgllife.utils import EarlyStopping, Meter, RandomSplitter
 from utils import set_random_seed, collate_molgraphs, load_model
 
 def regress(args, model, bg):
+    bg = bg.to(args['device'])
     atom_feats, bond_feats = bg.ndata.pop('hv'), bg.edata.pop('he')
     atom_feats, bond_feats = atom_feats.to(args['device']), bond_feats.to(args['device'])
     return model(bg, atom_feats, bond_feats)
