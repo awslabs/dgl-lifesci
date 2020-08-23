@@ -34,7 +34,6 @@ def init_featurizer(args):
         args['bond_featurizer_type'] = 'pre_train'
         args['node_featurizer'] = PretrainAtomFeaturizer()
         args['edge_featurizer'] = PretrainBondFeaturizer()
-        args['mol_to_graph'] = partial(mol_to_bigraph, add_self_loop=True)
         return args
 
     if args['atom_featurizer_type'] == 'canonical':

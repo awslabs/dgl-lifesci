@@ -9,6 +9,8 @@ import pandas as pd
 import torch
 
 from dgllife.data import UnlabeledSMILES
+from dgllife.utils import mol_to_bigraph
+from functools import partial
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -16,7 +18,8 @@ from utils import mkdir_p, collate_molgraphs_unlabeled, load_model, predict, ini
 
 def main(args):
     dataset = UnlabeledSMILES(args['smiles'], node_featurizer=args['node_featurizer'],
-                              edge_featurizer=args['edge_featurizer'], mol_to_graph=args['mol_to_graph'])
+                              edge_featurizer=args['edge_featurizer'],
+                              mol_to_graph=partial(mol_to_bigraph, add_self_loop=True))
     dataloader = DataLoader(dataset, batch_size=args['batch_size'],
                             collate_fn=collate_molgraphs_unlabeled, num_workers=args['num_workers'])
     model = load_model(args).to(args['device'])
