@@ -9,6 +9,7 @@ import random
 import torch
 
 from dgllife.utils.splitters import RandomSplitter
+from functools import partial
 
 def set_random_seed(seed=0):
     """Set random seed.
@@ -46,7 +47,7 @@ def load_dataset_for_classification(args):
     assert args['dataset'] in ['Tox21']
     if args['dataset'] == 'Tox21':
         from dgllife.data import Tox21
-        dataset = Tox21(smiles_to_graph=args['smiles_to_graph'],
+        dataset = Tox21(smiles_to_graph=partial(args['smiles_to_graph'], add_self_loop=True),
                         node_featurizer=args.get('node_featurizer', None),
                         edge_featurizer=args.get('edge_featurizer', None),
                         load=False,
