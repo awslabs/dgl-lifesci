@@ -5,6 +5,7 @@
 #
 # pylint: disable=C0111, C0103, E1101, W0611, W0612, W0221
 
+import dgl
 import numpy as np
 import torch
 import torch.nn as nn
@@ -73,8 +74,7 @@ class DGLJTNNEncoder(nn.Module):
         mol_tree_batch = batch(mol_trees)
 
         # Build line graph to prepare for belief propagation
-        mol_tree_batch_lg = mol_tree_batch.line_graph(
-            backtracking=False, shared=True)
+        mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
 
         return self.run(mol_tree_batch, mol_tree_batch_lg)
 
