@@ -91,12 +91,12 @@ def mol2dgl_single(cand_batch):
             x_bid = mol_tree.nodes_dict[x_nid - 1]['idx'] if x_nid > 0 else -1
             y_bid = mol_tree.nodes_dict[y_nid - 1]['idx'] if y_nid > 0 else -1
             if x_bid >= 0 and y_bid >= 0 and x_bid != y_bid:
-                if mol_tree.has_edge_between(x_bid, y_bid):
+                if mol_tree.has_edges_between(x_bid, y_bid):
                     tree_mess_target_edges.append(
                         (begin_idx + n_nodes, end_idx + n_nodes))
                     tree_mess_source_edges.append((x_bid, y_bid))
                     tree_mess_target_nodes.append(end_idx + n_nodes)
-                if mol_tree.has_edge_between(y_bid, x_bid):
+                if mol_tree.has_edges_between(y_bid, x_bid):
                     tree_mess_target_edges.append(
                         (end_idx + n_nodes, begin_idx + n_nodes))
                     tree_mess_source_edges.append((y_bid, x_bid))

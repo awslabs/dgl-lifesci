@@ -3,6 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+import dgl
 import rdkit.Chem as Chem
 import torch
 
@@ -10,8 +11,6 @@ from collections import defaultdict
 from rdkit.Chem.EnumerateStereoisomers import EnumerateStereoisomers
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import minimum_spanning_tree
-
-from dgl import DGLGraph
 
 ELEM_LIST = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na',
              'Ca', 'Fe', 'Al', 'I', 'B', 'K', 'Se', 'Zn', 'H', 'Cu', 'Mn', 'unknown']
@@ -402,7 +401,7 @@ def mol2dgl_dec(cand_batch):
     for mol, mol_tree, ctr_node_id in cand_batch:
         n_atoms = mol.GetNumAtoms()
 
-        g = DGLGraph()
+        g = dgl.graph(([], []), idtype=torch.int32)
 
         for i, atom in enumerate(mol.GetAtoms()):
             assert i == atom.GetIdx()
@@ -430,12 +429,12 @@ def mol2dgl_dec(cand_batch):
             x_bid = mol_tree.nodes_dict[x_nid - 1]['idx'] if x_nid > 0 else -1
             y_bid = mol_tree.nodes_dict[y_nid - 1]['idx'] if y_nid > 0 else -1
             if x_bid >= 0 and y_bid >= 0 and x_bid != y_bid:
-                if mol_tree.has_edge_between(x_bid, y_bid):
+                if mol_tree.has_edges_between(x_bid, y_bid):
                     tree_mess_target_edges.append(
                         (begin_idx + n_nodes, end_idx + n_nodes))
                     tree_mess_source_edges.append((x_bid, y_bid))
                     tree_mess_target_nodes.append(end_idx + n_nodes)
-                if mol_tree.has_edge_between(y_bid, x_bid):
+                if mol_tree.has_edges_between(y_bid, x_bid):
                     tree_mess_target_edges.append(
                         (end_idx + n_nodes, begin_idx + n_nodes))
                     tree_mess_source_edges.append((y_bid, x_bid))
@@ -475,7 +474,7 @@ def mol2dgl_enc(smiles):
     mol = get_mol(smiles)
     n_atoms = mol.GetNumAtoms()
     n_bonds = mol.GetNumBonds()
-    graph = DGLGraph()
+    graph = dgl.graph(([], []), idtype=torch.int32)
     for i, atom in enumerate(mol.GetAtoms()):
         assert i == atom.GetIdx()
         atom_x.append(atom_features(atom))
