@@ -193,6 +193,9 @@ class DGLMPN(nn.Module):
                 self.loopy_bp_updater,
             )
 
+        mol_graph.edata.update({
+            'msg': mol_line_graph.ndata['msg']
+        })
         mol_graph.update_all(
             mpn_gather_msg,
             mpn_gather_reduce,
