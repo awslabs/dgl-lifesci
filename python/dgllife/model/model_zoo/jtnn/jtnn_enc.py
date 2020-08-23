@@ -7,6 +7,7 @@
 
 import dgl
 import numpy as np
+import os
 import torch
 import torch.nn as nn
 
@@ -72,7 +73,8 @@ class DGLJTNNEncoder(nn.Module):
 
     def forward(self, mol_trees):
         mol_tree_batch = batch(mol_trees)
-        mol_tree_batch = mol_tree_batch.to('cuda:0')
+        if torch.cuda.is_available() and not os.getenv('NOCUDA', None):
+            mol_tree_batch = mol_tree_batch.to('cuda:0')
 
         # Build line graph to prepare for belief propagation
         mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
@@ -83,7 +85,7 @@ class DGLJTNNEncoder(nn.Module):
         # Since tree roots are designated to 0.  In the batched graph we can
         # simply find the corresponding node ID by looking at node_offset
         node_offset = np.cumsum([0] + mol_tree_batch.batch_num_nodes().tolist())
-        root_ids = node_offset[:-1]
+        root_ids = cuda(node_offset[:-1])
         n_nodes = mol_tree_batch.number_of_nodes()
         n_edges = mol_tree_batch.number_of_edges()
 
