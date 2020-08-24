@@ -30,6 +30,9 @@ def test_mol3():
 def test_mol4():
     return Chem.MolFromSmiles('N[C@@H](C)C(=O)O')
 
+def test_mol5():
+    return Chem.MolFromSmiles('C')
+
 def test_atom_type_one_hot():
     mol = test_mol1()
     assert atom_type_one_hot(mol.GetAtomWithIdx(0), ['C', 'O']) == [1, 0]
@@ -361,6 +364,12 @@ def test_base_bond_featurizer():
                                                      [0., 0., 0., 0., 0., 0., 1.],
                                                      [0., 0., 0., 0., 0., 0., 1.]]))
 
+    # Test graphs without edges
+    mol = test_mol5()
+    feats = test_featurizer2(mol)
+    assert torch.allclose(feats['h1'], torch.tensor([[0., 0., 1.]]))
+    assert torch.allclose(feats['h2'], torch.tensor([[0., 0., 0., 0., 0., 0., 1.]]))
+
 def test_canonical_bond_featurizer():
     test_featurizer = CanonicalBondFeaturizer()
     assert test_featurizer.feat_size() == 12
@@ -387,6 +396,12 @@ def test_canonical_bond_featurizer():
          [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
          [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]
     ))
+
+    # Test graphs without edges
+    mol = test_mol5()
+    feats = test_featurizer2(mol)
+    assert torch.allclose(feats['e'],
+                          torch.tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]))
 
 def test_weave_edge_featurizer():
     test_featurizer = WeaveEdgeFeaturizer()
@@ -446,6 +461,12 @@ def test_attentivefp_bond_featurizer():
          [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
          [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
          [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]))
+
+    # Test graphs without edges
+    mol = test_mol5()
+    feats = test_featurizer2(mol)
+    assert torch.allclose(feats['e'],
+                          torch.tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]))
 
 if __name__ == '__main__':
     test_one_hot_encoding()

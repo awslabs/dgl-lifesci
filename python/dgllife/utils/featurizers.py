@@ -1663,7 +1663,7 @@ class BaseBondFeaturizer(object):
             feat = np.stack(feat_list)
             processed_features[feat_name] = F.zerocopy_from_numpy(feat.astype(np.float32))
 
-        if self._self_loop:
+        if self._self_loop and num_bonds > 0:
             num_atoms = mol.GetNumAtoms()
             for feat_name in processed_features:
                 feats = processed_features[feat_name]
@@ -1671,6 +1671,16 @@ class BaseBondFeaturizer(object):
                 self_loop_feats = torch.zeros(num_atoms, feats.shape[1])
                 self_loop_feats[:, -1] = 1
                 feats = torch.cat([feats, self_loop_feats], dim=0)
+                processed_features[feat_name] = feats
+
+        if self._self_loop and num_bonds == 0:
+            num_atoms = mol.GetNumAtoms()
+            toy_mol = Chem.MolFromSmiles('CO')
+            processed_features = self(toy_mol)
+            for feat_name in processed_features:
+                feats = processed_features[feat_name]
+                feats = torch.zeros(num_atoms, feats.shape[1])
+                feats[:, -1] = 1
                 processed_features[feat_name] = feats
 
         return processed_features
