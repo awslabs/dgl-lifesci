@@ -68,6 +68,21 @@ def test_smiles_to_bigraph():
                                                         [1.], [1.], [0.], [0.], [0.], [0.],
                                                         [0.], [0.], [0.], [0.], [0.], [0.]]))
 
+    # Test the case with virtual nodes added
+    g5 = smiles_to_bigraph(test_smiles1, node_featurizer=test_node_featurizer,
+                           edge_featurizer=test_edge_featurizer,
+                           num_virtual_nodes=2)
+    assert g5.num_nodes() == 5
+    assert g5.num_edges() == 16
+    assert torch.allclose(g5.ndata['hv'], torch.tensor([[6., 0.], [8., 0.], [6., 0.],
+                                                        [0., 1.], [0., 1.]]))
+    assert torch.allclose(g5.edata['he'], torch.tensor([[0., 0.], [0., 0.], [0., 0.],
+                                                        [0., 0.], [0., 1.], [0., 1.],
+                                                        [0., 1.], [0., 1.], [0., 1.],
+                                                        [0., 1.], [0., 1.], [0., 1.],
+                                                        [0., 1.], [0., 1.], [0., 1.],
+                                                        [0., 1.]]))
+
 def test_mol_to_bigraph():
     mol1 = Chem.MolFromSmiles(test_smiles1)
     g1 = mol_to_bigraph(mol1, add_self_loop=True)
@@ -111,6 +126,20 @@ def test_mol_to_bigraph():
                                                         [1.], [1.], [0.], [0.], [0.], [0.],
                                                         [0.], [0.], [0.], [0.], [0.], [0.]]))
 
+    # Test the case with virtual nodes added
+    g5 = mol_to_bigraph(mol1, node_featurizer=test_node_featurizer,
+                        edge_featurizer=test_edge_featurizer, num_virtual_nodes=2)
+    assert g5.num_nodes() == 5
+    assert g5.num_edges() == 16
+    assert torch.allclose(g5.ndata['hv'], torch.tensor([[6., 0.], [8., 0.], [6., 0.],
+                                                        [0., 1.], [0., 1.]]))
+    assert torch.allclose(g5.edata['he'], torch.tensor([[0., 0.], [0., 0.], [0., 0.],
+                                                        [0., 0.], [0., 1.], [0., 1.],
+                                                        [0., 1.], [0., 1.], [0., 1.],
+                                                        [0., 1.], [0., 1.], [0., 1.],
+                                                        [0., 1.], [0., 1.], [0., 1.],
+                                                        [0., 1.]]))
+
 def test_smiles_to_complete_graph():
     test_node_featurizer = TestAtomFeaturizer()
     g1 = smiles_to_complete_graph(test_smiles1, add_self_loop=False,
@@ -135,6 +164,14 @@ def test_smiles_to_complete_graph():
                                   explicit_hydrogens=True)
     assert torch.allclose(g3.ndata['hv'], torch.tensor([[1.], [1.], [1.], [6.],
                                                         [8.], [1.], [1.], [1.], [6.]]))
+
+    # Test the case with virtual nodes added
+    g4 = smiles_to_complete_graph(test_smiles1, node_featurizer=test_node_featurizer,
+                                  num_virtual_nodes=2)
+    assert g4.num_nodes() == 5
+    assert g4.num_edges() == 18
+    assert torch.allclose(g4.ndata['hv'], torch.tensor([[6., 0.], [8., 0.], [6., 0.],
+                                                        [0., 1.], [0., 1.]]))
 
 def test_mol_to_complete_graph():
     test_node_featurizer = TestAtomFeaturizer()
@@ -162,6 +199,13 @@ def test_mol_to_complete_graph():
                                node_featurizer=test_node_featurizer, explicit_hydrogens=True)
     assert torch.allclose(g3.ndata['hv'], torch.tensor([[1.], [1.], [1.], [6.], [8.],
                                                         [1.], [1.], [1.], [6.]]))
+
+    # Test the case with virtual nodes added
+    g4 = mol_to_complete_graph(mol1, node_featurizer=test_node_featurizer, num_virtual_nodes=2)
+    assert g4.num_nodes() == 5
+    assert g4.num_edges() == 18
+    assert torch.allclose(g4.ndata['hv'], torch.tensor([[6., 0.], [8., 0.], [6., 0.],
+                                                        [0., 1.], [0., 1.]]))
 
 def test_k_nearest_neighbors():
     coordinates = np.array([[0.1, 0.1, 0.1],
@@ -251,6 +295,17 @@ def test_smiles_to_nearest_neighbor_graph():
     assert torch.allclose(g4.ndata['hv'], torch.tensor([[1.], [1.], [1.], [6.],
                                                         [8.], [1.], [1.], [1.], [6.]]))
 
+    # Test the case with virtual nodes added
+    g5 = smiles_to_nearest_neighbor_graph(test_smiles1, coordinates, neighbor_cutoff=10,
+                                          node_featurizer=test_node_featurizer,
+                                          keep_dists=True, explicit_hydrogens=True,
+                                          num_virtual_nodes=2)
+    assert g5.num_nodes() == 11
+    assert g5.num_edges() == 108
+    assert torch.allclose(g5.ndata['hv'], torch.tensor([[1., 1.], [1., 1.], [1., 1.], [6., 1.],
+                                                        [8., 1.], [1., 1.], [1., 1.], [1., 1.],
+                                                        [6., 1.], [0., 0.], [0., 0.]]))
+
 def test_mol_to_nearest_neighbor_graph():
     mol = Chem.MolFromSmiles(test_smiles1)
     AllChem.EmbedMolecule(mol)
@@ -294,6 +349,16 @@ def test_mol_to_nearest_neighbor_graph():
     assert g4.number_of_edges() == 72
     assert torch.allclose(g4.ndata['hv'], torch.tensor([[1.], [1.], [1.], [6.],
                                                         [8.], [1.], [1.], [1.], [6.]]))
+
+    g5 = mol_to_nearest_neighbor_graph(mol, coordinates, neighbor_cutoff=10,
+                                       node_featurizer=test_node_featurizer,
+                                       explicit_hydrogens=True,
+                                       num_virtual_nodes=2)
+    assert g5.num_nodes() == 11
+    assert g5.num_edges() == 108
+    assert torch.allclose(g5.ndata['hv'], torch.tensor([[1., 1.], [1., 1.], [1., 1.], [6., 1.],
+                                                        [8., 1.], [1., 1.], [1., 1.], [1., 1.],
+                                                        [6., 1.], [0., 0.], [0., 0.]]))
 
 if __name__ == '__main__':
     test_smiles_to_bigraph()
