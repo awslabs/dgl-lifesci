@@ -103,12 +103,12 @@ def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
 
         for nk, nv in g.ndata.items():
             nv = torch.cat([nv, torch.zeros(g.num_nodes(), 1)], dim=1)
-            nv[:-num_virtual_nodes, -1] = 1
+            nv[-num_virtual_nodes:, -1] = 1
             g.ndata[nk] = nv
 
         for ek, ev in g.edata.items():
             ev = torch.cat([ev, torch.zeros(g.num_edges(), 1)], dim=1)
-            ev[:-num_virtual_nodes * num_real_nodes * 2, -1] = 1
+            ev[-num_virtual_nodes * num_real_nodes * 2:, -1] = 1
             g.edata[ek] = ev
 
     return g
