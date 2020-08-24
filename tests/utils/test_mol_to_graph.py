@@ -298,11 +298,13 @@ def test_smiles_to_nearest_neighbor_graph():
     # Test the case with virtual nodes added
     g5 = smiles_to_nearest_neighbor_graph(test_smiles1, coordinates, neighbor_cutoff=10,
                                           node_featurizer=test_node_featurizer,
-                                          keep_dists=True, num_virtual_nodes=2)
-    assert g5.num_nodes() == 5
-    assert g5.num_edges() == 18
-    assert torch.allclose(g5.ndata['hv'], torch.tensor([[6., 1.], [8., 1.], [6., 1.],
-                                                        [0., 0.], [0., 0.]]))
+                                          keep_dists=True, explicit_hydrogens=True,
+                                          num_virtual_nodes=2)
+    assert g5.num_nodes() == 11
+    assert g5.num_edges() == 108
+    assert torch.allclose(g5.ndata['hv'], torch.tensor([[1., 1.], [1., 1.], [1., 1.], [6., 1.],
+                                                        [8., 1.], [1., 1.], [1., 1.], [1., 1.],
+                                                        [6., 1.], [0., 0.], [0., 0.]]))
 
 def test_mol_to_nearest_neighbor_graph():
     mol = Chem.MolFromSmiles(test_smiles1)
@@ -350,11 +352,13 @@ def test_mol_to_nearest_neighbor_graph():
 
     g5 = mol_to_nearest_neighbor_graph(mol, coordinates, neighbor_cutoff=10,
                                        node_featurizer=test_node_featurizer,
+                                       explicit_hydrogens=True,
                                        num_virtual_nodes=2)
-    assert g5.num_nodes() == 5
-    assert g5.num_edges() == 18
-    assert torch.allclose(g5.ndata['hv'], torch.tensor([[6., 1.], [8., 1.], [6., 1.],
-                                                        [0., 0.], [0., 0.]]))
+    assert g5.num_nodes() == 11
+    assert g5.num_edges() == 108
+    assert torch.allclose(g5.ndata['hv'], torch.tensor([[1., 1.], [1., 1.], [1., 1.], [6., 1.],
+                                                        [8., 1.], [1., 1.], [1., 1.], [1., 1.],
+                                                        [6., 1.], [0., 0.], [0., 0.]]))
 
 if __name__ == '__main__':
     test_smiles_to_bigraph()
