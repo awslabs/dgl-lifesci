@@ -50,10 +50,10 @@ def init_featurizer(args):
     if args['model'] in ['Weave', 'MPNN', 'AttentiveFP']:
         if args['bond_featurizer_type'] == 'canonical':
             from dgllife.utils import CanonicalBondFeaturizer
-            args['edge_featurizer'] = CanonicalBondFeaturizer()
+            args['edge_featurizer'] = CanonicalBondFeaturizer(self_loop=True)
         elif args['bond_featurizer_type'] == 'attentivefp':
             from dgllife.utils import AttentiveFPBondFeaturizer
-            args['edge_featurizer'] = AttentiveFPBondFeaturizer()
+            args['edge_featurizer'] = AttentiveFPBondFeaturizer(self_loop=True)
     else:
         args['edge_featurizer'] = None
 
