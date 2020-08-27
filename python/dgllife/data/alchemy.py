@@ -202,7 +202,8 @@ class TencentAlchemyDataset(object):
 
         self._url = 'dataset/alchemy/'
         self.zip_file_path = pathlib.Path(file_dir, file_name + '.zip')
-        download(_get_dgl_url(self._url + file_name + '.zip'), path=str(self.zip_file_path))
+        download(_get_dgl_url(self._url + file_name + '.zip'),
+                 path=str(self.zip_file_path), overwrite=False)
         if not os.path.exists(str(self.file_dir)):
             archive = zipfile.ZipFile(self.zip_file_path)
             archive.extractall(file_dir)

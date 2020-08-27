@@ -5,7 +5,6 @@
 #
 # The Toxicology in the 21st Century initiative."""
 
-import dgl.backend as F
 import pandas as pd
 
 from dgl.data.utils import get_download_dir, download, _get_dgl_url
@@ -102,7 +101,7 @@ class Tox21(MoleculeCSVDataset):
                  cache_file_path='./tox21_dglgraph.bin'):
         self._url = 'dataset/tox21.csv.gz'
         data_path = get_download_dir() + '/tox21.csv.gz'
-        download(_get_dgl_url(self._url), path=data_path)
+        download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         df = pd.read_csv(data_path)
         self.id = df['mol_id']
 
