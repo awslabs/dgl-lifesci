@@ -138,9 +138,11 @@ class FreeSolv(MoleculeCSVDataset):
         Tensor of dtype float32 and shape (1)
             Labels of the ith datapoint
         str, optional
-            IUPAC nomenclature for the ith datapoint
+            IUPAC nomenclature for the ith datapoint, returned only when
+            ``self.load_full`` is True.
         float, optional
-            Calculated hydration free energy for the ith datapoint
+            Calculated hydration free energy for the ith datapoint, returned only when
+            ``self.load_full`` is True.
         """
         if self.load_full:
             return self.smiles[item], self.graphs[item], self.labels[item], \

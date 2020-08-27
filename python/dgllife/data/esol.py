@@ -168,22 +168,22 @@ class ESOL(MoleculeCSVDataset):
             returned only when ``self.load_full`` is True.
         int, optional
             Minimum atom degree for the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         float, optional
             Molecular weight for the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         int, optional
             Number of h bond donors for the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         int, optional
             Number of rings in the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         int, optional
             Number of rotatable bonds in the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         float, optional
             Polar surface area for the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         """
         if self.load_full:
             return self.smiles[item], self.graphs[item], self.labels[item], \

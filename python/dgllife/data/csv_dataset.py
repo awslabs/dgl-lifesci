@@ -8,6 +8,7 @@
 import dgl.backend as F
 import numpy as np
 import os
+import torch
 
 from dgl import save_graphs, load_graphs
 
@@ -71,6 +72,9 @@ class MoleculeCSVDataset(object):
         self.cache_file_path = cache_file_path
         self._pre_process(smiles_to_graph, node_featurizer, edge_featurizer,
                           load, log_every, init_mask, n_jobs)
+
+        # Only useful for binary classification tasks
+        self._task_pos_weights = None
 
     def _pre_process(self, smiles_to_graph, node_featurizer,
                      edge_featurizer, load, log_every, init_mask, n_jobs=1):
@@ -170,3 +174,35 @@ class MoleculeCSVDataset(object):
             Size for the dataset
         """
         return len(self.smiles)
+
+    def task_pos_weights(self, indices):
+        """Get weights for positive samples on each task
+
+        This should only be used when all tasks are binary classification.
+
+        It's quite common that the number of positive samples and the number of
+        negative samples are significantly different for binary classification.
+        To compensate for the class imbalance issue, we can weight each datapoint
+        in loss computation.
+
+        In particular, for each task we will set the weight of negative samples
+        to be 1 and the weight of positive samples to be the number of negative
+        samples divided by the number of positive samples.
+
+        Parameters
+        ----------
+        indices : 1D LongTensor
+            The function will compute the weights on the data subset specified by
+            the indices, e.g. the indices for the training set.
+
+        Returns
+        -------
+        Tensor of dtype float32 and shape (T)
+            Weight of positive samples on all tasks
+        """
+        task_pos_weights = torch.ones(self.labels.shape[1])
+        num_pos = F.sum(self.labels[indices], dim=0)
+        num_indices = F.sum(self.mask[indices], dim=0)
+        task_pos_weights[num_pos > 0] = ((num_indices - num_pos) / num_pos)[num_pos > 0]
+
+        return task_pos_weights

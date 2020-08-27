@@ -130,7 +130,8 @@ class Lipophilicity(MoleculeCSVDataset):
         Tensor of dtype float32 and shape (1)
             Labels of the ith datapoint
         str, optional
-            ChEMBL id of the ith datapoint
+            ChEMBL id of the ith datapoint, returned only when
+            ``self.load_full`` is True.
         """
         if self.load_full:
             return self.smiles[item], self.graphs[item], self.labels[item], self.chembl_ids[item]
