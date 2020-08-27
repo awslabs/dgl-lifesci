@@ -154,7 +154,7 @@ def potentialNet_graph_construction_featurization(ligand_mol,
     complex_knn_graph.add_nodes(len(complex_coordinates))
     complex_knn_graph.add_edges(complex_srcs, complex_dsts)
     
-    return complex_bigraph, complex_knn_graph, ligand_bigraph, ligand_coordinates, protein_coordinates
+    return complex_bigraph, complex_knn_graph
 
 
 # pylint: disable=C0326

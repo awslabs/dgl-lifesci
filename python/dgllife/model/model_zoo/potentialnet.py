@@ -1,37 +1,50 @@
 import numpy as np
-import os
 import math
-# import matplotlib.pyplot as plt
-# import networkx as nx
 import torch as th
 import torch.nn as nn
 import dgl
 from dgl.nn.pytorch.conv import GatedGraphConv
 import torch.nn.functional as F
 
+__all__ = ['PotentialNet']
+
+def process_etypes(graph):
+    '''convert one-hot encoding edge types to label encoding, and add duplicated edges
+    '''
+    edata = np.array(graph.edata['e'])
+    etypes = []
+    etypes_to_extend = []
+    for i in range(edata.shape[0]):
+        row = edata[i,]
+        encodings = np.nonzero(row)[0]
+        etypes.append(encodings[0])
+        src, dst = graph.find_edges(i)
+        for _ in encodings[1:]: # start from the second
+        # add edges to represent different edge types
+            graph.add_edge(np.array(src), np.array(dst))
+        etypes_to_extend.extend(encodings[1:])
+    etypes.extend(etypes_to_extend)
+    del graph.edata['e']
+    return graph, th.tensor(etypes, dtype=th.long)
+
 class PotentialNet(nn.Module):
     def __init__(self,
-                 bigraph, knn_graph, liagnd_graph,
                  n_etypes,
                  f_in,
-                 f_bonds,
+                 f_bond,
                  f_spatial,
                  f_gather,
-                 f_out,
                  n_row_fc,
                  n_bond_conv_steps,
                  n_spatial_conv_steps,
                  n_fc_layers,
-                 f_fc,
-                 lr,
-                 dropout,
-                 weight_decay,
+                 dropout
                  ):
         super(PotentialNet, self).__init__()
         self.stage_1_model = StagedGGNN(f_gru_in=f_in,
                                         f_gru_out=f_bond,
                                         f_gather=f_gather,
-                                        n_etypes=?, # distinghuish diff chem bonds
+                                        n_etypes=12, # from CanonicalBondFeaturizer
                                         n_gconv_steps=n_bond_conv_steps,
                                         dropout=dropout
                                         )
@@ -44,17 +57,19 @@ class PotentialNet(nn.Module):
                                         )
         self.stage_3_model = StagedFCNN(f_in=f_gather,
                                         n_row=n_row_fc,
-                                        f_out=f_out,
                                         n_layers=n_fc_layers,
                                         dropout=dropout
         )
 
-    def forward(self, graph, features, stage_1_etypes, stage_2_etypes):
-        # h = features
-        h = self.stage_1_model(graph=bigraph, features=features, etypes=stage_1_etypes)
-        h = self.stage_2_model(graph=knn_grpah, features=h, etypes=stage_2_etypes)
-        x = self.stage_3_model(graph=ligand_graph, features=?)
-        return h
+    def forward(self, bigraph_canonical, knn_graph):
+        num_atoms_ligand = int(bigraph_canonical.batch_num_nodes()[0])
+        bigraph, stage_1_etypes = process_etypes(bigraph_canonical)
+        stage_2_etypes = th.zeros(knn_graph.num_edges() ,dtype=th.long)   # temporal solution
+        h = self.stage_1_model(graph=bigraph, features=bigraph.ndata['h'], etypes=stage_1_etypes)
+        h = self.stage_2_model(graph=knn_graph, features=h, etypes=stage_2_etypes)
+        x = self.stage_3_model(features=h[:num_atoms_ligand, ])
+        return x
+
 
 class StagedGGNN(nn.Module):
     def __init__(self,
@@ -66,7 +81,7 @@ class StagedGGNN(nn.Module):
                  dropout):
         super(StagedGGNN, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
-        self.ggc= GatedGraphConv(in_feats=f_gru_in, 
+        self.ggc = GatedGraphConv(in_feats=f_gru_in, 
                                       out_feats=f_gru_out,
                                       n_steps=n_gconv_steps,
                                       n_etypes=n_etypes,
@@ -88,7 +103,6 @@ class StagedFCNN(nn.Module):
     def __init__(self,
                  f_in,
                  n_row,
-                 f_out,
                  n_layers,
                  dropout):
         super(StagedFCNN, self).__init__()
@@ -97,10 +111,10 @@ class StagedFCNN(nn.Module):
         self.layers.append(nn.Linear(f_in, n_row))
         for _ in range(n_layers - 1):
             self.layers.append(nn.Linear(n_row, n_row))
-        self.out_layer = nn.Linear(n_row, f_out)
+        self.out_layer = nn.Linear(n_row, 1)
 
-    def forward(self, graph, features):
-        x = sum_over_ligand(graph, features) # need to be defined, x is of dimension (1xf_gather)
+    def forward(self, features):
+        x = features.sum(axis=0) # sum over ligand atoms
         for i, layer in enumerate(self.layers):
             if i !=0:
                 x = self.dropout(x)
@@ -108,3 +122,4 @@ class StagedFCNN(nn.Module):
             x = F.relu(x)
         x = self.out_layer(x)
         return x
+
