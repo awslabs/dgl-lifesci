@@ -26,13 +26,11 @@ if [ $2 == "gpu" ]
 then
   export CUDA_VISIBLE_DEVICES=0
   pip uninstall -y dgl-cu101
-  # pip install --pre dgl-cu101
-  pip install dgl-cu101
+  pip install --pre dgl-cu101
 else
   export CUDA_VISIBLE_DEVICES=-1
   pip uninstall -y dgl
-  # pip install --pre dgl
-  pip install dgl
+  pip install --pre dgl
 fi
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib

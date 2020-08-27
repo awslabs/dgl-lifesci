@@ -5,6 +5,7 @@
 #
 # pylint: disable=C0111, C0103, E1101, W0611, W0612, W0221, E1102
 
+import dgl
 import numpy as np
 import torch
 import torch.nn as nn
@@ -125,8 +126,7 @@ class DGLJTNNDecoder(nn.Module):
         ground truth tree
         '''
         mol_tree_batch = batch(mol_trees)
-        mol_tree_batch_lg = mol_tree_batch.line_graph(
-            backtracking=False, shared=True)
+        mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
         n_trees = len(mol_trees)
 
         return self.run(mol_tree_batch, mol_tree_batch_lg, n_trees, tree_vec)
@@ -318,8 +318,7 @@ class DGLJTNNDecoder(nn.Module):
                 # keeping dst_x 0 is fine as h on new edge doesn't depend on that.
 
                 # DGL doesn't dynamically maintain a line graph.
-                mol_tree_lg = mol_tree.line_graph(
-                    backtracking=False, shared=True)
+                mol_tree_lg = dgl.line_graph(mol_tree, backtracking=False, shared=True)
 
                 mol_tree_lg.pull(
                     uv,
@@ -372,8 +371,7 @@ class DGLJTNNDecoder(nn.Module):
                     mol_tree.edges[vu].data['dst_x'] = mol_tree.nodes[u].data['x']
 
                     # DGL doesn't dynamically maintain a line graph.
-                    mol_tree_lg = mol_tree.line_graph(
-                        backtracking=False, shared=True)
+                    mol_tree_lg = dgl.line_graph(mol_tree, backtracking=False, shared=True)
                     mol_tree_lg.apply_nodes(
                         self.dec_tree_edge_update.update_r,
                         uv

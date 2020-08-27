@@ -5,10 +5,12 @@
 #
 # pylint: disable=C0111, C0103, E1101, W0611, W0612, W0221
 
+import os
 import numpy as np
 import torch
 import torch.nn as nn
 
+import dgl
 import dgl.function as DGLF
 from dgl import batch, bfs_edges_generator
 
@@ -71,18 +73,19 @@ class DGLJTNNEncoder(nn.Module):
 
     def forward(self, mol_trees):
         mol_tree_batch = batch(mol_trees)
+        if torch.cuda.is_available() and not os.getenv('NOCUDA', None):
+            mol_tree_batch = mol_tree_batch.to('cuda:0')
 
         # Build line graph to prepare for belief propagation
-        mol_tree_batch_lg = mol_tree_batch.line_graph(
-            backtracking=False, shared=True)
+        mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
 
         return self.run(mol_tree_batch, mol_tree_batch_lg)
 
     def run(self, mol_tree_batch, mol_tree_batch_lg):
         # Since tree roots are designated to 0.  In the batched graph we can
         # simply find the corresponding node ID by looking at node_offset
-        node_offset = np.cumsum([0] + mol_tree_batch.batch_num_nodes)
-        root_ids = node_offset[:-1]
+        node_offset = np.cumsum([0] + mol_tree_batch.batch_num_nodes().tolist())
+        root_ids = cuda(torch.tensor(node_offset[:-1]))
         n_nodes = mol_tree_batch.number_of_nodes()
         n_edges = mol_tree_batch.number_of_edges()
 

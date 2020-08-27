@@ -7,7 +7,7 @@ import copy
 import numpy as np
 import rdkit.Chem as Chem
 
-from dgl import DGLGraph
+from dgl import DGLHeteroGraph
 
 from .chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, \
     set_atommap, enum_assemble_nx, decode_stereo
@@ -34,9 +34,9 @@ class Vocab(object):
     def size(self):
         return len(self.vocab)
 
-class DGLMolTree(DGLGraph):
+class DGLMolTree(DGLHeteroGraph):
     def __init__(self, smiles):
-        DGLGraph.__init__(self)
+        DGLHeteroGraph.__init__(self)
         self.nodes_dict = {}
 
         if smiles is None:
@@ -85,9 +85,9 @@ class DGLMolTree(DGLGraph):
 
         for i in self.nodes_dict:
             self.nodes_dict[i]['nid'] = i + 1
-            if self.out_degree(i) > 1:  # Leaf node mol is not marked
+            if self.out_degrees(i) > 1:  # Leaf node mol is not marked
                 set_atommap(self.nodes_dict[i]['mol'], self.nodes_dict[i]['nid'])
-            self.nodes_dict[i]['is_leaf'] = (self.out_degree(i) == 1)
+            self.nodes_dict[i]['is_leaf'] = (self.out_degrees(i) == 1)
 
     def treesize(self):
         return self.number_of_nodes()

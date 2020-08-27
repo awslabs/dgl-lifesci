@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser(description="Evaluation for JTNN",
 parser.add_argument("-t", "--train", dest="train",
                     default='test', help='Training file name')
 parser.add_argument("-v", "--vocab", dest="vocab",
-                    default='vocab', help='Vocab file name')
+                    default='zinc', help='Vocab file name')
 parser.add_argument("-m", "--model", dest="model_path", default=None,
                     help="Pre-trained model to be loaded for evalutaion. If not specified,"
                          " would use pre-trained model from model zoo")

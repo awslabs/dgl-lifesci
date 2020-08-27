@@ -7,16 +7,16 @@ import dgl
 import numpy as np
 import torch
 
-from dgl import DGLGraph
-
 from dgllife.model.model_zoo import *
 
 def get_complete_graph(num_nodes):
-    edge_list = []
+    src = []
+    dst = []
     for i in range(num_nodes):
         for j in range(num_nodes):
-            edge_list.append((i, j))
-    return DGLGraph(edge_list)
+            src.append(i)
+            dst.append(j)
+    return dgl.graph((src, dst))
 
 def test_graph1():
     """
@@ -24,7 +24,7 @@ def test_graph1():
     In addition to node features/edge features, we also return
     features for the pairs of nodes.
     """
-    mol_graph = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    mol_graph = dgl.graph(([0, 0, 1], [1, 2, 2]))
     node_feats = torch.arange(mol_graph.number_of_nodes()).float().reshape(-1, 1)
     edge_feats = torch.arange(2 * mol_graph.number_of_edges()).float().reshape(-1, 2)
 
@@ -35,8 +35,8 @@ def test_graph1():
 
 def test_graph2():
     """Batched version of test_graph1"""
-    mol_graph1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
-    mol_graph2 = DGLGraph([(0, 1), (1, 2), (1, 3), (1, 4)])
+    mol_graph1 = dgl.graph(([0, 0, 1], [1, 2, 2]))
+    mol_graph2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]))
     batch_mol_graph = dgl.batch([mol_graph1, mol_graph2])
     node_feats = torch.arange(batch_mol_graph.number_of_nodes()).float().reshape(-1, 1)
     edge_feats = torch.arange(2 * batch_mol_graph.number_of_edges()).float().reshape(-1, 2)
@@ -92,7 +92,7 @@ def test_wln_reaction_center():
 
 def test_reactant_product_graph1():
     edges = (np.array([0, 1, 2]), np.array([1, 2, 2]))
-    reactant_g = DGLGraph(edges)
+    reactant_g = dgl.graph(edges)
     reactant_node_feats = torch.arange(
         reactant_g.number_of_nodes()).float().reshape(-1, 1)
     reactant_edge_feats = torch.arange(
@@ -102,7 +102,7 @@ def test_reactant_product_graph1():
     batch_num_candidate_products = []
     for i in range(1, 2):
         product_g.extend([
-            DGLGraph(edges) for _ in range(i)
+            dgl.graph(edges) for _ in range(i)
         ])
         batch_num_candidate_products.append(i)
     product_g = dgl.batch(product_g)
@@ -120,7 +120,7 @@ def test_reactant_product_graph2():
     edges = (np.array([0, 1, 2]), np.array([1, 2, 2]))
     reactant_g = []
     for _ in range(batch_size):
-        reactant_g.append(DGLGraph(edges))
+        reactant_g.append(dgl.graph(edges))
     reactant_g = dgl.batch(reactant_g)
     reactant_node_feats = torch.arange(
         reactant_g.number_of_nodes()).float().reshape(-1, 1)
@@ -131,7 +131,7 @@ def test_reactant_product_graph2():
     batch_num_candidate_products = []
     for i in range(1, batch_size + 1):
         product_g.extend([
-            DGLGraph(edges) for _ in range(i)
+            dgl.graph(edges) for _ in range(i)
         ])
         batch_num_candidate_products.append(i)
     product_g = dgl.batch(product_g)
@@ -152,6 +152,8 @@ def test_wln_candidate_ranking():
 
     reactant_g, reactant_node_feats, reactant_edge_feats, product_g, product_node_feats, \
     product_edge_feats, product_scores, num_candidate_products = test_reactant_product_graph1()
+    reactant_g = reactant_g.to(device)
+    product_g = product_g.to(device)
     reactant_node_feats, reactant_edge_feats = reactant_node_feats.to(device), reactant_edge_feats.to(device)
     product_node_feats, product_edge_feats, product_scores = product_node_feats.to(device), \
                                                              product_edge_feats.to(device), \
@@ -160,6 +162,8 @@ def test_wln_candidate_ranking():
     batch_reactant_g, batch_reactant_node_feats, batch_reactant_edge_feats, batch_product_g, \
     batch_product_node_feats, batch_product_edge_feats, batch_product_scores, \
     batch_num_candidate_products = test_reactant_product_graph2()
+    batch_reactant_g = batch_reactant_g.to(device)
+    batch_product_g = batch_product_g.to(device)
     batch_reactant_node_feats = batch_reactant_node_feats.to(device)
     batch_reactant_edge_feats = batch_reactant_edge_feats.to(device)
     batch_product_node_feats = batch_product_node_feats.to(device)

@@ -13,7 +13,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
 
-from dgl import DGLGraph
 from functools import partial
 from rdkit import Chem
 from torch.distributions import Categorical
@@ -98,7 +97,7 @@ class MoleculeEnv(object):
             Whether to keep a Chem.rdchem.Mol object so
             that we know what molecule is being generated
         """
-        self.dgl_graph = DGLGraph()
+        self.dgl_graph = dgl.graph(([], []), idtype=torch.int32)
         # If there are some features for nodes and edges,
         # zero tensors will be set for those of new nodes and edges.
         self.dgl_graph.set_n_initializer(dgl.frame.zero_initializer)
@@ -573,7 +572,7 @@ class ChooseDestAndUpdate(nn.Module):
         if dest is None:
             dest = Categorical(dests_probs).sample().item()
 
-        if not g.has_edge_between(src, dest):
+        if not g.has_edges_between(src, dest):
             # For undirected graphs, we add edges for both directions
             # so that we can perform graph propagation.
             src_list = [src, dest]

@@ -53,7 +53,7 @@ def test_acnn():
     g1 = g1.to(device)
     assert model(g1).shape == torch.Size([1, 1])
 
-    bg = dgl.batch_hetero([g1, g1])
+    bg = dgl.batch([g1, g1])
     bg = bg.to(device)
     assert model(bg).shape == torch.Size([2, 1])
 
@@ -66,7 +66,7 @@ def test_acnn():
     g1 = g1.to(device)
     assert model(g1).shape == torch.Size([1, 1])
 
-    bg = dgl.batch_hetero([g1, g1])
+    bg = dgl.batch([g1, g1])
     bg = bg.to(device)
     assert model(bg).shape == torch.Size([2, 1])
 

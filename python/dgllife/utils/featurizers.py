@@ -1538,6 +1538,10 @@ class BaseBondFeaturizer(object):
     feat_sizes : dict
         Mapping feature name to the size of the corresponding feature. If None, they will be
         computed when needed. Default: None.
+    self_loop : bool
+        Whether self loops will be added. Default to False. If True, it will use an additional
+        column of binary values to indicate the identity of self loops in each bond feature.
+        The features of the self loops will be zero except for the additional columns.
 
     Examples
     --------
@@ -1559,6 +1563,32 @@ class BaseBondFeaturizer(object):
     >>> bond_featurizer.feat_size('ring')
     1
 
+    # Featurization with self loops to add
+
+    >>> bond_featurizer = BaseBondFeaturizer(
+    ...                       {'type': bond_type_one_hot, 'ring': bond_is_in_ring},
+    ...                       self_loop=True)
+    >>> bond_featurizer(mol)
+    {'type': tensor([[1., 0., 0., 0., 0.],
+                     [1., 0., 0., 0., 0.],
+                     [1., 0., 0., 0., 0.],
+                     [1., 0., 0., 0., 0.],
+                     [0., 0., 0., 0., 1.],
+                     [0., 0., 0., 0., 1.],
+                     [0., 0., 0., 0., 1.]]),
+     'ring': tensor([[0., 0.],
+                     [0., 0.],
+                     [0., 0.],
+                     [0., 0.],
+                     [0., 1.],
+                     [0., 1.],
+                     [0., 1.]])}
+    >>> # Get feature size
+    >>> bond_featurizer.feat_size('type')
+    5
+    >>> bond_featurizer.feat_size('ring')
+    2
+
     See Also
     --------
     CanonicalBondFeaturizer
@@ -1566,11 +1596,12 @@ class BaseBondFeaturizer(object):
     PretrainBondFeaturizer
     AttentiveFPBondFeaturizer
     """
-    def __init__(self, featurizer_funcs, feat_sizes=None):
+    def __init__(self, featurizer_funcs, feat_sizes=None, self_loop=False):
         self.featurizer_funcs = featurizer_funcs
         if feat_sizes is None:
             feat_sizes = dict()
         self._feat_sizes = feat_sizes
+        self._self_loop = self_loop
 
     def feat_size(self, feat_name=None):
         """Get the feature size for ``feat_name``.
@@ -1596,11 +1627,10 @@ class BaseBondFeaturizer(object):
             return ValueError('Expect feat_name to be in {}, got {}'.format(
                 list(self.featurizer_funcs.keys()), feat_name))
 
-        if feat_name not in self._feat_sizes:
-            bond = Chem.MolFromSmiles('CO').GetBondWithIdx(0)
-            self._feat_sizes[feat_name] = len(self.featurizer_funcs[feat_name](bond))
+        mol = Chem.MolFromSmiles('CCO')
+        feats = self(mol)
 
-        return self._feat_sizes[feat_name]
+        return feats[feat_name].shape[1]
 
     def __call__(self, mol):
         """Featurize all bonds in a molecule.
@@ -1633,6 +1663,26 @@ class BaseBondFeaturizer(object):
             feat = np.stack(feat_list)
             processed_features[feat_name] = F.zerocopy_from_numpy(feat.astype(np.float32))
 
+        if self._self_loop and num_bonds > 0:
+            num_atoms = mol.GetNumAtoms()
+            for feat_name in processed_features:
+                feats = processed_features[feat_name]
+                feats = torch.cat([feats, torch.zeros(feats.shape[0], 1)], dim=1)
+                self_loop_feats = torch.zeros(num_atoms, feats.shape[1])
+                self_loop_feats[:, -1] = 1
+                feats = torch.cat([feats, self_loop_feats], dim=0)
+                processed_features[feat_name] = feats
+
+        if self._self_loop and num_bonds == 0:
+            num_atoms = mol.GetNumAtoms()
+            toy_mol = Chem.MolFromSmiles('CO')
+            processed_features = self(toy_mol)
+            for feat_name in processed_features:
+                feats = processed_features[feat_name]
+                feats = torch.zeros(num_atoms, feats.shape[1])
+                feats[:, -1] = 1
+                processed_features[feat_name] = feats
+
         return processed_features
 
 class CanonicalBondFeaturizer(BaseBondFeaturizer):
@@ -1649,6 +1699,15 @@ class CanonicalBondFeaturizer(BaseBondFeaturizer):
 
     **We assume the resulting DGLGraph will be created with :func:`smiles_to_bigraph` without
     self loops.**
+
+    Parameters
+    ----------
+    bond_data_field : str
+        Name for storing bond features in DGLGraphs, default to ``'e'``.
+    self_loop : bool
+        Whether self loops will be added. Default to False. If True, it will use an additional
+        column of binary values to indicate the identity of self loops. The feature of the
+        self loops will be zero except for the additional column.
 
     Examples
     --------
@@ -1667,6 +1726,20 @@ class CanonicalBondFeaturizer(BaseBondFeaturizer):
     >>> bond_featurizer.feat_size('feat')
     12
 
+    # Featurization with self loops to add
+    >>> bond_featurizer = CanonicalBondFeaturizer(bond_data_field='feat', self_loop=True)
+    >>> bond_featurizer(mol)
+    {'feat': tensor([[1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.],
+                     [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.],
+                     [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.],
+                     [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.],
+                     [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
+                     [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
+                     [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]])}
+    >>> # Get feature size
+    >>> bond_featurizer.feat_size('feat')
+    13
+
     See Also
     --------
     BaseBondFeaturizer
@@ -1674,14 +1747,14 @@ class CanonicalBondFeaturizer(BaseBondFeaturizer):
     PretrainBondFeaturizer
     AttentiveFPBondFeaturizer
     """
-    def __init__(self, bond_data_field='e'):
+    def __init__(self, bond_data_field='e', self_loop=False):
         super(CanonicalBondFeaturizer, self).__init__(
             featurizer_funcs={bond_data_field: ConcatFeaturizer(
                 [bond_type_one_hot,
                  bond_is_conjugated,
                  bond_is_in_ring,
                  bond_stereo_one_hot]
-            )})
+            )}, self_loop=self_loop)
 
 # pylint: disable=E1102
 class WeaveEdgeFeaturizer(object):
@@ -1915,6 +1988,15 @@ class AttentiveFPBondFeaturizer(BaseBondFeaturizer):
     **We assume the resulting DGLGraph will be created with :func:`smiles_to_bigraph` without
     self loops.**
 
+    Parameters
+    ----------
+    bond_data_field : str
+        Name for storing bond features in DGLGraphs, default to ``'e'``.
+    self_loop : bool
+        Whether self loops will be added. Default to False. If True, it will use an additional
+        column of binary values to indicate the identity of self loops. The feature of the
+        self loops will be zero except for the additional column.
+
     Examples
     --------
 
@@ -1932,6 +2014,20 @@ class AttentiveFPBondFeaturizer(BaseBondFeaturizer):
     >>> bond_featurizer.feat_size('feat')
     10
 
+    # Featurization with self loops to add
+    >>> bond_featurizer = AttentiveFPBondFeaturizer(bond_data_field='feat', self_loop=True)
+    >>> bond_featurizer(mol)
+    {'feat': tensor([[1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+                     [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+                     [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+                     [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+                     [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
+                     [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
+                     [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]])}
+    >>> # Get feature size
+    >>> bond_featurizer.feat_size('feat')
+    11
+
     See Also
     --------
     BaseBondFeaturizer
@@ -1939,7 +2035,7 @@ class AttentiveFPBondFeaturizer(BaseBondFeaturizer):
     WeaveEdgeFeaturizer
     PretrainBondFeaturizer
     """
-    def __init__(self, bond_data_field='e'):
+    def __init__(self, bond_data_field='e', self_loop=False):
         super(AttentiveFPBondFeaturizer, self).__init__(
             featurizer_funcs={bond_data_field: ConcatFeaturizer(
                 [bond_type_one_hot,
@@ -1949,4 +2045,4 @@ class AttentiveFPBondFeaturizer(BaseBondFeaturizer):
                                                              Chem.rdchem.BondStereo.STEREOANY,
                                                              Chem.rdchem.BondStereo.STEREOZ,
                                                              Chem.rdchem.BondStereo.STEREOE])]
-            )})
+            )}, self_loop=self_loop)

@@ -72,6 +72,8 @@ def main(args, path_to_candidate_bonds):
             batch_reactant_graphs, batch_product_graphs, \
             batch_combo_scores, batch_labels, batch_num_candidate_products = batch_data
 
+            batch_reactant_graphs = batch_reactant_graphs.to(args['device'])
+            batch_product_graphs = batch_product_graphs.to(args['device'])
             batch_combo_scores = batch_combo_scores.to(args['device'])
             batch_labels = batch_labels.to(args['device'])
             reactant_node_feats = batch_reactant_graphs.ndata.pop('hv').to(args['device'])
