@@ -99,7 +99,7 @@ class FreeSolv(MoleculeCSVDataset):
         self._url = 'dataset/FreeSolv.zip'
         data_path = get_download_dir() + '/FreeSolv.zip'
         dir_path = get_download_dir() + '/FreeSolv'
-        download(_get_dgl_url(self._url), path=data_path)
+        download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         extract_archive(data_path, dir_path)
         df = pd.read_csv(dir_path + '/SAMPL.csv')
 

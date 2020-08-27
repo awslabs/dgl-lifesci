@@ -93,7 +93,7 @@ class Lipophilicity(MoleculeCSVDataset):
         self._url = 'dataset/lipophilicity.zip'
         data_path = get_download_dir() + '/lipophilicity.zip'
         dir_path = get_download_dir() + '/lipophilicity'
-        download(_get_dgl_url(self._url), path=data_path)
+        download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         extract_archive(data_path, dir_path)
         df = pd.read_csv(dir_path + '/Lipophilicity.csv')
 

@@ -98,7 +98,7 @@ class AstraZenecaChEMBLSolubility(MoleculeCSVDataset):
 
         self._url = 'dataset/AstraZeneca_ChEMBL_Solubility.csv'
         data_path = get_download_dir() + '/AstraZeneca_ChEMBL_Solubility.csv'
-        download(_get_dgl_url(self._url), path=data_path)
+        download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         df = pd.read_csv(data_path)
 
         # ChEMBL ids
