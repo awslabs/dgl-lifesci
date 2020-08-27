@@ -284,7 +284,8 @@ def load_model(exp_configure):
             num_layers=exp_configure['num_layers'],
             num_timesteps=exp_configure['num_timesteps'],
             graph_feat_size=exp_configure['graph_feat_size'],
-            dropout=exp_configure['dropout']
+            dropout=exp_configure['dropout'],
+            n_tasks=exp_configure['n_tasks']
         )
     elif exp_configure['model'] in ['gin_supervised_contextpred', 'gin_supervised_infomax',
                                     'gin_supervised_edgepred', 'gin_supervised_masking']:
