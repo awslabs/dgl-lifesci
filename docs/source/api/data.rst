@@ -13,7 +13,7 @@ Tox21
 `````
 
 .. autoclass:: dgllife.data.Tox21
-    :members: task_pos_weights, __getitem__, __len__
+    :members: __getitem__, __len__, task_pos_weights
     :show-inheritance:
 
 ESOL
@@ -35,6 +35,13 @@ Lipophilicity
 
 .. autoclass:: dgllife.data.Lipophilicity
     :members: __getitem__, __len__
+    :show-inheritance:
+
+PCBA
+````
+
+.. autoclass:: dgllife.data.PCBA
+    :members: __getitem__, __len__, task_pos_weights
     :show-inheritance:
 
 Experimental solubility determined at AstraZeneca, extracted from ChEMBL
@@ -61,7 +68,7 @@ Adapting to New Datasets with CSV
 `````````````````````````````````
 
 .. autoclass:: dgllife.data.MoleculeCSVDataset
-    :members: __getitem__, __len__
+    :members: __getitem__, __len__, task_pos_weights
 
 Adapting to New Datasets for Inference
 ``````````````````````````````````````

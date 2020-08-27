@@ -47,7 +47,7 @@ class PubChemBioAssayAromaticity(MoleculeCSVDataset):
                  node_featurizer=None, edge_featurizer=None, load=True, log_every=1000):
         self._url = 'dataset/pubchem_bioassay_aromaticity.csv'
         data_path = get_download_dir() + '/pubchem_bioassay_aromaticity.csv'
-        download(_get_dgl_url(self._url), path=data_path)
+        download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         df = pd.read_csv(data_path)
 
         super(PubChemBioAssayAromaticity, self).__init__(

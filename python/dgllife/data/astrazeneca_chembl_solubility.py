@@ -98,7 +98,7 @@ class AstraZenecaChEMBLSolubility(MoleculeCSVDataset):
 
         self._url = 'dataset/AstraZeneca_ChEMBL_Solubility.csv'
         data_path = get_download_dir() + '/AstraZeneca_ChEMBL_Solubility.csv'
-        download(_get_dgl_url(self._url), path=data_path)
+        download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         df = pd.read_csv(data_path)
 
         # ChEMBL ids
@@ -140,9 +140,9 @@ class AstraZenecaChEMBLSolubility(MoleculeCSVDataset):
         Tensor of dtype float32 and shape (1)
             Labels of the ith datapoint
         str, optional
-            ChEMBL id of the ith datapoint
+            ChEMBL id of the ith datapoint, returned only when ``self.load_full`` is True.
         float, optional
-            Molecular weight of the ith datapoint
+            Molecular weight of the ith datapoint, returned only when ``self.load_full`` is True.
         """
         if self.load_full:
             return self.smiles[item], self.graphs[item], self.labels[item], \

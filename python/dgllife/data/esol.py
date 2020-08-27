@@ -111,7 +111,7 @@ class ESOL(MoleculeCSVDataset):
         self._url = 'dataset/ESOL.zip'
         data_path = get_download_dir() + '/ESOL.zip'
         dir_path = get_download_dir() + '/ESOL'
-        download(_get_dgl_url(self._url), path=data_path)
+        download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         extract_archive(data_path, dir_path)
         df = pd.read_csv(dir_path + '/delaney-processed.csv')
 
@@ -168,22 +168,22 @@ class ESOL(MoleculeCSVDataset):
             returned only when ``self.load_full`` is True.
         int, optional
             Minimum atom degree for the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         float, optional
             Molecular weight for the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         int, optional
             Number of h bond donors for the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         int, optional
             Number of rings in the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         int, optional
             Number of rotatable bonds in the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         float, optional
             Polar surface area for the ith datapoint, returned only when
-            ``self.load`` is True.
+            ``self.load_full`` is True.
         """
         if self.load_full:
             return self.smiles[item], self.graphs[item], self.labels[item], \

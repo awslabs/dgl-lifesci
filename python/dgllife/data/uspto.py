@@ -634,7 +634,7 @@ class USPTOCenter(WLNCenterDataset):
         self._url = 'dataset/uspto.zip'
         data_path = get_download_dir() + '/uspto.zip'
         extracted_data_path = get_download_dir() + '/uspto'
-        download(_get_dgl_url(self._url), path=data_path)
+        download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         extract_archive(data_path, extracted_data_path)
 
         super(USPTOCenter, self).__init__(
@@ -1599,7 +1599,7 @@ class USPTORank(WLNRankDataset):
         self._url = 'dataset/uspto.zip'
         data_path = get_download_dir() + '/uspto.zip'
         extracted_data_path = get_download_dir() + '/uspto'
-        download(_get_dgl_url(self._url), path=data_path)
+        download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         extract_archive(data_path, extracted_data_path)
 
         super(USPTORank, self).__init__(
