@@ -298,6 +298,8 @@ def reaction_center_prediction(device, model, mol_graphs, complete_graphs):
     biased_scores : float32 tensor of shape (E_full, 5)
         Comparing to scores, a bias is added if the pair is for a same atom.
     """
+    mol_graphs = mol_graphs.to(device)
+    complete_graphs = complete_graphs.to(device)
     node_feats = mol_graphs.ndata.pop('hv').to(device)
     edge_feats = mol_graphs.edata.pop('he').to(device)
     node_pair_feats = complete_graphs.edata.pop('feats').to(device)
@@ -1154,6 +1156,8 @@ def candidate_ranking_eval(args, model, data_loader):
             continue
         total_samples += len(batch_num_candidate_products)
 
+        batch_reactant_graphs = batch_reactant_graphs.to(args['device'])
+        batch_product_graphs = batch_product_graphs.to(args['device'])
         batch_combo_scores = batch_combo_scores.to(args['device'])
         reactant_node_feats = batch_reactant_graphs.ndata.pop('hv').to(args['device'])
         reactant_edge_feats = batch_reactant_graphs.edata.pop('he').to(args['device'])

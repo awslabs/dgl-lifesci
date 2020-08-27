@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from utils import set_random_seed, load_dataset_for_classification, collate_molgraphs, load_model
 
 def predict(args, model, bg):
+    bg = bg.to(args['device'])
     node_feats = bg.ndata.pop(args['node_data_field']).to(args['device'])
     if args.get('edge_featurizer', None) is not None:
         edge_feats = bg.edata.pop(args['edge_data_field']).to(args['device'])

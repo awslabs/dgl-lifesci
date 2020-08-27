@@ -30,6 +30,9 @@ def test_mol3():
 def test_mol4():
     return Chem.MolFromSmiles('N[C@@H](C)C(=O)O')
 
+def test_mol5():
+    return Chem.MolFromSmiles('C')
+
 def test_atom_type_one_hot():
     mol = test_mol1()
     assert atom_type_one_hot(mol.GetAtomWithIdx(0), ['C', 'O']) == [1, 0]
@@ -323,6 +326,16 @@ class TestBondFeaturizer(BaseBondFeaturizer):
             }
         )
 
+class TestBondFeaturizer2(BaseBondFeaturizer):
+    def __init__(self):
+        super(TestBondFeaturizer2, self).__init__(
+            featurizer_funcs={
+                'h1': ConcatFeaturizer([bond_is_in_ring, bond_is_conjugated]),
+                'h2': ConcatFeaturizer([bond_stereo_one_hot])
+            },
+            self_loop=True
+        )
+
 def test_base_bond_featurizer():
     test_featurizer = TestBondFeaturizer()
     assert test_featurizer.feat_size('h1') == 2
@@ -335,6 +348,28 @@ def test_base_bond_featurizer():
                                                      [1., 0., 0., 0., 0., 0.],
                                                      [1., 0., 0., 0., 0., 0.]]))
 
+    test_featurizer2 = TestBondFeaturizer2()
+    assert test_featurizer2.feat_size('h1') == 3
+    assert test_featurizer2.feat_size('h2') == 7
+    mol = test_mol1()
+    feats = test_featurizer2(mol)
+    assert torch.allclose(feats['h1'], torch.tensor([[0., 0., 0.], [0., 0., 0.],
+                                                     [0., 0., 0.], [0., 0., 0.],
+                                                     [0., 0., 1.], [0., 0., 1.], [0., 0., 1.]]))
+    assert torch.allclose(feats['h2'], torch.tensor([[1., 0., 0., 0., 0., 0., 0.],
+                                                     [1., 0., 0., 0., 0., 0., 0.],
+                                                     [1., 0., 0., 0., 0., 0., 0.],
+                                                     [1., 0., 0., 0., 0., 0., 0.],
+                                                     [0., 0., 0., 0., 0., 0., 1.],
+                                                     [0., 0., 0., 0., 0., 0., 1.],
+                                                     [0., 0., 0., 0., 0., 0., 1.]]))
+
+    # Test graphs without edges
+    mol = test_mol5()
+    feats = test_featurizer2(mol)
+    assert torch.allclose(feats['h1'], torch.tensor([[0., 0., 1.]]))
+    assert torch.allclose(feats['h2'], torch.tensor([[0., 0., 0., 0., 0., 0., 1.]]))
+
 def test_canonical_bond_featurizer():
     test_featurizer = CanonicalBondFeaturizer()
     assert test_featurizer.feat_size() == 12
@@ -346,6 +381,27 @@ def test_canonical_bond_featurizer():
          [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
          [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
          [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.]]))
+
+    test_featurizer2 = CanonicalBondFeaturizer(self_loop=True)
+    assert test_featurizer2.feat_size() == 13
+    assert test_featurizer2.feat_size('e') == 13
+    mol = test_mol1()
+    feats = test_featurizer2(mol)
+    assert torch.allclose(feats['e'], torch.tensor(
+        [[1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.],
+         [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.],
+         [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.],
+         [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.],
+         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
+         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
+         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]
+    ))
+
+    # Test graphs without edges
+    mol = test_mol5()
+    feats = test_featurizer2(mol)
+    assert torch.allclose(feats['e'],
+                          torch.tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]))
 
 def test_weave_edge_featurizer():
     test_featurizer = WeaveEdgeFeaturizer()
@@ -381,16 +437,36 @@ def test_pretrain_bond_featurizer():
                           torch.tensor([[4], [5], [8], [9]]))
 
 def test_attentivefp_bond_featurizer():
+    mol = test_mol1()
+
     test_featurizer = AttentiveFPBondFeaturizer()
     assert test_featurizer.feat_size() == 10
     assert test_featurizer.feat_size('e') == 10
-    mol = test_mol1()
     feats = test_featurizer(mol)
     assert torch.allclose(feats['e'], torch.tensor([
         [1., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
         [1., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
         [1., 0., 0., 0., 0., 0., 1., 0., 0., 0.],
         [1., 0., 0., 0., 0., 0., 1., 0., 0., 0.]]))
+
+    test_featurizer2 = AttentiveFPBondFeaturizer(self_loop=True)
+    assert test_featurizer2.feat_size() == 11
+    assert test_featurizer2.feat_size('e') == 11
+    feats = test_featurizer2(mol)
+    assert torch.allclose(feats['e'], torch.tensor(
+        [[1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+         [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+         [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+         [1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
+         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.],
+         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]))
+
+    # Test graphs without edges
+    mol = test_mol5()
+    feats = test_featurizer2(mol)
+    assert torch.allclose(feats['e'],
+                          torch.tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]))
 
 if __name__ == '__main__':
     test_one_hot_encoding()

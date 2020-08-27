@@ -6,13 +6,14 @@
 # pylint: disable=C0111, C0103, E1101, W0611, W0612, I1101, W0221
 # pylint: disable=redefined-outer-name
 
+import dgl
 import rdkit.Chem as Chem
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 import dgl.function as DGLF
-from dgl import DGLGraph, mean_nodes
+from dgl import mean_nodes
 
 from .chemutils import get_mol
 
@@ -54,7 +55,7 @@ def mol2dgl_single(smiles):
     mol = get_mol(smiles)
     n_atoms = mol.GetNumAtoms()
     n_bonds = mol.GetNumBonds()
-    graph = DGLGraph()
+    graph = dgl.graph(([], []), idtype=torch.int32)
     for i, atom in enumerate(mol.GetAtoms()):
         assert i == atom.GetIdx()
         atom_x.append(atom_features(atom))
@@ -145,7 +146,7 @@ class DGLMPN(nn.Module):
     def forward(self, mol_graph):
         n_samples = mol_graph.batch_size
 
-        mol_line_graph = mol_graph.line_graph(backtracking=False, shared=True)
+        mol_line_graph = dgl.line_graph(mol_graph, backtracking=False, shared=True)
 
         n_nodes = mol_graph.number_of_nodes()
         n_edges = mol_graph.number_of_edges()
@@ -192,6 +193,9 @@ class DGLMPN(nn.Module):
                 self.loopy_bp_updater,
             )
 
+        mol_graph.edata.update({
+            'msg': mol_line_graph.ndata['msg']
+        })
         mol_graph.update_all(
             mpn_gather_msg,
             mpn_gather_reduce,

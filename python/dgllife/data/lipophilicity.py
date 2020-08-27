@@ -88,7 +88,7 @@ class Lipophilicity(MoleculeCSVDataset):
                  edge_featurizer=None,
                  load=True,
                  log_every=1000,
-                 cache_file_path='lipophilicity_dglgraph.bin'):
+                 cache_file_path='./lipophilicity_dglgraph.bin'):
 
         self._url = 'dataset/lipophilicity.zip'
         data_path = get_download_dir() + '/lipophilicity.zip'

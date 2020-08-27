@@ -28,7 +28,7 @@ worker_init_fn(None)
 parser = argparse.ArgumentParser(description="Training for JTNN",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-t", "--train", dest="train", default='train', help='Training file name')
-parser.add_argument("-v", "--vocab", dest="vocab", default='vocab', help='Vocab file name')
+parser.add_argument("-v", "--vocab", dest="vocab", default='zinc', help='Vocab file name')
 parser.add_argument("-s", "--save_dir", dest="save_path", default='./',
                     help="Path to save checkpoint models, default to be current working directory")
 parser.add_argument("-m", "--model", dest="model_path", default=None,
@@ -95,6 +95,7 @@ def train():
         word_acc, topo_acc, assm_acc, steo_acc = 0, 0, 0, 0
 
         for it, batch in enumerate(dataloader):
+            batch['mol_graph_batch'] = batch['mol_graph_batch'].to('cuda:0')
             model.zero_grad()
             try:
                 loss, kl_div, wacc, tacc, sacc, dacc = model(batch, beta)

@@ -50,7 +50,7 @@ class RBFExpansion(nn.Module):
         """Reinitialize model parameters."""
         device = self.centers.device
         self.centers = nn.Parameter(
-            torch.tensor(self.centers).float(), requires_grad=False).to(device)
+            self.centers.clone().detach().float(), requires_grad=False).to(device)
 
     def forward(self, edge_dists):
         """Expand distances.

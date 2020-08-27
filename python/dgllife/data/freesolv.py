@@ -94,7 +94,7 @@ class FreeSolv(MoleculeCSVDataset):
                  edge_featurizer=None,
                  load=True,
                  log_every=1000,
-                 cache_file_path='freesolv_dglgraph.bin'):
+                 cache_file_path='./freesolv_dglgraph.bin'):
 
         self._url = 'dataset/FreeSolv.zip'
         data_path = get_download_dir() + '/FreeSolv.zip'

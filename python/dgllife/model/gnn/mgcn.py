@@ -153,10 +153,8 @@ class VEConv(nn.Module):
         g = g.local_var()
         g.ndata.update({'hv': node_feats})
         g.edata.update({'dist': expanded_dists, 'he': edge_feats})
-        g.update_all(message_func=[fn.u_mul_e('hv', 'dist', 'm_0'),
-                                   fn.copy_e('he', 'm_1')],
-                     reduce_func=[fn.sum('m_0', 'hv_0'),
-                                  fn.sum('m_1', 'hv_1')])
+        g.update_all(fn.u_mul_e('hv', 'dist', 'm_0'), fn.sum('m_0', 'hv_0'))
+        g.update_all(fn.copy_e('he', 'm_1'), fn.sum('m_1', 'hv_1'))
         node_feats = g.ndata.pop('hv_0') + g.ndata.pop('hv_1')
 
         return node_feats, edge_feats

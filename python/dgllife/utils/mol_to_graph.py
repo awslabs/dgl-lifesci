@@ -9,8 +9,8 @@
 
 from functools import partial
 import torch
+import dgl
 
-from dgl import DGLGraph
 from rdkit import Chem
 from rdkit.Chem import rdmolfiles, rdmolops
 from sklearn.neighbors import NearestNeighbors
@@ -25,8 +25,8 @@ __all__ = ['mol_to_graph',
            'smiles_to_nearest_neighbor_graph']
 
 # pylint: disable=I1101
-def mol_to_graph(mol, graph_constructor, node_featurizer,
-                 edge_featurizer, canonical_atom_order, explicit_hydrogens):
+def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
+                 canonical_atom_order, explicit_hydrogens, num_virtual_nodes=0):
     """Convert an RDKit molecule object into a DGLGraph and featurize for it.
 
     This function can be used to construct any arbitrary ``DGLGraph`` from an
@@ -49,6 +49,12 @@ def mol_to_graph(mol, graph_constructor, node_featurizer,
         to true might change the order of atoms in the graph constructed.
     explicit_hydrogens : bool
         Whether to explicitly represent hydrogens as nodes in the graph.
+    num_virtual_nodes : int
+        The number of virtual nodes to add. The virtual nodes will be connected to
+        all real nodes with virtual edges. If the returned graph has any node/edge
+        feature, an additional column of binary values will be used for each feature
+        to indicate the identity of virtual node/edges. The features of the virtual
+        nodes/edges will be zero vectors except for the additional column. Default to 0.
 
     Returns
     -------
@@ -78,6 +84,33 @@ def mol_to_graph(mol, graph_constructor, node_featurizer,
     if edge_featurizer is not None:
         g.edata.update(edge_featurizer(mol))
 
+    if num_virtual_nodes > 0:
+        num_real_nodes = g.num_nodes()
+        real_nodes = list(range(num_real_nodes))
+        g.add_nodes(num_virtual_nodes)
+
+        # Change Topology
+        virtual_src = []
+        virtual_dst = []
+        for count in range(num_virtual_nodes):
+            virtual_node = num_real_nodes + count
+            virtual_node_copy = [virtual_node] * num_real_nodes
+            virtual_src.extend(real_nodes)
+            virtual_src.extend(virtual_node_copy)
+            virtual_dst.extend(virtual_node_copy)
+            virtual_dst.extend(real_nodes)
+        g.add_edges(virtual_src, virtual_dst)
+
+        for nk, nv in g.ndata.items():
+            nv = torch.cat([nv, torch.zeros(g.num_nodes(), 1)], dim=1)
+            nv[-num_virtual_nodes:, -1] = 1
+            g.ndata[nk] = nv
+
+        for ek, ev in g.edata.items():
+            ev = torch.cat([ev, torch.zeros(g.num_edges(), 1)], dim=1)
+            ev[-num_virtual_nodes * num_real_nodes * 2:, -1] = 1
+            g.edata[ek] = ev
+
     return g
 
 def construct_bigraph_from_mol(mol, add_self_loop=False):
@@ -106,7 +139,7 @@ def construct_bigraph_from_mol(mol, add_self_loop=False):
     g : DGLGraph
         Empty bigraph topology of the molecule
     """
-    g = DGLGraph()
+    g = dgl.graph(([], []), idtype=torch.int32)
 
     # Add nodes
     num_atoms = mol.GetNumAtoms()
@@ -122,11 +155,13 @@ def construct_bigraph_from_mol(mol, add_self_loop=False):
         v = bond.GetEndAtomIdx()
         src_list.extend([u, v])
         dst_list.extend([v, u])
-    g.add_edges(src_list, dst_list)
 
     if add_self_loop:
-        nodes = g.nodes()
-        g.add_edges(nodes, nodes)
+        nodes = g.nodes().tolist()
+        src_list.extend(nodes)
+        dst_list.extend(nodes)
+
+    g.add_edges(torch.IntTensor(src_list), torch.IntTensor(dst_list))
 
     return g
 
@@ -134,7 +169,8 @@ def mol_to_bigraph(mol, add_self_loop=False,
                    node_featurizer=None,
                    edge_featurizer=None,
                    canonical_atom_order=True,
-                   explicit_hydrogens=False):
+                   explicit_hydrogens=False,
+                   num_virtual_nodes=0):
     """Convert an RDKit molecule object into a bi-directed DGLGraph and featurize for it.
 
     Parameters
@@ -155,6 +191,12 @@ def mol_to_bigraph(mol, add_self_loop=False,
         to True.
     explicit_hydrogens : bool
         Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+    num_virtual_nodes : int
+        The number of virtual nodes to add. The virtual nodes will be connected to
+        all real nodes with virtual edges. If the returned graph has any node/edge
+        feature, an additional column of binary values will be used for each feature
+        to indicate the identity of virtual node/edges. The features of the virtual
+        nodes/edges will be zero vectors except for the additional column. Default to 0.
 
     Returns
     -------
@@ -222,13 +264,14 @@ def mol_to_bigraph(mol, add_self_loop=False,
     """
     return mol_to_graph(mol, partial(construct_bigraph_from_mol, add_self_loop=add_self_loop),
                         node_featurizer, edge_featurizer,
-                        canonical_atom_order, explicit_hydrogens)
+                        canonical_atom_order, explicit_hydrogens, num_virtual_nodes)
 
 def smiles_to_bigraph(smiles, add_self_loop=False,
                       node_featurizer=None,
                       edge_featurizer=None,
                       canonical_atom_order=True,
-                      explicit_hydrogens=False):
+                      explicit_hydrogens=False,
+                      num_virtual_nodes=0):
     """Convert a SMILES into a bi-directed DGLGraph and featurize for it.
 
     Parameters
@@ -249,6 +292,12 @@ def smiles_to_bigraph(smiles, add_self_loop=False,
         to True.
     explicit_hydrogens : bool
         Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+    num_virtual_nodes : int
+        The number of virtual nodes to add. The virtual nodes will be connected to
+        all real nodes with virtual edges. If the returned graph has any node/edge
+        feature, an additional column of binary values will be used for each feature
+        to indicate the identity of virtual node/edges. The features of the virtual
+        nodes/edges will be zero vectors except for the additional column. Default to 0.
 
     Returns
     -------
@@ -312,8 +361,8 @@ def smiles_to_bigraph(smiles, add_self_loop=False,
     mol_to_bigraph
     """
     mol = Chem.MolFromSmiles(smiles)
-    return mol_to_bigraph(mol, add_self_loop, node_featurizer,
-                          edge_featurizer, canonical_atom_order, explicit_hydrogens)
+    return mol_to_bigraph(mol, add_self_loop, node_featurizer, edge_featurizer,
+                          canonical_atom_order, explicit_hydrogens, num_virtual_nodes)
 
 def construct_complete_graph_from_mol(mol, add_self_loop=False):
     """Construct a complete graph with topology only for the molecule
@@ -337,12 +386,14 @@ def construct_complete_graph_from_mol(mol, add_self_loop=False):
         Empty complete graph topology of the molecule
     """
     num_atoms = mol.GetNumAtoms()
-    edge_list = []
+    src = []
+    dst = []
     for i in range(num_atoms):
         for j in range(num_atoms):
             if i != j or add_self_loop:
-                edge_list.append((i, j))
-    g = DGLGraph(edge_list)
+                src.append(i)
+                dst.append(j)
+    g = dgl.graph((torch.IntTensor(src), torch.IntTensor(dst)), idtype=torch.int32)
 
     return g
 
@@ -350,7 +401,8 @@ def mol_to_complete_graph(mol, add_self_loop=False,
                           node_featurizer=None,
                           edge_featurizer=None,
                           canonical_atom_order=True,
-                          explicit_hydrogens=False):
+                          explicit_hydrogens=False,
+                          num_virtual_nodes=0):
     """Convert an RDKit molecule into a complete DGLGraph and featurize for it.
 
     Parameters
@@ -371,6 +423,12 @@ def mol_to_complete_graph(mol, add_self_loop=False,
         to True.
     explicit_hydrogens : bool
         Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+    num_virtual_nodes : int
+        The number of virtual nodes to add. The virtual nodes will be connected to
+        all real nodes with virtual edges. If the returned graph has any node/edge
+        feature, an additional column of binary values will be used for each feature
+        to indicate the identity of virtual node/edges. The features of the virtual
+        nodes/edges will be zero vectors except for the additional column. Default to 0.
 
     Returns
     -------
@@ -448,13 +506,14 @@ def mol_to_complete_graph(mol, add_self_loop=False,
     return mol_to_graph(mol,
                         partial(construct_complete_graph_from_mol, add_self_loop=add_self_loop),
                         node_featurizer, edge_featurizer,
-                        canonical_atom_order, explicit_hydrogens)
+                        canonical_atom_order, explicit_hydrogens, num_virtual_nodes)
 
 def smiles_to_complete_graph(smiles, add_self_loop=False,
                              node_featurizer=None,
                              edge_featurizer=None,
                              canonical_atom_order=True,
-                             explicit_hydrogens=False):
+                             explicit_hydrogens=False,
+                             num_virtual_nodes=0):
     """Convert a SMILES into a complete DGLGraph and featurize for it.
 
     Parameters
@@ -475,6 +534,12 @@ def smiles_to_complete_graph(smiles, add_self_loop=False,
         to True.
     explicit_hydrogens : bool
         Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+    num_virtual_nodes : int
+        The number of virtual nodes to add. The virtual nodes will be connected to
+        all real nodes with virtual edges. If the returned graph has any node/edge
+        feature, an additional column of binary values will be used for each feature
+        to indicate the identity of virtual node/edges. The features of the virtual
+        nodes/edges will be zero vectors except for the additional column. Default to 0.
 
     Returns
     -------
@@ -547,8 +612,8 @@ def smiles_to_complete_graph(smiles, add_self_loop=False,
     mol_to_complete_graph
     """
     mol = Chem.MolFromSmiles(smiles)
-    return mol_to_complete_graph(mol, add_self_loop, node_featurizer,
-                                 edge_featurizer, canonical_atom_order, explicit_hydrogens)
+    return mol_to_complete_graph(mol, add_self_loop, node_featurizer, edge_featurizer,
+                                 canonical_atom_order, explicit_hydrogens, num_virtual_nodes)
 
 def k_nearest_neighbors(coordinates, neighbor_cutoff, max_num_neighbors=None,
                         p_distance=2, self_loops=False):
@@ -648,7 +713,8 @@ def mol_to_nearest_neighbor_graph(mol,
                                   canonical_atom_order=True,
                                   keep_dists=False,
                                   dist_field='dist',
-                                  explicit_hydrogens=False):
+                                  explicit_hydrogens=False,
+                                  num_virtual_nodes=0):
     """Convert an RDKit molecule into a nearest neighbor graph and featurize for it.
 
     Different from bigraph and complete graph, the nearest neighbor graph
@@ -693,6 +759,12 @@ def mol_to_nearest_neighbor_graph(mol,
         into effect only when ``keep_dists=True``. Default to ``'dist'``.
     explicit_hydrogens : bool
         Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+    num_virtual_nodes : int
+        The number of virtual nodes to add. The virtual nodes will be connected to
+        all real nodes with virtual edges. If the returned graph has any node/edge
+        feature, an additional column of binary values will be used for each feature
+        to indicate the identity of virtual node/edges. The features of the virtual
+        nodes/edges will be zero vectors except for the additional column. Default to 0.
 
     Returns
     -------
@@ -767,7 +839,7 @@ def mol_to_nearest_neighbor_graph(mol,
                                             max_num_neighbors=max_num_neighbors,
                                             p_distance=p_distance,
                                             self_loops=add_self_loop)
-    g = DGLGraph()
+    g = dgl.graph(([], []), idtype=torch.int32)
 
     # Add nodes first since some nodes may be completely isolated
     g.add_nodes(num_atoms)
@@ -786,6 +858,33 @@ def mol_to_nearest_neighbor_graph(mol,
             'Expect {} to be reserved for distance between neighboring atoms.'
         g.edata[dist_field] = torch.tensor(dists).float().reshape(-1, 1)
 
+    if num_virtual_nodes > 0:
+        num_real_nodes = g.num_nodes()
+        real_nodes = list(range(num_real_nodes))
+        g.add_nodes(num_virtual_nodes)
+
+        # Change Topology
+        virtual_src = []
+        virtual_dst = []
+        for count in range(num_virtual_nodes):
+            virtual_node = num_real_nodes + count
+            virtual_node_copy = [virtual_node] * num_real_nodes
+            virtual_src.extend(real_nodes)
+            virtual_src.extend(virtual_node_copy)
+            virtual_dst.extend(virtual_node_copy)
+            virtual_dst.extend(real_nodes)
+        g.add_edges(virtual_src, virtual_dst)
+
+        for nk, nv in g.ndata.items():
+            nv = torch.cat([nv, torch.zeros(g.num_nodes(), 1)], dim=1)
+            nv[:-num_virtual_nodes, -1] = 1
+            g.ndata[nk] = nv
+
+        for ek, ev in g.edata.items():
+            ev = torch.cat([ev, torch.zeros(g.num_edges(), 1)], dim=1)
+            ev[:-num_virtual_nodes * num_real_nodes * 2, -1] = 1
+            g.edata[ek] = ev
+
     return g
 
 def smiles_to_nearest_neighbor_graph(smiles,
@@ -799,7 +898,8 @@ def smiles_to_nearest_neighbor_graph(smiles,
                                      canonical_atom_order=True,
                                      keep_dists=False,
                                      dist_field='dist',
-                                     explicit_hydrogens=False):
+                                     explicit_hydrogens=False,
+                                     num_virtual_nodes=0):
     """Convert a SMILES into a nearest neighbor graph and featurize for it.
 
     Different from bigraph and complete graph, the nearest neighbor graph
@@ -844,6 +944,12 @@ def smiles_to_nearest_neighbor_graph(smiles,
         into effect only when ``keep_dists=True``. Default to ``'dist'``.
     explicit_hydrogens : bool
         Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+    num_virtual_nodes : int
+        The number of virtual nodes to add. The virtual nodes will be connected to
+        all real nodes with virtual edges. If the returned graph has any node/edge
+        feature, an additional column of binary values will be used for each feature
+        to indicate the identity of virtual node/edges. The features of the virtual
+        nodes/edges will be zero vectors except for the additional column. Default to 0.
 
     Returns
     -------
@@ -904,4 +1010,4 @@ def smiles_to_nearest_neighbor_graph(smiles,
     return mol_to_nearest_neighbor_graph(
         mol, coordinates, neighbor_cutoff, max_num_neighbors, p_distance,
         add_self_loop, node_featurizer, edge_featurizer, canonical_atom_order,
-        keep_dists, dist_field, explicit_hydrogens)
+        keep_dists, dist_field, explicit_hydrogens, num_virtual_nodes)

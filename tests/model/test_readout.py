@@ -7,18 +7,17 @@ import dgl
 import torch
 import torch.nn.functional as F
 
-from dgl import DGLGraph
 from dgllife.model.readout import *
 
 def test_graph1():
     """Graph with node features"""
-    g = DGLGraph([(0, 1), (0, 2), (1, 2)])
+    g = dgl.graph(([0, 0, 1], [1, 2, 2]))
     return g, torch.arange(g.number_of_nodes()).float().reshape(-1, 1)
 
 def test_graph2():
     "Batched graph with node features"
-    g1 = DGLGraph([(0, 1), (0, 2), (1, 2)])
-    g2 = DGLGraph([(0, 1), (1, 2), (1, 3), (1, 4)])
+    g1 = dgl.graph(([0, 0, 1], [1, 2, 2]))
+    g2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]))
     bg = dgl.batch([g1, g2])
     return bg, torch.arange(bg.number_of_nodes()).float().reshape(-1, 1)
 
