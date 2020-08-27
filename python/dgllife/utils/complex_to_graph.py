@@ -8,7 +8,7 @@
 import numpy as np
 import dgl.backend as F
 
-from dgl import graph, bipartite, hetero_from_relations, DGLGraph, batch
+from dgl import graph, bipartite, hetero_from_relations, batch, DGLGraph
 
 from ..utils.mol_to_graph import k_nearest_neighbors, mol_to_bigraph
 from ..utils.featurizers import CanonicalAtomFeaturizer, CanonicalBondFeaturizer
@@ -63,7 +63,7 @@ def potentialNet_graph_construction_featurization(ligand_mol,
                                               protein_coordinates,
                                               max_num_ligand_atoms=None,
                                               max_num_protein_atoms=None,
-                                              neighbor_cutoff=12.,
+                                              neighbor_cutoff=3.,
                                               max_num_neighbors=12,
                                               strip_hydrogens=False):
     """Graph construction and featurization for `PotentialNet` <link>__.
@@ -139,21 +139,22 @@ def potentialNet_graph_construction_featurization(ligand_mol,
                    explicit_hydrogens=False)
 
     complex_bigraph = batch([ligand_bigraph, protein_bigraph])
-    complex_bigraph.flatten()
+    # complex_bigraph.flatten() # not applicable in dgl 0.5
 
     # Construct knn grpah for stage 2
+    complex_coordinates = np.concatenate([ligand_coordinates, protein_coordinates])
     complex_srcs, complex_dsts, complex_dists = k_nearest_neighbors(
-            np.concatenate([ligand_coordinates, protein_coordinates]),
+            complex_coordinates,
             neighbor_cutoff, max_num_neighbors)
     complex_srcs = np.array(complex_srcs)
     complex_dsts = np.array(complex_dsts)
     complex_dists = np.array(complex_dists)
 
     complex_knn_graph = DGLGraph()
-    complex_knn_graph.add_nodes(num=(num_ligand_atoms + num_protein_atoms))
+    complex_knn_graph.add_nodes(len(complex_coordinates))
     complex_knn_graph.add_edges(complex_srcs, complex_dsts)
-
-    return complex_bigraph, complex_knn_graph, ligand_bigraph
+    
+    return complex_bigraph, complex_knn_graph, ligand_bigraph, ligand_coordinates, protein_coordinates
 
 
 # pylint: disable=C0326

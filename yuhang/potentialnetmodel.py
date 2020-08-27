@@ -11,7 +11,7 @@ import torch.nn.functional as F
 
 class PotentialNet(nn.Module):
     def __init__(self,
-                 bigraph, knn_graph, liagnd_graph
+                 bigraph, knn_graph, liagnd_graph,
                  n_etypes,
                  f_in,
                  f_bonds,
