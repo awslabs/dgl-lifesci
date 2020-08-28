@@ -43,11 +43,14 @@ class ESOL(MoleculeCSVDataset):
     load : bool
         Whether to load the previously pre-processed dataset or pre-process from scratch.
         ``load`` should be False when we want to try different graph construction and
-        featurization methods and need to preprocess from scratch. Default to True.
+        featurization methods and need to preprocess from scratch. Default to False.
     log_every : bool
         Print a message every time ``log_every`` molecules are processed. Default to 1000.
     cache_file_path : str
         Path to the cached DGLGraphs, default to 'esol_dglgraph.bin'.
+    n_jobs : int
+        The maximum number of concurrently running jobs for graph construction and featurization,
+        using joblib backend. Default to 1.
 
     Examples
     --------
@@ -104,9 +107,10 @@ class ESOL(MoleculeCSVDataset):
                  smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,
                  edge_featurizer=None,
-                 load=True,
+                 load=False,
                  log_every=1000,
-                 cache_file_path='./esol_dglgraph.bin'):
+                 cache_file_path='./esol_dglgraph.bin',
+                 n_jobs=1):
 
         self._url = 'dataset/ESOL.zip'
         data_path = get_download_dir() + '/ESOL.zip'
@@ -143,7 +147,8 @@ class ESOL(MoleculeCSVDataset):
                                    task_names=['measured log solubility in mols per litre'],
                                    load=load,
                                    log_every=log_every,
-                                   init_mask=False)
+                                   init_mask=False,
+                                   n_jobs=n_jobs)
 
     def __getitem__(self, item):
         """Get datapoint with index

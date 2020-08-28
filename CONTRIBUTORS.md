@@ -13,3 +13,4 @@ Contributors
 * [Yue Zhong](https://github.com/YueZhong-bio): HadamardLinkPredictor, link prediction for ogbl-ppa
 * [Yangkang Zhang](https://github.com/yangkang98): GNNOGBPredictor, graph property prediction for ogbg-ppa, support for GuacaMol in JTNN
 * [Sooheon Kim](https://github.com/sooheon): Parallel processing for dataset construction from a CSV file
+* [Krishna Sirumalla](https://github.com/skrsna): Fix for regression_inference.py and classification_inference.py
