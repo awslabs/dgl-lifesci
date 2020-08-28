@@ -11,3 +11,7 @@ dgllife.egg-info/
 docs/build
 docs/source/tutorials
 docs/source/generated
+
+# Installation from source
+python/build/
+python/dist/

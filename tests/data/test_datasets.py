@@ -71,6 +71,14 @@ def test_lipophilicity():
     dataset.load_full = True
     assert len(dataset[0]) == 4
 
+def test_bace():
+    print('Test BACE')
+    dataset = BACE()
+    remove_file('bace_dglgraph.bin')
+    assert len(dataset[0]) == 4
+    dataset.load_full = True
+    assert len(dataset[0]) == 5
+
 def test_astrazeneca_chembl_solubility():
     print('Test AstraZenecaChEMBLSolubility')
     dataset = AstraZenecaChEMBLSolubility()
