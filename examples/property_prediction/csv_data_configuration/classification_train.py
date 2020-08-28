@@ -123,7 +123,7 @@ def bayesian_optimization(args, train_set, val_set, test_set):
         configure = deepcopy(args)
         trial_path, val_metric = main(configure, hyperparams, train_set, val_set, test_set)
 
-        if args['metric'] in ['roc_auc_score']:
+        if args['metric'] in ['roc_auc_score', 'pr_auc_score']:
             # Maximize ROCAUC is equivalent to minimize the negative of it
             val_metric_to_minimize = -1 * val_metric
         else:
@@ -156,7 +156,8 @@ if __name__ == '__main__':
     parser.add_argument('-sr', '--split-ratio', default='0.8,0.1,0.1', type=str,
                         help='Proportion of the dataset used for training, validation and test, '
                              '(default: 0.8,0.1,0.1)')
-    parser.add_argument('-me', '--metric', choices=['roc_auc_score'], default='roc_auc_score',
+    parser.add_argument('-me', '--metric', choices=['roc_auc_score', 'pr_auc_score'],
+                        default='roc_auc_score',
                         help='Metric for evaluation (default: roc_auc_score)')
     parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP',
                                                    'gin_supervised_contextpred',
@@ -192,7 +193,7 @@ if __name__ == '__main__':
     if args['task_names'] is not None:
         args['task_names'] = args['task_names'].split(',')
 
-    if args['metric'] == 'roc_auc_score':
+    if args['metric'] in ['roc_auc_score', 'pr_auc_score']:
         args['early_stop_mode'] = 'higher'
 
     args = init_featurizer(args)
