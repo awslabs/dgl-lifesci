@@ -10,7 +10,7 @@ import torch
 
 from dgl.data.utils import Subset
 from dgllife.data import PDBBind
-from dgllife.model import ACNN
+from dgllife.model import ACNN, PotentialNet
 from dgllife.utils import RandomSplitter, ScaffoldSplitter, SingleTaskStratifiedSplitter
 from itertools import accumulate
 
@@ -46,7 +46,14 @@ def load_dataset(args):
     """
     assert args['dataset'] in ['PDBBind'], 'Unexpected dataset {}'.format(args['dataset'])
     if args['dataset'] == 'PDBBind':
-        dataset = PDBBind(subset=args['subset'],
+        if args['model'] == 'PotentialNet': # fix with args
+            from dgllife.utils import potentialNet_graph_construction_featurization
+            dataset = PDBBind(subset='core', load_binding_pocket=True, sanitize=True, calc_charges=False,
+                     remove_hs=True, use_conformation=True,
+                     construct_graph_and_featurize=potentialNet_graph_construction_featurization,
+                     zero_padding=True, num_processes=6)
+        elif args['model'] =='ACNN':
+            dataset = PDBBind(subset=args['subset'],
                           load_binding_pocket=args['load_binding_pocket'],
                           zero_padding=True)
         # No validation set is used and frac_val = 0.
@@ -99,22 +106,47 @@ def load_dataset(args):
 
 def collate(data):
     indices, ligand_mols, protein_mols, graphs, labels = map(list, zip(*data))
-    bg = dgl.batch_hetero(graphs)
-    for nty in bg.ntypes:
-        bg.set_n_initializer(dgl.init.zero_initializer, ntype=nty)
-    for ety in bg.canonical_etypes:
-        bg.set_e_initializer(dgl.init.zero_initializer, etype=ety)
-    labels = torch.stack(labels, dim=0)
+    if (type(graphs[0]) == tuple):
+        g1s, g2s = graphs[0], graphs[1] # unpack
+        bg1 = dgl.batch([g[0] for g in graphs])
+        for nty in bg1.ntypes:
+            bg1.set_n_initializer(dgl.init.zero_initializer, ntype=nty)
+        for ety in bg1.canonical_etypes:
+            bg1.set_e_initializer(dgl.init.zero_initializer, etype=ety)
+        bg2 = dgl.batch([g[1] for g in graphs])
+        for nty in bg2.ntypes:
+            bg2.set_n_initializer(dgl.init.zero_initializer, ntype=nty)
+        for ety in bg2.canonical_etypes:
+            bg2.set_e_initializer(dgl.init.zero_initializer, etype=ety)
+        bg = (bg1, bg2)
+    
+    else:
+        bg = dgl.batch(graphs)
+        for nty in bg.ntypes:
+            bg.set_n_initializer(dgl.init.zero_initializer, ntype=nty)
+        for ety in bg.canonical_etypes:
+            bg.set_e_initializer(dgl.init.zero_initializer, etype=ety)
 
+    labels = torch.stack(labels, dim=0)
     return indices, ligand_mols, protein_mols, bg, labels
 
 def load_model(args):
-    assert args['model'] in ['ACNN'], 'Unexpected model {}'.format(args['model'])
+    assert args['model'] in ['ACNN', 'PotentialNet'], 'Unexpected model {}'.format(args['model'])
     if args['model'] == 'ACNN':
         model = ACNN(hidden_sizes=args['hidden_sizes'],
                      weight_init_stddevs=args['weight_init_stddevs'],
                      dropouts=args['dropouts'],
                      features_to_use=args['atomic_numbers_considered'],
                      radial=args['radial'])
-
+    if args['model'] == 'PotentialNet': # fix with args
+        model = PotentialNet(n_etypes=1,
+                 f_in=74,
+                 f_bond=75,
+                 f_spatial=64,
+                 f_gather=64,
+                 n_row_fc=32,
+                 n_bond_conv_steps=1,
+                 n_spatial_conv_steps=1,
+                 n_fc_layers=1,
+                 dropout=0.2)
     return model

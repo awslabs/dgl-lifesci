@@ -11,6 +11,8 @@ from torch.utils.data import DataLoader
 
 from utils import set_random_seed, load_dataset, collate, load_model
 
+
+
 def update_msg_from_scores(msg, scores):
     for metric, score in scores.items():
         msg += ', {} {:.4f}'.format(metric, score)
@@ -23,8 +25,15 @@ def run_a_train_epoch(args, epoch, model, data_loader,
     epoch_loss = 0
     for batch_id, batch_data in enumerate(data_loader):
         indices, ligand_mols, protein_mols, bg, labels = batch_data
-        labels, bg = labels.to(args['device']), bg.to(args['device'])
-        prediction = model(bg)
+        labels = labels.to(args['device'])
+        if type(bg) == tuple: # for the case of PotentialNet
+            bigraph_canonical, knn_graph = bg # unpack
+            bigraph_canonical = bigraph_canonical.to(args['device'])
+            knn_graph = knn_graph.to(args['device'])
+            prediction = model(bigraph_canonical, knn_graph)
+        else:
+            bg = bg.to(args['device'])
+            prediction = model(bg)
         loss = loss_criterion(prediction, (labels - args['train_mean']) / args['train_std'])
         epoch_loss += loss.data.item() * len(indices)
         optimizer.zero_grad()
@@ -86,7 +95,7 @@ if __name__ == '__main__':
     from configure import get_exp_configure
 
     parser = argparse.ArgumentParser(description='Protein-Ligand Binding Affinity Prediction')
-    parser.add_argument('-m', '--model', type=str, choices=['ACNN'],
+    parser.add_argument('-m', '--model', type=str, choices=['ACNN', 'PotentialNet'],
                         help='Model to use')
     parser.add_argument('-d', '--dataset', type=str,
                         choices=['PDBBind_core_pocket_random', 'PDBBind_core_pocket_scaffold',

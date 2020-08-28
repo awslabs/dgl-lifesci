@@ -12,7 +12,7 @@ import pandas as pd
 
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 
-from ..utils import multiprocess_load_molecules, ACNN_graph_construction_and_featurization
+from ..utils import multiprocess_load_molecules, ACNN_graph_construction_and_featurization, potentialNet_graph_construction_featurization
 
 __all__ = ['PDBBind']
 
