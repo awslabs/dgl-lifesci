@@ -96,6 +96,27 @@ def test_Meter():
     assert meter.compute_metric('roc_auc_score', 'mean') == np.mean(true_scores)
     assert meter.compute_metric('roc_auc_score', 'sum') == np.sum(true_scores)
 
+    # pr auc score
+    meter = Meter()
+    meter.update(pred, label)
+    true_scores = [1.0, 1.0]
+    assert meter.pr_auc_score() == true_scores
+    assert meter.pr_auc_score('mean') == np.mean(true_scores)
+    assert meter.pr_auc_score('sum') == np.sum(true_scores)
+    assert meter.compute_metric('pr_auc_score') == true_scores
+    assert meter.compute_metric('pr_auc_score', 'mean') == np.mean(true_scores)
+    assert meter.compute_metric('pr_auc_score', 'sum') == np.sum(true_scores)
+
+    meter = Meter()
+    meter.update(pred, label, mask)
+    true_scores = [1.0, 1.0]
+    assert meter.pr_auc_score() == true_scores
+    assert meter.pr_auc_score('mean') == np.mean(true_scores)
+    assert meter.pr_auc_score('sum') == np.sum(true_scores)
+    assert meter.compute_metric('pr_auc_score') == true_scores
+    assert meter.compute_metric('pr_auc_score', 'mean') == np.mean(true_scores)
+    assert meter.compute_metric('pr_auc_score', 'sum') == np.sum(true_scores)
+
 def test_cases_with_undefined_scores():
     label = torch.tensor([[0., 1.],
                           [0., 1.],

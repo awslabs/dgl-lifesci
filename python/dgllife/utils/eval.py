@@ -11,7 +11,7 @@ import torch
 import torch.nn.functional as F
 
 from scipy.stats import pearsonr
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, precision_recall_curve, auc
 
 __all__ = ['Meter']
 
@@ -242,15 +242,17 @@ class Meter(object):
         return self.multilabel_score(score, reduction)
 
     def roc_auc_score(self, reduction='none'):
-        """Compute roc-auc score for binary classification.
+        """Compute the area under the receiver operating characteristic curve (roc-auc score)
+        for binary classification.
 
         ROC-AUC scores are not well-defined in cases where labels for a task have one single
-        class only. In this case we will simply ignore this task and print a warning message.
+        class only (e.g. positive labels only or negative labels only). In this case we will
+        simply ignore this task and print a warning message.
 
         Parameters
         ----------
         reduction : 'none' or 'mean' or 'sum'
-            Controls the form of scores for all tasks
+            Controls the form of scores for all tasks.
 
         Returns
         -------
@@ -272,6 +274,39 @@ class Meter(object):
                 return roc_auc_score(y_true.long().numpy(), torch.sigmoid(y_pred).numpy())
         return self.multilabel_score(score, reduction)
 
+    def pr_auc_score(self, reduction='none'):
+        """Compute the area under the precision-recall curve (pr-auc score)
+        for binary classification.
+
+        PR-AUC scores are not well-defined in cases where labels for a task have one single
+        class only (e.g. positive labels only or negative labels only). In this case, we will
+        simply ignore this task and print a warning message.
+
+        Parameters
+        ----------
+        reduction : 'none' or 'mean' or 'sum'
+            Controls the form of scores for all tasks.
+
+        Returns
+        -------
+        float or list of float
+            * If ``reduction == 'none'``, return the list of scores for all tasks.
+            * If ``reduction == 'mean'``, return the mean of scores for all tasks.
+            * If ``reduction == 'sum'``, return the sum of scores for all tasks.
+        """
+        assert (self.mean is None) and (self.std is None), \
+            'Label normalization should not be performed for binary classification.'
+        def score(y_true, y_pred):
+            if len(y_true.unique()) == 1:
+                print('Warning: Only one class {} present in y_true for a task. '
+                      'PR AUC score is not defined in that case.'.format(y_true[0]))
+                return None
+            else:
+                precision, recall, _ = precision_recall_curve(
+                    y_true.long().numpy(), torch.sigmoid(y_pred).numpy())
+                return auc(recall, precision)
+        return self.multilabel_score(score, reduction)
+
     def compute_metric(self, metric_name, reduction='none'):
         """Compute metric based on metric name.
 
@@ -283,6 +318,7 @@ class Meter(object):
             * ``'mae'``: compute mean absolute error
             * ``'rmse'``: compute root mean square error
             * ``'roc_auc_score'``: compute roc-auc score
+            * ``'pr_auc_score'``: compute pr-auc score
 
         reduction : 'none' or 'mean' or 'sum'
             Controls the form of scores for all tasks
@@ -302,6 +338,8 @@ class Meter(object):
             return self.rmse(reduction)
         elif metric_name == 'roc_auc_score':
             return self.roc_auc_score(reduction)
+        elif metric_name == 'pr_auc_score':
+            return self.pr_auc_score(reduction)
         else:
             raise ValueError('Expect metric_name to be "r2" or "mae" or "rmse" '
-                             'or "roc_auc_score", got {}'.format(metric_name))
+                             'or "roc_auc_score" or "pr_auc", got {}'.format(metric_name))
