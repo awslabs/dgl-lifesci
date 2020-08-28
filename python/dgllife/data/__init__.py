@@ -16,4 +16,5 @@ from .lipophilicity import *
 from .pcba import *
 from .muv import *
 from .hiv import *
+from .bace import *
 from .uspto import *
