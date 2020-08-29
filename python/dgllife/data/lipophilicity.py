@@ -43,11 +43,14 @@ class Lipophilicity(MoleculeCSVDataset):
     load : bool
         Whether to load the previously pre-processed dataset or pre-process from scratch.
         ``load`` should be False when we want to try different graph construction and
-        featurization methods and need to preprocess from scratch. Default to True.
+        featurization methods and need to preprocess from scratch. Default to False.
     log_every : bool
         Print a message every time ``log_every`` molecules are processed. Default to 1000.
     cache_file_path : str
         Path to the cached DGLGraphs, default to 'lipophilicity_dglgraph.bin'.
+    n_jobs : int
+        The maximum number of concurrently running jobs for graph construction and featurization,
+        using joblib backend. Default to 1.
 
     Examples
     --------
@@ -86,14 +89,15 @@ class Lipophilicity(MoleculeCSVDataset):
                  smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,
                  edge_featurizer=None,
-                 load=True,
+                 load=False,
                  log_every=1000,
-                 cache_file_path='./lipophilicity_dglgraph.bin'):
+                 cache_file_path='./lipophilicity_dglgraph.bin',
+                 n_jobs=1):
 
         self._url = 'dataset/lipophilicity.zip'
         data_path = get_download_dir() + '/lipophilicity.zip'
         dir_path = get_download_dir() + '/lipophilicity'
-        download(_get_dgl_url(self._url), path=data_path)
+        download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         extract_archive(data_path, dir_path)
         df = pd.read_csv(dir_path + '/Lipophilicity.csv')
 
@@ -111,7 +115,8 @@ class Lipophilicity(MoleculeCSVDataset):
                                             task_names=['exp'],
                                             load=load,
                                             log_every=log_every,
-                                            init_mask=False)
+                                            init_mask=False,
+                                            n_jobs=n_jobs)
 
     def __getitem__(self, item):
         """Get datapoint with index
@@ -130,7 +135,8 @@ class Lipophilicity(MoleculeCSVDataset):
         Tensor of dtype float32 and shape (1)
             Labels of the ith datapoint
         str, optional
-            ChEMBL id of the ith datapoint
+            ChEMBL id of the ith datapoint, returned only when
+            ``self.load_full`` is True.
         """
         if self.load_full:
             return self.smiles[item], self.graphs[item], self.labels[item], self.chembl_ids[item]

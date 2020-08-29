@@ -3,32 +3,30 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# The Toxicology in the 21st Century initiative."""
+# BACE from MoleculeNet for the prediction of quantitative (IC50) and
+# qualitative (binary label) binding results for a set of inhibitors of
+# human beta-secretase 1 (BACE-1).
 
 import pandas as pd
 
-from dgl.data.utils import get_download_dir, download, _get_dgl_url
+from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 
 from .csv_dataset import MoleculeCSVDataset
 from ..utils.mol_to_graph import smiles_to_bigraph
 
-__all__ = ['Tox21']
+__all__ = ['BACE']
 
-class Tox21(MoleculeCSVDataset):
-    """Tox21 dataset.
+class BACE(MoleculeCSVDataset):
+    r"""BACE from MoleculeNet for the prediction of quantitative and qualitative binding results
+    for a set of inhibitors of human beta-secretase 1 (BACE-1)
 
-    The Toxicology in the 21st Century (https://tripod.nih.gov/tox21/challenge/)
-    initiative created a public database measuring toxicity of compounds, which
-    has been used in the 2014 Tox21 Data Challenge. The dataset contains qualitative
-    toxicity measurements for 8014 compounds on 12 different targets, including nuclear
-    receptors and stress response pathways. Each target results in a binary label.
+    The dataset contains experimental values reported in scientific literature over the past
+    decade, some with detailed crystal structures available. The MoleculeNet benchmark merged
+    a collection of 1522 compounds with their 2D structures and binary labels.
 
-    A common issue for multi-task prediction is that some datapoints are not labeled for
-    all tasks. This is also the case for Tox21. In data pre-processing, we set non-existing
-    labels to be 0 so that they can be placed in tensors and used for masking in loss computation.
+    References:
 
-    All molecules are converted into DGLGraphs. After the first-time construction,
-    the DGLGraphs will be saved for reloading so that we do not need to reconstruct them everytime.
+        * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
 
     Parameters
     ----------
@@ -48,7 +46,7 @@ class Tox21(MoleculeCSVDataset):
     log_every : bool
         Print a message every time ``log_every`` molecules are processed. Default to 1000.
     cache_file_path : str
-        Path to the cached DGLGraphs, default to 'tox21_dglgraph.bin'.
+        Path to the cached DGLGraphs, default to 'bace_dglgraph.bin'.
     n_jobs : int
         The maximum number of concurrently running jobs for graph construction and featurization,
         using joblib backend. Default to 1.
@@ -56,66 +54,76 @@ class Tox21(MoleculeCSVDataset):
     Examples
     --------
 
-    >>> from dgllife.data import Tox21
+    >>> import torch
+    >>> from dgllife.data import BACE
     >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
 
-    >>> dataset = Tox21(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> dataset = BACE(smiles_to_bigraph, CanonicalAtomFeaturizer())
     >>> # Get size of the dataset
     >>> len(dataset)
-    7831
+    1513
     >>> # Get the 0th datapoint, consisting of SMILES, DGLGraph, labels, and masks
     >>> dataset[0]
-    ('CCOc1ccc2nc(S(N)(=O)=O)sc2c1',
-     DGLGraph(num_nodes=16, num_edges=34,
-              ndata_schemes={}
-              edata_schemes={}),
-     tensor([0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0.]),
-     tensor([1., 1., 1., 0., 0., 1., 1., 1., 1., 1., 1., 1.]))
+    ('O1CC[C@@H](NC(=O)[C@@H](Cc2cc3cc(ccc3nc2N)-c2ccccc2C)C)CC1(C)C',
+     Graph(num_nodes=32, num_edges=70,
+           ndata_schemes={'h': Scheme(shape=(74,), dtype=torch.float32)}
+           edata_schemes={}),
+     tensor([1.]),
+     tensor([1.]))
 
     The dataset instance also contains information about molecule ids.
 
-    >>> dataset.id[i]
+    >>> dataset.ids[i]
 
     We can also get the id along with SMILES, DGLGraph, labels, and masks at once.
 
     >>> dataset.load_full = True
     >>> dataset[0]
-    ('CCOc1ccc2nc(S(N)(=O)=O)sc2c1',
-     DGLGraph(num_nodes=16, num_edges=34,
-              ndata_schemes={}
-              edata_schemes={}),
-     tensor([0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0.]),
-     tensor([1., 1., 1., 0., 0., 1., 1., 1., 1., 1., 1., 1.]),
-     'TOX3021')
+    ('O1CC[C@@H](NC(=O)[C@@H](Cc2cc3cc(ccc3nc2N)-c2ccccc2C)C)CC1(C)C',
+     Graph(num_nodes=32, num_edges=70,
+           ndata_schemes={'h': Scheme(shape=(74,), dtype=torch.float32)}
+           edata_schemes={}),
+     tensor([1.]),
+     tensor([1.]),
+     'BACE_1')
 
     To address the imbalance between positive and negative samples, we can re-weight
     positive samples for each task based on the training datapoints.
 
-    >>> train_ids = torch.arange(1000)
+    >>> train_ids = torch.arange(500)
     >>> dataset.task_pos_weights(train_ids)
-    tensor([26.9706, 35.3750,  5.9756, 21.6364,  6.4404, 21.4500, 26.0000,  5.0826,
-            21.4390, 14.7692,  6.1442, 12.4308])
+    tensor([0.2594])
     """
-    def __init__(self, smiles_to_graph=smiles_to_bigraph,
+    def __init__(self,
+                 smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,
                  edge_featurizer=None,
                  load=False,
                  log_every=1000,
-                 cache_file_path='./tox21_dglgraph.bin',
+                 cache_file_path='./bace_dglgraph.bin',
                  n_jobs=1):
-        self._url = 'dataset/tox21.csv.gz'
-        data_path = get_download_dir() + '/tox21.csv.gz'
+
+        self._url = 'dataset/bace.zip'
+        data_path = get_download_dir() + '/bace.zip'
+        dir_path = get_download_dir() + '/bace'
         download(_get_dgl_url(self._url), path=data_path, overwrite=False)
-        df = pd.read_csv(data_path)
-        self.id = df['mol_id']
+        extract_archive(data_path, dir_path)
+        df = pd.read_csv(dir_path + '/bace.csv')
 
-        df = df.drop(columns=['mol_id'])
-
+        self.ids = df['CID'].tolist()
         self.load_full = False
 
-        super(Tox21, self).__init__(df, smiles_to_graph, node_featurizer, edge_featurizer,
-                                    "smiles", cache_file_path,
-                                    load=load, log_every=log_every, n_jobs=n_jobs)
+        super(BACE, self).__init__(df=df,
+                                   smiles_to_graph=smiles_to_graph,
+                                   node_featurizer=node_featurizer,
+                                   edge_featurizer=edge_featurizer,
+                                   smiles_column='mol',
+                                   cache_file_path=cache_file_path,
+                                   task_names=['Class'],
+                                   load=load,
+                                   log_every=log_every,
+                                   init_mask=True,
+                                   n_jobs=n_jobs)
 
     def __getitem__(self, item):
         """Get datapoint with index
@@ -140,6 +148,6 @@ class Tox21(MoleculeCSVDataset):
         """
         if self.load_full:
             return self.smiles[item], self.graphs[item], self.labels[item], \
-                   self.mask[item], self.id[item]
+                   self.mask[item], self.ids[item]
         else:
             return self.smiles[item], self.graphs[item], self.labels[item], self.mask[item]

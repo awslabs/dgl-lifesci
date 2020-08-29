@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import torch
 
 from dgllife.data import *
 from dgllife.data.uspto import get_bond_changes, process_file
@@ -38,6 +39,13 @@ def test_tox21():
     print('Test Tox21')
     dataset = Tox21()
     remove_file('tox21_dglgraph.bin')
+    assert len(dataset[0]) == 4
+    dataset.load_full = True
+    assert len(dataset[0]) == 5
+    train_ids = torch.arange(1000)
+    assert torch.allclose(dataset.task_pos_weights(train_ids),
+                          torch.tensor([26.9706, 35.3750, 5.9756, 21.6364, 6.4404, 21.4500,
+                                        26.0000, 5.0826, 21.4390, 14.7692, 6.1442, 12.4308]))
 
 def test_esol():
     print('Test ESOL')
@@ -62,6 +70,14 @@ def test_lipophilicity():
     assert len(dataset[0]) == 3
     dataset.load_full = True
     assert len(dataset[0]) == 4
+
+def test_bace():
+    print('Test BACE')
+    dataset = BACE()
+    remove_file('bace_dglgraph.bin')
+    assert len(dataset[0]) == 4
+    dataset.load_full = True
+    assert len(dataset[0]) == 5
 
 def test_astrazeneca_chembl_solubility():
     print('Test AstraZenecaChEMBLSolubility')
