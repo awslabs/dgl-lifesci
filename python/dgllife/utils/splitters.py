@@ -456,7 +456,7 @@ class ScaffoldSplitter(object):
     """
 
     @staticmethod
-    def get_ordered_scaffold_sets(molecules, include_chirality, log_every_n):
+    def get_ordered_scaffold_sets(molecules, log_every_n):
         """Group molecules based on their Bemis-Murcko scaffolds and
         order these groups based on their sizes.
 
@@ -513,7 +513,7 @@ class ScaffoldSplitter(object):
         return scaffold_sets
 
     @staticmethod
-    def train_val_test_split(dataset, mols=None, sanitize=True, include_chirality=False,
+    def train_val_test_split(dataset, mols=None, sanitize=True,
                              frac_train=0.8, frac_val=0.1, frac_test=0.1, log_every_n=1000):
         """Split the dataset into training, validation and test set based on molecular scaffolds.
 
@@ -565,7 +565,7 @@ class ScaffoldSplitter(object):
         train_val_test_sanity_check(frac_train, frac_val, frac_test)
         molecules = prepare_mols(dataset, mols, sanitize)
         scaffold_sets = ScaffoldSplitter.get_ordered_scaffold_sets(
-            molecules, include_chirality, log_every_n)
+            molecules, log_every_n)
         train_indices, val_indices, test_indices = [], [], []
         train_cutoff = int(frac_train * len(molecules))
         val_cutoff = int((frac_train + frac_val) * len(molecules))
