@@ -579,7 +579,7 @@ class ScaffoldSplitter(object):
             else:
                 train_indices.extend(group_indices)
         assert len(set(train_indices).intersection(set(val_indices))) == 0, "Failed to successfully split using scaffolds"
-        assert len(set(test_inidces).intersection(set(val_indices))) == 0, "Failed to successfully split using scaffolds"
+        assert len(set(test_indices).intersection(set(val_indices))) == 0, "Failed to successfully split using scaffolds"
         return [Subset(dataset, train_indices),
                 Subset(dataset, val_indices),
                 Subset(dataset, test_indices)]
