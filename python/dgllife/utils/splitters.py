@@ -505,7 +505,6 @@ class ScaffoldSplitter(object):
         # Order groups of molecules by first comparing the size of groups
         # and then the index of the first compound in the group.
         scaffolds = {key: sorted(value) for key, value in scaffolds.items()}
-        print(scaffolds)
         scaffold_sets = [
             scaffold_set for (scaffold, scaffold_set) in sorted(
                 scaffolds.items(), key=lambda x: (len(x[1]), x[1][0]), reverse=True)
