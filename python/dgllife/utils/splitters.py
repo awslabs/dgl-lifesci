@@ -16,6 +16,7 @@ from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem.rdmolops import FastFindRings
 from rdkit.Chem.Scaffolds import MurckoScaffold
+from rdkit.Chem import AllChem
 
 import numpy as np
 import dgl.backend as F
@@ -484,23 +485,27 @@ class ScaffoldSplitter(object):
         """
         if log_every_n is not None:
             print('Start computing Bemis-Murcko scaffolds.')
-        scaffolds = defaultdict(list)
+        scaffolds = {}
         for i, mol in enumerate(molecules):
             count_and_log('Computing Bemis-Murcko for compound',
                           i, len(molecules), log_every_n)
             # For mols that have not been sanitized, we need to compute their ring information
             try:
                 FastFindRings(mol)
-                mol_scaffold = MurckoScaffold.MurckoScaffoldSmiles(
-                    mol=mol, includeChirality=include_chirality)
+                mol_scaffold = AllChem.MurckoDecompose(mol)
                 # Group molecules that have the same scaffold
-                scaffolds[mol_scaffold].append(i)
+                if mol_scaffold not in scaffolds:
+                    scaffolds[mol_scaffold] = [i]
+                else:
+                    scaffolds[mol_scaffold].append(i)
             except:
                 print('Failed to compute the scaffold for molecule {:d} '
                       'and it will be excluded.'.format(i + 1))
 
         # Order groups of molecules by first comparing the size of groups
         # and then the index of the first compound in the group.
+        scaffolds = {key: sorted(value) for key, value in scaffolds.items()}
+        print(scaffolds)
         scaffold_sets = [
             scaffold_set for (scaffold, scaffold_set) in sorted(
                 scaffolds.items(), key=lambda x: (len(x[1]), x[1][0]), reverse=True)
@@ -562,7 +567,6 @@ class ScaffoldSplitter(object):
         molecules = prepare_mols(dataset, mols, sanitize)
         scaffold_sets = ScaffoldSplitter.get_ordered_scaffold_sets(
             molecules, include_chirality, log_every_n)
-
         train_indices, val_indices, test_indices = [], [], []
         train_cutoff = int(frac_train * len(molecules))
         val_cutoff = int((frac_train + frac_val) * len(molecules))
@@ -574,7 +578,8 @@ class ScaffoldSplitter(object):
                     val_indices.extend(group_indices)
             else:
                 train_indices.extend(group_indices)
-
+        assert len(set(train_indices).intersection(set(valid_indices))) == 0, "Failed to successfully split using scaffolds"
+        assert len(set(test_inidces).intersection(set(valid_indices))) == 0, "Failed to successfully split using scaffolds"
         return [Subset(dataset, train_indices),
                 Subset(dataset, val_indices),
                 Subset(dataset, test_indices)]
