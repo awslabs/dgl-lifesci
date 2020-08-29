@@ -632,7 +632,7 @@ class ScaffoldSplitter(object):
 
         molecules = prepare_mols(dataset, mols, sanitize)
         scaffold_sets = ScaffoldSplitter.get_ordered_scaffold_sets(
-            molecules, include_chirality, log_every_n)
+            molecules, log_every_n)
 
         # k buckets that form a relatively balanced partition of the dataset
         index_buckets = [[] for _ in range(k)]
