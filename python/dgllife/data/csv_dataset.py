@@ -121,13 +121,17 @@ class MoleculeCSVDataset(object):
                 self.graphs = pmap(smiles_to_graph,
                                    self.smiles,
                                    node_featurizer=node_featurizer,
-                                   edge_featurizer=edge_featurizer)
+                                   edge_featurizer=edge_featurizer,
+                                   n_jobs=n_jobs)
+                self.graphs = [g for g in self.graphs if g is not None]
             else:
                 for i, s in enumerate(self.smiles):
                     if (i + 1) % log_every == 0:
                         print('Processing molecule {:d}/{:d}'.format(i+1, len(self)))
-                    self.graphs.append(smiles_to_graph(s, node_featurizer=node_featurizer,
-                                                       edge_featurizer=edge_featurizer))
+                    g = smiles_to_graph(s, node_featurizer=node_featurizer,
+                                        edge_featurizer=edge_featurizer)
+                    if g is not None:
+                        self.graphs.append(g)
             _label_values = self.df[self.task_names].values
             # np.nan_to_num will also turn inf into a very large number
             self.labels = F.zerocopy_from_numpy(np.nan_to_num(_label_values).astype(np.float32))
