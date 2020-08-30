@@ -126,6 +126,8 @@ class HIV(MoleculeCSVDataset):
                                   init_mask=True,
                                   n_jobs=n_jobs)
 
+        self.activity = [self.activity[i] for i in self.valid_ids]
+
     def __getitem__(self, item):
         """Get datapoint with index
 

@@ -127,6 +127,8 @@ class MUV(MoleculeCSVDataset):
                                   init_mask=True,
                                   n_jobs=n_jobs)
 
+        self.ids = [self.ids[i] for i in self.valid_ids]
+
     def __getitem__(self, item):
         """Get datapoint with index
 

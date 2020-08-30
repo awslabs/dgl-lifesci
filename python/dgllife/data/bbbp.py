@@ -63,7 +63,7 @@ class BBBP(MoleculeCSVDataset):
     >>> dataset = BBBP(smiles_to_bigraph, CanonicalAtomFeaturizer())
     >>> # Get size of the dataset
     >>> len(dataset)
-    2050
+    2039
     >>> # Get the 0th datapoint, consisting of SMILES, DGLGraph, labels, and masks
     >>> dataset[0]
     ('[Cl].CC(C)NCC(O)COc1cccc2ccccc12',
@@ -112,9 +112,6 @@ class BBBP(MoleculeCSVDataset):
         extract_archive(data_path, dir_path)
         df = pd.read_csv(dir_path + '/BBBP.csv')
 
-        self.names = df['name'].tolist()
-        self.load_full = False
-
         super(BBBP, self).__init__(df=df,
                                    smiles_to_graph=smiles_to_graph,
                                    node_featurizer=node_featurizer,
@@ -126,6 +123,10 @@ class BBBP(MoleculeCSVDataset):
                                    log_every=log_every,
                                    init_mask=True,
                                    n_jobs=n_jobs)
+
+        self.load_full = False
+        self.names = df['name'].tolist()
+        self.names = [self.names[i] for i in self.valid_ids]
 
     def __getitem__(self, item):
         """Get datapoint with index

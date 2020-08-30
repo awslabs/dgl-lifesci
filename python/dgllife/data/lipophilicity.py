@@ -101,11 +101,6 @@ class Lipophilicity(MoleculeCSVDataset):
         extract_archive(data_path, dir_path)
         df = pd.read_csv(dir_path + '/Lipophilicity.csv')
 
-        # ChEMBL ids
-        self.chembl_ids = df['CMPD_CHEMBLID'].tolist()
-
-        self.load_full = False
-
         super(Lipophilicity, self).__init__(df=df,
                                             smiles_to_graph=smiles_to_graph,
                                             node_featurizer=node_featurizer,
@@ -117,6 +112,12 @@ class Lipophilicity(MoleculeCSVDataset):
                                             log_every=log_every,
                                             init_mask=False,
                                             n_jobs=n_jobs)
+
+        self.load_full = False
+
+        # ChEMBL ids
+        self.chembl_ids = df['CMPD_CHEMBLID'].tolist()
+        self.chembl_ids = [self.chembl_ids[i] for i in self.valid_ids]
 
     def __getitem__(self, item):
         """Get datapoint with index
