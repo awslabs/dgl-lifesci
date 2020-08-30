@@ -61,7 +61,7 @@ class ToxCast(MoleculeCSVDataset):
     >>> dataset = ToxCast(smiles_to_bigraph, CanonicalAtomFeaturizer())
     >>> # Get size of the dataset
     >>> len(dataset)
-    8597
+    8576
     >>> # Get the 0th datapoint, consisting of SMILES, DGLGraph, labels, and masks
     >>> dataset[0]
     ('[O-][N+](=O)C1=CC=C(Cl)C=C1',
