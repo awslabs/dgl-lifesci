@@ -64,7 +64,7 @@ class ClinTox(MoleculeCSVDataset):
     >>> dataset = ClinTox(smiles_to_bigraph, CanonicalAtomFeaturizer())
     >>> # Get size of the dataset
     >>> len(dataset)
-    1484
+    1478
     >>> # Get the 0th datapoint, consisting of SMILES, DGLGraph, labels, and masks
     >>> dataset[0]
     ('*C(=O)[C@H](CCCCNC(=O)OCCOC)NC(=O)OCCOC',

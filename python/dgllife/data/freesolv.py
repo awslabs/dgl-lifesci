@@ -107,13 +107,6 @@ class FreeSolv(MoleculeCSVDataset):
         extract_archive(data_path, dir_path)
         df = pd.read_csv(dir_path + '/SAMPL.csv')
 
-        # Iupac names
-        self.iupac_names = df['iupac'].tolist()
-        # Calculated hydration free energy
-        self.calc_energy = df['calc'].tolist()
-
-        self.load_full = False
-
         super(FreeSolv, self).__init__(df=df,
                                        smiles_to_graph=smiles_to_graph,
                                        node_featurizer=node_featurizer,
@@ -125,6 +118,15 @@ class FreeSolv(MoleculeCSVDataset):
                                        log_every=log_every,
                                        init_mask=False,
                                        n_jobs=n_jobs)
+
+        self.load_full = False
+
+        # Iupac names
+        self.iupac_names = df['iupac'].tolist()
+        self.iupac_names = [self.iupac_names[i] for i in self.valid_ids]
+        # Calculated hydration free energy
+        self.calc_energy = df['calc'].tolist()
+        self.calc_energy = [self.calc_energy[i] for i in self.valid_ids]
 
     def __getitem__(self, item):
         """Get datapoint with index

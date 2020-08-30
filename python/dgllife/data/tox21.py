@@ -117,6 +117,8 @@ class Tox21(MoleculeCSVDataset):
                                     "smiles", cache_file_path,
                                     load=load, log_every=log_every, n_jobs=n_jobs)
 
+        self.id = [self.id[i] for i in self.valid_ids]
+
     def __getitem__(self, item):
         """Get datapoint with index
 
