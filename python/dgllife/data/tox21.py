@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# The Toxicology in the 21st Century initiative."""
+# The Toxicology in the 21st Century initiative.
 
 import pandas as pd
 

@@ -65,6 +65,34 @@ BACE
     :members: __getitem__, __len__, task_pos_weights
     :show-inheritance:
 
+BBBP
+````
+
+.. autoclass:: dgllife.data.BBBP
+    :members: __getitem__, __len__, task_pos_weights
+    :show-inheritance:
+
+ToxCast
+```````
+
+.. autoclass:: dgllife.data.ToxCast
+    :members: __getitem__, __len__, task_pos_weights
+    :show-inheritance:
+
+SIDER
+`````
+
+.. autoclass:: dgllife.data.SIDER
+    :members: __getitem__, __len__, task_pos_weights
+    :show-inheritance:
+
+ClinTox
+```````
+
+.. autoclass:: dgllife.data.ClinTox
+    :members: __getitem__, __len__, task_pos_weights
+    :show-inheritance:
+
 Experimental solubility determined at AstraZeneca, extracted from ChEMBL
 ````````````````````````````````````````````````````````````````````````
 

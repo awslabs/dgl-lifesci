@@ -79,6 +79,32 @@ def test_bace():
     dataset.load_full = True
     assert len(dataset[0]) == 5
 
+def test_bbbp():
+    print('Test BBBP')
+    dataset = BBBP()
+    remove_file('bbbp_dglgraph.bin')
+    assert len(dataset[0]) == 4
+    dataset.load_full = True
+    assert len(dataset[0]) == 5
+
+def test_toxcast():
+    print('Test ToxCast')
+    dataset = ToxCast()
+    remove_file('toxcast_dglgraph.bin')
+    assert len(dataset[0]) == 4
+
+def test_sider():
+    print('Test SIDER')
+    dataset = SIDER()
+    remove_file('sider_dglgraph.bin')
+    assert len(dataset[0]) == 4
+
+def test_clintox():
+    print('Test ClinTox')
+    dataset = ClinTox()
+    remove_file('clintox_dglgraph.bin')
+    assert len(dataset[0]) == 4
+
 def test_astrazeneca_chembl_solubility():
     print('Test AstraZenecaChEMBLSolubility')
     dataset = AstraZenecaChEMBLSolubility()
