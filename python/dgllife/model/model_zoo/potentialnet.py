@@ -21,7 +21,7 @@ def process_etypes(graph):
         src, dst = graph.find_edges(i)
         for _ in encodings[1:]: # start from the second
         # add edges to represent different edge types
-            graph.add_edge(np.array(src), np.array(dst))
+            graph.add_edges(np.array(src), np.array(dst))
         etypes_to_extend.extend(encodings[1:])
     etypes.extend(etypes_to_extend)
     del graph.edata['e']

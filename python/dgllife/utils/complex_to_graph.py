@@ -13,7 +13,9 @@ from dgl import graph, bipartite, hetero_from_relations, batch, DGLGraph
 from ..utils.mol_to_graph import k_nearest_neighbors, mol_to_bigraph
 from ..utils.featurizers import CanonicalAtomFeaturizer, CanonicalBondFeaturizer
 
-__all__ = ['ACNN_graph_construction_and_featurization', 'potentialNet_graph_construction_featurization']
+__all__ = ['ACNN_graph_construction_and_featurization', 
+           'potentialNet_graph_construction_featurization', 
+           'flattern_graph']
 
 def filter_out_hydrogens(mol):
     """Get indices for non-hydrogen atoms.
@@ -56,6 +58,13 @@ def get_atomic_numbers(mol, indices):
         atom = mol.GetAtomWithIdx(i)
         atomic_numbers.append(atom.GetAtomicNum())
     return atomic_numbers
+
+def flattern_graph(graph):
+    """Flattern a batched graph by removing batch infomation
+    """
+    g = dgl.add_edges(graph, [0], [0]) # add dummy edge to new graph
+    g.remove_edges(g.num_edges()-1) # remove the edge we just added
+    return g
 
 def potentialNet_graph_construction_featurization(ligand_mol,
                                               protein_mol,
@@ -150,7 +159,7 @@ def potentialNet_graph_construction_featurization(ligand_mol,
     complex_dsts = np.array(complex_dsts)
     complex_dists = np.array(complex_dists)
 
-    complex_knn_graph = DGLGraph()
+    complex_knn_graph = graph([])
     complex_knn_graph.add_nodes(len(complex_coordinates))
     complex_knn_graph.add_edges(complex_srcs, complex_dsts)
     

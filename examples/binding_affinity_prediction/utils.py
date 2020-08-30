@@ -107,19 +107,9 @@ def load_dataset(args):
 def collate(data):
     indices, ligand_mols, protein_mols, graphs, labels = map(list, zip(*data))
     if (type(graphs[0]) == tuple):
-        g1s, g2s = graphs[0], graphs[1] # unpack
         bg1 = dgl.batch([g[0] for g in graphs])
-        for nty in bg1.ntypes:
-            bg1.set_n_initializer(dgl.init.zero_initializer, ntype=nty)
-        for ety in bg1.canonical_etypes:
-            bg1.set_e_initializer(dgl.init.zero_initializer, etype=ety)
         bg2 = dgl.batch([g[1] for g in graphs])
-        for nty in bg2.ntypes:
-            bg2.set_n_initializer(dgl.init.zero_initializer, ntype=nty)
-        for ety in bg2.canonical_etypes:
-            bg2.set_e_initializer(dgl.init.zero_initializer, etype=ety)
         bg = (bg1, bg2)
-    
     else:
         bg = dgl.batch(graphs)
         for nty in bg.ntypes:
