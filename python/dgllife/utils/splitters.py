@@ -15,7 +15,6 @@ from itertools import accumulate, chain
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem.rdmolops import FastFindRings
-from rdkit.Chem.Scaffolds import MurckoScaffold
 from rdkit.Chem import AllChem
 
 import numpy as np
@@ -485,7 +484,7 @@ class ScaffoldSplitter(object):
         """
         if log_every_n is not None:
             print('Start computing Bemis-Murcko scaffolds.')
-        scaffolds = {}
+        scaffolds = defaultdict(list)
         for i, mol in enumerate(molecules):
             count_and_log('Computing Bemis-Murcko for compound',
                           i, len(molecules), log_every_n)
@@ -494,10 +493,7 @@ class ScaffoldSplitter(object):
                 FastFindRings(mol)
                 mol_scaffold = AllChem.MurckoDecompose(mol)
                 # Group molecules that have the same scaffold
-                if mol_scaffold not in scaffolds:
-                    scaffolds[mol_scaffold] = [i]
-                else:
-                    scaffolds[mol_scaffold].append(i)
+                scaffolds[mol_scaffold].append(i)
             except:
                 print('Failed to compute the scaffold for molecule {:d} '
                       'and it will be excluded.'.format(i + 1))
@@ -577,8 +573,6 @@ class ScaffoldSplitter(object):
                     val_indices.extend(group_indices)
             else:
                 train_indices.extend(group_indices)
-        assert len(set(train_indices).intersection(set(val_indices))) == 0, "Failed to successfully split using scaffolds"
-        assert len(set(test_indices).intersection(set(val_indices))) == 0, "Failed to successfully split using scaffolds"
         return [Subset(dataset, train_indices),
                 Subset(dataset, val_indices),
                 Subset(dataset, test_indices)]
@@ -612,8 +606,6 @@ class ScaffoldSplitter(object):
             sanitization is performed in initializing RDKit molecule instances. See
             https://www.rdkit.org/docs/RDKit_Book.html for details of the sanitization.
             Default to True.
-        include_chirality : bool
-            Whether to consider chirality in computing scaffolds. Default to False.
         k : int
             Number of folds to use and should be no smaller than 2. Default to be 5.
         log_every_n : None or int
