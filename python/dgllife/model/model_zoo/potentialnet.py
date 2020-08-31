@@ -9,8 +9,8 @@ import torch.nn.functional as F
 __all__ = ['PotentialNet']
 
 def process_etypes(graph):
-    '''convert one-hot encoding edge types to label encoding, and add duplicated edges
-    '''
+    """convert one-hot encoding edge types to label encoding, and add duplicated edges
+    """
     edata = np.array(graph.edata['e'])
     etypes = []
     etypes_to_extend = []
@@ -26,6 +26,16 @@ def process_etypes(graph):
     etypes.extend(etypes_to_extend)
     del graph.edata['e']
     return graph, th.tensor(etypes, dtype=th.long)
+
+def sum_ligand_features(h, batch_num_nodes):
+    """Computes the sum of ligand features h from batch_num_nodes"""
+    node_nums = th.cumsum(batch_num_nodes, dim=0)
+    B = int(len(batch_num_nodes)/2)
+    ligand_idx = [list(range(node_nums[0]))] # first ligand
+    for i in range(2,len(node_nums),2): # the rest of ligands in the batch
+        ligand_idx.append(list(range(node_nums[i-1],node_nums[i])))
+    return th.cat([h[i,].sum(0, keepdim=True) for i in ligand_idx]).to(device=h.device) # sum over each ligand
+
 
 class PotentialNet(nn.Module):
     def __init__(self,
@@ -62,12 +72,12 @@ class PotentialNet(nn.Module):
         )
 
     def forward(self, bigraph_canonical, knn_graph):
-        num_atoms_ligand = int(bigraph_canonical.batch_num_nodes()[0])
+        batch_num_nodes = bigraph_canonical.batch_num_nodes()
         bigraph, stage_1_etypes = process_etypes(bigraph_canonical)
         stage_2_etypes = th.zeros(knn_graph.num_edges() ,dtype=th.long)   # temporal solution
         h = self.stage_1_model(graph=bigraph, features=bigraph.ndata['h'], etypes=stage_1_etypes)
         h = self.stage_2_model(graph=knn_graph, features=h, etypes=stage_2_etypes)
-        x = self.stage_3_model(features=h[:num_atoms_ligand, ])
+        x = self.stage_3_model(batch_num_nodes=batch_num_nodes, features=h) 
         return x
 
 
@@ -95,7 +105,7 @@ class StagedGGNN(nn.Module):
         h = self.ggc(graph, features, etypes)
         h = self.dropout(h) # my guess
         h = th.mul(
-                   F.sigmoid(self.i_nn(th.cat((h, features),dim=1))), 
+                   th.sigmoid(self.i_nn(th.cat((h, features),dim=1))), 
                    self.j_nn(h))
         return h
 
@@ -113,8 +123,8 @@ class StagedFCNN(nn.Module):
             self.layers.append(nn.Linear(n_row, n_row))
         self.out_layer = nn.Linear(n_row, 1)
 
-    def forward(self, features):
-        x = features.sum(axis=0) # sum over ligand atoms
+    def forward(self, batch_num_nodes, features):
+        x = sum_ligand_features(features, batch_num_nodes)
         for i, layer in enumerate(self.layers):
             if i !=0:
                 x = self.dropout(x)
