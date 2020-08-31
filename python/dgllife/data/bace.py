@@ -110,9 +110,6 @@ class BACE(MoleculeCSVDataset):
         extract_archive(data_path, dir_path)
         df = pd.read_csv(dir_path + '/bace.csv')
 
-        self.ids = df['CID'].tolist()
-        self.load_full = False
-
         super(BACE, self).__init__(df=df,
                                    smiles_to_graph=smiles_to_graph,
                                    node_featurizer=node_featurizer,
@@ -124,6 +121,10 @@ class BACE(MoleculeCSVDataset):
                                    log_every=log_every,
                                    init_mask=True,
                                    n_jobs=n_jobs)
+
+        self.load_full = False
+        self.ids = df['CID'].tolist()
+        self.ids = [self.ids[i] for i in self.valid_ids]
 
     def __getitem__(self, item):
         """Get datapoint with index

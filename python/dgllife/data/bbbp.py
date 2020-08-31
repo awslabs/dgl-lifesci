@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# HIV from MoleculeNet for the prediction of the ability to inhibit HIV replication
+# BBBP from MoleculeNet for the prediction of permeability properties.
 
 import pandas as pd
 
@@ -12,21 +12,23 @@ from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_arc
 from .csv_dataset import MoleculeCSVDataset
 from ..utils.mol_to_graph import smiles_to_bigraph
 
-__all__ = ['HIV']
+__all__ = ['BBBP']
 
-class HIV(MoleculeCSVDataset):
-    r"""HIV from MoleculeNet for the prediction of the ability to inhibit HIV replication
+class BBBP(MoleculeCSVDataset):
+    r"""BBBP from MoleculeNet for the prediction of permeability properties
 
-    The dataset was introduced by the Drug Therapeutics Program (DTP) AIDS Antiviral Screen,
-    which tested the ability to inhibit HIV replication for over 40,000 compounds. Screening
-    results were evaluated and placed into three categories: confirmed inactive (CI),
-    confirmed active (CA) and confirmed moderately active (CM). The MoleculeNet benchmark
-    combines the latter two labels, making it a binary classification task between
-    inactive (CI) and active (CA and CM).
+    The Blood-brain barrier penetration (BBBP) dataset comes from a study on
+    the modeling and prediction of the barrier permeability. As a membrane
+    separating circulating blood and brain extracellular fluid, the blood-brain
+    barrier blocks most drugs, hormones and neurotransmitters. Thus penetration of
+    the barrier forms a long-standing issue in development of drugs targeting
+    central nervous system. This dataset includes binary labels for over 2000
+    compounds on their permeability properties.
 
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
+        * [2] A Bayesian approach to in silico blood-brain barrier penetration modeling
 
     Parameters
     ----------
@@ -46,7 +48,7 @@ class HIV(MoleculeCSVDataset):
     log_every : bool
         Print a message every time ``log_every`` molecules are processed. Default to 1000.
     cache_file_path : str
-        Path to the cached DGLGraphs, default to 'hiv_dglgraph.bin'.
+        Path to the cached DGLGraphs, default to 'bbbp_dglgraph.bin'.
     n_jobs : int
         The maximum number of concurrently running jobs for graph construction and featurization,
         using joblib backend. Default to 1.
@@ -55,44 +57,44 @@ class HIV(MoleculeCSVDataset):
     --------
 
     >>> import torch
-    >>> from dgllife.data import HIV
+    >>> from dgllife.data import BBBP
     >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
 
-    >>> dataset = HIV(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> dataset = BBBP(smiles_to_bigraph, CanonicalAtomFeaturizer())
     >>> # Get size of the dataset
     >>> len(dataset)
-    41127
+    2039
     >>> # Get the 0th datapoint, consisting of SMILES, DGLGraph, labels, and masks
     >>> dataset[0]
-    ('CCC1=[O+][Cu-3]2([O+]=C(CC)C1)[O+]=C(CC)CC(CC)=[O+]2',
-     Graph(num_nodes=19, num_edges=40,
+    ('[Cl].CC(C)NCC(O)COc1cccc2ccccc12',
+     Graph(num_nodes=20, num_edges=40,
            ndata_schemes={'h': Scheme(shape=(74,), dtype=torch.float32)}
            edata_schemes={}),
-     tensor([0.]),
+     tensor([1.]),
      tensor([1.]))
 
-    The dataset instance also contains information about the original screening result.
+    The dataset instance also contains information about compound name.
 
-    >>> dataset.activity[i]
+    >>> dataset.names[i]
 
-    We can also get the screening result along with SMILES, DGLGraph, labels, and masks at once.
+    We can also get the name along with SMILES, DGLGraph, labels, and masks at once.
 
     >>> dataset.load_full = True
     >>> dataset[0]
-    ('CCC1=[O+][Cu-3]2([O+]=C(CC)C1)[O+]=C(CC)CC(CC)=[O+]2',
-     Graph(num_nodes=19, num_edges=40,
+    ('[Cl].CC(C)NCC(O)COc1cccc2ccccc12',
+     Graph(num_nodes=20, num_edges=40,
            ndata_schemes={'h': Scheme(shape=(74,), dtype=torch.float32)}
            edata_schemes={}),
-     tensor([0.]),
      tensor([1.]),
-     'CI')
+     tensor([1.]),
+     'Propanolol')
 
     To address the imbalance between positive and negative samples, we can re-weight
     positive samples for each task based on the training datapoints.
 
-    >>> train_ids = torch.arange(20000)
+    >>> train_ids = torch.arange(500)
     >>> dataset.task_pos_weights(train_ids)
-    tensor([33.1880])
+    tensor([0.7123])
     """
     def __init__(self,
                  smiles_to_graph=smiles_to_bigraph,
@@ -100,33 +102,31 @@ class HIV(MoleculeCSVDataset):
                  edge_featurizer=None,
                  load=False,
                  log_every=1000,
-                 cache_file_path='./hiv_dglgraph.bin',
+                 cache_file_path='./bbbp_dglgraph.bin',
                  n_jobs=1):
 
-        self._url = 'dataset/hiv.zip'
-        data_path = get_download_dir() + '/hiv.zip'
-        dir_path = get_download_dir() + '/hiv'
+        self._url = 'dataset/bbbp.zip'
+        data_path = get_download_dir() + '/bbbp.zip'
+        dir_path = get_download_dir() + '/bbbp'
         download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         extract_archive(data_path, dir_path)
-        df = pd.read_csv(dir_path + '/HIV.csv')
+        df = pd.read_csv(dir_path + '/BBBP.csv')
 
-        self.activity = df['activity'].tolist()
+        super(BBBP, self).__init__(df=df,
+                                   smiles_to_graph=smiles_to_graph,
+                                   node_featurizer=node_featurizer,
+                                   edge_featurizer=edge_featurizer,
+                                   smiles_column='smiles',
+                                   cache_file_path=cache_file_path,
+                                   task_names=['p_np'],
+                                   load=load,
+                                   log_every=log_every,
+                                   init_mask=True,
+                                   n_jobs=n_jobs)
+
         self.load_full = False
-
-        df = df.drop(columns=['activity'])
-
-        super(HIV, self).__init__(df=df,
-                                  smiles_to_graph=smiles_to_graph,
-                                  node_featurizer=node_featurizer,
-                                  edge_featurizer=edge_featurizer,
-                                  smiles_column='smiles',
-                                  cache_file_path=cache_file_path,
-                                  load=load,
-                                  log_every=log_every,
-                                  init_mask=True,
-                                  n_jobs=n_jobs)
-
-        self.activity = [self.activity[i] for i in self.valid_ids]
+        self.names = df['name'].tolist()
+        self.names = [self.names[i] for i in self.valid_ids]
 
     def __getitem__(self, item):
         """Get datapoint with index
@@ -147,10 +147,10 @@ class HIV(MoleculeCSVDataset):
         Tensor of dtype float32 and shape (T)
             Binary masks of the ith datapoint indicating the existence of labels for all tasks.
         str, optional
-            Raw screening result, which can be CI, CA, or CM.
+            Name for the ith compound, returned only when ``self.load_full`` is True.
         """
         if self.load_full:
             return self.smiles[item], self.graphs[item], self.labels[item], \
-                   self.mask[item], self.activity[item]
+                   self.mask[item], self.names[item]
         else:
             return self.smiles[item], self.graphs[item], self.labels[item], self.mask[item]

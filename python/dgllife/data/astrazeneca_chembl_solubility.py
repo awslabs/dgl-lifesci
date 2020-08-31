@@ -105,13 +105,6 @@ class AstraZenecaChEMBLSolubility(MoleculeCSVDataset):
         download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         df = pd.read_csv(data_path)
 
-        # ChEMBL ids
-        self.chembl_ids = df['Molecule ChEMBL ID'].tolist()
-        # Molecular weight
-        self.mol_weight = df['Molecular Weight'].tolist()
-
-        self.load_full = False
-
         super(AstraZenecaChEMBLSolubility, self).__init__(
             df=df,
             smiles_to_graph=smiles_to_graph,
@@ -124,6 +117,14 @@ class AstraZenecaChEMBLSolubility(MoleculeCSVDataset):
             log_every=log_every,
             init_mask=False,
             n_jobs=n_jobs)
+
+        self.load_full = False
+        # ChEMBL ids
+        self.chembl_ids = df['Molecule ChEMBL ID'].tolist()
+        self.chembl_ids = [self.chembl_ids[i] for i in self.valid_ids]
+        # Molecular weight
+        self.mol_weight = df['Molecular Weight'].tolist()
+        self.mol_weight = [self.mol_weight[i] for i in self.valid_ids]
 
         if log_of_values:
             self.labels = self.labels.log()

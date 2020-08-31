@@ -58,8 +58,8 @@ def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
 
     Returns
     -------
-    g : DGLGraph
-        Converted DGLGraph for the molecule
+    DGLGraph or None
+        Converted DGLGraph for the molecule if :attr:`mol` is valid and None otherwise.
 
     See Also
     --------
@@ -67,6 +67,10 @@ def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
     mol_to_complete_graph
     mol_to_nearest_neighbor_graph
     """
+    if mol is None:
+        print('Invalid mol found')
+        return None
+
     # Whether to have hydrogen atoms as explicit nodes
     if explicit_hydrogens:
         mol = Chem.AddHs(mol)
@@ -200,8 +204,8 @@ def mol_to_bigraph(mol, add_self_loop=False,
 
     Returns
     -------
-    g : DGLGraph
-        Bi-directed DGLGraph for the molecule
+    DGLGraph or None
+        Bi-directed DGLGraph for the molecule if :attr:`mol` is valid and None otherwise.
 
     Examples
     --------
@@ -301,8 +305,8 @@ def smiles_to_bigraph(smiles, add_self_loop=False,
 
     Returns
     -------
-    g : DGLGraph
-        Bi-directed DGLGraph for the molecule
+    DGLGraph or None
+        Bi-directed DGLGraph for the molecule if :attr:`smiles` is valid and None otherwise.
 
     Examples
     --------
@@ -432,8 +436,8 @@ def mol_to_complete_graph(mol, add_self_loop=False,
 
     Returns
     -------
-    g : DGLGraph
-        Complete DGLGraph for the molecule
+    DGLGraph or None
+        Complete DGLGraph for the molecule if :attr:`mol` is valid and None otherwise.
 
     Examples
     --------
@@ -543,8 +547,8 @@ def smiles_to_complete_graph(smiles, add_self_loop=False,
 
     Returns
     -------
-    g : DGLGraph
-        Complete DGLGraph for the molecule
+    DGLGraph or None
+        Complete DGLGraph for the molecule if :attr:`smiles` is valid and None otherwise.
 
     Examples
     --------
@@ -768,8 +772,8 @@ def mol_to_nearest_neighbor_graph(mol,
 
     Returns
     -------
-    g : DGLGraph
-        Nearest neighbor DGLGraph for the molecule
+    DGLGraph or None
+        Nearest neighbor DGLGraph for the molecule if :attr:`mol` is valid and None otherwise.
 
     Examples
     --------
@@ -819,6 +823,10 @@ def mol_to_nearest_neighbor_graph(mol,
     k_nearest_neighbors
     smiles_to_nearest_neighbor_graph
     """
+    if mol is None:
+        print('Invalid mol found')
+        return None
+
     if explicit_hydrogens:
         mol = Chem.AddHs(mol)
     else:
@@ -953,8 +961,8 @@ def smiles_to_nearest_neighbor_graph(smiles,
 
     Returns
     -------
-    g : DGLGraph
-        Nearest neighbor DGLGraph for the molecule
+    DGLGraph or None
+        Nearest neighbor DGLGraph for the molecule if :attr:`smiles` is valid and None otherwise.
 
     Examples
     --------

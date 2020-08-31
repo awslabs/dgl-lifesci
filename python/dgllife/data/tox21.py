@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# The Toxicology in the 21st Century initiative."""
+# The Toxicology in the 21st Century initiative.
 
 import pandas as pd
 
@@ -116,6 +116,8 @@ class Tox21(MoleculeCSVDataset):
         super(Tox21, self).__init__(df, smiles_to_graph, node_featurizer, edge_featurizer,
                                     "smiles", cache_file_path,
                                     load=load, log_every=log_every, n_jobs=n_jobs)
+
+        self.id = [self.id[i] for i in self.valid_ids]
 
     def __getitem__(self, item):
         """Get datapoint with index
