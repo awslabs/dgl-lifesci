@@ -12,9 +12,8 @@ def process_etypes(graph):
     """convert one-hot encoding edge types to label encoding, and add duplicated edges
     """
     edata = graph.edata['e']
-    etypes = th.tensor([], dtype=th.long)
+    etypes = th.tensor([], dtype=th.long, device=graph.device)
     for i in range(edata.shape[0]):
-        print(etypes.shape)
         encodings = th.nonzero(edata[i,])
         etypes = th.cat([etypes, encodings[0]])
         src, dst = graph.find_edges(i)
@@ -22,6 +21,7 @@ def process_etypes(graph):
         # add edges repeatedly to represent different edge types
             graph.add_edges(src, dst)
         etypes = th.cat([etypes, encodings[1:].reshape(1,-1)[0]])
+    del graph.edata['e']
     return graph, etypes
 
 def sum_ligand_features(h, batch_num_nodes):
