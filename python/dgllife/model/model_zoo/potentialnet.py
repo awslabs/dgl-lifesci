@@ -11,21 +11,18 @@ __all__ = ['PotentialNet']
 def process_etypes(graph):
     """convert one-hot encoding edge types to label encoding, and add duplicated edges
     """
-    edata = np.array(graph.edata['e'])
-    etypes = []
-    etypes_to_extend = []
+    edata = graph.edata['e']
+    etypes = th.tensor([], dtype=th.long)
     for i in range(edata.shape[0]):
-        row = edata[i,]
-        encodings = np.nonzero(row)[0]
-        etypes.append(encodings[0])
+        print(etypes.shape)
+        encodings = th.nonzero(edata[i,])
+        etypes = th.cat([etypes, encodings[0]])
         src, dst = graph.find_edges(i)
         for _ in encodings[1:]: # start from the second
-        # add edges to represent different edge types
-            graph.add_edges(np.array(src), np.array(dst))
-        etypes_to_extend.extend(encodings[1:])
-    etypes.extend(etypes_to_extend)
-    del graph.edata['e']
-    return graph, th.tensor(etypes, dtype=th.long)
+        # add edges repeatedly to represent different edge types
+            graph.add_edges(src, dst)
+        etypes = th.cat([etypes, encodings[1:].reshape(1,-1)[0]])
+    return graph, etypes
 
 def sum_ligand_features(h, batch_num_nodes):
     """Computes the sum of ligand features h from batch_num_nodes"""
