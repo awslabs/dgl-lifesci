@@ -468,8 +468,6 @@ class ScaffoldSplitter(object):
             Pre-computed RDKit molecule instances. We expect a one-on-one
             correspondence between ``dataset.smiles`` and ``mols``, i.e.
             ``mols[i]`` corresponds to ``dataset.smiles[i]``.
-        include_chirality : bool
-            Whether to consider chirality in computing scaffolds.
         log_every_n : None or int
             Molecule related computation can take a long time for a large dataset and we want
             to learn the progress of processing. This can be done by printing a message whenever
@@ -534,8 +532,6 @@ class ScaffoldSplitter(object):
             sanitization is performed in initializing RDKit molecule instances. See
             https://www.rdkit.org/docs/RDKit_Book.html for details of the sanitization.
             Default to True.
-        include_chirality : bool
-            Whether to consider chirality in computing scaffolds. Default to False.
         frac_train : float
             Fraction of data to use for training. By default, we set this to be 0.8, i.e.
             80% of the dataset is used for training.
@@ -579,7 +575,7 @@ class ScaffoldSplitter(object):
 
     @staticmethod
     def k_fold_split(dataset, mols=None, sanitize=True,
-                     include_chirality=False, k=5, log_every_n=1000):
+                      k=5, log_every_n=1000):
         """Group molecules based on their scaffolds and sort groups based on their sizes.
         The groups are then split for k-fold cross validation.
 
