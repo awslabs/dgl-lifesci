@@ -116,23 +116,36 @@ class MoleculeCSVDataset(object):
                 self.mask = label_dict['mask']
         else:
             print('Processing dgl graphs from scratch...')
-            self.graphs = []
             if n_jobs > 1:
                 self.graphs = pmap(smiles_to_graph,
                                    self.smiles,
                                    node_featurizer=node_featurizer,
-                                   edge_featurizer=edge_featurizer)
+                                   edge_featurizer=edge_featurizer,
+                                   n_jobs=n_jobs)
             else:
+                self.graphs = []
                 for i, s in enumerate(self.smiles):
                     if (i + 1) % log_every == 0:
                         print('Processing molecule {:d}/{:d}'.format(i+1, len(self)))
                     self.graphs.append(smiles_to_graph(s, node_featurizer=node_featurizer,
                                                        edge_featurizer=edge_featurizer))
+
+            # Keep only valid molecules
+            self.valid_ids = []
+            graphs = []
+            for i, g in enumerate(self.graphs):
+                if g is not None:
+                    self.valid_ids.append(i)
+                    graphs.append(g)
+            self.graphs = graphs
+            self.smiles = [self.smiles[i] for i in self.valid_ids]
             _label_values = self.df[self.task_names].values
             # np.nan_to_num will also turn inf into a very large number
-            self.labels = F.zerocopy_from_numpy(np.nan_to_num(_label_values).astype(np.float32))
+            self.labels = F.zerocopy_from_numpy(
+                np.nan_to_num(_label_values).astype(np.float32))[self.valid_ids]
             if init_mask:
-                self.mask = F.zerocopy_from_numpy((~np.isnan(_label_values)).astype(np.float32))
+                self.mask = F.zerocopy_from_numpy(
+                    (~np.isnan(_label_values)).astype(np.float32))[self.valid_ids]
                 save_graphs(self.cache_file_path, self.graphs,
                             labels={'labels': self.labels, 'mask': self.mask})
             else:

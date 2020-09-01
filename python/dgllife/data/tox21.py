@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# The Toxicology in the 21st Century initiative."""
+# The Toxicology in the 21st Century initiative.
 
 import pandas as pd
 
@@ -44,11 +44,14 @@ class Tox21(MoleculeCSVDataset):
     load : bool
         Whether to load the previously pre-processed dataset or pre-process from scratch.
         ``load`` should be False when we want to try different graph construction and
-        featurization methods and need to preprocess from scratch. Default to True.
+        featurization methods and need to preprocess from scratch. Default to False.
     log_every : bool
         Print a message every time ``log_every`` molecules are processed. Default to 1000.
     cache_file_path : str
         Path to the cached DGLGraphs, default to 'tox21_dglgraph.bin'.
+    n_jobs : int
+        The maximum number of concurrently running jobs for graph construction and featurization,
+        using joblib backend. Default to 1.
 
     Examples
     --------
@@ -96,9 +99,10 @@ class Tox21(MoleculeCSVDataset):
     def __init__(self, smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,
                  edge_featurizer=None,
-                 load=True,
+                 load=False,
                  log_every=1000,
-                 cache_file_path='./tox21_dglgraph.bin'):
+                 cache_file_path='./tox21_dglgraph.bin',
+                 n_jobs=1):
         self._url = 'dataset/tox21.csv.gz'
         data_path = get_download_dir() + '/tox21.csv.gz'
         download(_get_dgl_url(self._url), path=data_path, overwrite=False)
@@ -111,7 +115,9 @@ class Tox21(MoleculeCSVDataset):
 
         super(Tox21, self).__init__(df, smiles_to_graph, node_featurizer, edge_featurizer,
                                     "smiles", cache_file_path,
-                                    load=load, log_every=log_every)
+                                    load=load, log_every=log_every, n_jobs=n_jobs)
+
+        self.id = [self.id[i] for i in self.valid_ids]
 
     def __getitem__(self, item):
         """Get datapoint with index

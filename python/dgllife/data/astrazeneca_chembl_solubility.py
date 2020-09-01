@@ -41,7 +41,7 @@ class AstraZenecaChEMBLSolubility(MoleculeCSVDataset):
     load : bool
         Whether to load the previously pre-processed dataset or pre-process from scratch.
         ``load`` should be False when we want to try different graph construction and
-        featurization methods and need to preprocess from scratch. Default to True.
+        featurization methods and need to preprocess from scratch. Default to False.
     log_every : bool
         Print a message every time ``log_every`` molecules are processed. Default to 1000.
     cache_file_path : str
@@ -50,6 +50,9 @@ class AstraZenecaChEMBLSolubility(MoleculeCSVDataset):
         Whether to take the logarithm of the solubility values. Before taking the logarithm,
         the values can have a range of [100, 1513600]. After taking the logarithm, the
         values will have a range of [4.61, 14.23]. Default to True.
+    n_jobs : int
+        The maximum number of concurrently running jobs for graph construction and featurization,
+        using joblib backend. Default to 1.
 
     Examples
     --------
@@ -91,22 +94,16 @@ class AstraZenecaChEMBLSolubility(MoleculeCSVDataset):
                  smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,
                  edge_featurizer=None,
-                 load=True,
+                 load=False,
                  log_every=1000,
                  cache_file_path='./AstraZeneca_chembl_solubility_graph.bin',
-                 log_of_values=True):
+                 log_of_values=True,
+                 n_jobs=1):
 
         self._url = 'dataset/AstraZeneca_ChEMBL_Solubility.csv'
         data_path = get_download_dir() + '/AstraZeneca_ChEMBL_Solubility.csv'
         download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         df = pd.read_csv(data_path)
-
-        # ChEMBL ids
-        self.chembl_ids = df['Molecule ChEMBL ID'].tolist()
-        # Molecular weight
-        self.mol_weight = df['Molecular Weight'].tolist()
-
-        self.load_full = False
 
         super(AstraZenecaChEMBLSolubility, self).__init__(
             df=df,
@@ -118,7 +115,16 @@ class AstraZenecaChEMBLSolubility(MoleculeCSVDataset):
             task_names=['Solubility'],
             load=load,
             log_every=log_every,
-            init_mask=False)
+            init_mask=False,
+            n_jobs=n_jobs)
+
+        self.load_full = False
+        # ChEMBL ids
+        self.chembl_ids = df['Molecule ChEMBL ID'].tolist()
+        self.chembl_ids = [self.chembl_ids[i] for i in self.valid_ids]
+        # Molecular weight
+        self.mol_weight = df['Molecular Weight'].tolist()
+        self.mol_weight = [self.mol_weight[i] for i in self.valid_ids]
 
         if log_of_values:
             self.labels = self.labels.log()

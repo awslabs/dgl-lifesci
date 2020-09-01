@@ -19,6 +19,6 @@ docs/source/generated
 *.DS_Store
 .vscode/
 
-# build/ and dist/
-python/dist/
+# Installation from source
 python/build/
+python/dist/
