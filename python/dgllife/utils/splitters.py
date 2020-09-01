@@ -575,7 +575,7 @@ class ScaffoldSplitter(object):
 
     @staticmethod
     def k_fold_split(dataset, mols=None, sanitize=True,
-                      k=5, log_every_n=1000):
+                     k=5, log_every_n=1000):
         """Group molecules based on their scaffolds and sort groups based on their sizes.
         The groups are then split for k-fold cross validation.
 
