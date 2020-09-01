@@ -44,6 +44,55 @@ PCBA
     :members: __getitem__, __len__, task_pos_weights
     :show-inheritance:
 
+MUV
+```
+
+.. autoclass:: dgllife.data.MUV
+    :members: __getitem__, __len__, task_pos_weights
+    :show-inheritance:
+
+HIV
+```
+
+.. autoclass:: dgllife.data.HIV
+    :members: __getitem__, __len__, task_pos_weights
+    :show-inheritance:
+
+BACE
+````
+
+.. autoclass:: dgllife.data.BACE
+    :members: __getitem__, __len__, task_pos_weights
+    :show-inheritance:
+
+BBBP
+````
+
+.. autoclass:: dgllife.data.BBBP
+    :members: __getitem__, __len__, task_pos_weights
+    :show-inheritance:
+
+ToxCast
+```````
+
+.. autoclass:: dgllife.data.ToxCast
+    :members: __getitem__, __len__, task_pos_weights
+    :show-inheritance:
+
+SIDER
+`````
+
+.. autoclass:: dgllife.data.SIDER
+    :members: __getitem__, __len__, task_pos_weights
+    :show-inheritance:
+
+ClinTox
+```````
+
+.. autoclass:: dgllife.data.ClinTox
+    :members: __getitem__, __len__, task_pos_weights
+    :show-inheritance:
+
 Experimental solubility determined at AstraZeneca, extracted from ChEMBL
 ````````````````````````````````````````````````````````````````````````
 

@@ -43,11 +43,14 @@ class ESOL(MoleculeCSVDataset):
     load : bool
         Whether to load the previously pre-processed dataset or pre-process from scratch.
         ``load`` should be False when we want to try different graph construction and
-        featurization methods and need to preprocess from scratch. Default to True.
+        featurization methods and need to preprocess from scratch. Default to False.
     log_every : bool
         Print a message every time ``log_every`` molecules are processed. Default to 1000.
     cache_file_path : str
         Path to the cached DGLGraphs, default to 'esol_dglgraph.bin'.
+    n_jobs : int
+        The maximum number of concurrently running jobs for graph construction and featurization,
+        using joblib backend. Default to 1.
 
     Examples
     --------
@@ -104,9 +107,10 @@ class ESOL(MoleculeCSVDataset):
                  smiles_to_graph=smiles_to_bigraph,
                  node_featurizer=None,
                  edge_featurizer=None,
-                 load=True,
+                 load=False,
                  log_every=1000,
-                 cache_file_path='./esol_dglgraph.bin'):
+                 cache_file_path='./esol_dglgraph.bin',
+                 n_jobs=1):
 
         self._url = 'dataset/ESOL.zip'
         data_path = get_download_dir() + '/ESOL.zip'
@@ -114,25 +118,6 @@ class ESOL(MoleculeCSVDataset):
         download(_get_dgl_url(self._url), path=data_path, overwrite=False)
         extract_archive(data_path, dir_path)
         df = pd.read_csv(dir_path + '/delaney-processed.csv')
-
-        # Compound names in PubChem
-        self.compound_names = df['Compound ID'].tolist()
-        # Estimated solubility
-        self.estimated_solubility = df['ESOL predicted log solubility in mols per litre'].tolist()
-        # Minimum atom degree
-        self.min_degree = df['Minimum Degree'].tolist()
-        # Molecular weight
-        self.mol_weight = df['Molecular Weight'].tolist()
-        # Number of H-Bond Donors
-        self.num_h_bond_donors = df['Number of H-Bond Donors'].tolist()
-        # Number of rings
-        self.num_rings = df['Number of Rings'].tolist()
-        # Number of rotatable bonds
-        self.num_rotatable_bonds = df['Number of Rotatable Bonds'].tolist()
-        # Polar Surface Area
-        self.polar_surface_area = df['Polar Surface Area'].tolist()
-
-        self.load_full = False
 
         super(ESOL, self).__init__(df=df,
                                    smiles_to_graph=smiles_to_graph,
@@ -143,7 +128,34 @@ class ESOL(MoleculeCSVDataset):
                                    task_names=['measured log solubility in mols per litre'],
                                    load=load,
                                    log_every=log_every,
-                                   init_mask=False)
+                                   init_mask=False,
+                                   n_jobs=n_jobs)
+
+        self.load_full = False
+        # Compound names in PubChem
+        self.compound_names = df['Compound ID'].tolist()
+        self.compound_names = [self.compound_names[i] for i in self.valid_ids]
+        # Estimated solubility
+        self.estimated_solubility = df['ESOL predicted log solubility in mols per litre'].tolist()
+        self.estimated_solubility = [self.estimated_solubility[i] for i in self.valid_ids]
+        # Minimum atom degree
+        self.min_degree = df['Minimum Degree'].tolist()
+        self.min_degree = [self.min_degree[i] for i in self.valid_ids]
+        # Molecular weight
+        self.mol_weight = df['Molecular Weight'].tolist()
+        self.mol_weight = [self.mol_weight[i] for i in self.valid_ids]
+        # Number of H-Bond Donors
+        self.num_h_bond_donors = df['Number of H-Bond Donors'].tolist()
+        self.num_h_bond_donors = [self.num_h_bond_donors[i] for i in self.valid_ids]
+        # Number of rings
+        self.num_rings = df['Number of Rings'].tolist()
+        self.num_rings = [self.num_rings[i] for i in self.valid_ids]
+        # Number of rotatable bonds
+        self.num_rotatable_bonds = df['Number of Rotatable Bonds'].tolist()
+        self.num_rotatable_bonds = [self.num_rotatable_bonds[i] for i in self.valid_ids]
+        # Polar Surface Area
+        self.polar_surface_area = df['Polar Surface Area'].tolist()
+        self.polar_surface_area = [self.polar_surface_area[i] for i in self.valid_ids]
 
     def __getitem__(self, item):
         """Get datapoint with index

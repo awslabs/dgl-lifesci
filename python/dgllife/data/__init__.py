@@ -14,4 +14,11 @@ from .esol import *
 from .freesolv import *
 from .lipophilicity import *
 from .pcba import *
+from .muv import *
+from .hiv import *
+from .bace import *
+from .bbbp import *
+from .toxcast import *
+from .sider import *
+from .clintox import *
 from .uspto import *
