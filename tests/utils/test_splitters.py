@@ -43,7 +43,7 @@ def test_molecular_weight_splitter():
 
 def test_scaffold_splitter():
     dataset = TestDataset()
-    ScaffoldSplitter.train_val_test_split(dataset, include_chirality=True)
+    ScaffoldSplitter.train_val_test_split(dataset)
     ScaffoldSplitter.k_fold_split(dataset, mols=dataset.mols)
 
 def test_single_task_stratified_splitter():

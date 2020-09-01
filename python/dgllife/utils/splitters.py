@@ -15,7 +15,7 @@ from itertools import accumulate, chain
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem.rdmolops import FastFindRings
-from rdkit.Chem.Scaffolds import MurckoScaffold
+from rdkit.Chem import AllChem
 
 import numpy as np
 import dgl.backend as F
@@ -455,7 +455,7 @@ class ScaffoldSplitter(object):
     """
 
     @staticmethod
-    def get_ordered_scaffold_sets(molecules, include_chirality, log_every_n):
+    def get_ordered_scaffold_sets(molecules, log_every_n):
         """Group molecules based on their Bemis-Murcko scaffolds and
         order these groups based on their sizes.
 
@@ -468,8 +468,6 @@ class ScaffoldSplitter(object):
             Pre-computed RDKit molecule instances. We expect a one-on-one
             correspondence between ``dataset.smiles`` and ``mols``, i.e.
             ``mols[i]`` corresponds to ``dataset.smiles[i]``.
-        include_chirality : bool
-            Whether to consider chirality in computing scaffolds.
         log_every_n : None or int
             Molecule related computation can take a long time for a large dataset and we want
             to learn the progress of processing. This can be done by printing a message whenever
@@ -491,8 +489,7 @@ class ScaffoldSplitter(object):
             # For mols that have not been sanitized, we need to compute their ring information
             try:
                 FastFindRings(mol)
-                mol_scaffold = MurckoScaffold.MurckoScaffoldSmiles(
-                    mol=mol, includeChirality=include_chirality)
+                mol_scaffold = AllChem.MurckoDecompose(mol)
                 # Group molecules that have the same scaffold
                 scaffolds[mol_scaffold].append(i)
             except:
@@ -501,6 +498,7 @@ class ScaffoldSplitter(object):
 
         # Order groups of molecules by first comparing the size of groups
         # and then the index of the first compound in the group.
+        scaffolds = {key: sorted(value) for key, value in scaffolds.items()}
         scaffold_sets = [
             scaffold_set for (scaffold, scaffold_set) in sorted(
                 scaffolds.items(), key=lambda x: (len(x[1]), x[1][0]), reverse=True)
@@ -509,7 +507,7 @@ class ScaffoldSplitter(object):
         return scaffold_sets
 
     @staticmethod
-    def train_val_test_split(dataset, mols=None, sanitize=True, include_chirality=False,
+    def train_val_test_split(dataset, mols=None, sanitize=True,
                              frac_train=0.8, frac_val=0.1, frac_test=0.1, log_every_n=1000):
         """Split the dataset into training, validation and test set based on molecular scaffolds.
 
@@ -534,8 +532,6 @@ class ScaffoldSplitter(object):
             sanitization is performed in initializing RDKit molecule instances. See
             https://www.rdkit.org/docs/RDKit_Book.html for details of the sanitization.
             Default to True.
-        include_chirality : bool
-            Whether to consider chirality in computing scaffolds. Default to False.
         frac_train : float
             Fraction of data to use for training. By default, we set this to be 0.8, i.e.
             80% of the dataset is used for training.
@@ -561,8 +557,7 @@ class ScaffoldSplitter(object):
         train_val_test_sanity_check(frac_train, frac_val, frac_test)
         molecules = prepare_mols(dataset, mols, sanitize)
         scaffold_sets = ScaffoldSplitter.get_ordered_scaffold_sets(
-            molecules, include_chirality, log_every_n)
-
+            molecules, log_every_n)
         train_indices, val_indices, test_indices = [], [], []
         train_cutoff = int(frac_train * len(molecules))
         val_cutoff = int((frac_train + frac_val) * len(molecules))
@@ -574,14 +569,13 @@ class ScaffoldSplitter(object):
                     val_indices.extend(group_indices)
             else:
                 train_indices.extend(group_indices)
-
         return [Subset(dataset, train_indices),
                 Subset(dataset, val_indices),
                 Subset(dataset, test_indices)]
 
     @staticmethod
     def k_fold_split(dataset, mols=None, sanitize=True,
-                     include_chirality=False, k=5, log_every_n=1000):
+                      k=5, log_every_n=1000):
         """Group molecules based on their scaffolds and sort groups based on their sizes.
         The groups are then split for k-fold cross validation.
 
@@ -608,8 +602,6 @@ class ScaffoldSplitter(object):
             sanitization is performed in initializing RDKit molecule instances. See
             https://www.rdkit.org/docs/RDKit_Book.html for details of the sanitization.
             Default to True.
-        include_chirality : bool
-            Whether to consider chirality in computing scaffolds. Default to False.
         k : int
             Number of folds to use and should be no smaller than 2. Default to be 5.
         log_every_n : None or int
@@ -628,7 +620,7 @@ class ScaffoldSplitter(object):
 
         molecules = prepare_mols(dataset, mols, sanitize)
         scaffold_sets = ScaffoldSplitter.get_ordered_scaffold_sets(
-            molecules, include_chirality, log_every_n)
+            molecules, log_every_n)
 
         # k buckets that form a relatively balanced partition of the dataset
         index_buckets = [[] for _ in range(k)]
