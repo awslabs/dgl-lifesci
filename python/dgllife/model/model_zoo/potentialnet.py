@@ -45,33 +45,33 @@ class PotentialNet(nn.Module):
                  n_bond_conv_steps,
                  n_spatial_conv_steps,
                  n_fc_layers,
-                 dropout
+                 dropouts
                  ):
         super(PotentialNet, self).__init__()
         self.stage_1_model = StagedGGNN(f_gru_in=f_in,
                                         f_gru_out=f_bond,
                                         f_gather=f_gather,
-                                        n_etypes=12, # from CanonicalBondFeaturizer
+                                        n_etypes=n_etypes[0], # 12, from CanonicalBondFeaturizer
                                         n_gconv_steps=n_bond_conv_steps,
-                                        dropout=dropout
+                                        dropout=dropouts[0]
                                         )
         self.stage_2_model = StagedGGNN(f_gru_in=f_gather,
                                         f_gru_out=f_spatial,
                                         f_gather=f_gather,
-                                        n_etypes=n_etypes, # all 
+                                        n_etypes=n_etypes[1], # 1, temporal solution
                                         n_gconv_steps=n_spatial_conv_steps,
-                                        dropout=dropout
+                                        dropout=dropouts[1]
                                         )
         self.stage_3_model = StagedFCNN(f_in=f_gather,
                                         n_row=n_row_fc,
                                         n_layers=n_fc_layers,
-                                        dropout=dropout
+                                        dropout=dropouts[2]
         )
 
     def forward(self, bigraph_canonical, knn_graph):
         batch_num_nodes = bigraph_canonical.batch_num_nodes()
         bigraph, stage_1_etypes = process_etypes(bigraph_canonical)
-        stage_2_etypes = th.zeros(knn_graph.num_edges() ,dtype=th.long)   # temporal solution
+        stage_2_etypes = th.zeros(knn_graph.num_edges() ,dtype=th.long, device=knn_graph.device)   # temporal solution
         h = self.stage_1_model(graph=bigraph, features=bigraph.ndata['h'], etypes=stage_1_etypes)
         h = self.stage_2_model(graph=knn_graph, features=h, etypes=stage_2_etypes)
         x = self.stage_3_model(batch_num_nodes=batch_num_nodes, features=h) 

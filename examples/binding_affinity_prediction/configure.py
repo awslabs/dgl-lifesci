@@ -29,7 +29,7 @@ ACNN_PDBBind_core_pocket_random = {
     'split': 'random'
 }
 
-PotentialNet_PDBBind_core_pocket_random = { # fix 
+PotentialNet_PDBBind_core_pocket_random = { 
     'dataset': 'PDBBind',
     'subset': 'core',
     'load_binding_pocket': True,
@@ -37,17 +37,22 @@ PotentialNet_PDBBind_core_pocket_random = { # fix
     'frac_train': 0.8,
     'frac_val': 0.,
     'frac_test': 0.2,
-    'batch_size': 24,
+    'batch_size': 20,
     'shuffle': False,
-    'hidden_sizes': [128, 128, 64],
-    'weight_init_stddevs': [0.125, 0.125, 0.177, 0.01],
-    'dropouts': [0.4, 0.4, 0.],
-    'atomic_numbers_considered': torch.tensor([
-        1., 6., 7., 8., 9., 11., 12., 15., 16., 17., 19., 20., 25., 26., 27., 28.,
-        29., 30., 34., 35., 38., 48., 53., 55., 80.]),
-    'radial': [[12.0], [0.0, 2.0, 4.0, 6.0, 8.0], [4.0]],
+    'sanitize': True,
+    'remove_hs': True,
+    'n_etypes': [12, 1],
+    'f_in': 74,
+    'f_bond': 75, # has to be larger than f_in
+    'f_spatial':64,
+    'f_gather':64,
+    'n_row_fc':32,
+    'n_bond_conv_steps':1,
+    'n_spatial_conv_steps':1,
+    'n_fc_layers':1,
+    'dropouts': [0.2, 0.2, 0.3],
     'lr': 0.001,
-    'num_epochs': 100,
+    'num_epochs': 1,
     'metrics': ['r2', 'mae'],
     'split': 'random'
 }

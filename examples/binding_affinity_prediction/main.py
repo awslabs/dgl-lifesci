@@ -12,7 +12,6 @@ from torch.utils.data import DataLoader
 from utils import set_random_seed, load_dataset, collate, load_model
 
 
-
 def update_msg_from_scores(msg, scores):
     for metric, score in scores.items():
         msg += ', {} {:.4f}'.format(metric, score)
@@ -54,8 +53,15 @@ def run_an_eval_epoch(args, model, data_loader):
     with torch.no_grad():
         for batch_id, batch_data in enumerate(data_loader):
             indices, ligand_mols, protein_mols, bg, labels = batch_data
-            labels, bg = labels.to(args['device']), bg.to(args['device'])
-            prediction = model(bg)
+            labels = labels.to(args['device'])
+            if type(bg) == tuple: # for the case of PotentialNet
+                bigraph_canonical, knn_graph = bg # unpack
+                bigraph_canonical = bigraph_canonical.to(args['device'])
+                knn_graph = knn_graph.to(args['device'])
+                prediction = model(bigraph_canonical, knn_graph)
+            else:
+                bg = bg.to(args['device'])
+                prediction = model(bg)
             eval_meter.update(prediction, labels)
     total_scores = {metric: eval_meter.compute_metric(metric, 'mean')
                     for metric in args['metrics']}
@@ -70,7 +76,7 @@ def main(args):
     args['train_std'] = train_set.labels_std.to(args['device'])
     train_loader = DataLoader(dataset=train_set,
                               batch_size=args['batch_size'],
-                              shuffle=False,
+                              shuffle=args['shuffle'],
                               collate_fn=collate)
     test_loader = DataLoader(dataset=test_set,
                              batch_size=args['batch_size'],

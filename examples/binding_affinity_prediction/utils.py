@@ -48,10 +48,12 @@ def load_dataset(args):
     if args['dataset'] == 'PDBBind':
         if args['model'] == 'PotentialNet': # fix with args
             from dgllife.utils import potentialNet_graph_construction_featurization
-            dataset = PDBBind(subset='core', load_binding_pocket=True, sanitize=True, calc_charges=False,
-                     remove_hs=True, use_conformation=True,
-                     construct_graph_and_featurize=potentialNet_graph_construction_featurization,
-                     zero_padding=True, num_processes=6)
+            dataset = PDBBind(subset=args['subset'], 
+                    load_binding_pocket=args['load_binding_pocket'], 
+                    sanitize=args['sanitize'], calc_charges=False,
+                    remove_hs=args['remove_hs'], use_conformation=True,
+                    construct_graph_and_featurize=potentialNet_graph_construction_featurization,
+                    zero_padding=True, num_processes=6)
         elif args['model'] =='ACNN':
             dataset = PDBBind(subset=args['subset'],
                           load_binding_pocket=args['load_binding_pocket'],
@@ -109,7 +111,7 @@ def collate(data):
     if (type(graphs[0]) == tuple):
         bg1 = dgl.batch([g[0] for g in graphs])
         bg2 = dgl.batch([g[1] for g in graphs])
-        bg = (bg1, bg2)
+        bg = (bg1, bg2) # return a tuple for PotentialNet
     else:
         bg = dgl.batch(graphs)
         for nty in bg.ntypes:
@@ -129,14 +131,14 @@ def load_model(args):
                      features_to_use=args['atomic_numbers_considered'],
                      radial=args['radial'])
     if args['model'] == 'PotentialNet': # fix with args
-        model = PotentialNet(n_etypes=1,
-                 f_in=74,
-                 f_bond=75,
-                 f_spatial=64,
-                 f_gather=64,
-                 n_row_fc=32,
-                 n_bond_conv_steps=1,
-                 n_spatial_conv_steps=1,
-                 n_fc_layers=1,
-                 dropout=0.2)
+        model = PotentialNet(n_etypes=args['n_etypes'],
+                 f_in=args['f_in'],
+                 f_bond=args['f_bond'],
+                 f_spatial=args['f_spatial'],
+                 f_gather=args['f_gather'],
+                 n_row_fc=args['n_row_fc'],
+                 n_bond_conv_steps=args['n_bond_conv_steps'],
+                 n_spatial_conv_steps=args['n_spatial_conv_steps'],
+                 n_fc_layers=args['n_fc_layers'],
+                 dropouts=args['dropouts'])
     return model
