@@ -39,8 +39,8 @@ PotentialNet_PDBBind_core_pocket_random = {
     'frac_test': 0.2,
     'batch_size': 20,
     'shuffle': False,
-    'sanitize': True,
-    'remove_hs': True,
+    'sanitize': False,
+    'remove_hs': False,
     'n_etypes': [12, 1],
     'f_in': 74,
     'f_bond': 75, # has to be larger than f_in

@@ -26,7 +26,7 @@ __all__ = ['mol_to_graph',
 
 # pylint: disable=I1101
 def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
-                 canonical_atom_order, explicit_hydrogens, num_virtual_nodes=0):
+                 canonical_atom_order, explicit_hydrogens=None, num_virtual_nodes=0):
     """Convert an RDKit molecule object into a DGLGraph and featurize for it.
 
     This function can be used to construct any arbitrary ``DGLGraph`` from an
@@ -74,7 +74,7 @@ def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
     # Whether to have hydrogen atoms as explicit nodes
     if explicit_hydrogens:
         mol = Chem.AddHs(mol)
-    else:
+    elif explicit_hydrogens is False:
         mol = Chem.RemoveHs(mol)
 
     if canonical_atom_order:
@@ -173,7 +173,7 @@ def mol_to_bigraph(mol, add_self_loop=False,
                    node_featurizer=None,
                    edge_featurizer=None,
                    canonical_atom_order=True,
-                   explicit_hydrogens=False,
+                   explicit_hydrogens=None,
                    num_virtual_nodes=0):
     """Convert an RDKit molecule object into a bi-directed DGLGraph and featurize for it.
 

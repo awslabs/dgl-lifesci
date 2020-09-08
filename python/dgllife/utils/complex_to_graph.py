@@ -8,7 +8,7 @@
 import numpy as np
 import dgl.backend as F
 
-from dgl import graph, bipartite, hetero_from_relations, batch, DGLGraph
+from dgl import graph, bipartite, hetero_from_relations, heterograph, batch
 
 from ..utils.mol_to_graph import k_nearest_neighbors, mol_to_bigraph
 from ..utils.featurizers import CanonicalAtomFeaturizer, CanonicalBondFeaturizer
@@ -139,16 +139,14 @@ def potentialNet_graph_construction_featurization(ligand_mol,
     ligand_bigraph = mol_to_bigraph(ligand_mol, add_self_loop=False,
                    node_featurizer=node_featurizer,
                    edge_featurizer=edge_featurizer,
-                   canonical_atom_order=True,
-                   explicit_hydrogens=False)
+                   canonical_atom_order=True
+                   )
     protein_bigraph = mol_to_bigraph(protein_mol, add_self_loop=False,
                    node_featurizer=node_featurizer,
                    edge_featurizer=edge_featurizer,
-                   canonical_atom_order=True,
-                   explicit_hydrogens=False)
+                   canonical_atom_order=True)
 
     complex_bigraph = batch([ligand_bigraph, protein_bigraph])
-    # complex_bigraph.flatten() # not applicable in dgl 0.5
 
     # Construct knn grpah for stage 2
     complex_coordinates = np.concatenate([ligand_coordinates, protein_coordinates])
