@@ -127,7 +127,6 @@ class DGLJTNNDecoder(nn.Module):
         '''
         mol_tree_batch = batch(mol_trees)
         mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
-        mol_tree_batch_lg._node_frames = mol_tree_batch._edge_frames
         n_trees = len(mol_trees)
 
         return self.run(mol_tree_batch, mol_tree_batch_lg, n_trees, tree_vec)
@@ -328,7 +327,6 @@ class DGLJTNNDecoder(nn.Module):
 
                 # DGL doesn't dynamically maintain a line graph.
                 mol_tree_lg = dgl.line_graph(mol_tree.g, backtracking=False, shared=True)
-                mol_tree_lg._node_frames = mol_tree.g._edge_frames
 
                 mol_tree_lg.pull(
                     uv,
@@ -387,7 +385,6 @@ class DGLJTNNDecoder(nn.Module):
 
                     # DGL doesn't dynamically maintain a line graph.
                     mol_tree_lg = dgl.line_graph(mol_tree.g, backtracking=False, shared=True)
-                    mol_tree_lg._node_frames = mol_tree.g._edge_frames
                     mol_tree_lg.apply_nodes(
                         self.dec_tree_edge_update.update_r,
                         uv
