@@ -23,6 +23,7 @@ from .jtnn_enc import DGLJTNNEncoder
 from .mol_tree import Vocab
 from .mpn import DGLMPN
 from .mpn import mol2dgl_single as mol2dgl_enc
+from .nnutils import cuda
 
 class DGLJTNNVAE(nn.Module):
     """
