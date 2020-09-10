@@ -78,7 +78,10 @@ class DGLJTNNVAE(nn.Module):
 
     @staticmethod
     def move_to_device(mol_batch, device):
-        mol_batch['mol_trees'] = [t.to(device) for t in mol_batch['mol_trees']]
+        mol_trees = []
+        for t in mol_batch['mol_trees']:
+            mol_trees.append(t.g.to(device))
+        mol_batch['mol_trees'] = mol_trees
         mol_batch['mol_graph_batch'] = mol_batch['mol_graph_batch'].to(device)
         if 'cand_graph_batch' in mol_batch:
             mol_batch['cand_graph_batch'] = mol_batch['cand_graph_batch'].to(device)
