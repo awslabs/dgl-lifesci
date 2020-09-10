@@ -297,6 +297,9 @@ class DGLJTNNVAE(nn.Module):
             tree_mess_tgt_edges, tree_mess_tgt_nodes = mol2dgl_dec(
                 cands)
         cand_graphs = batch(cand_graphs).to(device)
+        tree_mess_src_edges = tree_mess_src_edges.to(device)
+        tree_mess_tgt_edges = tree_mess_tgt_edges.to(device)
+        tree_mess_tgt_nodes = tree_mess_tgt_nodes.to(device)
         atom_x = cuda(atom_x)
         bond_x = cuda(bond_x)
         cand_graphs.ndata['x'] = atom_x
