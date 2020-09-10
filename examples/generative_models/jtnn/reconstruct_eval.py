@@ -46,19 +46,6 @@ hidden_size = int(args.hidden_size)
 latent_size = int(args.latent_size)
 depth = int(args.depth)
 
-model = DGLJTNNVAE(vocab_file=vocab_file,
-                   hidden_size=hidden_size,
-                   latent_size=latent_size,
-                   depth=depth)
-
-if args.model_path is not None:
-    model.load_state_dict(torch.load(args.model_path))
-else:
-    model = load_pretrained("JTNN_ZINC")
-
-print("Model #Params: %dK" %
-      (sum([x.nelement() for x in model.parameters()]) / 1000,))
-
 MAX_EPOCH = 100
 PRINT_ITER = 20
 
@@ -78,6 +65,19 @@ def reconstruct():
         collate_fn=JTNNCollator(dataset.vocab, False),
         drop_last=True,
         worker_init_fn=worker_init_fn)
+
+    model = DGLJTNNVAE(vocab_file=vocab_file,
+                       hidden_size=hidden_size,
+                       latent_size=latent_size,
+                       depth=depth)
+
+    if args.model_path is not None:
+        model.load_state_dict(torch.load(args.model_path))
+    else:
+        model = load_pretrained("JTNN_ZINC")
+
+    print("Model #Params: %dK" %
+          (sum([x.nelement() for x in model.parameters()]) / 1000,))
 
     # Just an example of molecule decoding; in reality you may want to sample
     # tree and molecule vectors.
