@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import dgl.function as DGLF
+import dgl.function as fn
 from dgl import batch, dfs_labeled_edges_generator
 
 from .chemutils import enum_assemble_nx, get_mol
@@ -29,16 +29,16 @@ def dfs_order(forest, roots):
         # using find_edges().
         yield e ^ l, l
 
-dec_tree_node_msg = DGLF.copy_edge(edge='m', out='m')
-dec_tree_node_reduce = DGLF.sum(msg='m', out='h')
+dec_tree_node_msg = fn.copy_edge(edge='m', out='m')
+dec_tree_node_reduce = fn.sum(msg='m', out='h')
 
 def dec_tree_node_update(nodes):
     return {'new': nodes.data['new'].clone().zero_()}
 
-dec_tree_edge_msg = [DGLF.copy_src(
-    src='m', out='m'), DGLF.copy_src(src='rm', out='rm')]
-dec_tree_edge_reduce = [
-    DGLF.sum(msg='m', out='s'), DGLF.sum(msg='rm', out='accum_rm')]
+dec_tree_edge_msg1 = fn.copy_src(src='m', out='m')
+dec_tree_edge_msg2 = fn.copy_src(src='rm', out='rm')
+dec_tree_edge_reduce1 = fn.sum(msg='m', out='s')
+dec_tree_edge_reduce2 = fn.sum(msg='rm', out='accum_rm')
 
 def have_slots(fa_slots, ch_slots):
     if len(fa_slots) > 2 and len(ch_slots) > 2:
@@ -127,6 +127,7 @@ class DGLJTNNDecoder(nn.Module):
         '''
         mol_tree_batch = batch(mol_trees)
         mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
+        mol_tree_batch_lg._node_frames = mol_tree_batch._edge_frames
         n_trees = len(mol_trees)
 
         return self.run(mol_tree_batch, mol_tree_batch_lg, n_trees, tree_vec)
@@ -197,10 +198,16 @@ class DGLJTNNDecoder(nn.Module):
 
             mol_tree_batch_lg.pull(
                 eid,
-                dec_tree_edge_msg,
-                dec_tree_edge_reduce,
-                self.dec_tree_edge_update,
+                dec_tree_edge_msg1,
+                dec_tree_edge_reduce1
             )
+            mol_tree_batch_lg.pull(
+                eid,
+                dec_tree_edge_msg2,
+                dec_tree_edge_reduce2,
+                self.dec_tree_edge_update
+            )
+
             is_new = mol_tree_batch.nodes[v].data['new']
             mol_tree_batch.pull(
                 v,
@@ -325,9 +332,14 @@ class DGLJTNNDecoder(nn.Module):
 
                 mol_tree_lg.pull(
                     uv,
-                    dec_tree_edge_msg,
-                    dec_tree_edge_reduce,
-                    self.dec_tree_edge_update.update_zm,
+                    dec_tree_edge_msg1,
+                    dec_tree_edge_reduce1
+                )
+                mol_tree_lg.pull(
+                    uv,
+                    dec_tree_edge_msg2,
+                    dec_tree_edge_reduce2,
+                    self.dec_tree_edge_update.update_zm
                 )
                 mol_tree.g.pull(
                     v,
@@ -390,9 +402,14 @@ class DGLJTNNDecoder(nn.Module):
 
                 mol_tree_lg.pull(
                     u_pu,
-                    dec_tree_edge_msg,
-                    dec_tree_edge_reduce,
-                    self.dec_tree_edge_update,
+                    dec_tree_edge_msg1,
+                    dec_tree_edge_reduce1
+                )
+                mol_tree_lg.pull(
+                    u_pu,
+                    dec_tree_edge_msg2,
+                    dec_tree_edge_reduce2,
+                    self.dec_tree_edge_update
                 )
                 mol_tree.g.pull(
                     pu,
