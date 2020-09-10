@@ -100,7 +100,7 @@ class DGLMolTree():
             for cidx in node['clique']:
                 original_mol.GetAtomWithIdx(cidx).SetAtomMapNum(node['nid'])
 
-        for j in self.successors(i).numpy():
+        for j in self.g.successors(i).numpy():
             nei_node = self.nodes_dict[j]
             clique.extend(nei_node['clique'])
             if nei_node['is_leaf']:  # Leaf node, no need to mark
