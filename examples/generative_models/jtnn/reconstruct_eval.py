@@ -8,8 +8,8 @@ import rdkit
 import torch
 
 from dgllife.model import DGLJTNNVAE, load_pretrained
-from dgllife.model.model_zoo.jtnn.nnutils import cuda
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from jtnn import *
 
@@ -85,7 +85,7 @@ def reconstruct():
     tot = 0
     model = model.to(device)
     model.eval()
-    for it, batch in enumerate(dataloader):
+    for it, batch in enumerate(tqdm(dataloader)):
         gt_smiles = batch['mol_trees'][0].smiles
         # print(gt_smiles)
         batch = model.move_to_device(batch, device)
