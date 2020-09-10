@@ -220,7 +220,7 @@ class DGLJTNNVAE(nn.Module):
             node['idx'] = i
             node['nid'] = i + 1
             node['is_leaf'] = True
-            if mol_tree.in_degree(node_id) > 1:
+            if mol_tree.g.in_degree(node_id) > 1:
                 node['is_leaf'] = False
                 set_atommap(node['mol'], node['nid'])
 
