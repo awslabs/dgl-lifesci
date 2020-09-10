@@ -169,7 +169,7 @@ class JTNNCollator(object):
         mol_trees = _unpack_field(examples, 'mol_tree')
         wid = _unpack_field(examples, 'wid')
         for _wid, mol_tree in zip(wid, mol_trees):
-            mol_tree.ndata['wid'] = torch.LongTensor(_wid)
+            mol_tree.g.ndata['wid'] = torch.LongTensor(_wid)
 
         # TODO: either support pickling or get around ctypes pointers using scipy
         # batch molecule graphs
