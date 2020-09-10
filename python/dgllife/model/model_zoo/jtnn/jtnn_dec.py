@@ -253,8 +253,9 @@ class DGLJTNNDecoder(nn.Module):
 
     def decode(self, mol_vec):
         assert mol_vec.shape[0] == 1
+        device = mol_vec.device
 
-        mol_tree = DGLMolTree(None)
+        mol_tree = DGLMolTree(None).to(device)
 
         init_hidden = cuda(torch.zeros(1, self.hidden_size))
 
