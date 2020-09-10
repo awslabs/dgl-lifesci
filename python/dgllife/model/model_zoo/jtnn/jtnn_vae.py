@@ -213,6 +213,8 @@ class DGLJTNNVAE(nn.Module):
         return all_loss, acc / len(labels)
 
     def decode(self, tree_vec, mol_vec):
+        device = mol_vec.device
+
         mol_tree, nodes_dict, effective_nodes = self.decoder.decode(tree_vec)
         effective_nodes_list = effective_nodes.tolist()
         nodes_dict = [nodes_dict[v] for v in effective_nodes_list]
@@ -253,7 +255,7 @@ class DGLJTNNVAE(nn.Module):
         stereo_graphs = [mol2dgl_enc(c) for c in stereo_cands]
         stereo_cand_graphs, atom_x, bond_x = \
             zip(*stereo_graphs)
-        stereo_cand_graphs = batch(stereo_cand_graphs)
+        stereo_cand_graphs = batch(stereo_cand_graphs).to(device)
         atom_x = cuda(torch.cat(atom_x))
         bond_x = cuda(torch.cat(bond_x))
         stereo_cand_graphs.ndata['x'] = atom_x
