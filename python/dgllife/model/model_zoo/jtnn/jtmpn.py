@@ -199,6 +199,7 @@ class DGLJTMPN(nn.Module):
         n_samples = len(cand_graphs)
 
         cand_line_graph = dgl.line_graph(cand_graphs, backtracking=False, shared=True)
+        cand_line_graph._node_frames = cand_graphs._edge_frames
 
         n_nodes = cand_graphs.number_of_nodes()
         n_edges = cand_graphs.number_of_edges()

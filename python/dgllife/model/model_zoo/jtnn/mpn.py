@@ -147,6 +147,7 @@ class DGLMPN(nn.Module):
         n_samples = mol_graph.batch_size
 
         mol_line_graph = dgl.line_graph(mol_graph, backtracking=False, shared=True)
+        mol_line_graph._node_frames = mol_graph._edge_frames
 
         n_nodes = mol_graph.number_of_nodes()
         n_edges = mol_graph.number_of_edges()
