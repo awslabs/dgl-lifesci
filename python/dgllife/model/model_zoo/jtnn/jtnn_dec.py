@@ -64,7 +64,7 @@ def have_slots(fa_slots, ch_slots):
 
 def can_assemble(mol_tree, u, v_node_dict):
     u_node_dict = mol_tree.nodes_dict[u]
-    u_neighbors = mol_tree.successors(u)
+    u_neighbors = mol_tree.g.successors(u)
     u_neighbors_node_dict = [
         mol_tree.nodes_dict[_u]
         for _u in u_neighbors
