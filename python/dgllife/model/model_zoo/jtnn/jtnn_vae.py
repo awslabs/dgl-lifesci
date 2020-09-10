@@ -23,7 +23,6 @@ from .jtnn_enc import DGLJTNNEncoder
 from .mol_tree import Vocab
 from .mpn import DGLMPN
 from .mpn import mol2dgl_single as mol2dgl_enc
-from .nnutils import cuda, move_dgl_to_cuda
 
 class DGLJTNNVAE(nn.Module):
     """
@@ -78,15 +77,14 @@ class DGLJTNNVAE(nn.Module):
         self.G_var.reset_parameters()
 
     @staticmethod
-    def move_to_cuda(mol_batch):
-        for t in mol_batch['mol_trees']:
-            move_dgl_to_cuda(t)
-
-        move_dgl_to_cuda(mol_batch['mol_graph_batch'])
+    def move_to_device(mol_batch, device):
+        mol_batch['mol_trees'] = [t.to(device) for t in mol_batch['mol_trees']]
+        mol_batch['mol_graph_batch'] = mol_batch['mol_graph_batch'].to(device)
         if 'cand_graph_batch' in mol_batch:
-            move_dgl_to_cuda(mol_batch['cand_graph_batch'])
+            mol_batch['cand_graph_batch'] = mol_batch['cand_graph_batch'].to(device)
         if mol_batch.get('stereo_cand_graph_batch') is not None:
-            move_dgl_to_cuda(mol_batch['stereo_cand_graph_batch'])
+            mol_batch['stereo_cand_graph_batch'] = mol_batch['stereo_cand_graph_batch'].to(device)
+        return mol_batch
 
     def encode(self, mol_batch):
         mol_graphs = mol_batch['mol_graph_batch']
@@ -119,7 +117,8 @@ class DGLJTNNVAE(nn.Module):
         return tree_vec, mol_vec, z_mean, z_log_var
 
     def forward(self, mol_batch, beta=0, e1=None, e2=None):
-        self.move_to_cuda(mol_batch)
+        device = mol_batch['mol_graph_batch'].device
+        self.move_to_device(mol_batch, device)
 
         mol_trees = mol_batch['mol_trees']
         batch_size = len(mol_trees)
