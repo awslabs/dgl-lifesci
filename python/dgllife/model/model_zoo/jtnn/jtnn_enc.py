@@ -81,6 +81,7 @@ class DGLJTNNEncoder(nn.Module):
 
         # Build line graph to prepare for belief propagation
         mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
+        mol_tree_batch_lg._node_frames = mol_tree_batch._edge_frames
 
         return self.run(mol_tree_batch, mol_tree_batch_lg)
 
