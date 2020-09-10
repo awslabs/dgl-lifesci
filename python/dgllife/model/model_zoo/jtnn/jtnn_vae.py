@@ -268,6 +268,7 @@ class DGLJTNNVAE(nn.Module):
 
     def dfs_assemble(self, mol_tree_msg, mol_vec, cur_mol,
                      global_amap, fa_amap, cur_node_id, fa_node_id):
+        device = mol_vec.device
         nodes_dict = mol_tree_msg.nodes_dict
         fa_node = nodes_dict[fa_node_id] if fa_node_id is not None else None
         cur_node = nodes_dict[cur_node_id]
@@ -295,7 +296,7 @@ class DGLJTNNVAE(nn.Module):
         cand_graphs, atom_x, bond_x, tree_mess_src_edges, \
             tree_mess_tgt_edges, tree_mess_tgt_nodes = mol2dgl_dec(
                 cands)
-        cand_graphs = batch(cand_graphs)
+        cand_graphs = batch(cand_graphs).to(device)
         atom_x = cuda(atom_x)
         bond_x = cuda(bond_x)
         cand_graphs.ndata['x'] = atom_x
