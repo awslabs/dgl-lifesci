@@ -19,9 +19,12 @@ from .nnutils import GRUUpdate, cuda
 MAX_NB = 8
 
 def level_order(forest, roots):
+    device = forest.device
     edges = bfs_edges_generator(forest, roots)
+    edges = [e.to(device) for e in edges]
     _, leaves = forest.find_edges(edges[-1])
     edges_back = bfs_edges_generator(forest, roots, reverse=True)
+    edges_back = [e.to(device) for e in edges_back]
     yield from reversed(edges_back)
     yield from edges
 
