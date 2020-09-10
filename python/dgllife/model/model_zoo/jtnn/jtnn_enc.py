@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 
 import dgl
-import dgl.function as DGLF
+import dgl.function as fn
 from dgl import batch, bfs_edges_generator
 
 from .nnutils import GRUUpdate, cuda
@@ -28,12 +28,12 @@ def level_order(forest, roots):
     yield from reversed(edges_back)
     yield from edges
 
-enc_tree_msg = [DGLF.copy_src(src='m', out='m'),
-                DGLF.copy_src(src='rm', out='rm')]
-enc_tree_reduce = [DGLF.sum(msg='m', out='s'),
-                   DGLF.sum(msg='rm', out='accum_rm')]
-enc_tree_gather_msg = DGLF.copy_edge(edge='m', out='m')
-enc_tree_gather_reduce = DGLF.sum(msg='m', out='m')
+enc_tree_msg1 = fn.copy_src(src='m', out='m')
+enc_tree_msg2 = fn.copy_src(src='rm', out='rm')
+enc_tree_reduce1 = fn.sum(msg='m', out='s')
+enc_tree_reduce2 = fn.sum(msg='rm', out='accum_rm')
+enc_tree_gather_msg = fn.copy_edge(edge='m', out='m')
+enc_tree_gather_reduce = fn.sum(msg='m', out='m')
 
 class EncoderGatherUpdate(nn.Module):
     def __init__(self, hidden_size):
@@ -125,11 +125,15 @@ class DGLJTNNEncoder(nn.Module):
         # we can always compute s_ij as the sum of incoming m_ij, no matter
         # if m_ij is actually computed or not.
         for eid in level_order(mol_tree_batch, root_ids):
-            #eid = mol_tree_batch.edge_ids(u, v)
             mol_tree_batch_lg.pull(
                 eid,
-                enc_tree_msg,
-                enc_tree_reduce,
+                enc_tree_msg1,
+                enc_tree_reduce1
+            )
+            mol_tree_batch_lg.pull(
+                eid,
+                enc_tree_msg2,
+                enc_tree_reduce2,
                 self.enc_tree_update,
             )
 
