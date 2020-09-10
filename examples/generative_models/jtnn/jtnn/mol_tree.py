@@ -122,10 +122,10 @@ class DGLMolTree():
         return node['label']
 
     def _assemble_node(self, i):
-        neighbors = [self.nodes_dict[j] for j in self.successors(i).numpy()
+        neighbors = [self.nodes_dict[j] for j in self.g.successors(i).numpy()
                      if self.nodes_dict[j]['mol'].GetNumAtoms() > 1]
         neighbors = sorted(neighbors, key=lambda x: x['mol'].GetNumAtoms(), reverse=True)
-        singletons = [self.nodes_dict[j] for j in self.successors(i).numpy()
+        singletons = [self.nodes_dict[j] for j in self.g.successors(i).numpy()
                       if self.nodes_dict[j]['mol'].GetNumAtoms() == 1]
         neighbors = singletons + neighbors
 
