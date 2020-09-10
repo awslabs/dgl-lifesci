@@ -4,10 +4,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import copy
+import dgl
 import numpy as np
 import rdkit.Chem as Chem
-
-from dgl import DGLHeteroGraph
 
 from .chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, \
     set_atommap, enum_assemble_nx, decode_stereo
@@ -34,12 +33,12 @@ class Vocab(object):
     def size(self):
         return len(self.vocab)
 
-class DGLMolTree(DGLHeteroGraph):
+class DGLMolTree():
     def __init__(self, smiles):
-        DGLHeteroGraph.__init__(self)
         self.nodes_dict = {}
 
         if smiles is None:
+            self.g = dgl.graph(([], []))
             return
 
         self.smiles = smiles
@@ -64,7 +63,6 @@ class DGLMolTree(DGLHeteroGraph):
             )
             if min(c) == 0:
                 root = i
-        self.add_nodes(len(cliques))
 
         # The clique with atom ID 0 becomes root
         if root > 0:
@@ -81,16 +79,17 @@ class DGLMolTree(DGLHeteroGraph):
             dst[2 * i] = y
             src[2 * i + 1] = y
             dst[2 * i + 1] = x
-        self.add_edges(src, dst)
+
+        self.g = dgl.graph((src, dst), num_nodes=len(cliques))
 
         for i in self.nodes_dict:
             self.nodes_dict[i]['nid'] = i + 1
-            if self.out_degrees(i) > 1:  # Leaf node mol is not marked
+            if self.g.out_degrees(i) > 1:  # Leaf node mol is not marked
                 set_atommap(self.nodes_dict[i]['mol'], self.nodes_dict[i]['nid'])
-            self.nodes_dict[i]['is_leaf'] = (self.out_degrees(i) == 1)
+            self.nodes_dict[i]['is_leaf'] = (self.g.out_degrees(i) == 1)
 
     def treesize(self):
-        return self.number_of_nodes()
+        return self.g.num_nodes()
 
     def _recover_node(self, i, original_mol):
         node = self.nodes_dict[i]
