@@ -170,11 +170,11 @@ def load_pretrained(model_name, log=True):
 
     elif model_name == "JTNN_ZINC":
         default_dir = get_download_dir()
-        vocab_file = '{}/jtnn/{}.txt'.format(default_dir, 'vocab')
+        vocab_file = '{}/jtvae/{}.txt'.format(default_dir, 'vocab')
         if not os.path.exists(vocab_file):
-            zip_file_path = '{}/jtnn.zip'.format(default_dir)
-            download(_get_dgl_url('dataset/jtnn.zip'), path=zip_file_path)
-            extract_archive(zip_file_path, '{}/jtnn'.format(default_dir))
+            zip_file_path = '{}/jtvae.zip'.format(default_dir)
+            download(_get_dgl_url('dataset/jtvae.zip'), path=zip_file_path)
+            extract_archive(zip_file_path, '{}/jtvae'.format(default_dir))
         model = DGLJTNNVAE(vocab_file=vocab_file,
                            depth=3,
                            hidden_size=450,

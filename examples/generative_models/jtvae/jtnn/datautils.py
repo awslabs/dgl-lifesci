@@ -22,7 +22,7 @@ MAX_NB = 10
 
 PAPER = os.getenv('PAPER', False)
 
-_url = _get_dgl_url('dataset/jtnn.zip')
+_url = _get_dgl_url('dataset/jtvae.zip')
 
 def _unpack_field(examples, field):
     return [e[field] for e in examples]
@@ -38,21 +38,21 @@ def _set_node_id(mol_tree, vocab):
 class JTNNDataset(Dataset):
     def __init__(self, data, vocab, training=True):
         self.dir = get_download_dir()
-        self.zip_file_path = '{}/jtnn.zip'.format(self.dir)
+        self.zip_file_path = '{}/jtvae.zip'.format(self.dir)
         download(_url, path=self.zip_file_path)
-        extract_archive(self.zip_file_path, '{}/jtnn'.format(self.dir))
+        extract_archive(self.zip_file_path, '{}/jtvae'.format(self.dir))
         print('Loading data...')
         if data in ['train', 'test']:
-            data_file = '{}/jtnn/{}.txt'.format(self.dir, data)
+            data_file = '{}/jtvae/{}.txt'.format(self.dir, data)
         else:
             data_file = data
         with open(data_file) as f:
             self.data = [line.strip("\r\n ").split()[0] for line in f]
 
         if vocab == 'zinc':
-            self.vocab_file = '{}/jtnn/vocab.txt'.format(self.dir)
+            self.vocab_file = '{}/jtvae/vocab.txt'.format(self.dir)
         elif vocab == 'guacamol':
-            self.vocab_file = '{}/jtnn/vocab_guacamol.txt'.format(self.dir)
+            self.vocab_file = '{}/jtvae/vocab_guacamol.txt'.format(self.dir)
         else:
             self.vocab_file = vocab
 

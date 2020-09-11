@@ -47,12 +47,6 @@ wget https://ndownloader.figshare.com/files/13612766 -O $DIRECTORY/guacamol_v1_v
 ``` 
 `$DIRECTORY` specifies the directory to save the dataset files.
 
-
-### Preprocessing
-
-Class `JTNNDataset` will process a SMILES string into a dict, consisting of a junction tree, a graph with 
-encoded nodes(atoms) and edges(bonds), and other information for model to use.
-
 ## Usage
 
 ### Training

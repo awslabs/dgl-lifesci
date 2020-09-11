@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import dgl.function as DGLF
+import dgl.function as fn
 from dgl import mean_nodes
 
 from .chemutils import get_mol
@@ -80,8 +80,8 @@ def mol2dgl_single(smiles):
     return graph, torch.stack(atom_x), \
         torch.stack(bond_x) if len(bond_x) > 0 else torch.zeros(0)
 
-mpn_loopy_bp_msg = DGLF.copy_src(src='msg', out='msg')
-mpn_loopy_bp_reduce = DGLF.sum(msg='msg', out='accum_msg')
+mpn_loopy_bp_msg = fn.copy_src(src='msg', out='msg')
+mpn_loopy_bp_reduce = fn.sum(msg='msg', out='accum_msg')
 
 class LoopyBPUpdate(nn.Module):
     def __init__(self, hidden_size):
@@ -100,8 +100,8 @@ class LoopyBPUpdate(nn.Module):
         msg = F.relu(msg_input + msg_delta)
         return {'msg': msg}
 
-mpn_gather_msg = DGLF.copy_edge(edge='msg', out='msg')
-mpn_gather_reduce = DGLF.sum(msg='msg', out='m')
+mpn_gather_msg = fn.copy_edge(edge='msg', out='msg')
+mpn_gather_reduce = fn.sum(msg='msg', out='m')
 
 class GatherUpdate(nn.Module):
     def __init__(self, hidden_size):

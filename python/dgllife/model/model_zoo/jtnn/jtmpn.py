@@ -12,10 +12,8 @@ import torch
 import torch.nn as nn
 
 import dgl
-import dgl.function as DGLF
+import dgl.function as fn
 from dgl import graph, mean_nodes
-
-from .nnutils import cuda
 
 ELEM_LIST = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na',
              'Ca', 'Fe', 'Al', 'I', 'B', 'K', 'Se', 'Zn', 'H', 'Cu', 'Mn', 'unknown']
@@ -113,8 +111,8 @@ def mol2dgl_single(cand_batch):
         torch.LongTensor(tree_mess_target_edges), \
         torch.LongTensor(tree_mess_target_nodes)
 
-mpn_loopy_bp_msg = DGLF.copy_src(src='msg', out='msg')
-mpn_loopy_bp_reduce = DGLF.sum(msg='msg', out='accum_msg')
+mpn_loopy_bp_msg = fn.copy_src(src='msg', out='msg')
+mpn_loopy_bp_reduce = fn.sum(msg='msg', out='accum_msg')
 
 class LoopyBPUpdate(nn.Module):
     def __init__(self, hidden_size):
@@ -135,19 +133,19 @@ class LoopyBPUpdate(nn.Module):
 
 if PAPER:
     mpn_gather_msg = [
-        DGLF.copy_edge(edge='msg', out='msg'),
-        DGLF.copy_edge(edge='alpha', out='alpha')
+        fn.copy_edge(edge='msg', out='msg'),
+        fn.copy_edge(edge='alpha', out='alpha')
     ]
 else:
-    mpn_gather_msg = DGLF.copy_edge(edge='msg', out='msg')
+    mpn_gather_msg = fn.copy_edge(edge='msg', out='msg')
 
 if PAPER:
     mpn_gather_reduce = [
-        DGLF.sum(msg='msg', out='m'),
-        DGLF.sum(msg='alpha', out='accum_alpha'),
+        fn.sum(msg='msg', out='m'),
+        fn.sum(msg='alpha', out='accum_alpha'),
     ]
 else:
-    mpn_gather_reduce = DGLF.sum(msg='msg', out='m')
+    mpn_gather_reduce = fn.sum(msg='msg', out='m')
 
 class GatherUpdate(nn.Module):
     def __init__(self, hidden_size):
@@ -219,7 +217,8 @@ class DGLJTMPN(nn.Module):
 
     def run(self, cand_graphs, cand_line_graph, tree_mess_src_edges, tree_mess_tgt_edges,
             tree_mess_tgt_nodes, mol_tree_batch):
-        n_nodes = cand_graphs.number_of_nodes()
+        device = cand_graphs.device
+        n_nodes = cand_graphs.num_nodes()
 
         cand_graphs.apply_edges(
             func=lambda edges: {'src_x': edges.src['x']},
@@ -241,7 +240,7 @@ class DGLJTMPN(nn.Module):
         })
 
         cand_graphs.edata['alpha'] = \
-            cuda(torch.zeros(cand_graphs.number_of_edges(), self.hidden_size))
+            torch.zeros(cand_graphs.num_edges(), self.hidden_size).to(device)
         cand_graphs.ndata['alpha'] = zero_node_state
         if tree_mess_src_edges.shape[0] > 0:
             if PAPER:
