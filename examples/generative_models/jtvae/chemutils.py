@@ -105,7 +105,7 @@ def tree_decomp(mol):
     ssr = [list(x) for x in Chem.GetSymmSSSR(mol)]
     cliques.extend(ssr)
 
-    nei_list = [[] for i in range(n_atoms)]
+    nei_list = [[] for _ in range(n_atoms)]
     for i in range(len(cliques)):
         for atom in cliques[i]:
             nei_list[atom].append(i)

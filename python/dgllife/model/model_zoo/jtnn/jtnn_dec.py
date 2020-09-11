@@ -380,7 +380,7 @@ class DGLJTNNDecoder(nn.Module):
                     mol_tree.nodes_dict[v] = next_node_dict
                     all_nodes[v] = next_node_dict
                     stack.append((v, next_slots))
-                    mol_tree.g.add_edge(v, u)
+                    mol_tree.g.add_edges(v, u)
                     vu = new_edge_id
                     new_edge_id += 1
                     mol_tree.g.edges[uv].data['dst_x'] = mol_tree.g.nodes[v].data['x']
