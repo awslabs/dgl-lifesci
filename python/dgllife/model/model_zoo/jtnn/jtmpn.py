@@ -194,7 +194,7 @@ class DGLJTMPN(nn.Module):
     def forward(self, cand_batch, mol_tree_batch):
         cand_graphs, tree_mess_src_edges, tree_mess_tgt_edges, tree_mess_tgt_nodes = cand_batch
 
-        n_samples = len(cand_graphs)
+        n_samples = cand_graphs.num_nodes()
 
         cand_line_graph = dgl.line_graph(cand_graphs, backtracking=False, shared=True)
         cand_line_graph._node_frames = cand_graphs._edge_frames
