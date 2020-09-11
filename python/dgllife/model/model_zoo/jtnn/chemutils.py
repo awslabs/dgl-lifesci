@@ -7,68 +7,13 @@
 
 from collections import defaultdict
 import rdkit.Chem as Chem
-from rdkit.Chem.EnumerateStereoisomers import EnumerateStereoisomers
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import minimum_spanning_tree
 
+from ....data.jtvae import get_smiles, sanitize, copy_atom, copy_edit_mol
+
 MST_MAX_WEIGHT = 100
 MAX_NCAND = 2000
-
-def get_mol(smiles):
-    mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
-        return None
-    Chem.Kekulize(mol)
-    return mol
-
-def get_smiles(mol):
-    return Chem.MolToSmiles(mol, kekuleSmiles=True)
-
-def decode_stereo(smiles2D):
-    mol = Chem.MolFromSmiles(smiles2D)
-    dec_isomers = list(EnumerateStereoisomers(mol))
-
-    dec_isomers = [Chem.MolFromSmiles(Chem.MolToSmiles(
-        mol, isomericSmiles=True)) for mol in dec_isomers]
-    smiles3D = [Chem.MolToSmiles(mol, isomericSmiles=True)
-                for mol in dec_isomers]
-
-    chiralN = [atom.GetIdx() for atom in dec_isomers[0].GetAtoms() if int(
-        atom.GetChiralTag()) > 0 and atom.GetSymbol() == "N"]
-    if len(chiralN) > 0:
-        for mol in dec_isomers:
-            for idx in chiralN:
-                mol.GetAtomWithIdx(idx).SetChiralTag(
-                    Chem.rdchem.ChiralType.CHI_UNSPECIFIED)
-            smiles3D.append(Chem.MolToSmiles(mol, isomericSmiles=True))
-
-    return smiles3D
-
-def sanitize(mol):
-    try:
-        smiles = get_smiles(mol)
-        mol = get_mol(smiles)
-    except Exception:
-        return None
-    return mol
-
-def copy_atom(atom):
-    new_atom = Chem.Atom(atom.GetSymbol())
-    new_atom.SetFormalCharge(atom.GetFormalCharge())
-    new_atom.SetAtomMapNum(atom.GetAtomMapNum())
-    return new_atom
-
-def copy_edit_mol(mol):
-    new_mol = Chem.RWMol(Chem.MolFromSmiles(''))
-    for atom in mol.GetAtoms():
-        new_atom = copy_atom(atom)
-        new_mol.AddAtom(new_atom)
-    for bond in mol.GetBonds():
-        a1 = bond.GetBeginAtom().GetIdx()
-        a2 = bond.GetEndAtom().GetIdx()
-        bt = bond.GetBondType()
-        new_mol.AddBond(a1, a2, bt)
-    return new_mol
 
 def get_clique_mol(mol, atoms):
     smiles = Chem.MolFragmentToSmiles(mol, atoms, kekuleSmiles=True)
