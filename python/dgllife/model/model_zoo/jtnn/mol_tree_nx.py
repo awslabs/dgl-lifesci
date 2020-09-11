@@ -8,9 +8,9 @@ import dgl
 import numpy as np
 import rdkit.Chem as Chem
 
-from .chemutils import (decode_stereo, enum_assemble_nx, get_clique_mol,
-                        get_mol, get_smiles, tree_decomp)
-from ....data.jtvae import set_atommap
+from .chemutils import enum_assemble_nx
+from ....data.jtvae import set_atommap, decode_stereo, get_mol, get_clique_mol, tree_decomp, \
+    get_smiles
 
 class DGLMolTree():
     def __init__(self, smiles):

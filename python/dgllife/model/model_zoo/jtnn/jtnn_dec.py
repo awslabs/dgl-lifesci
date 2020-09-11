@@ -14,9 +14,10 @@ import torch.nn.functional as F
 import dgl.function as fn
 from dgl import batch, dfs_labeled_edges_generator
 
-from .chemutils import enum_assemble_nx, get_mol
+from .chemutils import enum_assemble_nx
 from .mol_tree_nx import DGLMolTree
 from .nnutils import GRUUpdate
+from ....data.jtvae import get_mol
 
 MAX_NB = 8
 MAX_DECODE_LEN = 100

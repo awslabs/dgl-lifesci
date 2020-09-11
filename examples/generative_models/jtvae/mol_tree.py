@@ -8,7 +8,8 @@ import dgl
 import numpy as np
 import rdkit.Chem as Chem
 
-from dgllife.data.jtvae import set_atommap, get_mol, get_smiles, decode_stereo, get_clique_mol, tree_decomp
+from dgllife.data.jtvae import set_atommap, get_mol, get_smiles, decode_stereo, get_clique_mol, \
+    tree_decomp
 
 from chemutils import enum_assemble_nx
 

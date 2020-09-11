@@ -14,7 +14,7 @@ import torch.nn.functional as F
 from dgl import batch, unbatch
 from dgl.data.utils import _get_dgl_url, download, get_download_dir, extract_archive
 
-from .chemutils import attach_mols_nx, copy_edit_mol, decode_stereo, enum_assemble_nx
+from .chemutils import attach_mols_nx, copy_edit_mol, enum_assemble_nx
 from .jtmpn import DGLJTMPN
 from .jtmpn import mol2dgl_single as mol2dgl_dec
 from .jtnn_dec import DGLJTNNDecoder
@@ -22,7 +22,7 @@ from .jtnn_enc import DGLJTNNEncoder
 from .vocab import Vocab
 from .mpn import DGLMPN
 from .mpn import mol2dgl_single as mol2dgl_enc
-from ....data.jtvae import set_atommap
+from ....data.jtvae import set_atommap, decode_stereo
 
 class DGLJTNNVAE(nn.Module):
     """
