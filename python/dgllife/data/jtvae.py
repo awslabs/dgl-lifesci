@@ -301,3 +301,88 @@ def tree_decomp(mol, mst_max_weight=100):
     edges = [(row[i], col[i]) for i in range(len(row))]
 
     return (cliques, edges)
+
+def atom_equal(a1, a2):
+    """Check if two atoms have the same type and formal charge.
+
+    Parameters
+    ----------
+    a1 : rdkit.Chem.rdchem.Atom
+        An RDKit atom object.
+    a2 : rdkit.Chem.rdchem.Atom
+        An RDKit atom object.
+
+    Returns
+    -------
+    bool
+        Whether they are equal.
+    """
+    return a1.GetSymbol() == a2.GetSymbol() and a1.GetFormalCharge() == a2.GetFormalCharge()
+
+def ring_bond_equal(b1, b2, reverse=False):
+    """Check whether the end atoms of the two bonds have the same type and formal charge.
+
+    Parameters
+    ----------
+    b1 : rdkit.Chem.rdchem.Bond
+        An RDKit bond object.
+    b2 : rdkit.Chem.rdchem.Bond
+        An RDKit bond object.
+    reverse : bool
+        Whether to reverse b2 in comparison.
+
+    Returns
+    -------
+    bool
+        Whether the bonds are equal.
+    """
+    b1 = (b1.GetBeginAtom(), b1.GetEndAtom())
+    if reverse:
+        b2 = (b2.GetEndAtom(), b2.GetBeginAtom())
+    else:
+        b2 = (b2.GetBeginAtom(), b2.GetEndAtom())
+    return atom_equal(b1[0], b2[0]) and atom_equal(b1[1], b2[1])
+
+def attach_mols_nx(ctr_mol, neighbors, prev_nodes, nei_amap):
+    """Attach clusters to a central molecule.
+
+    Parameters
+    ----------
+    ctr_mol : rdkit.Chem.rdchem.Mol
+        The central molecule.
+    neighbors : list of dict
+        Each element contains the information of a neighboring cluster.
+    prev_nodes : list of dict
+        Each element contains the information of a previous cluster.
+    nei_amap : dict
+        nei_amap[nei_id][nei_atom] maps an atom in a neighboring cluster
+        with id nei_id to an atom in the central molecule.
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.Mol
+        The central molecule with clusters attached.
+    """
+    prev_nids = [node['nid'] for node in prev_nodes]
+    for nei_node in prev_nodes + neighbors:
+        nei_id, nei_mol = nei_node['nid'], nei_node['mol']
+        amap = nei_amap[nei_id]
+        for atom in nei_mol.GetAtoms():
+            if atom.GetIdx() not in amap:
+                new_atom = copy_atom(atom)
+                amap[atom.GetIdx()] = ctr_mol.AddAtom(new_atom)
+
+        if nei_mol.GetNumBonds() == 0:
+            nei_atom = nei_mol.GetAtomWithIdx(0)
+            ctr_atom = ctr_mol.GetAtomWithIdx(amap[0])
+            ctr_atom.SetAtomMapNum(nei_atom.GetAtomMapNum())
+        else:
+            for bond in nei_mol.GetBonds():
+                a1 = amap[bond.GetBeginAtom().GetIdx()]
+                a2 = amap[bond.GetEndAtom().GetIdx()]
+                if ctr_mol.GetBondBetweenAtoms(a1, a2) is None:
+                    ctr_mol.AddBond(a1, a2, bond.GetBondType())
+                elif nei_id in prev_nids:  # father node overrides
+                    ctr_mol.RemoveBond(a1, a2)
+                    ctr_mol.AddBond(a1, a2, bond.GetBondType())
+    return ctr_mol
