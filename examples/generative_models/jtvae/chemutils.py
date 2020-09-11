@@ -7,7 +7,7 @@ import dgl
 import rdkit.Chem as Chem
 import torch
 
-from dgllife.data.jtvae import get_mol, get_smiles, sanitize, copy_atom
+from dgllife.data.jtvae import get_mol, get_smiles, sanitize, copy_atom, copy_edit_mol
 
 ELEM_LIST = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na',
              'Ca', 'Fe', 'Al', 'I', 'B', 'K', 'Se', 'Zn', 'H', 'Cu', 'Mn', 'unknown']
