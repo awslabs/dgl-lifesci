@@ -72,9 +72,8 @@ class PotentialNet(nn.Module):
     def forward(self, bigraph_canonical, knn_graph):
         batch_num_nodes = bigraph_canonical.batch_num_nodes()
         bigraph, stage_1_etypes = process_etypes(bigraph_canonical)
-        stage_2_etypes = th.zeros(knn_graph.num_edges() ,dtype=th.long, device=knn_graph.device)   # temporal solution
         h = self.stage_1_model(graph=bigraph, features=bigraph.ndata['h'], etypes=stage_1_etypes)
-        h = self.stage_2_model(graph=knn_graph, features=h, etypes=stage_2_etypes)
+        h = self.stage_2_model(graph=knn_graph, features=h, etypes=knn_graph.edata['d'])
         x = self.stage_3_model(batch_num_nodes=batch_num_nodes, features=h) 
         return x
 

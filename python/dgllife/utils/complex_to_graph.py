@@ -72,35 +72,10 @@ def potentialNet_graph_construction_featurization(ligand_mol,
                                               protein_coordinates,
                                               max_num_ligand_atoms=None,
                                               max_num_protein_atoms=None,
-                                              neighbor_cutoff=3.,
+                                              neighbor_cutoff=5.,
                                               max_num_neighbors=12,
+                                              distance_bins = [0.0, 2.0, 3.5, 4.0, 5.0],
                                               strip_hydrogens=False):
-    """Graph construction and featurization for `PotentialNet` <link>__.
-    Parameters
-    ----------
-    ligand_mol : rdkit.Chem.rdchem.Mol
-        RDKit molecule instance.
-    protein_mol : rdkit.Chem.rdchem.Mol
-        RDKit molecule instance.
-    ligand_coordinates : Float Tensor of shape (V1, 3)
-        Atom coordinates in a ligand.
-    protein_coordinates : Float Tensor of shape (V2, 3)
-        Atom coordinates in a protein.
-    max_num_ligand_atoms : int or None
-        Maximum number of atoms in ligands for zero padding, which should be no smaller than
-        ligand_mol.GetNumAtoms() if not None. If None, no zero padding will be performed.
-        Default to None.
-    max_num_protein_atoms : int or None
-        Maximum number of atoms in proteins for zero padding, which should be no smaller than
-        protein_mol.GetNumAtoms() if not None. If None, no zero padding will be performed.
-        Default to None.
-    neighbor_cutoff : float
-        Distance cutoff to define 'neighboring'. Default to 12.
-    max_num_neighbors : int
-        Maximum number of neighbors allowed for each atom. Default to 12.
-    strip_hydrogens : bool
-        Whether to exclude hydrogen atoms. Default to False.
-    """
     assert ligand_coordinates is not None, 'Expect ligand_coordinates to be provided.'
     assert protein_coordinates is not None, 'Expect protein_coordinates to be provided.'
     if max_num_ligand_atoms is not None:
@@ -160,6 +135,8 @@ def potentialNet_graph_construction_featurization(ligand_mol,
     complex_knn_graph = graph([])
     complex_knn_graph.add_nodes(len(complex_coordinates))
     complex_knn_graph.add_edges(complex_srcs, complex_dsts)
+    complex_knn_graph.edata['d'] = F.zerocopy_from_numpy(
+        (np.digitize(complex_dists, bins=distance_bins, right=True)-1).astype(np.long))
     
     return complex_bigraph, complex_knn_graph
 
