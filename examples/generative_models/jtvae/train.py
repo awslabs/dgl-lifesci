@@ -14,7 +14,7 @@ import torch.optim.lr_scheduler as lr_scheduler
 from dgllife.model import DGLJTNNVAE
 from torch.utils.data import DataLoader
 
-from .datautils import JTNNDataset, JTNNCollator
+from datautils import JTNNDataset, JTNNCollator
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
