@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
-import rdkit
 import torch
 
 from dgllife.model import DGLJTNNVAE, load_pretrained
@@ -12,10 +11,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from datautils import JTNNCollator, JTNNDataset
-
-def worker_init_fn(id_):
-    lg = rdkit.RDLogger.logger()
-    lg.setLevel(rdkit.RDLogger.CRITICAL)
+from utils import worker_init_fn
 
 worker_init_fn(None)
 

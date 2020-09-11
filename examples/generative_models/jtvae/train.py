@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
-import rdkit
 import sys
 import torch
 import torch.nn as nn
@@ -15,12 +14,9 @@ from dgllife.model import DGLJTNNVAE
 from torch.utils.data import DataLoader
 
 from datautils import JTNNDataset, JTNNCollator
+from utils import worker_init_fn
 
 torch.multiprocessing.set_sharing_strategy('file_system')
-
-def worker_init_fn(id_):
-    lg = rdkit.RDLogger.logger()
-    lg.setLevel(rdkit.RDLogger.CRITICAL)
 
 worker_init_fn(None)
 

@@ -14,10 +14,6 @@ from scipy.sparse.csgraph import minimum_spanning_tree
 MST_MAX_WEIGHT = 100
 MAX_NCAND = 2000
 
-def set_atommap(mol, num=0):
-    for atom in mol.GetAtoms():
-        atom.SetAtomMapNum(num)
-
 def get_mol(smiles):
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:

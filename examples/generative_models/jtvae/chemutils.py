@@ -8,9 +8,10 @@ import rdkit.Chem as Chem
 import torch
 
 from collections import defaultdict
-from rdkit.Chem.EnumerateStereoisomers import EnumerateStereoisomers
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import minimum_spanning_tree
+
+from dgllife.data.jtvae import get_mol, get_smiles
 
 ELEM_LIST = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na',
              'Ca', 'Fe', 'Al', 'I', 'B', 'K', 'Se', 'Zn', 'H', 'Cu', 'Mn', 'unknown']
@@ -22,40 +23,6 @@ def onek_encoding_unk(x, allowable_set):
     if x not in allowable_set:
         x = allowable_set[-1]
     return [x == s for s in allowable_set]
-
-def set_atommap(mol, num=0):
-    for atom in mol.GetAtoms():
-        atom.SetAtomMapNum(num)
-
-def get_mol(smiles):
-    mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
-        return None
-    Chem.Kekulize(mol)
-    return mol
-
-def get_smiles(mol):
-    return Chem.MolToSmiles(mol, kekuleSmiles=True)
-
-def decode_stereo(smiles2D):
-    mol = Chem.MolFromSmiles(smiles2D)
-    dec_isomers = list(EnumerateStereoisomers(mol))
-
-    dec_isomers = [Chem.MolFromSmiles(Chem.MolToSmiles(
-        mol, isomericSmiles=True)) for mol in dec_isomers]
-    smiles3D = [Chem.MolToSmiles(mol, isomericSmiles=True)
-                for mol in dec_isomers]
-
-    chiralN = [atom.GetIdx() for atom in dec_isomers[0].GetAtoms() if int(
-        atom.GetChiralTag()) > 0 and atom.GetSymbol() == "N"]
-    if len(chiralN) > 0:
-        for mol in dec_isomers:
-            for idx in chiralN:
-                mol.GetAtomWithIdx(idx).SetChiralTag(
-                    Chem.rdchem.ChiralType.CHI_UNSPECIFIED)
-            smiles3D.append(Chem.MolToSmiles(mol, isomericSmiles=True))
-
-    return smiles3D
 
 def sanitize(mol):
     try:

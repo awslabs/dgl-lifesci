@@ -8,8 +8,9 @@ import dgl
 import numpy as np
 import rdkit.Chem as Chem
 
-from chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, \
-    set_atommap, enum_assemble_nx, decode_stereo
+from dgllife.data.jtvae import set_atommap, get_mol, get_smiles, decode_stereo
+
+from chemutils import get_clique_mol, tree_decomp, enum_assemble_nx
 
 def get_slots(smiles):
     mol = Chem.MolFromSmiles(smiles)
