@@ -17,17 +17,18 @@ def process_etypes(graph):
         encodings = th.nonzero(edata[i,])
         etypes = th.cat([etypes, encodings[0]])
         src, dst = graph.find_edges(i)
-        for _ in encodings[1:]: # start from the second
+        encodings = encodings.view(-1)
+        num_2_add = encodings[1:].shape # start from the second
         # add edges repeatedly to represent different edge types
-            graph.add_edges(src, dst)
-        etypes = th.cat([etypes, encodings[1:].reshape(1,-1)[0]])
+        graph.add_edges(src.repeat(num_2_add), dst.repeat(num_2_add)) 
+        etypes = th.cat([etypes, encodings[1:]])
     del graph.edata['e']
     return graph, etypes
 
 def sum_ligand_features(h, batch_num_nodes):
     """Computes the sum of ligand features h from batch_num_nodes"""
     node_nums = th.cumsum(batch_num_nodes, dim=0)
-    B = int(len(batch_num_nodes)/2)
+    B = int(len(batch_num_nodes)/2) # actual batch size
     ligand_idx = [list(range(node_nums[0]))] # first ligand
     for i in range(2,len(node_nums),2): # the rest of ligands in the batch
         ligand_idx.append(list(range(node_nums[i-1],node_nums[i])))

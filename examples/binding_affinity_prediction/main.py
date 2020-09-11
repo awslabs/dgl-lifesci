@@ -77,11 +77,13 @@ def main(args):
     train_loader = DataLoader(dataset=train_set,
                               batch_size=args['batch_size'],
                               shuffle=args['shuffle'],
-                              collate_fn=collate)
+                              collate_fn=collate,
+                              num_workers=8)
     test_loader = DataLoader(dataset=test_set,
                              batch_size=args['batch_size'],
                              shuffle=True,
-                             collate_fn=collate)
+                             collate_fn=collate,
+                             num_workers=8)
 
     model = load_model(args)
     loss_fn = nn.MSELoss()
