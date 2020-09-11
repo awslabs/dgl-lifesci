@@ -199,8 +199,8 @@ class DGLJTMPN(nn.Module):
         cand_line_graph = dgl.line_graph(cand_graphs, backtracking=False, shared=True)
         cand_line_graph._node_frames = cand_graphs._edge_frames
 
-        n_nodes = cand_graphs.number_of_nodes()
-        n_edges = cand_graphs.number_of_edges()
+        n_nodes = cand_graphs.num_nodes()
+        n_edges = cand_graphs.num_edges()
 
         cand_graphs = self.run(
             cand_graphs, cand_line_graph, tree_mess_src_edges, tree_mess_tgt_edges,

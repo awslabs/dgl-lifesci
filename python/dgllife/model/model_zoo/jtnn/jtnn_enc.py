@@ -89,8 +89,8 @@ class DGLJTNNEncoder(nn.Module):
         # simply find the corresponding node ID by looking at node_offset
         node_offset = np.cumsum([0] + mol_tree_batch.batch_num_nodes().tolist())
         root_ids = torch.tensor(node_offset[:-1]).to(device)
-        n_nodes = mol_tree_batch.number_of_nodes()
-        n_edges = mol_tree_batch.number_of_edges()
+        n_nodes = mol_tree_batch.num_nodes()
+        n_edges = mol_tree_batch.num_edges()
 
         # Assign structure embeddings to tree nodes
         mol_tree_batch.ndata.update({

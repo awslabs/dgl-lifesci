@@ -137,8 +137,8 @@ class DGLJTNNDecoder(nn.Module):
 
         node_offset = np.cumsum([0] + mol_tree_batch.batch_num_nodes)
         root_ids = node_offset[:-1]
-        n_nodes = mol_tree_batch.number_of_nodes()
-        n_edges = mol_tree_batch.number_of_edges()
+        n_nodes = mol_tree_batch.num_nodes()
+        n_edges = mol_tree_batch.num_edges()
 
         mol_tree_batch.ndata.update({
             'x': self.embedding(mol_tree_batch.ndata['wid']),

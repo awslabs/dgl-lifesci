@@ -259,18 +259,18 @@ def test_smiles_to_nearest_neighbor_graph():
     g = smiles_to_nearest_neighbor_graph(test_smiles1, coordinates, neighbor_cutoff=10,
                                          node_featurizer=test_node_featurizer)
     assert torch.allclose(g.ndata['hv'], torch.tensor([[6.], [8.], [6.]]))
-    assert g.number_of_edges() == 6
+    assert g.num_edges() == 6
     assert 'dist' not in g.edata
 
     # Test self loops
     g = smiles_to_nearest_neighbor_graph(test_smiles1, coordinates, neighbor_cutoff=10,
                                          add_self_loop=True)
-    assert g.number_of_edges() == 9
+    assert g.num_edges() == 9
 
     # Test max_num_neighbors
     g = smiles_to_nearest_neighbor_graph(test_smiles1, coordinates, neighbor_cutoff=10,
                                          max_num_neighbors=1, add_self_loop=True)
-    assert g.number_of_edges() == 3
+    assert g.num_edges() == 3
 
     # Test pairwise distances
     g = smiles_to_nearest_neighbor_graph(test_smiles1, coordinates,
@@ -291,7 +291,7 @@ def test_smiles_to_nearest_neighbor_graph():
     g4 = smiles_to_nearest_neighbor_graph(test_smiles1, coordinates, neighbor_cutoff=10,
                                           node_featurizer=test_node_featurizer,
                                           keep_dists=True, explicit_hydrogens=True)
-    assert g4.number_of_edges() == 72
+    assert g4.num_edges() == 72
     assert torch.allclose(g4.ndata['hv'], torch.tensor([[1.], [1.], [1.], [6.],
                                                         [8.], [1.], [1.], [1.], [6.]]))
 
@@ -316,17 +316,17 @@ def test_mol_to_nearest_neighbor_graph():
     g = mol_to_nearest_neighbor_graph(mol, coordinates, neighbor_cutoff=10,
                                       node_featurizer=test_node_featurizer)
     assert torch.allclose(g.ndata['hv'], torch.tensor([[6.], [8.], [6.]]))
-    assert g.number_of_edges() == 6
+    assert g.num_edges() == 6
     assert 'dist' not in g.edata
 
     # Test self loops
     g = mol_to_nearest_neighbor_graph(mol, coordinates, neighbor_cutoff=10, add_self_loop=True)
-    assert g.number_of_edges() == 9
+    assert g.num_edges() == 9
 
     # Test max_num_neighbors
     g = mol_to_nearest_neighbor_graph(mol, coordinates, neighbor_cutoff=10,
                                       max_num_neighbors=1, add_self_loop=True)
-    assert g.number_of_edges() == 3
+    assert g.num_edges() == 3
 
     # Test pairwise distances
     g = mol_to_nearest_neighbor_graph(mol, coordinates, neighbor_cutoff=10, keep_dists=True)
@@ -346,7 +346,7 @@ def test_mol_to_nearest_neighbor_graph():
     g4 = mol_to_nearest_neighbor_graph(mol, coordinates, neighbor_cutoff=10,
                                        node_featurizer=test_node_featurizer,
                                        explicit_hydrogens=True)
-    assert g4.number_of_edges() == 72
+    assert g4.num_edges() == 72
     assert torch.allclose(g4.ndata['hv'], torch.tensor([[1.], [1.], [1.], [6.],
                                                         [8.], [1.], [1.], [1.], [6.]]))
 
