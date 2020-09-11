@@ -20,7 +20,7 @@ from .jtmpn import DGLJTMPN
 from .jtmpn import mol2dgl_single as mol2dgl_dec
 from .jtnn_dec import DGLJTNNDecoder
 from .jtnn_enc import DGLJTNNEncoder
-from .mol_tree import Vocab
+from .vocab import Vocab
 from .mpn import DGLMPN
 from .mpn import mol2dgl_single as mol2dgl_enc
 
