@@ -9,8 +9,8 @@ import torch
 from dgl.data.utils import download, extract_archive, get_download_dir, _get_dgl_url
 from torch.utils.data import Dataset
 
-from examples.generative_models.jtvae.mol_tree import Vocab, DGLMolTree
-from examples.generative_models.jtvae.chemutils import mol2dgl_dec, mol2dgl_enc
+from .mol_tree import Vocab, DGLMolTree
+from .chemutils import mol2dgl_dec, mol2dgl_enc
 
 ELEM_LIST = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na', 'Ca',
              'Fe', 'Al', 'I', 'B', 'K', 'Se', 'Zn', 'H', 'Cu', 'Mn', 'unknown']
