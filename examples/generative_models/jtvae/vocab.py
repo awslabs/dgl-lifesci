@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     from dgl.data.utils import _get_dgl_url, download, get_download_dir, extract_archive
 
-    from jtnn.mol_tree import DGLMolTree
+    from .mol_tree import DGLMolTree
 
     parser = argparse.ArgumentParser('Generate vocabulary for a molecule dataset')
     parser.add_argument('-d', '--data-path', type=str,

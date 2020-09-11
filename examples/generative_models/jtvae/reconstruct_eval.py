@@ -11,7 +11,7 @@ from dgllife.model import DGLJTNNVAE, load_pretrained
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from jtnn import *
+from .datautils import JTNNCollator, JTNNDataset
 
 def worker_init_fn(id_):
     lg = rdkit.RDLogger.logger()

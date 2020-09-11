@@ -12,10 +12,9 @@ import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 
 from dgllife.model import DGLJTNNVAE
-from dgllife.model.model_zoo.jtnn.nnutils import cuda
 from torch.utils.data import DataLoader
 
-from jtnn import *
+from .datautils import JTNNDataset, JTNNCollator
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
@@ -57,30 +56,15 @@ depth = int(args.depth)
 beta = float(args.beta)
 lr = float(args.lr)
 
-model = DGLJTNNVAE(vocab_file=vocab_file,
-                   hidden_size=hidden_size,
-                   latent_size=latent_size,
-                   depth=depth)
-
-if args.model_path is not None:
-    model.load_state_dict(torch.load(args.model_path))
-else:
-    for param in model.parameters():
-        if param.dim() == 1:
-            nn.init.constant_(param, 0)
-        else:
-            nn.init.xavier_normal_(param)
-
-model = cuda(model)
-print("Model #Params: %dK" % (sum([x.nelement() for x in model.parameters()]) / 1000,))
-
-optimizer = optim.Adam(model.parameters(), lr=lr)
-scheduler = lr_scheduler.ExponentialLR(optimizer, 0.9)
-
 MAX_EPOCH = 100
 PRINT_ITER = 20
 
 def train():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
     dataset.training = True
     dataloader = DataLoader(
         dataset,
@@ -91,11 +75,30 @@ def train():
         drop_last=True,
         worker_init_fn=worker_init_fn)
 
+    model = DGLJTNNVAE(vocab_file=vocab_file,
+                       hidden_size=hidden_size,
+                       latent_size=latent_size,
+                       depth=depth)
+
+    if args.model_path is not None:
+        model.load_state_dict(torch.load(args.model_path))
+    else:
+        for param in model.parameters():
+            if param.dim() == 1:
+                nn.init.constant_(param, 0)
+            else:
+                nn.init.xavier_normal_(param)
+    model = model.to(device)
+    print("Model #Params: %dK" % (sum([x.nelement() for x in model.parameters()]) / 1000,))
+
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    scheduler = lr_scheduler.ExponentialLR(optimizer, 0.9)
+
     for epoch in range(MAX_EPOCH):
         word_acc, topo_acc, assm_acc, steo_acc = 0, 0, 0, 0
 
         for it, batch in enumerate(dataloader):
-            batch['mol_graph_batch'] = batch['mol_graph_batch'].to('cuda:0')
+            batch['mol_graph_batch'] = batch['mol_graph_batch'].to(device)
             model.zero_grad()
             try:
                 loss, kl_div, wacc, tacc, sacc, dacc = model(batch, beta)
@@ -133,16 +136,3 @@ def train():
 
 if __name__ == '__main__':
     train()
-
-    print('# passes:', model.n_passes)
-    print('Total # nodes processed:', model.n_nodes_total)
-    print('Total # edges processed:', model.n_edges_total)
-    print('Total # tree nodes processed:', model.n_tree_nodes_total)
-    print('Graph decoder: # passes:', model.jtmpn.n_passes)
-    print('Graph decoder: Total # candidates processed:', model.jtmpn.n_samples_total)
-    print('Graph decoder: Total # nodes processed:', model.jtmpn.n_nodes_total)
-    print('Graph decoder: Total # edges processed:', model.jtmpn.n_edges_total)
-    print('Graph encoder: # passes:', model.mpn.n_passes)
-    print('Graph encoder: Total # candidates processed:', model.mpn.n_samples_total)
-    print('Graph encoder: Total # nodes processed:', model.mpn.n_nodes_total)
-    print('Graph encoder: Total # edges processed:', model.mpn.n_edges_total)

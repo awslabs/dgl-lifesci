@@ -8,7 +8,7 @@ import dgl
 import numpy as np
 import rdkit.Chem as Chem
 
-from .chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, \
+from examples.generative_models.jtvae.chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, \
     set_atommap, enum_assemble_nx, decode_stereo
 
 def get_slots(smiles):
