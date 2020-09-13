@@ -76,35 +76,6 @@ class DGLJTNNVAE(nn.Module):
         self.G_mean.reset_parameters()
         self.G_var.reset_parameters()
 
-    @staticmethod
-    def move_to_device(mol_batch, device):
-        """Move a data batch to the target device.
-
-        Parameters
-        ----------
-        mol_batch : dict
-            A batch of datapoints.
-        device
-            A target device.
-
-        Returns
-        -------
-        dict
-            The batch of datapoints moved to the target device.
-        """
-        trees = []
-        for tr in mol_batch['mol_trees']:
-            tr.g = tr.g.to(device)
-            trees.append(tr)
-        mol_batch['mol_trees'] = trees
-        mol_batch['mol_graph_batch'] = mol_batch['mol_graph_batch'].to(device)
-        if 'cand_graph_batch' in mol_batch:
-            mol_batch['cand_graph_batch'] = mol_batch['cand_graph_batch'].to(device)
-        if mol_batch.get('stereo_cand_graph_batch') is not None:
-            mol_batch['stereo_cand_graph_batch'] = mol_batch['stereo_cand_graph_batch'].to(device)
-
-        return mol_batch
-
     def encode(self, mol_batch):
         mol_graphs = mol_batch['mol_graph_batch']
         mol_vec = self.mpn(mol_graphs)

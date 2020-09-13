@@ -9,11 +9,23 @@ import numpy as np
 import torch
 
 from collections import defaultdict
-from dgl import graph
+from dgl import batch, graph
+from dgl.data.utils import get_download_dir, _get_dgl_url, download, extract_archive
+from functools import partial
 from rdkit import Chem
 from rdkit.Chem.EnumerateStereoisomers import EnumerateStereoisomers
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import minimum_spanning_tree
+from torch.utils.data import Dataset
+
+from ..utils.featurizers import BaseAtomFeaturizer, BaseBondFeaturizer, ConcatFeaturizer, \
+    atom_type_one_hot, atom_degree_one_hot, atom_formal_charge_one_hot, atom_chiral_tag_one_hot, \
+    atom_is_aromatic, bond_type_one_hot, bond_is_in_ring, bond_stereo_one_hot
+from ..utils.mol_to_graph import mol_to_bigraph
+
+__all__ = ['DGLMolTree',
+           'JTVAEDataset',
+           'JTVAECollator']
 
 def get_mol(smiles, kekulize=True):
     """Convert the SMILES string into an RDKit molecule object
@@ -774,3 +786,515 @@ def _set_node_id(mol_tree, vocab):
         wid.append(vocab.get_index(mol_tree.nodes_dict[node]['smiles']))
 
     return wid
+
+def get_atom_featurizer_enc():
+    """Get the atom featurizer for encoding.
+
+    Returns
+    -------
+    BaseAtomFeaturizer
+        The atom featurizer for encoding.
+    """
+    featurizer = BaseAtomFeaturizer({'x': ConcatFeaturizer([
+        partial(atom_type_one_hot,
+                allowable_set=['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na',
+                               'Ca', 'Fe', 'Al', 'I', 'B', 'K', 'Se', 'Zn', 'H', 'Cu', 'Mn'],
+                encode_unknown=True),
+        partial(atom_degree_one_hot, allowable_set=[0, 1, 2, 3, 4], encode_unknown=True),
+        partial(atom_formal_charge_one_hot, allowable_set=[-1, -2, 1, 2],
+                encode_unknown=True),
+        partial(atom_chiral_tag_one_hot,
+                allowable_set=[Chem.rdchem.ChiralType.CHI_UNSPECIFIED,
+                               Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW,
+                               Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW],
+                encode_unknown=True),
+        atom_is_aromatic
+    ])})
+    return featurizer
+
+def get_bond_featurizer_enc():
+    """Get the bond featurizer for encoding.
+
+    Returns
+    -------
+    BaseBondFeaturizer
+        The bond featurizer for encoding.
+    """
+    featurizer = BaseBondFeaturizer({'x': ConcatFeaturizer([
+        bond_type_one_hot,
+        bond_is_in_ring,
+        partial(bond_stereo_one_hot,
+                allowable_set=[Chem.rdchem.BondStereo.STEREONONE,
+                               Chem.rdchem.BondStereo.STEREOANY,
+                               Chem.rdchem.BondStereo.STEREOZ,
+                               Chem.rdchem.BondStereo.STEREOE,
+                               Chem.rdchem.BondStereo.STEREOCIS],
+                encode_unknown=True)
+    ])})
+    return featurizer
+
+def get_atom_featurizer_dec():
+    """Get the atom featurizer for decoding.
+
+    Returns
+    -------
+    BaseAtomFeaturizer
+        The atom featurizer for decoding.
+    """
+    featurizer = BaseAtomFeaturizer({'x': ConcatFeaturizer([
+        partial(atom_type_one_hot,
+                allowable_set=['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na',
+                               'Ca', 'Fe', 'Al', 'I', 'B', 'K', 'Se', 'Zn', 'H', 'Cu', 'Mn'],
+                encode_unknown=True),
+        partial(atom_degree_one_hot, allowable_set=[0, 1, 2, 3, 4], encode_unknown=True),
+        partial(atom_formal_charge_one_hot, allowable_set=[-1, -2, 1, 2],
+                encode_unknown=True),
+        atom_is_aromatic
+    ])})
+    return featurizer
+
+def get_bond_featurizer_dec():
+    """Get the bond featurizer for decoding.
+
+    Returns
+    -------
+    BaseBondFeaturizer
+        The bond featurizer for decoding.
+    """
+    featurizer = BaseBondFeaturizer({'x': ConcatFeaturizer([
+        bond_type_one_hot, bond_is_in_ring
+    ])})
+    return featurizer
+
+def mol2dgl_enc(smiles, atom_featurizer, bond_featurizer):
+    """Convert a SMILES to a DGLGraph for encoding.
+
+    Parameters
+    ----------
+    smiles : str
+        A SMILES string.
+    atom_featurizer : callable
+        Function for featurizing atoms.
+    bond_featurizer : callable
+        Function for featurizing bonds.
+
+    Returns
+    -------
+    g : DGLGraph
+        The DGLGraph for encoding. g.ndata['x'] stores the atom features and
+        g.edata['x'] stores the bond features.
+    """
+    mol = get_mol(smiles)
+    return mol_to_bigraph(mol=mol,
+                          node_featurizer=atom_featurizer,
+                          edge_featurizer=bond_featurizer,
+                          canonical_atom_order=False)
+
+def mol2dgl_dec(cand_batch, atom_featurizer, bond_featurizer):
+    """Convert a batch of candidate molecules to DGLGraphs for decoding.
+
+    Parameters
+    ----------
+    cand_batch : list of 3-tuples
+        Each tuple consists of the candidate molecule, the junction tree of
+        the original molecule and the id for the cluster.
+    atom_featurizer : callable
+        Function for featurizing atoms.
+    bond_featurizer : callable
+        Function for featurizing bonds.
+
+    Returns
+    -------
+    g_list : list of DGLGraph
+        Each graph corresponds to a candidate molecule decoded. g_list[i].ndata['x']
+        stores the atom features and g_list[i].edata['x'] stores the bond features.
+    1D LongTensor
+        The edges in the junction tree corresponding to the edges in ``g_list``.
+    1D LongTensor
+        The edges in the batched ``g_list``.
+    1D LongTensor
+        The nodes in the batched ``g_list``.
+    """
+    # Note that during graph decoding they don't predict stereochemistry-related
+    # characteristics (i.e. Chiral Atoms, E-Z, Cis-Trans).  Instead, they decode
+    # the 2-D graph first, then enumerate all possible 3-D forms and find the
+    # one with highest score.
+    cand_graphs = []
+    tree_mess_source_edges = []  # map these edges from trees to...
+    tree_mess_target_edges = []  # these edges on candidate graphs
+    tree_mess_target_nodes = []
+    n_nodes = 0
+
+    for mol, mol_tree, ctr_node_id in cand_batch:
+        n_atoms = mol.GetNumAtoms()
+
+        g = mol_to_bigraph(mol,
+                           node_featurizer=atom_featurizer,
+                           edge_featurizer=bond_featurizer,
+                           canonical_atom_order=False)
+        cand_graphs.append(g)
+
+        for i, bond in enumerate(mol.GetBonds()):
+            a1, a2 = bond.GetBeginAtom(), bond.GetEndAtom()
+            begin_idx, end_idx = a1.GetIdx(), a2.GetIdx()
+            x_nid, y_nid = a1.GetAtomMapNum(), a2.GetAtomMapNum()
+            # Tree node ID in the batch
+            x_bid = mol_tree.nodes_dict[x_nid - 1]['idx'] if x_nid > 0 else -1
+            y_bid = mol_tree.nodes_dict[y_nid - 1]['idx'] if y_nid > 0 else -1
+
+            if x_bid >= 0 and y_bid >= 0 and x_bid != y_bid:
+                if mol_tree.g.has_edges_between(x_bid, y_bid):
+                    tree_mess_target_edges.append(
+                        (begin_idx + n_nodes, end_idx + n_nodes))
+                    tree_mess_source_edges.append((x_bid, y_bid))
+                    tree_mess_target_nodes.append(end_idx + n_nodes)
+                if mol_tree.g.has_edges_between(y_bid, x_bid):
+                    tree_mess_target_edges.append(
+                        (end_idx + n_nodes, begin_idx + n_nodes))
+                    tree_mess_source_edges.append((y_bid, x_bid))
+                    tree_mess_target_nodes.append(begin_idx + n_nodes)
+
+        # Update offset
+        n_nodes += n_atoms
+
+    return cand_graphs, \
+           torch.LongTensor(tree_mess_source_edges), \
+           torch.LongTensor(tree_mess_target_edges), \
+           torch.LongTensor(tree_mess_target_nodes)
+
+class JTVAEDataset(Dataset):
+    """Dataset for JTVAE
+
+    JTVAE is introduced in `Junction Tree Variational Autoencoder for Molecular Graph Generation
+    <https://arxiv.org/abs/1802.04364>`__.
+
+    Parameters
+    ----------
+    data : str
+        * If 'train' or 'test', it will use the training or test subset of the ZINC dataset.
+        * Otherwise, it should be the path to a .txt file for a dataset. The .txt file should
+          contain one SMILES per line.
+    vocab : Vocab
+        Loaded vocabulary.
+    training : bool
+        Whether the dataset is for training or not.
+    """
+    def __init__(self, data, vocab, training=True):
+        dir = get_download_dir()
+
+        _url = _get_dgl_url('dataset/jtnn.zip')
+        zip_file_path = '{}/jtnn.zip'.format(dir)
+        download(_url, path=zip_file_path)
+        extract_archive(zip_file_path, '{}/jtnn'.format(dir))
+
+        print('Loading data...')
+        if data in ['train', 'test']:
+            # ZINC subset
+            data_file = '{}/jtnn/{}.txt'.format(dir, data)
+        else:
+            # New dataset
+            data_file = data
+        with open(data_file) as f:
+            self.data = [line.strip("\r\n ").split()[0] for line in f]
+        self.vocab = vocab
+
+        print('Loading finished')
+        print('\t# samples:', len(self.data))
+        self.training = training
+
+        self.atom_featurizer_enc = get_atom_featurizer_enc()
+        self.bond_featurizer_enc = get_bond_featurizer_enc()
+        self.atom_featurizer_dec = get_atom_featurizer_dec()
+        self.bond_featurizer_dec = get_bond_featurizer_dec()
+
+    @staticmethod
+    def move_to_device(mol_batch, device):
+        """Move a data batch to the target device.
+
+        Parameters
+        ----------
+        mol_batch : dict
+            A batch of datapoints.
+        device
+            A target device.
+
+        Returns
+        -------
+        dict
+            The batch of datapoints moved to the target device.
+        """
+        trees = []
+        for tr in mol_batch['mol_trees']:
+            tr.g = tr.g.to(device)
+            trees.append(tr)
+        mol_batch['mol_trees'] = trees
+        mol_batch['mol_graph_batch'] = mol_batch['mol_graph_batch'].to(device)
+        if 'cand_graph_batch' in mol_batch:
+            mol_batch['cand_graph_batch'] = mol_batch['cand_graph_batch'].to(device)
+        if mol_batch.get('stereo_cand_graph_batch') is not None:
+            mol_batch['stereo_cand_graph_batch'] = mol_batch['stereo_cand_graph_batch'].to(device)
+
+        return mol_batch
+
+    def __len__(self):
+        """Get the size of the dataset.
+
+        Returns
+        -------
+        int
+            Size of the dataset.
+        """
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        """Get the datapoint corresponding to the index.
+
+        Parameters
+        ----------
+        idx : int
+            Index for the datapoint.
+
+        Returns
+        -------
+        result: dict
+
+            The dictionary contains the following items:
+
+            * result['mol_tree'] : MolTree
+                The junction tree for the original compound.
+            * result['mol_graph'] : DGLGraph
+                The DGLGraph for the original compound.
+            * result['wid'] : list of int
+                The ids corresponding to the clusters (nodes in the junction tree)
+                in the vocabulary.
+            * result['cand_graphs'] : list of DGLGraph, optional
+                DGLGraphs corresponding to the enumerated candidate molecules.
+                This only exists when ``self.training`` is True.
+            * result['tree_mess_src_e'] : 1D LongTensor, optional
+                The edges in the junction tree corresponding to the edges in
+                ``result['cand_graphs']``. This only exists when ``self.training`` is True.
+            * result['tree_mess_tgt_e'] : 1D LongTensor, optional
+                The edges in ``result['cand_graphs']``.
+                This only exists when ``self.training`` is True.
+            * result['tree_mess_tgt_n'] : 1D LongTensor, optional
+                The nodes in ``result['cand_graphs']``.
+                This only exists when ``self.training`` is True.
+            * result['stereo_cand_graphs'], optional
+                DGLGraphs corresponding to enumerated stereoisomers.
+                This only exists when ``self.training`` is True.
+            * result['stereo_cand_label'], optional
+                A 2-tuple of int. The first element is the index of the ground truth
+                stereoisomer in the enumerated stereoisomers. The second element is
+                the number of the enumerated stereoisomers. This only exists when
+                ``self.training`` is True.
+        """
+        smiles = self.data[idx]
+        mol_tree = DGLMolTree(smiles)
+        mol_tree.recover()
+        mol_tree.assemble()
+
+        wid = _set_node_id(mol_tree, self.vocab)
+
+        # prebuild the molecule graph
+        mol_graph = mol2dgl_enc(mol_tree.smiles,
+                                self.atom_featurizer_enc,
+                                self.bond_featurizer_enc)
+
+        result = {
+            'mol_tree': mol_tree,
+            'mol_graph': mol_graph,
+            'wid': wid
+        }
+
+        if not self.training:
+            return result
+
+        # prebuild the candidate graph list
+        cands = []
+        # Enumerate over clusters in the junction tree
+        for node_id, node in mol_tree.nodes_dict.items():
+            # fill in ground truth
+            if node['label'] not in node['cands']:
+                node['cands'].append(node['label'])
+                node['cand_mols'].append(node['label_mol'])
+
+            if node['is_leaf'] or len(node['cands']) == 1:
+                continue
+            cands.extend([(cand, mol_tree, node_id)
+                         for cand in node['cand_mols']])
+        if len(cands) > 0:
+            cand_graphs, tree_mess_src_e, tree_mess_tgt_e, tree_mess_tgt_n = mol2dgl_dec(
+                cands, self.atom_featurizer_dec, self.bond_featurizer_dec)
+        else:
+            cand_graphs = []
+            tree_mess_src_e = torch.zeros(0, 2).long()
+            tree_mess_tgt_e = torch.zeros(0, 2).long()
+            tree_mess_tgt_n = torch.zeros(0).long()
+
+        # prebuild the stereoisomers
+        cands = mol_tree.stereo_cands
+        if len(cands) > 1:
+            if mol_tree.smiles_3d not in cands:
+                cands.append(mol_tree.smiles_3d)
+
+            stereo_cand_graphs = [mol2dgl_enc(c, self.atom_featurizer_enc,
+                                              self.bond_featurizer_enc)
+                                  for c in cands]
+            stereo_cand_label = [(cands.index(mol_tree.smiles_3d), len(cands))]
+        else:
+            stereo_cand_graphs = []
+            stereo_cand_label = []
+
+        result.update({
+            'cand_graphs': cand_graphs,
+            'tree_mess_src_e': tree_mess_src_e,
+            'tree_mess_tgt_e': tree_mess_tgt_e,
+            'tree_mess_tgt_n': tree_mess_tgt_n,
+            'stereo_cand_graphs': stereo_cand_graphs,
+            'stereo_cand_label': stereo_cand_label,
+            })
+
+        return result
+
+def _unpack_field(examples, field):
+    """Get all values of examples under the specified field.
+
+    Parameters
+    ----------
+    examples : iterable
+        An iterable of objects.
+    field : str
+        The field for value retrieval.
+
+    Returns
+    -------
+    list
+        A list of values.
+    """
+    return [e[field] for e in examples]
+
+class JTVAECollator(object):
+    """Collate function for JTVAE.
+
+    JTVAE is introduced in `Junction Tree Variational Autoencoder for Molecular Graph Generation
+    <https://arxiv.org/abs/1802.04364>`__.
+
+    Parameters
+    ----------
+    training : bool
+        Whether the collate function is for training or not.
+    """
+    def __init__(self, training):
+        self.training = training
+
+    @staticmethod
+    def _batch_and_set(graphs, flatten):
+        """Batch graphs and set an edge feature
+
+        Parameters
+        ----------
+        graphs : list of DGLGraph or list of list of DGLGraph
+            Graphs to batch.
+        flatten : bool
+            If True, ``graphs`` is a list of list of DGLGraphs and it will
+            flatten ``graphs`` before calling dgl.batch.
+
+        Returns
+        -------
+        DGLGraph
+            Batched DGLGraph.
+        """
+        if flatten:
+            graphs = [g for f in graphs for g in f]
+        graph_batch = batch(graphs)
+        graph_batch.edata['src_x'] = torch.zeros(graph_batch.num_edges(),
+                                                 graph_batch.ndata['x'].shape[1])
+        return graph_batch
+
+    def __call__(self, examples):
+        """Batch multiple datapoints
+
+        Parameters
+        ----------
+        examples : list of dict
+            Multiple datapoints.
+
+        Returns
+        -------
+        dict
+            Batched datapoint.
+        """
+        # get list of trees
+        mol_trees = _unpack_field(examples, 'mol_tree')
+        wid = _unpack_field(examples, 'wid')
+        for _wid, mol_tree in zip(wid, mol_trees):
+            mol_tree.g.ndata['wid'] = torch.LongTensor(_wid)
+
+        # TODO: either support pickling or get around ctypes pointers using scipy
+        # batch molecule graphs
+        mol_graphs = _unpack_field(examples, 'mol_graph')
+        mol_graph_batch = self._batch_and_set(mol_graphs, False)
+
+        result = {
+            'mol_trees': mol_trees,
+            'mol_graph_batch': mol_graph_batch
+        }
+
+        if not self.training:
+            return result
+
+        # batch candidate graphs
+        cand_graphs = _unpack_field(examples, 'cand_graphs')
+        cand_batch_idx = []
+        tree_mess_src_e = _unpack_field(examples, 'tree_mess_src_e')
+        tree_mess_tgt_e = _unpack_field(examples, 'tree_mess_tgt_e')
+        tree_mess_tgt_n = _unpack_field(examples, 'tree_mess_tgt_n')
+
+        n_graph_nodes = 0
+        n_tree_nodes = 0
+        for i in range(len(cand_graphs)):
+            tree_mess_tgt_e[i] += n_graph_nodes
+            tree_mess_src_e[i] += n_tree_nodes
+            tree_mess_tgt_n[i] += n_graph_nodes
+            n_graph_nodes += sum(g.num_nodes() for g in cand_graphs[i])
+            n_tree_nodes += mol_trees[i].g.num_nodes()
+            cand_batch_idx.extend([i] * len(cand_graphs[i]))
+        tree_mess_tgt_e = torch.cat(tree_mess_tgt_e)
+        tree_mess_src_e = torch.cat(tree_mess_src_e)
+        tree_mess_tgt_n = torch.cat(tree_mess_tgt_n)
+
+        cand_graph_batch = self._batch_and_set(cand_graphs, True)
+
+        # batch stereoisomers
+        stereo_cand_graphs = _unpack_field(examples, 'stereo_cand_graphs')
+        stereo_cand_batch_idx = []
+        for i in range(len(stereo_cand_graphs)):
+            stereo_cand_batch_idx.extend([i] * len(stereo_cand_graphs[i]))
+
+        if len(stereo_cand_batch_idx) > 0:
+            stereo_cand_labels = [
+                (label, length)
+                for ex in _unpack_field(examples, 'stereo_cand_label')
+                for label, length in ex
+            ]
+            stereo_cand_labels, stereo_cand_lengths = zip(*stereo_cand_labels)
+            stereo_cand_graph_batch = self._batch_and_set(stereo_cand_graphs, True)
+        else:
+            stereo_cand_labels = []
+            stereo_cand_lengths = []
+            stereo_cand_graph_batch = None
+            stereo_cand_batch_idx = []
+
+        result.update({
+            'cand_graph_batch': cand_graph_batch,
+            'cand_batch_idx': cand_batch_idx,
+            'tree_mess_tgt_e': tree_mess_tgt_e,
+            'tree_mess_src_e': tree_mess_src_e,
+            'tree_mess_tgt_n': tree_mess_tgt_n,
+            'stereo_cand_graph_batch': stereo_cand_graph_batch,
+            'stereo_cand_batch_idx': stereo_cand_batch_idx,
+            'stereo_cand_labels': stereo_cand_labels,
+            'stereo_cand_lengths': stereo_cand_lengths,
+            })
+
+        return result

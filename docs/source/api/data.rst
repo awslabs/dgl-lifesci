@@ -148,6 +148,21 @@ Adapting to New Datasets for Weisfeiler-Lehman Networks
 .. autoclass:: dgllife.data.WLNRankDataset
     :members: ignore_large, __getitem__, __len__
 
+Generative Models
+-----------------
+
+JTVAE
+`````
+
+.. autoclass:: dgllife.data.DGLMolTree
+    :members: treesize, recover, assemble
+
+.. autoclass:: dgllife.data.JTVAEDataset
+    :members: __len__, __getitem__, move_to_device
+
+.. autoclass:: dgllife.data.JTVAECollator
+    :members: __call__
+
 Protein-Ligand Binding Affinity Prediction
 ------------------------------------------
 
