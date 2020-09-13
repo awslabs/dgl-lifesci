@@ -17,7 +17,6 @@ from dgl import batch, dfs_labeled_edges_generator
 from .nnutils import GRUUpdate
 from ....data.jtvae import get_mol, enum_assemble_nx, DGLMolTree
 
-MAX_NB = 8
 MAX_DECODE_LEN = 100
 
 def dfs_order(forest, roots):
@@ -91,18 +90,14 @@ def create_node_dict(smiles, clique=None):
     )
 
 class DGLJTNNDecoder(nn.Module):
-    def __init__(self, vocab, hidden_size, latent_size, embedding=None):
+    def __init__(self, vocab, hidden_size, latent_size, embedding):
         nn.Module.__init__(self)
 
         self.hidden_size = hidden_size
         self.vocab_size = vocab.size()
         self.vocab = vocab
 
-        if embedding is None:
-            self.embedding = nn.Embedding(self.vocab_size, hidden_size)
-        else:
-            self.embedding = embedding
-
+        self.embedding = embedding
         self.dec_tree_edge_update = GRUUpdate(hidden_size)
 
         self.W = nn.Linear(latent_size + hidden_size, hidden_size)

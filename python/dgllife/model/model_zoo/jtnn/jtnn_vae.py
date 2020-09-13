@@ -15,14 +15,13 @@ from dgl import batch, unbatch
 from dgl.data.utils import _get_dgl_url, download, get_download_dir, extract_archive
 
 from .jtmpn import DGLJTMPN
-from .jtmpn import mol2dgl_single as mol2dgl_dec
 from .jtnn_dec import DGLJTNNDecoder
 from .jtnn_enc import DGLJTNNEncoder
 from .vocab import Vocab
 from .mpn import DGLMPN
 from .mpn import mol2dgl_single as mol2dgl_enc
 from ....data.jtvae import set_atommap, decode_stereo, copy_edit_mol, attach_mols_nx, \
-    enum_assemble_nx
+    enum_assemble_nx, get_atom_featurizer_dec, get_bond_featurizer_dec, mol2dgl_dec
 
 class DGLJTNNVAE(nn.Module):
     """
@@ -59,10 +58,8 @@ class DGLJTNNVAE(nn.Module):
         self.G_mean = nn.Linear(hidden_size, latent_size // 2)
         self.G_var = nn.Linear(hidden_size, latent_size // 2)
 
-        self.n_nodes_total = 0
-        self.n_passes = 0
-        self.n_edges_total = 0
-        self.n_tree_nodes_total = 0
+        self.atom_featurizer_dec = get_atom_featurizer_dec()
+        self.bond_featurizer_dec = get_bond_featurizer_dec()
 
     def reset_parameters(self):
         """Reinitialize model parameters."""
@@ -280,19 +277,14 @@ class DGLJTNNVAE(nn.Module):
         cand_smiles, cand_mols, cand_amap = list(zip(*cands))
 
         cands = [(candmol, mol_tree_msg, cur_node_id) for candmol in cand_mols]
-        cand_graphs, atom_x, bond_x, tree_mess_src_edges, \
-            tree_mess_tgt_edges, tree_mess_tgt_nodes = mol2dgl_dec(
-                cands)
+        cand_graphs, tree_mess_src_edges, tree_mess_tgt_edges, tree_mess_tgt_nodes = \
+            mol2dgl_dec(cands, self.atom_featurizer_dec, self.bond_featurizer_dec)
         cand_graphs = batch(cand_graphs).to(device)
         tree_mess_src_edges = tree_mess_src_edges.to(device)
         tree_mess_tgt_edges = tree_mess_tgt_edges.to(device)
         tree_mess_tgt_nodes = tree_mess_tgt_nodes.to(device)
-        atom_x = atom_x.to(device)
-        bond_x = bond_x.to(device)
-        cand_graphs.ndata['x'] = atom_x
-        cand_graphs.edata['x'] = bond_x
-        cand_graphs.edata['src_x'] = atom_x.new(
-            bond_x.shape[0], atom_x.shape[1]).zero_()
+        cand_graphs.edata['src_x'] = torch.zeros(cand_graphs.num_edges(),
+                                                 cand_graphs.ndata['x'].shape[1]).to(device)
 
         cand_vecs = self.jtmpn(
             (cand_graphs, tree_mess_src_edges,
