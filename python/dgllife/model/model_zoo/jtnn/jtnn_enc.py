@@ -11,7 +11,7 @@ import torch.nn as nn
 
 import dgl
 import dgl.function as fn
-from dgl import batch, bfs_edges_generator
+from dgl import bfs_edges_generator
 
 from .nnutils import GRUUpdate
 
@@ -19,10 +19,10 @@ MAX_NB = 8
 
 def level_order(forest, roots):
     device = forest.device
-    edges = bfs_edges_generator(forest, roots)
+    edges = list(bfs_edges_generator(forest, roots))
     edges = [e.to(device) for e in edges]
     _, leaves = forest.find_edges(edges[-1])
-    edges_back = bfs_edges_generator(forest, roots, reverse=True)
+    edges_back = list(bfs_edges_generator(forest, roots, reverse=True))
     edges_back = [e.to(device) for e in edges_back]
     yield from reversed(edges_back)
     yield from edges
@@ -53,17 +53,13 @@ class EncoderGatherUpdate(nn.Module):
         }
 
 class DGLJTNNEncoder(nn.Module):
-    def __init__(self, vocab, hidden_size, embedding=None):
+    def __init__(self, vocab, hidden_size, embedding):
         nn.Module.__init__(self)
         self.hidden_size = hidden_size
         self.vocab_size = vocab.size()
         self.vocab = vocab
 
-        if embedding is None:
-            self.embedding = nn.Embedding(self.vocab_size, hidden_size)
-        else:
-            self.embedding = embedding
-
+        self.embedding = embedding
         self.enc_tree_update = GRUUpdate(hidden_size)
         self.enc_tree_gather_update = EncoderGatherUpdate(hidden_size)
 
@@ -73,9 +69,7 @@ class DGLJTNNEncoder(nn.Module):
         self.enc_tree_update.reset_parameters()
         self.enc_tree_gather_update.reset_parameters()
 
-    def forward(self, mol_trees):
-        mol_tree_batch = batch(mol_trees)
-
+    def forward(self, mol_tree_batch):
         # Build line graph to prepare for belief propagation
         mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
         mol_tree_batch_lg._node_frames = mol_tree_batch._edge_frames
@@ -88,7 +82,7 @@ class DGLJTNNEncoder(nn.Module):
         # Since tree roots are designated to 0.  In the batched graph we can
         # simply find the corresponding node ID by looking at node_offset
         node_offset = np.cumsum([0] + mol_tree_batch.batch_num_nodes().tolist())
-        root_ids = torch.tensor(node_offset[:-1], device=device, dtype=torch.int32)
+        root_ids = torch.tensor(node_offset[:-1], device=device, dtype=mol_tree_batch.idtype)
         n_nodes = mol_tree_batch.num_nodes()
         n_edges = mol_tree_batch.num_edges()
 

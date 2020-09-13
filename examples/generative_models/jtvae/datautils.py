@@ -7,7 +7,7 @@ import dgl
 import torch
 
 from dgl.data.utils import download, extract_archive, get_download_dir, _get_dgl_url
-from dgllife.data.jtvae import DGLMolTree
+from dgllife.data.jtvae import DGLMolTree, _set_node_id
 from dgllife.model.model_zoo.jtnn.vocab import Vocab
 from torch.utils.data import Dataset
 
@@ -24,14 +24,6 @@ _url = _get_dgl_url('dataset/jtvae.zip')
 
 def _unpack_field(examples, field):
     return [e[field] for e in examples]
-
-def _set_node_id(mol_tree, vocab):
-    wid = []
-    for i, node in enumerate(mol_tree.nodes_dict):
-        mol_tree.nodes_dict[node]['idx'] = i
-        wid.append(vocab.get_index(mol_tree.nodes_dict[node]['smiles']))
-
-    return wid
 
 class JTNNDataset(Dataset):
     def __init__(self, data, vocab, training=True):

@@ -752,3 +752,25 @@ class DGLMolTree():
         """Assemble each cluster with its successors"""
         for i in self.nodes_dict:
             self._assemble_node(i)
+
+def _set_node_id(mol_tree, vocab):
+    """Get the id corresponding to each cluster in the vocabulary
+
+    Parameters
+    ----------
+    mol_tree : MolTree
+        A junction tree for a molecule.
+    vocab : Vocab
+        A vocabulary.
+
+    Returns
+    -------
+    list of int
+        The i-th element corresponds to the id of the i-th cluster in the vocabulary.
+    """
+    wid = []
+    for i, node in enumerate(mol_tree.nodes_dict):
+        mol_tree.nodes_dict[node]['idx'] = i
+        wid.append(vocab.get_index(mol_tree.nodes_dict[node]['smiles']))
+
+    return wid
