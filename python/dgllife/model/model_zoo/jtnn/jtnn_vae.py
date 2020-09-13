@@ -78,15 +78,31 @@ class DGLJTNNVAE(nn.Module):
 
     @staticmethod
     def move_to_device(mol_batch, device):
-        mol_trees = []
-        for t in mol_batch['mol_trees']:
-            mol_trees.append(t.g.to(device))
-        mol_batch['mol_trees'] = mol_trees
+        """Move a data batch to the target device.
+
+        Parameters
+        ----------
+        mol_batch : dict
+            A batch of datapoints.
+        device
+            A target device.
+
+        Returns
+        -------
+        dict
+            The batch of datapoints moved to the target device.
+        """
+        trees = []
+        for tr in mol_batch['mol_trees']:
+            tr.g = tr.g.to(device)
+            trees.append(tr)
+        mol_batch['mol_trees'] = trees
         mol_batch['mol_graph_batch'] = mol_batch['mol_graph_batch'].to(device)
         if 'cand_graph_batch' in mol_batch:
             mol_batch['cand_graph_batch'] = mol_batch['cand_graph_batch'].to(device)
         if mol_batch.get('stereo_cand_graph_batch') is not None:
             mol_batch['stereo_cand_graph_batch'] = mol_batch['stereo_cand_graph_batch'].to(device)
+
         return mol_batch
 
     def encode(self, mol_batch):
@@ -122,9 +138,6 @@ class DGLJTNNVAE(nn.Module):
         return tree_vec, mol_vec, z_mean, z_log_var
 
     def forward(self, mol_batch, beta=0, e1=None, e2=None):
-        device = mol_batch['mol_graph_batch'].device
-        self.move_to_device(mol_batch, device)
-
         mol_trees = mol_batch['mol_trees']
         batch_size = len(mol_trees)
 
@@ -238,7 +251,7 @@ class DGLJTNNVAE(nn.Module):
         mol_tree_msg.nodes_dict = nodes_dict
 
         cur_mol = copy_edit_mol(nodes_dict[0]['mol'])
-        global_amap = [{}] + [{} for node in nodes_dict]
+        global_amap = [{}] + [{} for _ in nodes_dict]
         global_amap[1] = {atom.GetIdx(): atom.GetIdx()
                           for atom in cur_mol.GetAtoms()}
 

@@ -7,9 +7,10 @@ import dgl
 import torch
 
 from dgl.data.utils import download, extract_archive, get_download_dir, _get_dgl_url
+from dgllife.data.jtvae import DGLMolTree
+from dgllife.model.model_zoo.jtnn.vocab import Vocab
 from torch.utils.data import Dataset
 
-from mol_tree import Vocab, DGLMolTree
 from chemutils import mol2dgl_dec, mol2dgl_enc
 
 ELEM_LIST = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na', 'Ca',

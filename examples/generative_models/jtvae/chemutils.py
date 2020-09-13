@@ -7,13 +7,10 @@ import dgl
 import rdkit.Chem as Chem
 import torch
 
-from dgllife.data.jtvae import get_mol, get_smiles
+from dgllife.data.jtvae import get_mol
 
 ELEM_LIST = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na',
              'Ca', 'Fe', 'Al', 'I', 'B', 'K', 'Se', 'Zn', 'H', 'Cu', 'Mn', 'unknown']
-
-MST_MAX_WEIGHT = 100
-MAX_NCAND = 2000
 
 def onek_encoding_unk(x, allowable_set):
     if x not in allowable_set:
