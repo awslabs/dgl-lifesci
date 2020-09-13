@@ -252,7 +252,7 @@ class DGLJTMPN(nn.Module):
                 src_u, src_v = tree_mess_src_edges.unbind(1)
                 alpha = mol_tree_batch.edges[src_u, src_v].data['m']
                 node_idx = (tree_mess_tgt_nodes
-                            .to(device=zero_node_state.device)[:, None]
+                            .to(device=zero_node_state.device, dtype=torch.int64)[:, None]
                             .expand_as(alpha))
                 node_alpha = zero_node_state.clone().scatter_add(0, node_idx, alpha)
                 cand_graphs.ndata['alpha'] = node_alpha
