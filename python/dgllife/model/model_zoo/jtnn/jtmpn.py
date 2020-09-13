@@ -107,9 +107,9 @@ def mol2dgl_single(cand_batch):
 
     return cand_graphs, torch.stack(atom_x), \
         torch.stack(bond_x) if len(bond_x) > 0 else torch.zeros(0), \
-        torch.LongTensor(tree_mess_source_edges), \
-        torch.LongTensor(tree_mess_target_edges), \
-        torch.LongTensor(tree_mess_target_nodes)
+        torch.IntTensor(tree_mess_source_edges), \
+        torch.IntTensor(tree_mess_target_edges), \
+        torch.IntTensor(tree_mess_target_nodes)
 
 mpn_loopy_bp_msg = fn.copy_src(src='msg', out='msg')
 mpn_loopy_bp_reduce = fn.sum(msg='msg', out='accum_msg')
