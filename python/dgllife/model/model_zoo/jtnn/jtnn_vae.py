@@ -113,12 +113,6 @@ class DGLJTNNVAE(nn.Module):
         mol_tree_batch = batch(mol_trees)
         mol_tree_batch, tree_vec = self.jtnn(mol_tree_batch)
 
-        self.n_nodes_total += mol_graphs.num_nodes()
-        self.n_edges_total += mol_graphs.num_edges()
-        self.n_tree_nodes_total += sum(t.num_nodes()
-                                       for t in mol_batch['mol_trees'])
-        self.n_passes += 1
-
         return mol_tree_batch, tree_vec, mol_vec
 
     def sample(self, tree_vec, mol_vec, e1=None, e2=None):
