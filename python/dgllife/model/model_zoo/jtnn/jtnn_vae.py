@@ -94,8 +94,7 @@ class DGLJTNNVAE(nn.Module):
         """
         trees = []
         for tr in mol_batch['mol_trees']:
-            tr.g = tr.g.to(device)
-            trees.append(tr)
+            trees.append(tr.g.to(device))
         mol_batch['mol_trees'] = trees
         mol_batch['mol_graph_batch'] = mol_batch['mol_graph_batch'].to(device)
         if 'cand_graph_batch' in mol_batch:
