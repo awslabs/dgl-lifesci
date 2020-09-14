@@ -117,7 +117,7 @@ class DGLJTNNDecoder(nn.Module):
         The training procedure which computes the prediction loss given the
         ground truth tree
         '''
-        mol_tree_batch = batch(mol_trees)
+        mol_tree_batch = batch([tr.g for tr in mol_trees])
         mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
         mol_tree_batch_lg._node_frames = mol_tree_batch._edge_frames
         n_trees = len(mol_trees)
