@@ -192,9 +192,9 @@ def test_wln_reaction():
     remove_file('_invalid_reactions.proc')
 
 def test_jtvae():
-    # Test MolTree
+    # Test DGLMolTree
     smiles = 'CC1([C@@H](N2[C@H](S1)[C@@H](C2=O)NC(=O)CC3=CC=CC=C3)C(=O)O)C'
-    tree = MolTree(smiles)
+    tree = DGLMolTree(smiles)
     assert tree.treesize() == 17
     tree.assemble()
     assert tree._recover_node(0, tree.mol) == 'C[CH3:15]'
