@@ -179,6 +179,7 @@ class DGLJTNNDecoder(nn.Module):
 
         # Traverse the tree and predict on children
         for eid, p in dfs_order(mol_tree_batch, root_ids):
+            eid = eid.to(device)
             u, v = mol_tree_batch.find_edges(eid)
 
             p_target_list = torch.zeros_like(root_out_degrees)
