@@ -1292,7 +1292,7 @@ def construct_graphs_rank(info, edge_featurizer):
 
         combo_edge_feats = torch.stack(combo_edge_feats, dim=0)
         combo_graph = DGLGraph()
-        combo_graph.add_nodes(reactant_graph.number_of_nodes())
+        combo_graph.add_nodes(reactant_graph.num_nodes())
         combo_graph.add_edges(combo_src_list, combo_dst_list)
         combo_graph.edata['he'] = combo_edge_feats
         reaction_graphs.append(combo_graph)

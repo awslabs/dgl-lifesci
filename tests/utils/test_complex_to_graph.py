@@ -44,22 +44,22 @@ def test_acnn_graph_construction_and_featurization():
                                                   pocket_coords)
     assert set(g.ntypes) == set(['protein_atom', 'ligand_atom'])
     assert set(g.etypes) == set(['protein', 'ligand', 'complex', 'complex', 'complex', 'complex'])
-    assert g.number_of_nodes('protein_atom') == 286
-    assert g.number_of_nodes('ligand_atom') == 21
+    assert g.num_nodes('protein_atom') == 286
+    assert g.num_nodes('ligand_atom') == 21
 
-    assert g.number_of_edges('protein') == 3432
-    assert g.number_of_edges('ligand') == 252
-    assert g.number_of_edges(('protein_atom', 'complex', 'protein_atom')) == 3349
-    assert g.number_of_edges(('ligand_atom', 'complex', 'ligand_atom')) == 131
-    assert g.number_of_edges(('protein_atom', 'complex', 'ligand_atom')) == 121
-    assert g.number_of_edges(('ligand_atom', 'complex', 'protein_atom')) == 83
+    assert g.num_edges('protein') == 3432
+    assert g.num_edges('ligand') == 252
+    assert g.num_edges(('protein_atom', 'complex', 'protein_atom')) == 3349
+    assert g.num_edges(('ligand_atom', 'complex', 'ligand_atom')) == 131
+    assert g.num_edges(('protein_atom', 'complex', 'ligand_atom')) == 121
+    assert g.num_edges(('ligand_atom', 'complex', 'protein_atom')) == 83
 
     assert 'atomic_number' in g.nodes['protein_atom'].data
     assert 'atomic_number' in g.nodes['ligand_atom'].data
     assert torch.allclose(g.nodes['protein_atom'].data['mask'],
-                          torch.ones(g.number_of_nodes('protein_atom'), 1))
+                          torch.ones(g.num_nodes('protein_atom'), 1))
     assert torch.allclose(g.nodes['ligand_atom'].data['mask'],
-                          torch.ones(g.number_of_nodes('ligand_atom'), 1))
+                          torch.ones(g.num_nodes('ligand_atom'), 1))
     assert 'distance' in g.edges['protein'].data
     assert 'distance' in g.edges['ligand'].data
     assert 'distance' in g.edges[('protein_atom', 'complex', 'protein_atom')].data
@@ -76,8 +76,8 @@ def test_acnn_graph_construction_and_featurization():
                                                   pocket_coords,
                                                   max_num_ligand_atoms=max_num_ligand_atoms,
                                                   max_num_protein_atoms=max_num_protein_atoms)
-    assert g.number_of_nodes('ligand_atom') == max_num_ligand_atoms
-    assert g.number_of_nodes('protein_atom') == max_num_protein_atoms
+    assert g.num_nodes('ligand_atom') == max_num_ligand_atoms
+    assert g.num_nodes('protein_atom') == max_num_protein_atoms
     ligand_mask = torch.zeros(max_num_ligand_atoms, 1)
     ligand_mask[:ligand_mol.GetNumAtoms(), :] = 1.
     assert torch.allclose(ligand_mask, g.nodes['ligand_atom'].data['mask'])
@@ -92,12 +92,12 @@ def test_acnn_graph_construction_and_featurization():
                                                   ligand_coords,
                                                   pocket_coords,
                                                   neighbor_cutoff=neighbor_cutoff)
-    assert g.number_of_edges('protein') == 3405
-    assert g.number_of_edges('ligand') == 193
-    assert g.number_of_edges(('protein_atom', 'complex', 'protein_atom')) == 3331
-    assert g.number_of_edges(('ligand_atom', 'complex', 'ligand_atom')) == 123
-    assert g.number_of_edges(('protein_atom', 'complex', 'ligand_atom')) == 119
-    assert g.number_of_edges(('ligand_atom', 'complex', 'protein_atom')) == 82
+    assert g.num_edges('protein') == 3405
+    assert g.num_edges('ligand') == 193
+    assert g.num_edges(('protein_atom', 'complex', 'protein_atom')) == 3331
+    assert g.num_edges(('ligand_atom', 'complex', 'ligand_atom')) == 123
+    assert g.num_edges(('protein_atom', 'complex', 'ligand_atom')) == 119
+    assert g.num_edges(('ligand_atom', 'complex', 'protein_atom')) == 82
 
     # Test max_num_neighbors
     g = ACNN_graph_construction_and_featurization(ligand_mol,
@@ -105,12 +105,12 @@ def test_acnn_graph_construction_and_featurization():
                                                   ligand_coords,
                                                   pocket_coords,
                                                   max_num_neighbors=6)
-    assert g.number_of_edges('protein') == 1716
-    assert g.number_of_edges('ligand') == 126
-    assert g.number_of_edges(('protein_atom', 'complex', 'protein_atom')) == 1691
-    assert g.number_of_edges(('ligand_atom', 'complex', 'ligand_atom')) == 86
-    assert g.number_of_edges(('protein_atom', 'complex', 'ligand_atom')) == 40
-    assert g.number_of_edges(('ligand_atom', 'complex', 'protein_atom')) == 25
+    assert g.num_edges('protein') == 1716
+    assert g.num_edges('ligand') == 126
+    assert g.num_edges(('protein_atom', 'complex', 'protein_atom')) == 1691
+    assert g.num_edges(('ligand_atom', 'complex', 'ligand_atom')) == 86
+    assert g.num_edges(('protein_atom', 'complex', 'ligand_atom')) == 40
+    assert g.num_edges(('ligand_atom', 'complex', 'protein_atom')) == 25
 
     # Test strip_hydrogens
     g = ACNN_graph_construction_and_featurization(pocket_mol_with_h,
@@ -118,8 +118,8 @@ def test_acnn_graph_construction_and_featurization():
                                                   pocket_coords_with_h,
                                                   pocket_coords_with_h,
                                                   strip_hydrogens=True)
-    assert g.number_of_nodes('ligand_atom') != pocket_mol_with_h.GetNumAtoms()
-    assert g.number_of_nodes('protein_atom') != pocket_mol_with_h.GetNumAtoms()
+    assert g.num_nodes('ligand_atom') != pocket_mol_with_h.GetNumAtoms()
+    assert g.num_nodes('protein_atom') != pocket_mol_with_h.GetNumAtoms()
     non_h_atomic_numbers = []
     for i in range(pocket_mol_with_h.GetNumAtoms()):
         atom = pocket_mol_with_h.GetAtomWithIdx(i)

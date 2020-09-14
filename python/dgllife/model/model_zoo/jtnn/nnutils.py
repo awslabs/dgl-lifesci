@@ -5,23 +5,8 @@
 #
 # pylint: disable=C0111, C0103, E1101, W0611, W0612, W0221
 
-import os
 import torch
 import torch.nn as nn
-
-from torch.autograd import Variable
-
-def create_var(tensor, requires_grad=None):
-    if requires_grad is None:
-        return Variable(tensor)
-    else:
-        return Variable(tensor, requires_grad=requires_grad)
-
-def cuda(tensor):
-    if torch.cuda.is_available() and not os.getenv('NOCUDA', None):
-        return tensor.cuda()
-    else:
-        return tensor
 
 class GRUUpdate(nn.Module):
     def __init__(self, hidden_size):
@@ -61,8 +46,3 @@ class GRUUpdate(nn.Module):
         dic = self.update_zm(node)
         dic.update(self.update_r(node, zm=dic))
         return dic
-
-def move_dgl_to_cuda(g):
-    g = g.to('cuda:0')
-    g.ndata.update({k: cuda(g.ndata[k]) for k in g.ndata})
-    g.edata.update({k: cuda(g.edata[k]) for k in g.edata})

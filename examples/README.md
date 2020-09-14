@@ -57,7 +57,7 @@ We provide various examples across 3 applications -- property prediction, genera
     - [Example Training Script](generative_models/dgmg)
 - Junction Tree Variational Autoencoder for Molecular Graph Generation (JTNN) [[paper]](https://arxiv.org/abs/1802.04364)
     - [JTNN with DGL](../python/dgllife/model/model_zoo/jtnn)
-    - [Example Training Script](generative_models/jtnn)
+    - [Example Training Script](generative_models/jtvae)
 
 ## Binding Affinity Prediction
 

@@ -253,7 +253,7 @@ class ACNN(nn.Module):
                                              complex_graph_distances)
 
         frag1_node_indices_in_complex = torch.where(complex_graph.ndata['_TYPE'] == 0)[0]
-        frag2_node_indices_in_complex = list(set(range(complex_graph.number_of_nodes())) -
+        frag2_node_indices_in_complex = list(set(range(complex_graph.num_nodes())) -
                                              set(frag1_node_indices_in_complex.tolist()))
 
         return self.predictor(

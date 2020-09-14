@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     from dgl.data.utils import _get_dgl_url, download, get_download_dir, extract_archive
 
-    from jtnn.mol_tree import DGLMolTree
+    from dgllife.data.jtvae import DGLMolTree
 
     parser = argparse.ArgumentParser('Generate vocabulary for a molecule dataset')
     parser.add_argument('-d', '--data-path', type=str,
@@ -38,11 +38,11 @@ if __name__ == '__main__':
 
     # Get the vocabulary used for the pre-trained model
     default_dir = get_download_dir()
-    vocab_file = '{}/jtnn/{}.txt'.format(default_dir, 'vocab')
+    vocab_file = '{}/jtvae/{}.txt'.format(default_dir, 'vocab')
     if not os.path.exists(vocab_file):
-        zip_file_path = '{}/jtnn.zip'.format(default_dir)
-        download(_get_dgl_url('dataset/jtnn.zip'), path=zip_file_path)
-        extract_archive(zip_file_path, '{}/jtnn'.format(default_dir))
+        zip_file_path = '{}/jtvae.zip'.format(default_dir)
+        download(_get_dgl_url('dataset/jtvae.zip'), path=zip_file_path)
+        extract_archive(zip_file_path, '{}/jtvae'.format(default_dir))
     default_vocab = set()
     with open(vocab_file, 'r') as f:
         for line in f:

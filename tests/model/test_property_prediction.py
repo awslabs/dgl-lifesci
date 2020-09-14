@@ -12,7 +12,7 @@ from dgllife.model.model_zoo import *
 def test_graph1():
     """Graph with node features."""
     g = dgl.graph(([0, 0, 1, 0, 1, 2], [1, 2, 2, 0, 1, 2]), idtype=torch.int32)
-    return g, torch.arange(g.number_of_nodes()).float().reshape(-1, 1)
+    return g, torch.arange(g.num_nodes()).float().reshape(-1, 1)
 
 def test_graph2():
     """Batched graph with node features."""
@@ -20,21 +20,21 @@ def test_graph2():
     g2 = dgl.graph(([0, 1, 1, 1, 0, 1, 2, 3, 4],
                     [1, 2, 3, 4, 0, 1, 2, 3, 4]), idtype=torch.int32)
     bg = dgl.batch([g1, g2])
-    return bg, torch.arange(bg.number_of_nodes()).float().reshape(-1, 1)
+    return bg, torch.arange(bg.num_nodes()).float().reshape(-1, 1)
 
 def test_graph3():
     """Graph with node features and edge features."""
     g = dgl.graph(([0, 0, 1], [1, 2, 2]), idtype=torch.int32)
-    return g, torch.arange(g.number_of_nodes()).float().reshape(-1, 1), \
-           torch.arange(2 * g.number_of_edges()).float().reshape(-1, 2)
+    return g, torch.arange(g.num_nodes()).float().reshape(-1, 1), \
+           torch.arange(2 * g.num_edges()).float().reshape(-1, 2)
 
 def test_graph4():
     """Batched graph with node features and edge features."""
     g1 = dgl.graph(([0, 0, 1], [1, 2, 2]), idtype=torch.int32)
     g2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]), idtype=torch.int32)
     bg = dgl.batch([g1, g2])
-    return bg, torch.arange(bg.number_of_nodes()).float().reshape(-1, 1), \
-           torch.arange(2 * bg.number_of_edges()).float().reshape(-1, 2)
+    return bg, torch.arange(bg.num_nodes()).float().reshape(-1, 1), \
+           torch.arange(2 * bg.num_edges()).float().reshape(-1, 2)
 
 def test_graph5():
     """Graph with node types and edge distances."""
@@ -69,8 +69,8 @@ def test_graph9():
     g1 = dgl.graph(([0, 0, 1], [1, 2, 2]))
     g2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]))
     bg = dgl.batch([g1, g2])
-    return bg, torch.zeros(bg.number_of_nodes()).long(), \
-           torch.randn(bg.number_of_edges(), 2).float()
+    return bg, torch.zeros(bg.num_nodes()).long(), \
+           torch.randn(bg.num_edges(), 2).float()
 
 def test_attentivefp_predictor():
     if torch.cuda.is_available():
