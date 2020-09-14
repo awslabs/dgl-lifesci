@@ -963,9 +963,9 @@ def mol2dgl_dec(cand_batch, atom_featurizer, bond_featurizer):
         n_nodes += n_atoms
 
     return cand_graphs, \
-           torch.LongTensor(tree_mess_source_edges), \
-           torch.LongTensor(tree_mess_target_edges), \
-           torch.LongTensor(tree_mess_target_nodes)
+           torch.IntTensor(tree_mess_source_edges), \
+           torch.IntTensor(tree_mess_target_edges), \
+           torch.IntTensor(tree_mess_target_nodes)
 
 class JTVAEDataset(Dataset):
     """Dataset for JTVAE
