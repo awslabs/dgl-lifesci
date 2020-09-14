@@ -127,7 +127,7 @@ class DGLJTNNDecoder(nn.Module):
     def run(self, mol_tree_batch, mol_tree_batch_lg, n_trees, tree_vec):
         device = tree_vec.device
 
-        node_offset = np.cumsum([0] + mol_tree_batch.batch_num_nodes)
+        node_offset = np.cumsum([0] + mol_tree_batch.batch_num_nodes().tolist())
         root_ids = node_offset[:-1]
         n_nodes = mol_tree_batch.num_nodes()
         n_edges = mol_tree_batch.num_edges()
