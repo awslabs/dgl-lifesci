@@ -189,8 +189,9 @@ class DGLJTNNDecoder(nn.Module):
             p_targets.append(p_target_list.clone().detach())
 
             root_out_degrees -= (root_out_degrees == 0).long()
-            root_out_degrees -= torch.tensor(np.isin(root_ids,
-                                                     v).astype('int64'))
+            root_out_degrees -= torch.tensor(np.isin(root_ids, v.cpu().numpy()),
+                                             device=mol_tree_batch.device,
+                                             dtype=mol_tree_batch.idtype)
 
             mol_tree_batch_lg.pull(
                 eid,
