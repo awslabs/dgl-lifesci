@@ -1038,6 +1038,12 @@ class JTVAEDataset(Dataset):
             mol_batch['cand_graph_batch'] = mol_batch['cand_graph_batch'].to(device)
         if mol_batch.get('stereo_cand_graph_batch') is not None:
             mol_batch['stereo_cand_graph_batch'] = mol_batch['stereo_cand_graph_batch'].to(device)
+        if mol_batch.get('tree_mess_tgt_e') is not None:
+            mol_batch['tree_mess_tgt_e'] = mol_batch['tree_mess_tgt_e'].to(device)
+        if mol_batch.get('tree_mess_src_e') is not None:
+            mol_batch['tree_mess_src_e'] = mol_batch['tree_mess_src_e'].to(device)
+        if mol_batch.get('tree_mess_tgt_n') is not None:
+            mol_batch['tree_mess_tgt_n'] = mol_batch['tree_mess_tgt_n'].to(device)
 
         return mol_batch
 
