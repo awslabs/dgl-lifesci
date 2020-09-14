@@ -4,15 +4,26 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import shutil
 import torch
 
+from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 from dgllife.data import *
 from dgllife.data.uspto import get_bond_changes, process_file
+from dgllife.model.model_zoo.jtnn.vocab import Vocab
+from torch.utils.data import DataLoader
 
 def remove_file(fname):
     if os.path.isfile(fname):
         try:
             os.remove(fname)
+        except OSError:
+            pass
+
+def remove_dir(dir_name):
+    if os.path.isdir(dir_name):
+        try:
+            shutil.rmtree(dir_name)
         except OSError:
             pass
 
@@ -180,6 +191,63 @@ def test_wln_reaction():
     remove_file('_valid_reactions.proc')
     remove_file('_invalid_reactions.proc')
 
+def test_jtvae():
+    # Test MolTree
+    smiles = 'CC1([C@@H](N2[C@H](S1)[C@@H](C2=O)NC(=O)CC3=CC=CC=C3)C(=O)O)C'
+    tree = MolTree(smiles)
+    assert tree.treesize() == 17
+    tree.assemble()
+    assert tree._recover_node(0, tree.mol) == 'C[CH3:15]'
+    tree.recover()
+
+    # Test JTVAEDataset
+    smiles = ['CCCCCCC1=NN2C(=N)/C(=C\c3cc(C)n(-c4ccc(C)cc4C)c3C)C(=O)N=C2S1',
+              'COCC[C@@H](C)C(=O)N(C)Cc1ccc(O)cc1']
+    with open('data.txt', 'w') as f:
+        for smi in smiles:
+            f.write(smi + '\n')
+
+    default_dir = get_download_dir()
+    vocab_file = '{}/jtnn/{}.txt'.format(default_dir, 'vocab')
+    zip_file_path = '{}/jtnn.zip'.format(default_dir)
+    download(_get_dgl_url('dataset/jtnn.zip'), path=zip_file_path, overwrite=False)
+    extract_archive(zip_file_path, '{}/jtnn'.format(default_dir))
+
+    with open(vocab_file, 'r') as f:
+        vocab = Vocab([x.strip("\r\n ") for x in f])
+    dataset = JTVAEDataset('data.txt', vocab)
+    assert len(dataset) == 2
+    assert set(dataset[0].keys()) == {'cand_graphs', 'mol_graph', 'mol_tree',
+                                      'stereo_cand_graphs', 'stereo_cand_label',
+                                      'tree_mess_src_e', 'tree_mess_tgt_e',
+                                      'tree_mess_tgt_n', 'wid'}
+    dataset.training = False
+    assert set(dataset[0].keys()) == {'mol_graph', 'mol_tree', 'wid'}
+
+    dataset.training = True
+    collate_fn = JTVAECollator(training=True)
+    loader = DataLoader(dataset,
+                        batch_size=2,
+                        collate_fn=collate_fn)
+    for _, batch_data in enumerate(loader):
+        assert set(batch_data.keys()) == {'cand_batch_idx', 'cand_graph_batch', 'mol_graph_batch',
+                                          'mol_trees', 'stereo_cand_batch_idx',
+                                          'stereo_cand_graph_batch', 'stereo_cand_labels',
+                                          'stereo_cand_lengths', 'tree_mess_src_e',
+                                          'tree_mess_tgt_e', 'tree_mess_tgt_n'}
+
+    dataset.training = False
+    collate_fn = JTVAECollator(training=False)
+    loader = DataLoader(dataset,
+                        batch_size=2,
+                        collate_fn=collate_fn)
+    for _, batch_data in enumerate(loader):
+        assert set(batch_data.keys()) == {'mol_graph_batch', 'mol_trees'}
+
+    remove_file('data.txt')
+    remove_file(zip_file_path)
+    remove_dir(default_dir + '/jtnn')
+
 if __name__ == '__main__':
     test_alchemy()
     test_pdbbind()
@@ -190,3 +258,4 @@ if __name__ == '__main__':
     test_lipophilicity()
     test_astrazeneca_chembl_solubility()
     test_wln_reaction()
+    test_jtvae()

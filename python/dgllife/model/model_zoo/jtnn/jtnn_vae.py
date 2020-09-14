@@ -19,28 +19,39 @@ from .jtnn_dec import DGLJTNNDecoder
 from .jtnn_enc import DGLJTNNEncoder
 from .vocab import Vocab
 from .mpn import DGLMPN
-from .mpn import mol2dgl_single as mol2dgl_enc
 from ....data.jtvae import set_atommap, decode_stereo, copy_edit_mol, attach_mols_nx, \
-    enum_assemble_nx, get_atom_featurizer_dec, get_bond_featurizer_dec, mol2dgl_dec
+    enum_assemble_nx, get_atom_featurizer_enc, get_bond_featurizer_enc, mol2dgl_enc, \
+    get_atom_featurizer_dec, get_bond_featurizer_dec, mol2dgl_dec
 
 class DGLJTNNVAE(nn.Module):
     """
     `Junction Tree Variational Autoencoder for Molecular Graph Generation
     <https://arxiv.org/abs/1802.04364>`__
-    """
-    def __init__(self, hidden_size, latent_size, depth, vocab=None, vocab_file=None):
-        super(DGLJTNNVAE, self).__init__()
-        if vocab is None:
-            if vocab_file is None:
-                default_dir = get_download_dir()
-                vocab_file = '{}/jtvae/{}.txt'.format(default_dir, 'vocab')
-                zip_file_path = '{}/jtvae.zip'.format(default_dir)
-                download(_get_dgl_url('dataset/jtvae.zip'), path=zip_file_path)
-                extract_archive(zip_file_path, '{}/jtvae'.format(default_dir))
 
-            self.vocab = Vocab([x.strip("\r\n ") for x in open(vocab_file)])
-        else:
-            self.vocab = vocab
+    Parameters
+    ----------
+    hidden_size : int
+        Size for hidden representations.
+    latent_size : int
+        Size for latent representations of nodes and edges.
+    depth : int
+        The number of times for message passing.
+    vocab_file : str
+        The path to a file of vocabulary, with one SMILES per line. If not
+        specified, it will use the vocabulary extracted from the ZINC dataset.
+    """
+    def __init__(self, hidden_size, latent_size, depth, vocab_file=None):
+        super(DGLJTNNVAE, self).__init__()
+
+        if vocab_file is None:
+            default_dir = get_download_dir()
+            vocab_file = '{}/jtvae/{}.txt'.format(default_dir, 'vocab')
+            zip_file_path = '{}/jtvae.zip'.format(default_dir)
+            download(_get_dgl_url('dataset/jtvae.zip'), path=zip_file_path)
+            extract_archive(zip_file_path, '{}/jtvae'.format(default_dir))
+
+        with open(vocab_file, 'r') as f:
+            self.vocab = Vocab([x.strip("\r\n ") for x in f])
 
         self.hidden_size = hidden_size
         self.latent_size = latent_size
@@ -49,8 +60,7 @@ class DGLJTNNVAE(nn.Module):
         self.embedding = nn.Embedding(self.vocab.size(), hidden_size)
         self.mpn = DGLMPN(hidden_size, depth)
         self.jtnn = DGLJTNNEncoder(self.vocab, hidden_size, self.embedding)
-        self.decoder = DGLJTNNDecoder(
-            self.vocab, hidden_size, latent_size // 2, self.embedding)
+        self.decoder = DGLJTNNDecoder(self.vocab, hidden_size, latent_size // 2, self.embedding)
         self.jtmpn = DGLJTMPN(hidden_size, depth)
 
         self.T_mean = nn.Linear(hidden_size, latent_size // 2)
@@ -58,6 +68,8 @@ class DGLJTNNVAE(nn.Module):
         self.G_mean = nn.Linear(hidden_size, latent_size // 2)
         self.G_var = nn.Linear(hidden_size, latent_size // 2)
 
+        self.atom_featurizer_enc = get_atom_featurizer_enc()
+        self.bond_featurizer_enc = get_bond_featurizer_enc()
         self.atom_featurizer_dec = get_atom_featurizer_dec()
         self.bond_featurizer_dec = get_bond_featurizer_dec()
 
@@ -230,11 +242,12 @@ class DGLJTNNVAE(nn.Module):
         if cur_mol is None:
             return None
 
-        smiles2D = Chem.MolToSmiles(cur_mol)
-        stereo_cands = decode_stereo(smiles2D)
+        smiles_2d = Chem.MolToSmiles(cur_mol)
+        stereo_cands = decode_stereo(smiles_2d)
         if len(stereo_cands) == 1:
             return stereo_cands[0]
-        stereo_graphs = [mol2dgl_enc(c) for c in stereo_cands]
+        stereo_graphs = [mol2dgl_enc(c, self.atom_featurizer_enc, self.bond_featurizer_enc)
+                         for c in stereo_cands]
         stereo_cand_graphs, atom_x, bond_x = \
             zip(*stereo_graphs)
         stereo_cand_graphs = batch(stereo_cand_graphs).to(device)

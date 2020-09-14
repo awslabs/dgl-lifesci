@@ -7,7 +7,6 @@
 # pylint: disable=redefined-outer-name
 
 import dgl
-import rdkit.Chem as Chem
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -15,70 +14,11 @@ import torch.nn.functional as F
 import dgl.function as fn
 from dgl import mean_nodes
 
-from ....data.jtvae import get_mol
-
 ELEM_LIST = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na',
              'Ca', 'Fe', 'Al', 'I', 'B', 'K', 'Se', 'Zn', 'H', 'Cu', 'Mn', 'unknown']
 
 ATOM_FDIM = len(ELEM_LIST) + 6 + 5 + 4 + 1
 BOND_FDIM = 5 + 6
-MAX_NB = 6
-
-def onek_encoding_unk(x, allowable_set):
-    if x not in allowable_set:
-        x = allowable_set[-1]
-    return [x == s for s in allowable_set]
-
-def atom_features(atom):
-    return (torch.Tensor(onek_encoding_unk(atom.GetSymbol(), ELEM_LIST)
-                         + onek_encoding_unk(atom.GetDegree(),
-                                             [0, 1, 2, 3, 4, 5])
-                         + onek_encoding_unk(atom.GetFormalCharge(),
-                                             [-1, -2, 1, 2, 0])
-                         + onek_encoding_unk(int(atom.GetChiralTag()), [0, 1, 2, 3])
-                         + [atom.GetIsAromatic()]))
-
-def bond_features(bond):
-    bt = bond.GetBondType()
-    stereo = int(bond.GetStereo())
-    fbond = [bt == Chem.rdchem.BondType.SINGLE, bt == Chem.rdchem.BondType.DOUBLE, bt ==
-             Chem.rdchem.BondType.TRIPLE, bt == Chem.rdchem.BondType.AROMATIC, bond.IsInRing()]
-    fstereo = onek_encoding_unk(stereo, [0, 1, 2, 3, 4, 5])
-    return torch.Tensor(fbond + fstereo)
-
-def mol2dgl_single(smiles):
-    n_edges = 0
-
-    atom_x = []
-    bond_x = []
-
-    mol = get_mol(smiles)
-    n_atoms = mol.GetNumAtoms()
-    n_bonds = mol.GetNumBonds()
-    graph = dgl.graph(([], []), idtype=torch.int32)
-    for i, atom in enumerate(mol.GetAtoms()):
-        assert i == atom.GetIdx()
-        atom_x.append(atom_features(atom))
-    graph.add_nodes(n_atoms)
-
-    bond_src = []
-    bond_dst = []
-    for i, bond in enumerate(mol.GetBonds()):
-        begin_idx = bond.GetBeginAtom().GetIdx()
-        end_idx = bond.GetEndAtom().GetIdx()
-        features = bond_features(bond)
-        bond_src.append(begin_idx)
-        bond_dst.append(end_idx)
-        bond_x.append(features)
-        # set up the reverse direction
-        bond_src.append(end_idx)
-        bond_dst.append(begin_idx)
-        bond_x.append(features)
-    graph.add_edges(bond_src, bond_dst)
-
-    n_edges += n_bonds
-    return graph, torch.stack(atom_x), \
-        torch.stack(bond_x) if len(bond_x) > 0 else torch.zeros(0)
 
 mpn_loopy_bp_msg = fn.copy_src(src='msg', out='msg')
 mpn_loopy_bp_reduce = fn.sum(msg='msg', out='accum_msg')
@@ -132,11 +72,6 @@ class DGLMPN(nn.Module):
         self.gather_updater = GatherUpdate(hidden_size)
         self.hidden_size = hidden_size
 
-        self.n_samples_total = 0
-        self.n_nodes_total = 0
-        self.n_edges_total = 0
-        self.n_passes = 0
-
     def reset_parameters(self):
         """Reinitialize model parameters."""
         self.W_i.reset_parameters()
@@ -144,23 +79,13 @@ class DGLMPN(nn.Module):
         self.gather_updater.reset_parameters()
 
     def forward(self, mol_graph):
-        n_samples = mol_graph.batch_size
-
         mol_line_graph = dgl.line_graph(mol_graph, backtracking=False, shared=True)
         mol_line_graph._node_frames = mol_graph._edge_frames
-
-        n_nodes = mol_graph.num_nodes()
-        n_edges = mol_graph.num_edges()
 
         mol_graph = self.run(mol_graph, mol_line_graph)
 
         # TODO: replace with unbatch or readout
         g_repr = mean_nodes(mol_graph, 'h')
-
-        self.n_samples_total += n_samples
-        self.n_nodes_total += n_nodes
-        self.n_edges_total += n_edges
-        self.n_passes += 1
 
         return g_repr
 

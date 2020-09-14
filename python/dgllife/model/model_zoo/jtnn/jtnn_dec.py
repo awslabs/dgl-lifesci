@@ -17,8 +17,6 @@ from dgl import batch, dfs_labeled_edges_generator
 from .nnutils import GRUUpdate
 from ....data.jtvae import get_mol, enum_assemble_nx, DGLMolTree
 
-MAX_DECODE_LEN = 100
-
 def dfs_order(forest, roots):
     edges = dfs_labeled_edges_generator(forest, roots, has_reverse_edge=True)
     for e, l in zip(*edges):
@@ -254,7 +252,7 @@ class DGLJTNNDecoder(nn.Module):
 
         return q_loss, p_loss, q_acc, p_acc
 
-    def decode(self, mol_vec):
+    def decode(self, mol_vec, max_decode_len=100):
         assert mol_vec.shape[0] == 1
         device = mol_vec.device
 
@@ -285,7 +283,7 @@ class DGLJTNNDecoder(nn.Module):
         new_node_id = 0
         new_edge_id = 0
 
-        for step in range(MAX_DECODE_LEN):
+        for step in range(max_decode_len):
             u, u_slots = stack[-1]
             udata = mol_tree.g.nodes[u].data
             x = udata['x']

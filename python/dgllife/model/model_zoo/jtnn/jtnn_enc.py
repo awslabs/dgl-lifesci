@@ -15,8 +15,6 @@ from dgl import bfs_edges_generator
 
 from .nnutils import GRUUpdate
 
-MAX_NB = 8
-
 def level_order(forest, roots):
     device = forest.device
     edges = list(bfs_edges_generator(forest, roots))
