@@ -1,10 +1,12 @@
-import numpy as np
 import math
+import dgl
+import numpy as np
 import torch as th
 import torch.nn as nn
-import dgl
-from dgl.nn.pytorch.conv import GatedGraphConv
 import torch.nn.functional as F
+from dgl import function as fn
+from dgl.nn.pytorch.conv import GatedGraphConv
+from torch.nn import init
 
 __all__ = ['PotentialNet']
 
@@ -49,17 +51,17 @@ class PotentialNet(nn.Module):
                  dropouts
                  ):
         super(PotentialNet, self).__init__()
-        self.stage_1_model = StagedGGNN(f_gru_in=f_in,
-                                        f_gru_out=f_bond,
+        self.stage_1_model = Customized_GatedGraphConv(in_feats=f_in,
+                                        out_feats=f_bond,
                                         f_gather=f_gather,
-                                        n_etypes=n_etypes[0], # 12, from CanonicalBondFeaturizer
-                                        n_gconv_steps=n_bond_conv_steps,
+                                        n_etypes=12,
+                                        n_steps=n_bond_conv_steps,
                                         dropout=dropouts[0]
                                         )
         self.stage_2_model = StagedGGNN(f_gru_in=f_gather,
                                         f_gru_out=f_spatial,
                                         f_gather=f_gather,
-                                        n_etypes=n_etypes[1], # 1, temporal solution
+                                        n_etypes=n_etypes, # 1, temporal solution
                                         n_gconv_steps=n_spatial_conv_steps,
                                         dropout=dropouts[1]
                                         )
@@ -69,10 +71,10 @@ class PotentialNet(nn.Module):
                                         dropout=dropouts[2]
         )
 
-    def forward(self, bigraph_canonical, knn_graph):
-        batch_num_nodes = bigraph_canonical.batch_num_nodes()
-        bigraph, stage_1_etypes = process_etypes(bigraph_canonical)
-        h = self.stage_1_model(graph=bigraph, features=bigraph.ndata['h'], etypes=stage_1_etypes)
+    def forward(self, bigraph, knn_graph):
+        batch_num_nodes = bigraph.batch_num_nodes()
+        # bigraph, stage_1_etypes = process_etypes(bigraph_canonical)
+        h = self.stage_1_model(graph=bigraph, feat=bigraph.ndata['h'])
         h = self.stage_2_model(graph=knn_graph, features=h, etypes=knn_graph.edata['d'])
         x = self.stage_3_model(batch_num_nodes=batch_num_nodes, features=h) 
         return x
@@ -130,3 +132,85 @@ class StagedFCNN(nn.Module):
         x = self.out_layer(x)
         return x
 
+
+class Customized_GatedGraphConv(nn.Module):
+    def __init__(self,
+                in_feats,
+                out_feats,
+                f_gather,
+                n_steps,
+                n_etypes,
+                dropout,
+                bias=True):
+        super(Customized_GatedGraphConv, self).__init__()
+        self._in_feats = in_feats
+        self._out_feats = out_feats
+        self._n_steps = n_steps
+        self._n_etypes = n_etypes
+        self.linears = nn.ModuleList(
+            [nn.Linear(out_feats, out_feats) for _ in range(n_etypes)]
+        )
+        self.gru = nn.GRUCell(out_feats, out_feats, bias=bias)
+        self.dropout = nn.Dropout(p=dropout)
+        self.i_nn = nn.Linear(in_features=(in_feats + out_feats), out_features=f_gather)
+        self.j_nn = nn.Linear(in_features=out_feats, out_features=f_gather)
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        gain = init.calculate_gain('relu')
+        self.gru.reset_parameters()
+        for linear in self.linears:
+            init.xavier_normal_(linear.weight, gain=gain)
+            init.zeros_(linear.bias)
+
+    def set_allow_zero_in_degree(self, set_value):
+        self._allow_zero_in_degree = set_value
+
+    def forward(self, graph, feat):
+        """
+
+        Description
+        -----------
+        Compute Gated Graph Convolution layer.
+
+        Parameters
+        ----------
+        graph : DGLGraph
+            The graph, with graph.ndata['h'] being the input feature of shape :math:`(N, D_{in})` where :math:`N`
+            is the number of nodes of the graph and :math:`D_{in}` is the
+            input feature size;
+            And graph.edata['e'] one-hot encodes the edge types
+
+        Returns
+        -------
+        torch.Tensor
+            The output feature of shape :math:`(N, D_{out})` where :math:`D_{out}`
+            is the output feature size.
+        """
+        with graph.local_scope():
+            assert graph.is_homogeneous, \
+                "not a homogeneous graph; convert it with to_homogeneous " \
+                "and pass in the edge type as argument"
+            assert  graph.edata['e'].shape[1] <= self._n_etypes, \
+                "edge type indices out of range [0, {})".format(self._n_etypes)
+            zero_pad = feat.new_zeros((feat.shape[0], self._out_feats - feat.shape[1]))
+            h = th.cat([feat, zero_pad], -1)
+
+            for _ in range(self._n_steps):
+                graph.ndata['h'] = h
+                for i in range(self._n_etypes):
+                    eids = graph.edata['e'][:,i].nonzero().view(-1).type(graph.idtype)
+                    if len(eids) > 0:
+                        graph.apply_edges(
+                            lambda edges: {'W_e*h': self.linears[i](edges.src['h'])},
+                            eids
+                        )
+                graph.update_all(fn.copy_e('W_e*h', 'm'), fn.sum('m', 'a'))
+                a = graph.ndata.pop('a') # (N, D)
+                h = self.gru(a, h)
+
+            h = self.dropout(h) # my guess
+            h = th.mul(
+                    th.sigmoid(self.i_nn(th.cat((h, feat),dim=1))), 
+                    self.j_nn(h))    
+            return h

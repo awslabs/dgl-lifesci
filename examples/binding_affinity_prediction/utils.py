@@ -46,13 +46,14 @@ def load_dataset(args):
     """
     assert args['dataset'] in ['PDBBind'], 'Unexpected dataset {}'.format(args['dataset'])
     if args['dataset'] == 'PDBBind':
-        if args['model'] == 'PotentialNet': # fix with args
+        if args['model'] == 'PotentialNet': 
+            from functools import partial
             from dgllife.utils import potentialNet_graph_construction_featurization
             dataset = PDBBind(subset=args['subset'], 
                     load_binding_pocket=args['load_binding_pocket'], 
                     sanitize=args['sanitize'], calc_charges=False,
                     remove_hs=args['remove_hs'], use_conformation=True,
-                    construct_graph_and_featurize=potentialNet_graph_construction_featurization,
+                    construct_graph_and_featurize = partial(potentialNet_graph_construction_featurization, distance_bins=args['distance_bins']),
                     zero_padding=True, num_processes=6)
         elif args['model'] =='ACNN':
             dataset = PDBBind(subset=args['subset'],
@@ -131,7 +132,7 @@ def load_model(args):
                      features_to_use=args['atomic_numbers_considered'],
                      radial=args['radial'])
     if args['model'] == 'PotentialNet': # fix with args
-        model = PotentialNet(n_etypes=args['n_etypes'],
+        model = PotentialNet(n_etypes= (len(args['distance_bins']) - 1),
                  f_in=args['f_in'],
                  f_bond=args['f_bond'],
                  f_spatial=args['f_spatial'],

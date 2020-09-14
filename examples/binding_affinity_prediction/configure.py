@@ -41,7 +41,8 @@ PotentialNet_PDBBind_core_pocket_random = {
     'shuffle': False,
     'sanitize': False,
     'remove_hs': False,
-    'n_etypes': [12, 4],
+    'n_etypes': 12,
+    'distance_bins': [0.0, 1.5, 2.5, 3.5, 4.5, 5.5],
     'f_in': 74,
     'f_bond': 128, # has to be larger than f_in
     'f_spatial':64,

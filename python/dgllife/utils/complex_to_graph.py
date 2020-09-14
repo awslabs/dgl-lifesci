@@ -74,7 +74,7 @@ def potentialNet_graph_construction_featurization(ligand_mol,
                                               max_num_protein_atoms=None,
                                               neighbor_cutoff=5.,
                                               max_num_neighbors=12,
-                                              distance_bins = [0.0, 2.0, 3.5, 4.0, 5.0],
+                                              distance_bins = [0.0, 1.5, 2.5, 3.5, 4.5, 5.5],
                                               strip_hydrogens=False):
     assert ligand_coordinates is not None, 'Expect ligand_coordinates to be provided.'
     assert protein_coordinates is not None, 'Expect protein_coordinates to be provided.'
