@@ -40,8 +40,7 @@ def main(args):
         num_workers=0,
         collate_fn=JTVAECollator(False),
         worker_init_fn=worker_init_fn)
-    # Just an example of molecule decoding; in reality you may want to sample
-    # tree and molecule vectors.
+
     acc = 0.0
     tot = 0
     model = model.to(device)
