@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import rdkit
+from dgl.data.utils import get_download_dir
 
 def worker_init_fn(id_):
     lg = rdkit.RDLogger.logger()
@@ -24,6 +25,7 @@ def get_vocab_file(vocab):
     str
         The path to a vocabulary file.
     """
+    dir = get_download_dir()
     if vocab == 'zinc':
         vocab_file = '{}/jtnn/vocab.txt'.format(dir)
     elif vocab == 'guacamol':
