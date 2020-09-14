@@ -1138,9 +1138,9 @@ class JTVAEDataset(Dataset):
                 cands, self.atom_featurizer_dec, self.bond_featurizer_dec)
         else:
             cand_graphs = []
-            tree_mess_src_e = torch.zeros(0, 2).long()
-            tree_mess_tgt_e = torch.zeros(0, 2).long()
-            tree_mess_tgt_n = torch.zeros(0).long()
+            tree_mess_src_e = torch.zeros(0, 2).int()
+            tree_mess_tgt_e = torch.zeros(0, 2).int()
+            tree_mess_tgt_n = torch.zeros(0).int()
 
         # prebuild the stereoisomers
         cands = mol_tree.stereo_cands
