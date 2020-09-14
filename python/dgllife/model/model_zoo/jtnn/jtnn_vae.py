@@ -246,17 +246,11 @@ class DGLJTNNVAE(nn.Module):
         stereo_cands = decode_stereo(smiles_2d)
         if len(stereo_cands) == 1:
             return stereo_cands[0]
-        stereo_graphs = [mol2dgl_enc(c, self.atom_featurizer_enc, self.bond_featurizer_enc)
-                         for c in stereo_cands]
-        stereo_cand_graphs, atom_x, bond_x = \
-            zip(*stereo_graphs)
+        stereo_cand_graphs = [mol2dgl_enc(c, self.atom_featurizer_enc, self.bond_featurizer_enc)
+                              for c in stereo_cands]
         stereo_cand_graphs = batch(stereo_cand_graphs).to(device)
-        atom_x = torch.cat(atom_x).to(device)
-        bond_x = torch.cat(bond_x).to(device)
-        stereo_cand_graphs.ndata['x'] = atom_x
-        stereo_cand_graphs.edata['x'] = bond_x
-        stereo_cand_graphs.edata['src_x'] = atom_x.new(
-            bond_x.shape[0], atom_x.shape[1]).zero_()
+        stereo_cand_graphs.edata['src_x'] = torch.zeros(
+            stereo_cand_graphs.num_edges(), stereo_cand_graphs.ndata['x'].shape[1]).to(device)
         stereo_vecs = self.mpn(stereo_cand_graphs)
         stereo_vecs = self.G_mean(stereo_vecs)
         scores = F.cosine_similarity(stereo_vecs, mol_vec)
