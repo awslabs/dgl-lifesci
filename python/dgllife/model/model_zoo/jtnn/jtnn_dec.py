@@ -227,7 +227,8 @@ class DGLJTNNDecoder(nn.Module):
             if q_input.shape[0] > 0:
                 q_inputs.append(q_input)
                 q_targets.append(q_target)
-        p_targets.append(torch.zeros((root_out_degrees == 0).sum()).long())
+        p_targets.append(torch.zeros((root_out_degrees == 0).sum()).to(
+            device=device, dtype=mol_tree_batch.idtype))
 
         # Batch compute the stop/label prediction losses
         p_inputs = torch.cat(p_inputs, 0)
