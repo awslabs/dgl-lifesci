@@ -934,6 +934,11 @@ def mol2dgl_dec(cand_batch, atom_featurizer, bond_featurizer):
                            canonical_atom_order=False)
         cand_graphs.append(g)
 
+        if isinstance(mol_tree, DGLMolTree):
+            tree_graph = mol_tree.g
+        else:
+            tree_graph = mol_tree
+
         for i, bond in enumerate(mol.GetBonds()):
             a1, a2 = bond.GetBeginAtom(), bond.GetEndAtom()
             begin_idx, end_idx = a1.GetIdx(), a2.GetIdx()
@@ -943,12 +948,12 @@ def mol2dgl_dec(cand_batch, atom_featurizer, bond_featurizer):
             y_bid = mol_tree.nodes_dict[y_nid - 1]['idx'] if y_nid > 0 else -1
 
             if x_bid >= 0 and y_bid >= 0 and x_bid != y_bid:
-                if mol_tree.g.has_edges_between(x_bid, y_bid):
+                if tree_graph.has_edges_between(x_bid, y_bid):
                     tree_mess_target_edges.append(
                         (begin_idx + n_nodes, end_idx + n_nodes))
                     tree_mess_source_edges.append((x_bid, y_bid))
                     tree_mess_target_nodes.append(end_idx + n_nodes)
-                if mol_tree.g.has_edges_between(y_bid, x_bid):
+                if tree_graph.has_edges_between(y_bid, x_bid):
                     tree_mess_target_edges.append(
                         (end_idx + n_nodes, begin_idx + n_nodes))
                     tree_mess_source_edges.append((y_bid, x_bid))
