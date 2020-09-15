@@ -72,9 +72,8 @@ def potentialNet_graph_construction_featurization(ligand_mol,
                                               protein_coordinates,
                                               max_num_ligand_atoms=None,
                                               max_num_protein_atoms=None,
-                                              neighbor_cutoff=5.,
                                               max_num_neighbors=12,
-                                              distance_bins = [0.0, 1.5, 2.5, 3.5, 4.5, 5.5],
+                                              distance_bins = [1.5, 2.5, 3.5, 4.5, 5.5],
                                               strip_hydrogens=False):
     assert ligand_coordinates is not None, 'Expect ligand_coordinates to be provided.'
     assert protein_coordinates is not None, 'Expect protein_coordinates to be provided.'
@@ -126,8 +125,7 @@ def potentialNet_graph_construction_featurization(ligand_mol,
     # Construct knn grpah for stage 2
     complex_coordinates = np.concatenate([ligand_coordinates, protein_coordinates])
     complex_srcs, complex_dsts, complex_dists = k_nearest_neighbors(
-            complex_coordinates,
-            neighbor_cutoff, max_num_neighbors)
+            complex_coordinates, distance_bins[-1], max_num_neighbors)
     complex_srcs = np.array(complex_srcs)
     complex_dsts = np.array(complex_dsts)
     complex_dists = np.array(complex_dists)
@@ -136,7 +134,7 @@ def potentialNet_graph_construction_featurization(ligand_mol,
     complex_knn_graph.add_nodes(len(complex_coordinates))
     complex_knn_graph.add_edges(complex_srcs, complex_dsts)
     complex_knn_graph.edata['d'] = F.zerocopy_from_numpy(
-        (np.digitize(complex_dists, bins=distance_bins, right=True)-1).astype(np.long))
+        (np.digitize(complex_dists, bins=distance_bins, right=True)).astype(np.long))
     
     return complex_bigraph, complex_knn_graph
 

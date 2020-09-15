@@ -71,7 +71,7 @@ def main(args):
     args['device'] = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     set_random_seed(args['random_seed'])
 
-    dataset, train_set, test_set = load_dataset(args)
+    dataset, train_set, val_set, test_set = load_dataset(args)
     args['train_mean'] = train_set.labels_mean.to(args['device'])
     args['train_std'] = train_set.labels_std.to(args['device'])
     train_loader = DataLoader(dataset=train_set,
@@ -81,7 +81,12 @@ def main(args):
                               num_workers=8)
     test_loader = DataLoader(dataset=test_set,
                              batch_size=args['batch_size'],
-                             shuffle=True,
+                             shuffle=args['shuffle'],
+                             collate_fn=collate,
+                             num_workers=8)
+    val_loader = DataLoader(dataset=val_set,
+                             batch_size=args['batch_size'],
+                             shuffle=args['shuffle'],
                              collate_fn=collate,
                              num_workers=8)
 
@@ -96,6 +101,10 @@ def main(args):
     test_scores = run_an_eval_epoch(args, model, test_loader)
     test_msg = update_msg_from_scores('test results', test_scores)
     print(test_msg)
+    if args['frac_val'] > 0:
+        val_scores = run_an_eval_epoch(args, model, val_loader)
+        val_msg = update_msg_from_scores('validation results', val_scores)
+        print(val_msg)
 
 if __name__ == '__main__':
     import argparse

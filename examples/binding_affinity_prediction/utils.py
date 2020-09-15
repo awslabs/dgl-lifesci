@@ -59,9 +59,9 @@ def load_dataset(args):
             dataset = PDBBind(subset=args['subset'],
                           load_binding_pocket=args['load_binding_pocket'],
                           zero_padding=True)
-        # No validation set is used and frac_val = 0.
+
         if args['split'] == 'random':
-            train_set, _, test_set = RandomSplitter.train_val_test_split(
+            train_set, val_set, test_set = RandomSplitter.train_val_test_split(
                 dataset,
                 frac_train=args['frac_train'],
                 frac_val=args['frac_val'],
@@ -69,7 +69,7 @@ def load_dataset(args):
                 random_state=args['random_seed'])
 
         elif args['split'] == 'scaffold':
-            train_set, _, test_set = ScaffoldSplitter.train_val_test_split(
+            train_set, val_set, test_set = ScaffoldSplitter.train_val_test_split(
                 dataset,
                 mols=dataset.ligand_mols,
                 sanitize=False,
@@ -78,7 +78,7 @@ def load_dataset(args):
                 frac_test=args['frac_test'])
 
         elif args['split'] == 'stratified':
-            train_set, _, test_set = SingleTaskStratifiedSplitter.train_val_test_split(
+            train_set, val_set, test_set = SingleTaskStratifiedSplitter.train_val_test_split(
                 dataset,
                 labels=dataset.labels,
                 task_id=0,
@@ -100,12 +100,12 @@ def load_dataset(args):
 
         else:
             raise ValueError('Expect the splitting method '
-                             'to be "random" or "scaffold", got {}'.format(args['split']))
+                             'to be "random", "scaffold", "stratified" or "temporal", got {}'.format(args['split']))
         train_labels = torch.stack([train_set.dataset.labels[i] for i in train_set.indices])
         train_set.labels_mean = train_labels.mean(dim=0)
         train_set.labels_std = train_labels.std(dim=0)
 
-    return dataset, train_set, test_set
+    return dataset, train_set, val_set, test_set
 
 def collate(data):
     indices, ligand_mols, protein_mols, graphs, labels = map(list, zip(*data))
@@ -131,8 +131,8 @@ def load_model(args):
                      dropouts=args['dropouts'],
                      features_to_use=args['atomic_numbers_considered'],
                      radial=args['radial'])
-    if args['model'] == 'PotentialNet': # fix with args
-        model = PotentialNet(n_etypes= (len(args['distance_bins']) - 1),
+    if args['model'] == 'PotentialNet': 
+        model = PotentialNet(n_etypes= (len(args['distance_bins'])),
                  f_in=args['f_in'],
                  f_bond=args['f_bond'],
                  f_spatial=args['f_spatial'],
