@@ -1026,11 +1026,9 @@ class JTVAEDataset(Dataset):
         dict
             The batch of datapoints moved to the target device.
         """
-        trees = []
-        for tr in mol_batch['mol_trees']:
-            tr.graph = tr.graph.to(device)
-            trees.append(tr)
-        mol_batch['mol_trees'] = trees
+        for i in range(len(mol_batch['mol_trees'])):
+            mol_batch['mol_trees'][i].graph = mol_batch['mol_trees'][i].graph.to(device)
+
         mol_batch['mol_graph_batch'] = mol_batch['mol_graph_batch'].to(device)
         if 'cand_graph_batch' in mol_batch:
             mol_batch['cand_graph_batch'] = mol_batch['cand_graph_batch'].to(device)

@@ -89,9 +89,7 @@ class DGLJTNNVAE(nn.Module):
         mol_graphs = mol_batch['mol_graph_batch']
         mol_vec = self.mpn(mol_graphs)
 
-        mol_trees = [tree.graph for tree in mol_batch['mol_trees']]
-        mol_tree_batch = batch(mol_trees)
-        mol_tree_batch, tree_vec = self.jtnn(mol_tree_batch)
+        mol_tree_batch, tree_vec = self.jtnn([t.graph for t in mol_batch['mol_trees']])
 
         return mol_tree_batch, tree_vec, mol_vec
 
@@ -125,7 +123,7 @@ class DGLJTNNVAE(nn.Module):
             1.0 + z_log_var - z_mean * z_mean - torch.exp(z_log_var)) / batch_size
 
         word_loss, topo_loss, word_acc, topo_acc = self.decoder(
-            mol_trees, tree_vec)
+            [t.graph for t in mol_trees], tree_vec)
         assm_loss, assm_acc = self.assm(mol_batch, mol_tree_batch, mol_vec)
         stereo_loss, stereo_acc = self.stereo(mol_batch, mol_vec)
 
@@ -221,18 +219,16 @@ class DGLJTNNVAE(nn.Module):
                 node['is_leaf'] = False
                 set_atommap(node['mol'], node['nid'])
 
-        mol_tree_sg = mol_tree.graph.subgraph(effective_nodes)
+        mol_tree_sg = mol_tree.graph.subgraph(effective_nodes.to(device))
         mol_tree_msg, _ = self.jtnn(mol_tree_sg)
         mol_tree_msg = unbatch(mol_tree_msg)[0]
         mol_tree_msg.nodes_dict = nodes_dict
 
         cur_mol = copy_edit_mol(nodes_dict[0]['mol'])
         global_amap = [{}] + [{} for _ in nodes_dict]
-        global_amap[1] = {atom.GetIdx(): atom.GetIdx()
-                          for atom in cur_mol.GetAtoms()}
+        global_amap[1] = {atom.GetIdx(): atom.GetIdx() for atom in cur_mol.GetAtoms()}
 
-        cur_mol = self.dfs_assemble(
-            mol_tree_msg, mol_vec, cur_mol, global_amap, [], 0, None)
+        cur_mol = self.dfs_assemble(mol_tree_msg, mol_vec, cur_mol, global_amap, [], 0, None)
         if cur_mol is None:
             return None
 
@@ -276,8 +272,7 @@ class DGLJTNNVAE(nn.Module):
         singletons = [nei for nei in children if nei['mol'].GetNumAtoms() == 1]
         neighbors = singletons + neighbors
 
-        cur_amap = [(fa_nid, a2, a1)
-                    for nid, a1, a2 in fa_amap if nid == cur_node['nid']]
+        cur_amap = [(fa_nid, a2, a1) for nid, a1, a2 in fa_amap if nid == cur_node['nid']]
         cands = enum_assemble_nx(cur_node, neighbors, prev_nodes, cur_amap)
         if len(cands) == 0:
             return None

@@ -16,21 +16,14 @@ from dgl import bfs_edges_generator
 from .nnutils import GRUUpdate
 
 def level_order(forest, roots):
-    device = forest.device
-    edges = list(bfs_edges_generator(forest, roots))
-    edges = [e.to(device) for e in edges]
+    edges = bfs_edges_generator(forest, roots)
+    if len(edges) == 0:
+        # no edges in the tree; do not perform loopy BP
+        return
     _, leaves = forest.find_edges(edges[-1])
-    edges_back = list(bfs_edges_generator(forest, roots, reverse=True))
-    edges_back = [e.to(device) for e in edges_back]
+    edges_back = bfs_edges_generator(forest, roots, reverse=True)
     yield from reversed(edges_back)
     yield from edges
-
-enc_tree_msg1 = fn.copy_src(src='m', out='m')
-enc_tree_msg2 = fn.copy_src(src='rm', out='rm')
-enc_tree_reduce1 = fn.sum(msg='m', out='s')
-enc_tree_reduce2 = fn.sum(msg='rm', out='accum_rm')
-enc_tree_gather_msg = fn.copy_edge(edge='m', out='m')
-enc_tree_gather_reduce = fn.sum(msg='m', out='m')
 
 class EncoderGatherUpdate(nn.Module):
     def __init__(self, hidden_size):
@@ -67,10 +60,11 @@ class DGLJTNNEncoder(nn.Module):
         self.enc_tree_update.reset_parameters()
         self.enc_tree_gather_update.reset_parameters()
 
-    def forward(self, mol_tree_batch):
+    def forward(self, mol_trees):
+        mol_tree_batch = dgl.batch(mol_trees)
+
         # Build line graph to prepare for belief propagation
         mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
-        mol_tree_batch_lg._node_frames = mol_tree_batch._edge_frames
 
         return self.run(mol_tree_batch, mol_tree_batch_lg)
 
@@ -79,7 +73,7 @@ class DGLJTNNEncoder(nn.Module):
 
         # Since tree roots are designated to 0.  In the batched graph we can
         # simply find the corresponding node ID by looking at node_offset
-        node_offset = np.cumsum([0] + mol_tree_batch.batch_num_nodes().tolist())
+        node_offset = np.cumsum(np.insert(mol_tree_batch.batch_num_nodes().cpu().numpy(), 0, 0))
         root_ids = torch.tensor(node_offset[:-1], device=device, dtype=mol_tree_batch.idtype)
         n_nodes = mol_tree_batch.num_nodes()
         n_edges = mol_tree_batch.num_edges()
@@ -87,7 +81,8 @@ class DGLJTNNEncoder(nn.Module):
         # Assign structure embeddings to tree nodes
         mol_tree_batch.ndata.update({
             'x': self.embedding(mol_tree_batch.ndata['wid']),
-            'h': torch.zeros(n_nodes, self.hidden_size).to(device),
+            'm': torch.zeros(n_nodes, self.hidden_size).to(device),
+            'h': torch.zeros(n_nodes, self.hidden_size).to(device)
         })
 
         # Initialize the intermediate variables according to Eq (4)-(8).
@@ -115,25 +110,17 @@ class DGLJTNNEncoder(nn.Module):
         # messages, and the uncomputed messages are zero vectors.  Essentially,
         # we can always compute s_ij as the sum of incoming m_ij, no matter
         # if m_ij is actually computed or not.
+        mol_tree_batch_lg.ndata.update(mol_tree_batch.edata)
         for eid in level_order(mol_tree_batch, root_ids):
-            mol_tree_batch_lg.pull(
-                eid,
-                enc_tree_msg1,
-                enc_tree_reduce1
-            )
-            mol_tree_batch_lg.pull(
-                eid,
-                enc_tree_msg2,
-                enc_tree_reduce2,
-                self.enc_tree_update,
-            )
+            eid = eid.to(mol_tree_batch_lg.device)
+            mol_tree_batch_lg.pull(eid, fn.copy_u('m', 'm'), fn.sum('m', 's'))
+            mol_tree_batch_lg.pull(eid, fn.copy_u('rm', 'rm'), fn.sum('rm', 'rm'))
+            mol_tree_batch_lg.apply_nodes(self.enc_tree_update)
 
         # Readout
-        mol_tree_batch.update_all(
-            enc_tree_gather_msg,
-            enc_tree_gather_reduce,
-            self.enc_tree_gather_update,
-        )
+        mol_tree_batch.edata.update(mol_tree_batch_lg.ndata)
+        mol_tree_batch.update_all(fn.copy_e('m', 'm'), fn.sum('m', 'm'))
+        mol_tree_batch.apply_nodes(self.enc_tree_gather_update)
 
         root_vecs = mol_tree_batch.nodes[root_ids].data['h']
 

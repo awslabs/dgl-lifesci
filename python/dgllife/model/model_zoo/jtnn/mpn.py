@@ -20,9 +20,6 @@ ELEM_LIST = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na',
 ATOM_FDIM = len(ELEM_LIST) + 6 + 5 + 4 + 1
 BOND_FDIM = 5 + 6
 
-mpn_loopy_bp_msg = fn.copy_src(src='msg', out='msg')
-mpn_loopy_bp_reduce = fn.sum(msg='msg', out='accum_msg')
-
 class LoopyBPUpdate(nn.Module):
     def __init__(self, hidden_size):
         super(LoopyBPUpdate, self).__init__()
@@ -80,7 +77,6 @@ class DGLMPN(nn.Module):
 
     def forward(self, mol_graph):
         mol_line_graph = dgl.line_graph(mol_graph, backtracking=False, shared=True)
-        mol_line_graph._node_frames = mol_graph._edge_frames
 
         mol_graph = self.run(mol_graph, mol_line_graph)
 
@@ -113,19 +109,11 @@ class DGLMPN(nn.Module):
         })
 
         for i in range(self.depth - 1):
-            mol_line_graph.update_all(
-                mpn_loopy_bp_msg,
-                mpn_loopy_bp_reduce,
-                self.loopy_bp_updater,
-            )
+            mol_line_graph.update_all(fn.copy_u('msg', 'msg'), fn.sum('msg', 'accum_msg'))
+            mol_line_graph.apply_nodes(self.loopy_bp_updater)
 
-        mol_graph.edata.update({
-            'msg': mol_line_graph.ndata['msg']
-        })
-        mol_graph.update_all(
-            mpn_gather_msg,
-            mpn_gather_reduce,
-            self.gather_updater,
-        )
+        mol_graph.edata.update(mol_line_graph.ndata)
+        mol_graph.update_all(fn.copy_e('msg', 'msg'), fn.sum('msg', 'm'))
+        mol_graph.apply_nodes(self.gather_updater)
 
         return mol_graph
