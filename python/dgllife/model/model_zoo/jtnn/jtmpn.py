@@ -121,12 +121,12 @@ class DGLJTMPN(nn.Module):
             if PAPER:
                 src_u, src_v = tree_mess_src_edges.unbind(1)
                 tgt_u, tgt_v = tree_mess_tgt_edges.unbind(1)
-                eid = mol_tree_batch.edge_ids(src_u, src_v)
+                eid = mol_tree_batch.edge_ids(src_u, src_v).long()
                 alpha = mol_tree_batch.edata['m'][eid]
                 cand_graphs.edges[tgt_u, tgt_v].data['alpha'] = alpha
             else:
                 src_u, src_v = tree_mess_src_edges.unbind(1)
-                eid = mol_tree_batch.edge_ids(src_u, src_v)
+                eid = mol_tree_batch.edge_ids(src_u, src_v).long()
                 alpha = mol_tree_batch.edata['m'][eid]
                 node_idx = (tree_mess_tgt_nodes
                             .to(device=zero_node_state.device, dtype=torch.int64)[:, None]
