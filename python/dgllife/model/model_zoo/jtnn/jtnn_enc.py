@@ -16,12 +16,15 @@ from dgl import bfs_edges_generator
 from .nnutils import GRUUpdate
 
 def level_order(forest, roots):
-    edges = bfs_edges_generator(forest, roots)
+    device = forest.device
+    edges = list(bfs_edges_generator(forest, roots))
     if len(edges) == 0:
         # no edges in the tree; do not perform loopy BP
         return
+    edges = [e.to(device) for e in edges]
     _, leaves = forest.find_edges(edges[-1])
-    edges_back = bfs_edges_generator(forest, roots, reverse=True)
+    edges_back = list(bfs_edges_generator(forest, roots, reverse=True))
+    edges_back = [e.to(device) for e in edges_back]
     yield from reversed(edges_back)
     yield from edges
 
