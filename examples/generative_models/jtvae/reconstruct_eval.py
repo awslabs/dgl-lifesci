@@ -14,7 +14,7 @@ from utils import worker_init_fn, get_vocab_file
 
 @torch.no_grad()
 def main(args):
-    worker_init_fn(None)
+    worker_init_fn()
 
     if torch.cuda.is_available():
         device = torch.device('cuda:0')

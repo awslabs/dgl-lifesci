@@ -987,9 +987,8 @@ class JTVAEDataset(Dataset):
     def __init__(self, data, vocab, training=True):
         dir = get_download_dir()
 
-        _url = _get_dgl_url('dataset/jtnn.zip')
         zip_file_path = '{}/jtnn.zip'.format(dir)
-        download(_url, path=zip_file_path)
+        download(_get_dgl_url('dgllife/jtnn.zip'), path=zip_file_path)
         extract_archive(zip_file_path, '{}/jtnn'.format(dir))
 
         print('Loading data...')

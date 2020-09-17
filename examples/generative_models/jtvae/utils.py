@@ -6,7 +6,7 @@
 import rdkit
 from dgl.data.utils import get_download_dir
 
-def worker_init_fn(id_):
+def worker_init_fn():
     lg = rdkit.RDLogger.logger()
     lg.setLevel(rdkit.RDLogger.CRITICAL)
 
