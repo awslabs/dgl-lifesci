@@ -18,7 +18,7 @@ from utils import worker_init_fn, get_vocab_file
 def main(args):
     torch.multiprocessing.set_sharing_strategy('file_system')
 
-    worker_init_fn()
+    worker_init_fn(None)
 
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
