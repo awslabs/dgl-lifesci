@@ -44,10 +44,9 @@ class PotentialNet(nn.Module):
                  f_bond,
                  f_spatial,
                  f_gather,
-                 n_row_fc,
+                 n_rows_fc,
                  n_bond_conv_steps,
                  n_spatial_conv_steps,
-                 n_fc_layers,
                  dropouts
                  ):
         super(PotentialNet, self).__init__()
@@ -66,8 +65,7 @@ class PotentialNet(nn.Module):
                                         dropout=dropouts[1]
                                         )
         self.stage_3_model = StagedFCNN(f_in=f_gather,
-                                        n_row=n_row_fc,
-                                        n_layers=n_fc_layers,
+                                        n_row=n_rows_fc,
                                         dropout=dropouts[2]
         )
 
@@ -112,15 +110,14 @@ class StagedFCNN(nn.Module):
     def __init__(self,
                  f_in,
                  n_row,
-                 n_layers,
                  dropout):
         super(StagedFCNN, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
         self.layers = nn.ModuleList()
-        self.layers.append(nn.Linear(f_in, n_row))
-        for _ in range(n_layers - 1):
-            self.layers.append(nn.Linear(n_row, n_row))
-        self.out_layer = nn.Linear(n_row, 1)
+        self.layers.append(nn.Linear(f_in, n_row[0]))
+        for i in range(1, len(n_row)):
+            self.layers.append(nn.Linear(n_row[i-1], n_row[i]))
+        self.out_layer = nn.Linear(n_row[-1], 1)
 
     def forward(self, batch_num_nodes, features):
         x = sum_ligand_features(features, batch_num_nodes)

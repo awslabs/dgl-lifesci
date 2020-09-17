@@ -137,9 +137,8 @@ def load_model(args):
                  f_bond=args['f_bond'],
                  f_spatial=args['f_spatial'],
                  f_gather=args['f_gather'],
-                 n_row_fc=args['n_row_fc'],
+                 n_rows_fc=args['n_rows_fc'],
                  n_bond_conv_steps=args['n_bond_conv_steps'],
                  n_spatial_conv_steps=args['n_spatial_conv_steps'],
-                 n_fc_layers=args['n_fc_layers'],
                  dropouts=args['dropouts'])
     return model
