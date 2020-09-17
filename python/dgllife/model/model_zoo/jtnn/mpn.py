@@ -37,9 +37,6 @@ class LoopyBPUpdate(nn.Module):
         msg = F.relu(msg_input + msg_delta)
         return {'msg': msg}
 
-mpn_gather_msg = fn.copy_edge(edge='msg', out='msg')
-mpn_gather_reduce = fn.sum(msg='msg', out='m')
-
 class GatherUpdate(nn.Module):
     def __init__(self, hidden_size):
         super(GatherUpdate, self).__init__()

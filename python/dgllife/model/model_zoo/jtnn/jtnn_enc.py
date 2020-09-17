@@ -115,7 +115,6 @@ class DGLJTNNEncoder(nn.Module):
         # if m_ij is actually computed or not.
         mol_tree_batch_lg.ndata.update(mol_tree_batch.edata)
         for eid in level_order(mol_tree_batch, root_ids):
-            eid = eid.to(mol_tree_batch_lg.device)
             mol_tree_batch_lg.pull(eid, fn.copy_u('m', 'm'), fn.sum('m', 's'))
             mol_tree_batch_lg.pull(eid, fn.copy_u('rm', 'rm'), fn.sum('rm', 'rm'))
             mol_tree_batch_lg.apply_nodes(self.enc_tree_update)

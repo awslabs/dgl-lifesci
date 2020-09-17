@@ -250,7 +250,7 @@ class DGLJTNNDecoder(nn.Module):
         _, root_wid = torch.max(root_score, 1)
         root_wid = root_wid.view(1)
 
-        mol_tree.graph.add_nodes(1)   # root
+        mol_tree_graph.add_nodes(1)   # root
         mol_tree_graph.ndata['wid'] = root_wid
         mol_tree_graph.ndata['x'] = self.embedding(root_wid)
         mol_tree_graph.ndata['h'] = init_hidden
