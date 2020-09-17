@@ -312,7 +312,7 @@ class DGLJTNNDecoder(nn.Module):
                 mol_tree_graph.edata.update(mol_tree_graph_lg.ndata)
                 mol_tree_graph.pull(v, fn.copy_e('m', 'm'), fn.sum('m', 'h'))
 
-                vdata = mol_tree.g.nodes[v].data
+                vdata = mol_tree_graph.nodes[v].data
                 h_v = vdata['h']
                 q_input = torch.cat([h_v, mol_vec], 1)
                 q_score = torch.softmax(self.W_o(torch.relu(self.W(q_input))), -1)
