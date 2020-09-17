@@ -89,7 +89,7 @@ class DGLJTNNVAE(nn.Module):
         mol_graphs = mol_batch['mol_graph_batch']
         mol_vec = self.mpn(mol_graphs)
 
-        mol_trees = [tree.g for tree in mol_batch['mol_trees']]
+        mol_trees = [tree.graph for tree in mol_batch['mol_trees']]
         mol_tree_batch = batch(mol_trees)
         mol_tree_batch, tree_vec = self.jtnn(mol_tree_batch)
 
@@ -217,11 +217,11 @@ class DGLJTNNVAE(nn.Module):
             node['idx'] = i
             node['nid'] = i + 1
             node['is_leaf'] = True
-            if mol_tree.g.in_degrees(node_id) > 1:
+            if mol_tree.graph.in_degrees(node_id) > 1:
                 node['is_leaf'] = False
                 set_atommap(node['mol'], node['nid'])
 
-        mol_tree_sg = mol_tree.g.subgraph(effective_nodes)
+        mol_tree_sg = mol_tree.graph.subgraph(effective_nodes)
         mol_tree_msg, _ = self.jtnn(mol_tree_sg)
         mol_tree_msg = unbatch(mol_tree_msg)[0]
         mol_tree_msg.nodes_dict = nodes_dict

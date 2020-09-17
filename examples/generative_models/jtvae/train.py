@@ -12,6 +12,7 @@ import torch.optim.lr_scheduler as lr_scheduler
 from dgllife.data import JTVAEDataset, JTVAECollator
 from dgllife.model import DGLJTNNVAE
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from utils import worker_init_fn, get_vocab_file
 
@@ -59,7 +60,7 @@ def main(args):
     for epoch in range(args.max_epoch):
         word_acc, topo_acc, assm_acc, steo_acc = 0, 0, 0, 0
 
-        for it, batch in enumerate(dataloader):
+        for it, batch in enumerate(tqdm(dataloader)):
             batch = dataset.move_to_device(batch, device)
             model.zero_grad()
             try:

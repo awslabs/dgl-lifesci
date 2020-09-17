@@ -27,7 +27,7 @@ __all__ = ['DGLMolTree',
            'JTVAEDataset',
            'JTVAECollator']
 
-def get_mol(smiles, kekulize=True):
+def get_mol(smiles):
     """Convert the SMILES string into an RDKit molecule object
 
     Parameters
@@ -45,8 +45,7 @@ def get_mol(smiles, kekulize=True):
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return None
-    if kekulize:
-        Chem.Kekulize(mol)
+    Chem.Kekulize(mol)
     return mol
 
 def get_smiles(mol):
@@ -196,11 +195,13 @@ def get_clique_mol(mol, atoms):
     new_mol = sanitize(new_mol)  # We assume this is not None
     return new_mol
 
-def get_atom_to_substructures(cliques):
+def get_atom_to_substructures(n_atoms, cliques):
     """Get the substructures that each atom belongs to.
 
     Parameters
     ----------
+    n_atoms : int
+        Number of total atoms.
     cliques : list
         Each element is a list of int, representing a
         non-ring bond or a simple cycle.
@@ -210,7 +211,7 @@ def get_atom_to_substructures(cliques):
     nei_list : dict
         Mapping atom ids to the ids of the substructures that the atom belongs to.
     """
-    nei_list = defaultdict(list)
+    nei_list = [[] for _ in range(n_atoms)]
     for i in range(len(cliques)):
         for atom in cliques[i]:
             nei_list[atom].append(i)
@@ -253,7 +254,7 @@ def tree_decomp(mol, mst_max_weight=100):
     cliques.extend(ssr)
 
     # Record the non-ring bonds/simple cycles that each atom belongs to
-    nei_list = get_atom_to_substructures(cliques)
+    nei_list = get_atom_to_substructures(n_atoms, cliques)
 
     # Merge simple rings that have more than two overlapping atoms
     for i in range(len(cliques)):
@@ -272,7 +273,7 @@ def tree_decomp(mol, mst_max_weight=100):
     # Remove merged simple cycles
     cliques = [c for c in cliques if len(c) > 0]
     # Record the non-ring bonds/simple cycles that each atom belongs to
-    nei_list = get_atom_to_substructures(cliques)
+    nei_list = get_atom_to_substructures(n_atoms, cliques)
 
     # Build edges and add singleton cliques
     edges = defaultdict(int)
@@ -497,7 +498,7 @@ def enum_attach_nx(ctr_mol, nei_node, amap, singletons):
                     new_amap = amap + [(nei_idx, a1.GetIdx(), a2.GetIdx())]
                     att_confs.append(new_amap)
 
-        # intersection is an bond
+        # intersection is a bond
         if ctr_mol.GetNumBonds() > 1:
             for b1 in ctr_bonds:
                 for b2 in nei_mol.GetBonds():
@@ -566,12 +567,11 @@ def enum_assemble_nx(node, neighbors, prev_nodes=None, prev_amap=None):
         cand_smiles = set()
         candidates = []
         for amap in cand_amap:
-            cand_mol = local_attach_nx(
-                node['mol'], neighbors[:depth+1], prev_nodes, amap)
+            cand_mol = local_attach_nx(node['mol'], neighbors[:depth+1], prev_nodes, amap)
             cand_mol = sanitize(cand_mol)
             if cand_mol is None:
                 continue
-            smiles = Chem.MolToSmiles(cand_mol, kekuleSmiles=True)
+            smiles = get_smiles(cand_mol)
             if smiles in cand_smiles:
                 continue
             cand_smiles.add(smiles)
@@ -611,7 +611,7 @@ class DGLMolTree():
         self.nodes_dict = {}
 
         if smiles is None:
-            self.g = graph(([], []), idtype=torch.int32)
+            self.graph = graph(([], []), idtype=torch.int32)
             return
 
         self.mol = get_mol(smiles)
@@ -627,7 +627,7 @@ class DGLMolTree():
         root = 0
         for i, c in enumerate(cliques):
             cmol = get_clique_mol(self.mol, c)
-            csmiles = Chem.MolToSmiles(cmol, kekuleSmiles=True)
+            csmiles = get_smiles(cmol)
             self.nodes_dict[i] = dict(
                 smiles=csmiles,
                 mol=get_mol(csmiles),
@@ -664,13 +664,13 @@ class DGLMolTree():
             src[2 * i + 1] = y
             dst[2 * i + 1] = x
 
-        self.g = graph((src, dst), num_nodes=len(cliques), idtype=torch.int32)
+        self.graph = graph((src, dst), num_nodes=len(cliques), idtype=torch.int32)
 
         for i in self.nodes_dict:
             self.nodes_dict[i]['nid'] = i + 1
-            if self.g.out_degrees(i) > 1:  # Leaf node mol is not marked
+            if self.graph.out_degrees(i) > 1:  # Leaf node mol is not marked
                 set_atommap(self.nodes_dict[i]['mol'], self.nodes_dict[i]['nid'])
-            self.nodes_dict[i]['is_leaf'] = (self.g.out_degrees(i) == 1)
+            self.nodes_dict[i]['is_leaf'] = (self.graph.out_degrees(i) == 1)
 
     def treesize(self):
         """Get the number of nodes in the junction tree.
@@ -680,7 +680,7 @@ class DGLMolTree():
         int
             Get the number of nodes (clusters) in the junction tree.
         """
-        return self.g.num_nodes()
+        return self.graph.num_nodes()
 
     def _recover_node(self, i, original_mol):
         """Get the SMILES string corresponding to the i-th cluster in the
@@ -706,7 +706,7 @@ class DGLMolTree():
             for cidx in node['clique']:
                 original_mol.GetAtomWithIdx(cidx).SetAtomMapNum(node['nid'])
 
-        for j in self.g.successors(i).numpy():
+        for j in self.graph.successors(i).numpy():
             nei_node = self.nodes_dict[j]
             clique.extend(nei_node['clique'])
             if nei_node['is_leaf']:  # Leaf node, no need to mark
@@ -719,8 +719,7 @@ class DGLMolTree():
 
         clique = list(set(clique))
         label_mol = get_clique_mol(original_mol, clique)
-        node['label'] = Chem.MolToSmiles(Chem.MolFromSmiles(
-            Chem.MolToSmiles(label_mol, kekuleSmiles=True)))
+        node['label'] = Chem.MolToSmiles(Chem.MolFromSmiles(get_smiles(label_mol)))
         node['label_mol'] = get_mol(node['label'])
 
         for cidx in clique:
@@ -742,10 +741,10 @@ class DGLMolTree():
         i : int
             The id of a cluster.
         """
-        neighbors = [self.nodes_dict[j] for j in self.g.successors(i).numpy()
+        neighbors = [self.nodes_dict[j] for j in self.graph.successors(i).numpy()
                      if self.nodes_dict[j]['mol'].GetNumAtoms() > 1]
         neighbors = sorted(neighbors, key=lambda x: x['mol'].GetNumAtoms(), reverse=True)
-        singletons = [self.nodes_dict[j] for j in self.g.successors(i).numpy()
+        singletons = [self.nodes_dict[j] for j in self.graph.successors(i).numpy()
                       if self.nodes_dict[j]['mol'].GetNumAtoms() == 1]
         # All successors sorted based on their size
         neighbors = singletons + neighbors
@@ -935,7 +934,7 @@ def mol2dgl_dec(cand_batch, atom_featurizer, bond_featurizer):
         cand_graphs.append(g)
 
         if isinstance(mol_tree, DGLMolTree):
-            tree_graph = mol_tree.g
+            tree_graph = mol_tree.graph
         else:
             tree_graph = mol_tree
 
@@ -1029,7 +1028,7 @@ class JTVAEDataset(Dataset):
         """
         trees = []
         for tr in mol_batch['mol_trees']:
-            tr.g = tr.g.to(device)
+            tr.graph = tr.graph.to(device)
             trees.append(tr)
         mol_batch['mol_trees'] = trees
         mol_batch['mol_graph_batch'] = mol_batch['mol_graph_batch'].to(device)
@@ -1238,7 +1237,7 @@ class JTVAECollator(object):
         mol_trees = _unpack_field(examples, 'mol_tree')
         wid = _unpack_field(examples, 'wid')
         for _wid, mol_tree in zip(wid, mol_trees):
-            mol_tree.g.ndata['wid'] = torch.LongTensor(_wid)
+            mol_tree.graph.ndata['wid'] = torch.LongTensor(_wid)
 
         # TODO: either support pickling or get around ctypes pointers using scipy
         # batch molecule graphs
@@ -1267,7 +1266,7 @@ class JTVAECollator(object):
             tree_mess_src_e[i] += n_tree_nodes
             tree_mess_tgt_n[i] += n_graph_nodes
             n_graph_nodes += sum(g.num_nodes() for g in cand_graphs[i])
-            n_tree_nodes += mol_trees[i].g.num_nodes()
+            n_tree_nodes += mol_trees[i].graph.num_nodes()
             cand_batch_idx.extend([i] * len(cand_graphs[i]))
         tree_mess_tgt_e = torch.cat(tree_mess_tgt_e)
         tree_mess_src_e = torch.cat(tree_mess_src_e)

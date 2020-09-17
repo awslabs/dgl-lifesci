@@ -22,9 +22,6 @@ BOND_FDIM = 5
 
 PAPER = os.getenv('PAPER', False)
 
-mpn_loopy_bp_msg = fn.copy_src(src='msg', out='msg')
-mpn_loopy_bp_reduce = fn.sum(msg='msg', out='accum_msg')
-
 class LoopyBPUpdate(nn.Module):
     def __init__(self, hidden_size):
         super(LoopyBPUpdate, self).__init__()
@@ -42,22 +39,6 @@ class LoopyBPUpdate(nn.Module):
         msg = torch.relu(msg_input + msg_delta)
         return {'msg': msg}
 
-if PAPER:
-    mpn_gather_msg = [
-        fn.copy_edge(edge='msg', out='msg'),
-        fn.copy_edge(edge='alpha', out='alpha')
-    ]
-else:
-    mpn_gather_msg = fn.copy_edge(edge='msg', out='msg')
-
-if PAPER:
-    mpn_gather_reduce = [
-        fn.sum(msg='msg', out='m'),
-        fn.sum(msg='alpha', out='accum_alpha'),
-    ]
-else:
-    mpn_gather_reduce = fn.sum(msg='msg', out='m')
-
 class GatherUpdate(nn.Module):
     def __init__(self, hidden_size):
         super(GatherUpdate, self).__init__()
@@ -71,7 +52,6 @@ class GatherUpdate(nn.Module):
 
     def forward(self, node):
         if PAPER:
-            #m = node['m']
             m = node.data['m'] + node.data['accum_alpha']
         else:
             m = node.data['m'] + node.data['alpha']
@@ -101,7 +81,6 @@ class DGLJTMPN(nn.Module):
         cand_graphs, tree_mess_src_edges, tree_mess_tgt_edges, tree_mess_tgt_nodes = cand_batch
 
         cand_line_graph = dgl.line_graph(cand_graphs, backtracking=False, shared=True)
-        cand_line_graph._node_frames = cand_graphs._edge_frames
 
         cand_graphs = self.run(
             cand_graphs, cand_line_graph, tree_mess_src_edges, tree_mess_tgt_edges,
@@ -142,11 +121,13 @@ class DGLJTMPN(nn.Module):
             if PAPER:
                 src_u, src_v = tree_mess_src_edges.unbind(1)
                 tgt_u, tgt_v = tree_mess_tgt_edges.unbind(1)
-                alpha = mol_tree_batch.edges[src_u, src_v].data['m']
+                eid = mol_tree_batch.edge_ids(src_u, src_v)
+                alpha = mol_tree_batch.edata['m'][eid]
                 cand_graphs.edges[tgt_u, tgt_v].data['alpha'] = alpha
             else:
                 src_u, src_v = tree_mess_src_edges.unbind(1)
-                alpha = mol_tree_batch.edges[src_u, src_v].data['m']
+                eid = mol_tree_batch.edge_ids(src_u, src_v)
+                alpha = mol_tree_batch.edata['m'][eid]
                 node_idx = (tree_mess_tgt_nodes
                             .to(device=zero_node_state.device, dtype=torch.int64)[:, None]
                             .expand_as(alpha))
@@ -156,17 +137,16 @@ class DGLJTMPN(nn.Module):
                     func=lambda edges: {'alpha': edges.src['alpha']},
                 )
 
+        cand_line_graph.ndata.update(cand_graphs.edata)
         for i in range(self.depth - 1):
-            cand_line_graph.update_all(
-                mpn_loopy_bp_msg,
-                mpn_loopy_bp_reduce,
-                self.loopy_bp_updater,
-            )
+            cand_line_graph.update_all(fn.copy_u('msg', 'msg'), fn.sum(msg='msg', out='accum_msg'))
+            cand_line_graph.apply_nodes(self.loopy_bp_updater)
 
-        cand_graphs.update_all(
-            mpn_gather_msg,
-            mpn_gather_reduce,
-            self.gather_updater,
-        )
+        cand_graphs.edata.update(cand_line_graph.ndata)
+
+        cand_graphs.update_all(fn.copy_e('msg', 'msg'), fn.sum('msg', 'm'))
+        if PAPER:
+            cand_graphs.update_all(fn.copy_e('alpha', 'alpha'), fn.sum('alpha', 'accum_alpha'))
+        cand_graphs.apply_nodes(self.gather_updater)
 
         return cand_graphs
