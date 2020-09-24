@@ -476,7 +476,7 @@ class WLNCenterDataset(object):
                                 edge_featurizer=edge_featurizer, canonical_atom_order=False),
                         full_mols)
 
-                save_graphs(mol_graph_path, self.reactant_mol_graphs)
+            save_graphs(mol_graph_path, self.reactant_mol_graphs)
 
         self.mols = full_mols
         self.reactions = full_reactions

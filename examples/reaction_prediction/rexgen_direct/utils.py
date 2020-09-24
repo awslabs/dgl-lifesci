@@ -416,10 +416,10 @@ def reaction_center_eval(complete_graphs, preds, reactions,
     batch_size = complete_graphs.batch_size
     start = 0
     for i in range(batch_size):
-        end = start + complete_graphs.batch_num_edges[i]
+        end = start + complete_graphs.batch_num_edges()[i].item()
         candidate_bonds = get_candidate_bonds(
             reactions[i], preds[start:end, :].flatten(),
-            complete_graphs.batch_num_nodes[i], max_k, easy)
+            complete_graphs.batch_num_nodes()[i].item(), max_k, easy)
 
         gold_bonds = []
         gold_edits = graph_edits[i]
@@ -568,10 +568,10 @@ def prepare_reaction_center(args, reaction_center_config):
             batch_size = len(batch_reactions)
             start = 0
             for i in range(batch_size):
-                end = start + batch_complete_graphs.batch_num_edges[i]
+                end = start + batch_complete_graphs.batch_num_edges()[i].item()
                 output_strings.append(output_candidate_bonds_for_a_reaction(
                     (batch_reactions[i], biased_pred[start:end, :].flatten(),
-                    batch_complete_graphs.batch_num_nodes[i]), reaction_center_config['max_k']
+                    batch_complete_graphs.batch_num_nodes()[i].item()), reaction_center_config['max_k']
                 ))
                 start = end
 
