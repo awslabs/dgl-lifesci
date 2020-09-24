@@ -5,6 +5,7 @@
 #
 # USPTO for reaction prediction
 
+import dgl
 import errno
 import numpy as np
 import os
@@ -13,7 +14,6 @@ import torch
 
 from collections import defaultdict
 from copy import deepcopy
-from dgl import DGLGraph
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive, \
     save_graphs, load_graphs
 from functools import partial
@@ -1295,7 +1295,7 @@ def construct_graphs_rank(info, edge_featurizer):
             combo_edge_feats.extend([feats, feats.clone()])
 
         combo_edge_feats = torch.stack(combo_edge_feats, dim=0)
-        combo_graph = DGLGraph()
+        combo_graph = dgl.graph(([], []))
         combo_graph.add_nodes(reactant_graph.num_nodes())
         combo_graph.add_edges(combo_src_list, combo_dst_list)
         combo_graph.edata['he'] = combo_edge_feats
