@@ -5,6 +5,7 @@
 #
 # USPTO for reaction prediction
 
+import dgl
 import errno
 import numpy as np
 import os
@@ -13,7 +14,6 @@ import torch
 
 from collections import defaultdict
 from copy import deepcopy
-from dgl import DGLGraph
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive, \
     save_graphs, load_graphs
 from functools import partial
@@ -417,7 +417,8 @@ class WLNCenterDataset(object):
                  load=True,
                  num_processes=1,
                  check_reaction_validity=True,
-                 reaction_validity_result_prefix=''):
+                 reaction_validity_result_prefix='', 
+                 **kwargs):
         super(WLNCenterDataset, self).__init__()
 
         self._atom_pair_featurizer = atom_pair_featurizer
@@ -427,8 +428,10 @@ class WLNCenterDataset(object):
         self.complete_graphs = dict()
 
         path_to_reaction_file = raw_file_path + '.proc'
-        print('Pre-processing graph edits from reaction data')
-        process_file(raw_file_path, num_processes)
+        built_in = kwargs.get('built_in', False)
+        if not built_in:
+            print('Pre-processing graph edits from reaction data')
+            process_file(raw_file_path, num_processes)
 
         if check_reaction_validity:
             print('Start checking validity of input reactions for modeling...')
@@ -646,7 +649,8 @@ class USPTOCenter(WLNCenterDataset):
             atom_pair_featurizer=atom_pair_featurizer,
             load=load,
             num_processes=num_processes,
-            check_reaction_validity=False)
+            check_reaction_validity=False,
+            built_in=True)
 
     @property
     def subset(self):
@@ -1291,7 +1295,7 @@ def construct_graphs_rank(info, edge_featurizer):
             combo_edge_feats.extend([feats, feats.clone()])
 
         combo_edge_feats = torch.stack(combo_edge_feats, dim=0)
-        combo_graph = DGLGraph()
+        combo_graph = dgl.graph(([], []))
         combo_graph.add_nodes(reactant_graph.num_nodes())
         combo_graph.add_edges(combo_src_list, combo_dst_list)
         combo_graph.edata['he'] = combo_edge_feats
