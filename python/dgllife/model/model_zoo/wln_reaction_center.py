@@ -177,7 +177,7 @@ class WLNReactionCenter(nn.Module):
         nodes = batch_complete_graphs.nodes()
         e_ids = batch_complete_graphs.edge_ids(nodes, nodes)
         bias = torch.zeros(scores.shape[0], 5).to(scores.device)
-        bias[e_ids, :] = 1e4
+        bias[e_ids.long(), :] = 1e4
         biased_scores = scores - bias
 
         return scores, biased_scores

@@ -417,7 +417,8 @@ class WLNCenterDataset(object):
                  load=True,
                  num_processes=1,
                  check_reaction_validity=True,
-                 reaction_validity_result_prefix=''):
+                 reaction_validity_result_prefix='', 
+                 **kwargs):
         super(WLNCenterDataset, self).__init__()
 
         self._atom_pair_featurizer = atom_pair_featurizer
@@ -427,8 +428,10 @@ class WLNCenterDataset(object):
         self.complete_graphs = dict()
 
         path_to_reaction_file = raw_file_path + '.proc'
-        print('Pre-processing graph edits from reaction data')
-        process_file(raw_file_path, num_processes)
+        built_in = kwargs.get('built_in', False)
+        if not built_in:
+            print('Pre-processing graph edits from reaction data')
+            process_file(raw_file_path, num_processes)
 
         if check_reaction_validity:
             print('Start checking validity of input reactions for modeling...')
@@ -473,7 +476,7 @@ class WLNCenterDataset(object):
                                 edge_featurizer=edge_featurizer, canonical_atom_order=False),
                         full_mols)
 
-            save_graphs(mol_graph_path, self.reactant_mol_graphs)
+                save_graphs(mol_graph_path, self.reactant_mol_graphs)
 
         self.mols = full_mols
         self.reactions = full_reactions
@@ -646,7 +649,8 @@ class USPTOCenter(WLNCenterDataset):
             atom_pair_featurizer=atom_pair_featurizer,
             load=load,
             num_processes=num_processes,
-            check_reaction_validity=False)
+            check_reaction_validity=False,
+            built_in=True)
 
     @property
     def subset(self):

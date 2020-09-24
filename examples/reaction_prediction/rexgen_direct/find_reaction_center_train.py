@@ -22,14 +22,14 @@ def load_dataset(args):
         train_set = USPTOCenter('train', num_processes=args['num_processes'])
     else:
         train_set = WLNCenterDataset(raw_file_path=args['train_path'],
-                                     mol_graph_path='train.bin',
+                                     mol_graph_path='./train.bin',
                                      num_processes=args['num_processes'],
                                      reaction_validity_result_prefix='train')
     if args['val_path'] is None:
         val_set = USPTOCenter('val', num_processes=args['num_processes'])
     else:
         val_set = WLNCenterDataset(raw_file_path=args['val_path'],
-                                   mol_graph_path='val.bin',
+                                   mol_graph_path='./val.bin',
                                    num_processes=args['num_processes'],
                                    reaction_validity_result_prefix='val')
 
