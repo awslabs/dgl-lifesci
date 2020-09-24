@@ -464,7 +464,7 @@ class WLNCenterDataset(object):
             print('Constructing graphs from scratch...')
             if num_processes == 1:
                 self.reactant_mol_graphs = []
-                for mol in full_mols:
+                for mol in tqdm(full_mols):
                     self.reactant_mol_graphs.append(mol_to_graph(
                         mol, node_featurizer=node_featurizer,
                         edge_featurizer=edge_featurizer, canonical_atom_order=False))
