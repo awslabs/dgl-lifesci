@@ -165,9 +165,14 @@ def test_muv():
     else:
         device = torch.device('cpu')
 
-    for featurizer_type in ['canonical']:
-        for model_type in ['GCN']:
+    for featurizer_type in ['canonical', 'attentivefp']:
+        if featurizer_type == 'canonical':
             node_featurizer = CanonicalAtomFeaturizer(atom_data_field='hv')
+            edge_featurizer = CanonicalBondFeaturizer(bond_data_field='he')
+        else:
+            node_featurizer = AttentiveFPAtomFeaturizer(atom_data_field='hv')
+            edge_featurizer = AttentiveFPBondFeaturizer(bond_data_field='he')
+        for model_type in ['GCN']:
             g1 = smiles_to_bigraph('CO', node_featurizer=node_featurizer)
             g2 = smiles_to_bigraph('CCO', node_featurizer=node_featurizer)
             bg = dgl.batch([g1, g2])
@@ -179,9 +184,9 @@ def test_muv():
             remove_file('{}_{}_MUV_pre_trained.pth'.format(model_type.lower(), featurizer_type))
 
 if __name__ == '__main__':
-    test_dgmg()
-    test_jtnn()
-    test_gcn_tox21()
-    test_gat_tox21()
-    test_attentivefp_aromaticity()
+    # test_dgmg()
+    # test_jtnn()
+    # test_gcn_tox21()
+    # test_gat_tox21()
+    # test_attentivefp_aromaticity()
     test_muv()

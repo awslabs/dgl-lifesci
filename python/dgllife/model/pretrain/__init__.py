@@ -89,6 +89,8 @@ def load_pretrained(model_name, log=True):
           and attribute masking
         * ``'GCN_canonical_MUV'``: A GCN model trained on MUV with canonical
           featurization for atoms
+        * ``'GCN_attentivefp_MUV'``: A GCN model trained on MUV with attentivefp
+          featurization for atoms
 
     log : bool
         Whether to print progress for model loading
