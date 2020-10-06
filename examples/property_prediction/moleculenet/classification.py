@@ -100,7 +100,8 @@ def main(args, exp_config, train_set, val_set, test_set):
     print('test {} {:.4f}'.format(args['metric'], test_score))
 
     with open(args['result_path'] + '/eval.txt', 'w') as f:
-        f.write('Best val {}: {}\n'.format(args['metric'], stopper.best_score))
+        if not args['pretrain']:
+            f.write('Best val {}: {}\n'.format(args['metric'], stopper.best_score))
         f.write('Test {}: {}\n'.format(args['metric'], test_score))
 
 if __name__ == '__main__':
