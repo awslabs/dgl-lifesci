@@ -148,7 +148,8 @@ if __name__ == '__main__':
         from dgllife.data import MUV
         dataset = MUV(smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
                       node_featurizer=args['node_featurizer'],
-                      edge_featurizer=args['edge_featurizer'])
+                      edge_featurizer=args['edge_featurizer'],
+                      n_jobs=1 if args['num_workers'] == 0 else args['num_workers'])
     else:
         raise ValueError('Unexpected dataset: {}'.format(args['dataset']))
 

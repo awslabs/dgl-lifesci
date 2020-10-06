@@ -8,5 +8,5 @@
   "patience": 10,
   "predictor_hidden_feats": 128,
   "residual": false,
-  "weight_decay": 0.002934359614800871,
+  "weight_decay": 0.002934359614800871
 }
