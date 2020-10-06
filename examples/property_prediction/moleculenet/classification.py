@@ -68,7 +68,7 @@ def main(args, exp_config, train_set, val_set, test_set):
                              collate_fn=collate_molgraphs, num_workers=args['num_workers'])
 
     if args['pretrain']:
-        args['num_epochs'] = 1
+        args['num_epochs'] = 0
         model = load_pretrained('{}_{}_{}'.format(
             args['model'], args['featurizer_type'], args['dataset']))
     else:
