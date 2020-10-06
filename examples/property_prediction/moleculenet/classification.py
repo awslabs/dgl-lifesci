@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from dgllife.model import load_pretrained
 from dgllife.utils import smiles_to_bigraph, EarlyStopping, Meter
 from functools import partial
 from torch.optim import Adam
@@ -68,7 +69,8 @@ def main(args, exp_config, train_set, val_set, test_set):
 
     if args['pretrain']:
         args['num_epochs'] = 1
-        return NotImplementedError
+        model = load_pretrained('{}_{}_{}'.format(
+            args['model'], args['featurizer_type'], args['dataset']))
     else:
         model = load_model(exp_config).to(args['device'])
         loss_criterion = nn.BCEWithLogitsLoss(reduction='none')
@@ -159,5 +161,5 @@ if __name__ == '__main__':
 
     args['n_tasks'] = dataset.n_tasks
     train_set, val_set, test_set = split_dataset(args, dataset)
-    exp_config = get_configure(args['dataset'], args['model'], args['featurizer_type'])
+    exp_config = get_configure(args['model'], args['featurizer_type'], args['dataset'])
     main(args, exp_config, train_set, val_set, test_set)

@@ -159,9 +159,29 @@ def test_attentivefp_aromaticity():
 
     remove_file('AttentiveFP_Aromaticity_pre_trained.pth')
 
+def test_muv():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    for featurizer_type in ['canonical']:
+        for model_type in ['GCN']:
+            node_featurizer = CanonicalAtomFeaturizer(atom_data_field='hv')
+            g1 = smiles_to_bigraph('CO', node_featurizer=node_featurizer)
+            g2 = smiles_to_bigraph('CCO', node_featurizer=node_featurizer)
+            bg = dgl.batch([g1, g2])
+
+            model = load_pretrained('{}_{}_MUV'.format(model_type, featurizer_type)).to(device)
+            model(bg.to(device), bg.ndata.pop('hv').to(device))
+            model.eval()
+            model(g1.to(device), g1.ndata.pop('hv').to(device))
+            remove_file('{}_{}_MUV_pre_trained.pth'.format(model_type.lower(), featurizer_type))
+
 if __name__ == '__main__':
     test_dgmg()
     test_jtnn()
     test_gcn_tox21()
     test_gat_tox21()
     test_attentivefp_aromaticity()
+    test_muv()

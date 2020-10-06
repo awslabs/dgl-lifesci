@@ -104,24 +104,24 @@ def split_dataset(args, dataset):
 
     return train_set, val_set, test_set
 
-def get_configure(dataset, model, featurizer_type):
+def get_configure(model, featurizer_type, dataset):
     """Query for configuration
 
     Parameters
     ----------
-    dataset : str
-        Dataset for modeling
     model : str
         Model type
     featurizer_type : str
         The featurization performed
+    dataset : str
+        Dataset for modeling
 
     Returns
     -------
     dict
         Returns the manually specified configuration
     """
-    with open('configures/{}_{}_{}.json'.format(dataset, model, featurizer_type), 'r') as f:
+    with open('configures/{}_{}_{}.json'.format(model, featurizer_type, dataset), 'r') as f:
         config = json.load(f)
     return config
 
