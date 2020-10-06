@@ -52,7 +52,8 @@ def run_an_eval_epoch(args, model, data_loader):
 def main(args, exp_config, train_set, val_set, test_set):
     if args['featurizer_type'] != 'pre_train':
         exp_config['in_node_feats'] = args['node_featurizer'].feat_size()
-        exp_config['in_edge_feats'] = args['edge_featurizer'].feat_size()
+        if args['edge_featurizer'] is not None:
+            exp_config['in_edge_feats'] = args['edge_featurizer'].feat_size()
     exp_config['n_tasks'] = args['n_tasks']
 
     train_loader = DataLoader(dataset=train_set, batch_size=exp_config['batch_size'], shuffle=True,
