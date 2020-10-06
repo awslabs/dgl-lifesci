@@ -54,7 +54,10 @@ def main(args, exp_config, train_set, val_set, test_set):
         exp_config['in_node_feats'] = args['node_featurizer'].feat_size()
         if args['edge_featurizer'] is not None:
             exp_config['in_edge_feats'] = args['edge_featurizer'].feat_size()
-    exp_config['n_tasks'] = args['n_tasks']
+    exp_config.update({
+        'n_tasks': args['n_tasks'],
+        'model': args['model']
+    })
 
     train_loader = DataLoader(dataset=train_set, batch_size=exp_config['batch_size'], shuffle=True,
                               collate_fn=collate_molgraphs, num_workers=args['num_workers'])
