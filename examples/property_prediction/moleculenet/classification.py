@@ -75,7 +75,7 @@ def main(args, exp_config, train_set, val_set, test_set):
         optimizer = Adam(model.parameters(), lr=exp_config['lr'],
                          weight_decay=exp_config['weight_decay'])
         stopper = EarlyStopping(patience=exp_config['patience'],
-                                filename=args['trial_path'] + '/model.pth',
+                                filename=args['result_path'] + '/model.pth',
                                 metric=args['metric'])
 
     for epoch in range(args['num_epochs']):
