@@ -70,7 +70,7 @@ def main(args, exp_config, train_set, val_set, test_set):
     if args['pretrain']:
         args['num_epochs'] = 0
         model = load_pretrained('{}_{}_{}'.format(
-            args['model'], args['featurizer_type'], args['dataset']))
+            args['model'], args['featurizer_type'], args['dataset'])).to(args['device'])
     else:
         model = load_model(exp_config).to(args['device'])
         loss_criterion = nn.BCEWithLogitsLoss(reduction='none')
