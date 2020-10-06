@@ -8,6 +8,7 @@ import errno
 import json
 import os
 import torch
+import torch.nn.functional as F
 
 from dgllife.utils import ScaffoldSplitter, RandomSplitter
 
