@@ -68,5 +68,18 @@ def create_muv_model(model_name):
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
+    elif model_name == 'GAT_attentivefp_MUV':
+        dropout = 0.37739180577199594
+        return GATPredictor(in_feats=39,
+                            hidden_feats=[128],
+                            num_heads=[6],
+                            feat_drops=[dropout],
+                            attn_drops=[dropout],
+                            alphas=[0.9101107032743763],
+                            residuals=[False],
+                            predictor_hidden_feats=32,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
     else:
         return None
