@@ -21,7 +21,8 @@ muv_url = {
     'Weave_attentivefp_MUV': 'dgllife/pre_trained/weave_attentivefp_muv.pth',
     'MPNN_canonical_MUV': 'dgllife/pre_trained/mpnn_canonical_muv.pth',
     'MPNN_attentivefp_MUV': 'dgllife/pre_trained/mpnn_attentivefp_muv.pth',
-    'AttentiveFP_canonical_MUV': 'dgllife/pre_trained/attentivefp_canonical_muv.pth'
+    'AttentiveFP_canonical_MUV': 'dgllife/pre_trained/attentivefp_canonical_muv.pth',
+    'AttentiveFP_attentivefp_MUV': 'dgllife/pre_trained/attentivefp_attentivefp_muv.pth'
 }
 
 def create_muv_model(model_name):
@@ -131,6 +132,15 @@ def create_muv_model(model_name):
                                     num_timesteps=3,
                                     graph_feat_size=16,
                                     dropout=0.20184515449053175,
+                                    n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_attentivefp_MUV':
+        return AttentiveFPPredictor(node_feat_size=39,
+                                    edge_feat_size=11,
+                                    num_layers=1,
+                                    num_timesteps=2,
+                                    graph_feat_size=16,
+                                    dropout=0.3260017176688692,
                                     n_tasks=n_tasks)
 
     else:
