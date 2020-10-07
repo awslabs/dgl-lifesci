@@ -152,7 +152,11 @@ def collate_molgraphs(data):
         Batched datapoint binary mask, indicating the
         existence of labels.
     """
-    smiles, graphs, labels, masks = map(list, zip(*data))
+    mapped_values = map(list, zip(*data))
+    if len(mapped_values) == 3:
+        smiles, graphs, labels = mapped_values
+    else:
+        smiles, graphs, labels, masks = mapped_values
 
     bg = dgl.batch(graphs)
     bg.set_n_initializer(dgl.init.zero_initializer)
