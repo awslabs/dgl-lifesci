@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # pylint: disable= no-member, arguments-differ, invalid-name
+#
+# Pre-trained models for molecular property prediction
 
 from ..gnn.gin import GIN
 from ..model_zoo.attentivefp_predictor import AttentiveFPPredictor

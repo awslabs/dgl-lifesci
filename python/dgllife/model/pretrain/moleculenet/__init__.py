@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # pylint: disable= no-member, arguments-differ, invalid-name
+#
+# Index for pre-trained models on MoleculeNet
 
 from .muv import *
 from .tox21 import *

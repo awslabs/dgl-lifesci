@@ -3,8 +3,9 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Utilities for using pretrained models.
 # pylint: disable= no-member, arguments-differ, invalid-name
+#
+# Utilities for using pre-trained models.
 
 import torch
 
@@ -115,6 +116,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on MUV
         * ``'gin_supervised_masking_MUV'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on MUV
+        * ``'GCN_canonical_FreeSolv'``: A GCN model trained on FreeSolv with canonical
+          featurization for atoms
 
     log : bool
         Whether to print progress for model loading

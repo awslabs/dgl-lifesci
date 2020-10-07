@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # pylint: disable= no-member, arguments-differ, invalid-name
+#
+# Pre-trained generative models.
 
 import os
 

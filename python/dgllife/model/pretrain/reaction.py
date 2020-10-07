@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # pylint: disable= no-member, arguments-differ, invalid-name
+#
+# Pre-trained models for reaction prediction
 
 from ..model_zoo.wln_reaction_center import WLNReactionCenter
 from ..model_zoo.wln_reaction_ranking import WLNReactionRanking
