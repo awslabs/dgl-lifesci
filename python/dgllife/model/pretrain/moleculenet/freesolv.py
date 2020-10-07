@@ -17,7 +17,8 @@ __all__ = ['freesolv_url',
 freesolv_url = {
     'GCN_canonical_FreeSolv': 'dgllife/pre_trained/gcn_canonical_freesolv_v2.pth',
     'GCN_attentivefp_FreeSolv': 'dgllife/pre_trained/gcn_attentivefp_freesolv.pth',
-    'GAT_canonical_FreeSolv': 'dgllife/pre_trained/gat_canonical_freesolv.pth'
+    'GAT_canonical_FreeSolv': 'dgllife/pre_trained/gat_canonical_freesolv.pth',
+    'GAT_attentivefp_FreeSolv': 'dgllife/pre_trained/gat_attentivefp_freesolv.pth'
 }
 
 def create_freesolv_model(model_name):
@@ -68,6 +69,20 @@ def create_freesolv_model(model_name):
                             attn_drops=[dropout],
                             alphas=[0.9199722462937526],
                             residuals=[False],
+                            predictor_hidden_feats=16,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GAT_attentivefp_FreeSolv':
+        dropout = 0.3235550393975303
+        num_gnn_layers = 4
+        return GATPredictor(in_feats=39,
+                            hidden_feats=[64] * num_gnn_layers,
+                            num_heads=[4] * num_gnn_layers,
+                            feat_drops=[dropout] * num_gnn_layers,
+                            attn_drops=[dropout] * num_gnn_layers,
+                            alphas=[0.8613751164365371] * num_gnn_layers,
+                            residuals=[True] * num_gnn_layers,
                             predictor_hidden_feats=16,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)

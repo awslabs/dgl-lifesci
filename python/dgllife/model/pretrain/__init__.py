@@ -96,6 +96,8 @@ def load_pretrained(model_name, log=True):
           featurization for atoms
         * ``'GAT_canonical_FreeSolv'``: A GAT model trained on FreeSolv with canonical
           featurization for atoms
+        * ``'GAT_attentivefp_FreeSolv'``: A GAT model trained on FreeSolv with attentivefp
+          featurization for atoms
         * ``'GCN_canonical_MUV'``: A GCN model trained on MUV with canonical
           featurization for atoms
         * ``'GCN_attentivefp_MUV'``: A GCN model trained on MUV with attentivefp
