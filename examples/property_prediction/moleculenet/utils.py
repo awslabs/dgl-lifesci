@@ -134,9 +134,9 @@ def collate_molgraphs(data):
 
     Parameters
     ----------
-    data : list of 4-tuples.
+    data : list of 3-tuples or 4-tuples.
         Each tuple is for a single datapoint, consisting of
-        a SMILES, a DGLGraph, all-task labels and a binary
+        a SMILES, a DGLGraph, all-task labels and optionally a binary
         mask indicating the existence of labels.
 
     Returns
@@ -152,11 +152,10 @@ def collate_molgraphs(data):
         Batched datapoint binary mask, indicating the
         existence of labels.
     """
-    mapped_values = map(list, zip(*data))
-    if len(mapped_values) == 3:
-        smiles, graphs, labels = mapped_values
+    if len(data[0]) == 3:
+        smiles, graphs, labels = map(list, zip(*data))
     else:
-        smiles, graphs, labels, masks = mapped_values
+        smiles, graphs, labels, masks = map(list, zip(*data))
 
     bg = dgl.batch(graphs)
     bg.set_n_initializer(dgl.init.zero_initializer)
