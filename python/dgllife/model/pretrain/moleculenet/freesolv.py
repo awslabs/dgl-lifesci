@@ -18,7 +18,8 @@ freesolv_url = {
     'GCN_canonical_FreeSolv': 'dgllife/pre_trained/gcn_canonical_freesolv_v2.pth',
     'GCN_attentivefp_FreeSolv': 'dgllife/pre_trained/gcn_attentivefp_freesolv.pth',
     'GAT_canonical_FreeSolv': 'dgllife/pre_trained/gat_canonical_freesolv.pth',
-    'GAT_attentivefp_FreeSolv': 'dgllife/pre_trained/gat_attentivefp_freesolv.pth'
+    'GAT_attentivefp_FreeSolv': 'dgllife/pre_trained/gat_attentivefp_freesolv.pth',
+    'Weave_canonical_FreeSolv': 'dgllife/pre_trained/weave_canonical_freesolv.pth'
 }
 
 def create_freesolv_model(model_name):
@@ -86,6 +87,15 @@ def create_freesolv_model(model_name):
                             predictor_hidden_feats=16,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
+
+    elif model_name == 'Weave_canonical_FreeSolv':
+        return WeavePredictor(node_in_feats=74,
+                              edge_in_feats=13,
+                              num_gnn_layers=2,
+                              gnn_hidden_feats=32,
+                              graph_feats=32,
+                              gaussian_expand=False,
+                              n_tasks=1)
 
     else:
         return None
