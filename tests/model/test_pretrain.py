@@ -206,7 +206,7 @@ def test_moleculenet():
 
         node_featurizer = PretrainAtomFeaturizer()
         edge_featurizer = PretrainBondFeaturizer()
-        for model_type in ['gin_supervised_contextpred']:
+        for model_type in ['gin_supervised_contextpred', 'gin_supervised_infomax']:
             g1 = smiles_to_bigraph('CO', add_self_loop=True, node_featurizer=node_featurizer,
                                    edge_featurizer=edge_featurizer)
             g2 = smiles_to_bigraph('CCO', add_self_loop=True, node_featurizer=node_featurizer,
