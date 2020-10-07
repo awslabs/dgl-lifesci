@@ -185,7 +185,7 @@ def test_muv():
                 model(g1.to(device), g1.ndata.pop('hv').to(device))
             remove_file('{}_{}_MUV_pre_trained.pth'.format(model_type.lower(), featurizer_type))
 
-        for model_type in ['Weave']:
+        for model_type in ['Weave', 'MPNN']:
             g1 = smiles_to_bigraph('CO', add_self_loop=True, node_featurizer=node_featurizer,
                                    edge_featurizer=edge_featurizer)
             g2 = smiles_to_bigraph('CCO', add_self_loop=True, node_featurizer=node_featurizer,
