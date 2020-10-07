@@ -121,7 +121,7 @@ def get_configure(model, featurizer_type, dataset):
     dict
         Returns the manually specified configuration
     """
-    if featurizer_type is None:
+    if featurizer_type == 'pre_train':
         with open('configures/{}/{}.json'.format(dataset, model), 'r') as f:
             config = json.load(f)
     else:
