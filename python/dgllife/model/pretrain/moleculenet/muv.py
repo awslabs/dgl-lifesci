@@ -29,6 +29,7 @@ def create_muv_model(model_name):
     -------
     Created model
     """
+    n_tasks = 17
     if model_name == 'GCN_canonical_MUV':
         return GCNPredictor(in_feats=74,
                             hidden_feats=[32],
@@ -38,7 +39,7 @@ def create_muv_model(model_name):
                             dropout=[0.10811886971338101],
                             predictor_hidden_feats=128,
                             predictor_dropout=0.10811886971338101,
-                            n_tasks=17)
+                            n_tasks=n_tasks)
 
     elif model_name == 'GCN_attentivefp_MUV':
         return GCNPredictor(in_feats=39,
@@ -49,7 +50,21 @@ def create_muv_model(model_name):
                             dropout=[0.24997398695768708],
                             predictor_hidden_feats=128,
                             predictor_dropout=0.24997398695768708,
-                            n_tasks=17)
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GAT_canonical_MUV':
+        num_gnn_layers = 4
+        dropout = 0.5477918396466305
+        return GATPredictor(in_feats=74,
+                            hidden_feats=[128] * num_gnn_layers,
+                            num_heads=[6] * num_gnn_layers,
+                            feat_drops=[dropout] * num_gnn_layers,
+                            attn_drops=[dropout] * num_gnn_layers,
+                            alphas=[0.8145285541930105] * num_gnn_layers,
+                            residuals=[True] * num_gnn_layers,
+                            predictor_hidden_feats=128,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
 
     else:
         return None
