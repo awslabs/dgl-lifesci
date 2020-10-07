@@ -33,14 +33,13 @@ def create_freesolv_model(model_name):
     n_tasks = 1
 
     if model_name == 'GCN_canonical_FreeSolv':
-        num_gnn_layers = 3
-        dropout = 0.31707259912425456
+        dropout = 0.006589580021982596
         return GCNPredictor(in_feats=74,
-                            hidden_feats=[256] * num_gnn_layers,
-                            activation=[F.relu] * num_gnn_layers,
-                            residual=[True] * num_gnn_layers,
-                            batchnorm=[False] * num_gnn_layers,
-                            dropout=[dropout] * num_gnn_layers,
+                            hidden_feats=[64],
+                            activation=[F.relu],
+                            residual=[False],
+                            batchnorm=[False],
+                            dropout=[dropout],
                             predictor_hidden_feats=1024,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
