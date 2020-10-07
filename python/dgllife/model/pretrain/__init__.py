@@ -101,6 +101,8 @@ def load_pretrained(model_name, log=True):
           featurization for atoms
         * ``'MPNN_canonical_MUV'``: An MPNN model trained on MUV with canonical
           featurization for atoms
+        * ``'MPNN_attentivefp_MUV'``: An MPNN model trained on MUV with attentivefp
+          featurization for atoms
 
     log : bool
         Whether to print progress for model loading

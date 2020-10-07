@@ -19,7 +19,8 @@ muv_url = {
     'GAT_attentivefp_MUV': 'dgllife/pre_trained/gat_attentivefp_muv.pth',
     'Weave_canonical_MUV': 'dgllife/pre_trained/weave_canonical_muv.pth',
     'Weave_attentivefp_MUV': 'dgllife/pre_trained/weave_attentivefp_muv.pth',
-    'MPNN_canonical_MUV': 'dgllife/pre_trained/mpnn_canonical_muv.pth'
+    'MPNN_canonical_MUV': 'dgllife/pre_trained/mpnn_canonical_muv.pth',
+    'MPNN_attentivefp_MUV': 'dgllife/pre_trained/mpnn_attentivefp_muv.pth'
 }
 
 def create_muv_model(model_name):
@@ -110,6 +111,16 @@ def create_muv_model(model_name):
                              num_step_message_passing=5,
                              num_step_set2set=2,
                              num_layer_set2set=3,
+                             n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_attentivefp_MUV':
+        return MPNNPredictor(node_in_feats=39,
+                             edge_in_feats=11,
+                             node_out_feats=32,
+                             edge_hidden_feats=32,
+                             num_step_message_passing=5,
+                             num_step_set2set=2,
+                             num_layer_set2set=1,
                              n_tasks=n_tasks)
 
     else:
