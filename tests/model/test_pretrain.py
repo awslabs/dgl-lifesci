@@ -168,10 +168,10 @@ def test_muv():
     for featurizer_type in ['canonical', 'attentivefp']:
         if featurizer_type == 'canonical':
             node_featurizer = CanonicalAtomFeaturizer(atom_data_field='hv')
-            edge_featurizer = CanonicalBondFeaturizer(bond_data_field='he')
+            edge_featurizer = CanonicalBondFeaturizer(bond_data_field='he', self_loop=True)
         else:
             node_featurizer = AttentiveFPAtomFeaturizer(atom_data_field='hv')
-            edge_featurizer = AttentiveFPBondFeaturizer(bond_data_field='he')
+            edge_featurizer = AttentiveFPBondFeaturizer(bond_data_field='he', self_loop=True)
 
         for model_type in ['GCN', 'GAT']:
             g1 = smiles_to_bigraph('CO', node_featurizer=node_featurizer)
@@ -186,9 +186,9 @@ def test_muv():
             remove_file('{}_{}_MUV_pre_trained.pth'.format(model_type.lower(), featurizer_type))
 
         for model_type in ['Weave']:
-            g1 = smiles_to_bigraph('CO', node_featurizer=node_featurizer,
+            g1 = smiles_to_bigraph('CO', add_self_loop=True, node_featurizer=node_featurizer,
                                    edge_featurizer=edge_featurizer)
-            g2 = smiles_to_bigraph('CCO', node_featurizer=node_featurizer,
+            g2 = smiles_to_bigraph('CCO', add_self_loop=True, node_featurizer=node_featurizer,
                                    edge_featurizer=edge_featurizer)
             bg = dgl.batch([g1, g2])
 
