@@ -15,7 +15,7 @@ __all__ = ['freesolv_url',
            'create_freesolv_model']
 
 freesolv_url = {
-    'GCN_canonical_FreeSolv': 'dgllife/pre_trained/gcn_canonical_freesolv.pth'
+    'GCN_canonical_FreeSolv': 'dgllife/pre_trained/gcn_canonical_freesolv_v2.pth'
 }
 
 def create_freesolv_model(model_name):
