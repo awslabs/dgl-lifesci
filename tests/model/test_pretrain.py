@@ -172,15 +172,31 @@ def test_muv():
         else:
             node_featurizer = AttentiveFPAtomFeaturizer(atom_data_field='hv')
             edge_featurizer = AttentiveFPBondFeaturizer(bond_data_field='he')
+
         for model_type in ['GCN', 'GAT']:
             g1 = smiles_to_bigraph('CO', node_featurizer=node_featurizer)
             g2 = smiles_to_bigraph('CCO', node_featurizer=node_featurizer)
             bg = dgl.batch([g1, g2])
 
             model = load_pretrained('{}_{}_MUV'.format(model_type, featurizer_type)).to(device)
-            model(bg.to(device), bg.ndata.pop('hv').to(device))
-            model.eval()
-            model(g1.to(device), g1.ndata.pop('hv').to(device))
+            with torch.no_grad():
+                model(bg.to(device), bg.ndata.pop('hv').to(device))
+                model.eval()
+                model(g1.to(device), g1.ndata.pop('hv').to(device))
+            remove_file('{}_{}_MUV_pre_trained.pth'.format(model_type.lower(), featurizer_type))
+
+        for model_type in ['Weave']:
+            g1 = smiles_to_bigraph('CO', node_featurizer=node_featurizer,
+                                   edge_featurizer=edge_featurizer)
+            g2 = smiles_to_bigraph('CCO', node_featurizer=node_featurizer,
+                                   edge_featurizer=edge_featurizer)
+            bg = dgl.batch([g1, g2])
+
+            model = load_pretrained('{}_{}_MUV'.format(model_type, featurizer_type)).to(device)
+            with torch.no_grad():
+                model(bg.to(device), bg.ndata.pop('hv').to(device), bg.edata.pop('he').to(device))
+                model.eval()
+                model(g1.to(device), g1.ndata.pop('hv').to(device), g1.edata.pop('he').to(device))
             remove_file('{}_{}_MUV_pre_trained.pth'.format(model_type.lower(), featurizer_type))
 
 if __name__ == '__main__':
