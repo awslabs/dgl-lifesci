@@ -154,15 +154,18 @@ def collate_molgraphs(data):
     """
     if len(data[0]) == 3:
         smiles, graphs, labels = map(list, zip(*data))
-        masks = torch.ones(labels.shape)
     else:
         smiles, graphs, labels, masks = map(list, zip(*data))
-        masks = torch.stack(masks, dim=0)
 
     bg = dgl.batch(graphs)
     bg.set_n_initializer(dgl.init.zero_initializer)
     bg.set_e_initializer(dgl.init.zero_initializer)
     labels = torch.stack(labels, dim=0)
+
+    if len(data[0]) == 3:
+        masks = torch.ones(labels.shape)
+    else:
+        masks = torch.stack(masks, dim=0)
 
     return smiles, bg, labels, masks
 
