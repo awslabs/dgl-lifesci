@@ -133,7 +133,7 @@ if __name__ == '__main__':
     parser.add_argument('-sr', '--split-ratio', default='0.8,0.1,0.1', type=str,
                         help='Proportion of the dataset to use for training, validation and test, '
                              '(default: 0.8,0.1,0.1)')
-    parser.add_argument('-me', '--metric', choices=['r2', 'mae', 'rmse'], default='r2',
+    parser.add_argument('-me', '--metric', choices=['r2', 'mae', 'rmse'], default='rmse',
                         help='Metric for evaluation (default: r2)')
     parser.add_argument('-n', '--num-epochs', type=int, default=1000,
                         help='Maximum number of epochs for training. '
