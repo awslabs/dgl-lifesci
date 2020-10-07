@@ -22,7 +22,8 @@ muv_url = {
     'MPNN_canonical_MUV': 'dgllife/pre_trained/mpnn_canonical_muv.pth',
     'MPNN_attentivefp_MUV': 'dgllife/pre_trained/mpnn_attentivefp_muv.pth',
     'AttentiveFP_canonical_MUV': 'dgllife/pre_trained/attentivefp_canonical_muv.pth',
-    'AttentiveFP_attentivefp_MUV': 'dgllife/pre_trained/attentivefp_attentivefp_muv.pth'
+    'AttentiveFP_attentivefp_MUV': 'dgllife/pre_trained/attentivefp_attentivefp_muv.pth',
+    'gin_supervised_contextpred_MUV': 'dgllife/pre_trained/gin_supervised_contextpred_muv.pth'
 }
 
 def create_muv_model(model_name):
@@ -142,6 +143,21 @@ def create_muv_model(model_name):
                                     graph_feat_size=16,
                                     dropout=0.3260017176688692,
                                     n_tasks=n_tasks)
+
+    elif model_name == 'gin_supervised_contextpred_MUV':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='attention',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
 
     else:
         return None

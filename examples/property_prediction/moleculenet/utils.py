@@ -121,8 +121,12 @@ def get_configure(model, featurizer_type, dataset):
     dict
         Returns the manually specified configuration
     """
-    with open('configures/{}/{}_{}.json'.format(dataset, model, featurizer_type), 'r') as f:
-        config = json.load(f)
+    if featurizer_type is None:
+        with open('configures/{}/{}.json'.format(dataset, model), 'r') as f:
+            config = json.load(f)
+    else:
+        with open('configures/{}/{}_{}.json'.format(dataset, model, featurizer_type), 'r') as f:
+            config = json.load(f)
     return config
 
 def collate_molgraphs(data):

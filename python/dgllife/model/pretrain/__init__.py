@@ -107,6 +107,8 @@ def load_pretrained(model_name, log=True):
           featurization for atoms
         * ``'AttentiveFP_attentivefp_MUV'``: An AttentiveFP model trained on MUV with attentivefp
           featurization for atoms
+        * ``'gin_supervised_contextpred_MUV'``: A GIN model pre-trained with supervised learning
+          and context prediction, and fine-tuned on MUV
 
     log : bool
         Whether to print progress for model loading
