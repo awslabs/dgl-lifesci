@@ -88,6 +88,10 @@ def load_pretrained(model_name, log=True):
           and edge prediction
         * ``'gin_supervised_masking'``: A GIN model pre-trained with supervised learning
           and attribute masking
+        * ``'GCN_canonical_BACE'``: A GCN model trained on BACE with canonical
+          featurization for atoms
+        * ``'GCN_canonical_FreeSolv'``: A GCN model trained on FreeSolv with canonical
+          featurization for atoms
         * ``'GCN_canonical_MUV'``: A GCN model trained on MUV with canonical
           featurization for atoms
         * ``'GCN_attentivefp_MUV'``: A GCN model trained on MUV with attentivefp
@@ -116,8 +120,6 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on MUV
         * ``'gin_supervised_masking_MUV'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on MUV
-        * ``'GCN_canonical_FreeSolv'``: A GCN model trained on FreeSolv with canonical
-          featurization for atoms
 
     log : bool
         Whether to print progress for model loading
