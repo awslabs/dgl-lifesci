@@ -39,9 +39,9 @@ def run_a_train_epoch(args, epoch, model, data_loader, loss_criterion, optimizer
         if batch_id % args['print_every'] == 0:
             print('epoch {:d}/{:d}, batch {:d}/{:d}, loss {:.4f}'.format(
                 epoch + 1, args['num_epochs'], batch_id + 1, len(data_loader), loss.item()))
-    total_score = np.mean(train_meter.compute_metric(args['metric']))
+    train_score = np.mean(train_meter.compute_metric(args['metric']))
     print('epoch {:d}/{:d}, training {} {:.4f}'.format(
-        epoch + 1, args['num_epochs'], args['metric'], total_score))
+        epoch + 1, args['num_epochs'], args['metric'], train_score))
 
 def run_an_eval_epoch(args, model, data_loader):
     model.eval()
@@ -52,8 +52,7 @@ def run_an_eval_epoch(args, model, data_loader):
             labels = labels.to(args['device'])
             prediction = predict(args, model, bg)
             eval_meter.update(prediction, labels, masks)
-        total_score = np.mean(eval_meter.compute_metric(args['metric']))
-    return total_score
+    return np.mean(eval_meter.compute_metric(args['metric']))
 
 def main(args, exp_config, train_set, val_set, test_set):
     # Record settings
