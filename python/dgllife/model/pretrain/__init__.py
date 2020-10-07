@@ -93,6 +93,8 @@ def load_pretrained(model_name, log=True):
           featurization for atoms
         * ``'GAT_canonical_MUV'``: A GAT model trained on MUV with canonical
           featurization for atoms
+        * ``'GAT_attentivefp_MUV'``: A GAT model trained on MUV with attentivefp
+          featurization for atoms
 
     log : bool
         Whether to print progress for model loading

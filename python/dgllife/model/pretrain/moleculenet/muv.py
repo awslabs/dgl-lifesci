@@ -15,7 +15,8 @@ __all__ = ['muv_url',
 muv_url = {
     'GCN_canonical_MUV': 'dgllife/pre_trained/gcn_canonical_muv.pth',
     'GCN_attentivefp_MUV': 'dgllife/pre_trained/gcn_attentivefp_muv.pth',
-    'GAT_canonical_MUV': 'dgllife/pre_trained/gat_canonical_muv.pth'
+    'GAT_canonical_MUV': 'dgllife/pre_trained/gat_canonical_muv.pth',
+    'GAT_attentivefp_MUV': 'dgllife/pre_trained/gat_attentivefp_muv.pth'
 }
 
 def create_muv_model(model_name):
