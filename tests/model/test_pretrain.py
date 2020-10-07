@@ -172,7 +172,7 @@ def test_muv():
         else:
             node_featurizer = AttentiveFPAtomFeaturizer(atom_data_field='hv')
             edge_featurizer = AttentiveFPBondFeaturizer(bond_data_field='he')
-        for model_type in ['GCN']:
+        for model_type in ['GCN', 'GAT']:
             g1 = smiles_to_bigraph('CO', node_featurizer=node_featurizer)
             g2 = smiles_to_bigraph('CCO', node_featurizer=node_featurizer)
             bg = dgl.batch([g1, g2])

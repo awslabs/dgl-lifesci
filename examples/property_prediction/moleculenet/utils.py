@@ -121,7 +121,7 @@ def get_configure(model, featurizer_type, dataset):
     dict
         Returns the manually specified configuration
     """
-    with open('configures/{}_{}_{}.json'.format(model, featurizer_type, dataset), 'r') as f:
+    with open('configures/{}/{}_{}.json'.format(dataset, model, featurizer_type), 'r') as f:
         config = json.load(f)
     return config
 
