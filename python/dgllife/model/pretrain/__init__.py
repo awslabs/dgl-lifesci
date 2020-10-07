@@ -113,6 +113,8 @@ def load_pretrained(model_name, log=True):
           and infomax, and fine-tuned on MUV
         * ``'gin_supervised_edgepred_MUV'``: A GIN model pre-trained with supervised learning
           and edge prediction, and fine-tuned on MUV
+        * ``'gin_supervised_masking_MUV'``: A GIN model pre-trained with supervised learning
+          and masking, and fine-tuned on MUV
 
     log : bool
         Whether to print progress for model loading
