@@ -90,6 +90,8 @@ def load_pretrained(model_name, log=True):
           and attribute masking
         * ``'GCN_canonical_BACE'``: A GCN model trained on BACE with canonical
           featurization for atoms
+        * ``'GCN_attentivefp_BACE'``: A GCN model trained on BACE with attentivefp
+          featurization for atoms
         * ``'GCN_canonical_FreeSolv'``: A GCN model trained on FreeSolv with canonical
           featurization for atoms
         * ``'GCN_attentivefp_FreeSolv'``: A GCN model trained on FreeSolv with attentivefp
@@ -99,7 +101,7 @@ def load_pretrained(model_name, log=True):
         * ``'GAT_attentivefp_FreeSolv'``: A GAT model trained on FreeSolv with attentivefp
           featurization for atoms
         * ``'Weave_canonical_FreeSolv'``: A Weave model trained on FreeSolv with canonical
-          featurization for atoms
+          featurization for atoms and bonds
         * ``'GCN_canonical_MUV'``: A GCN model trained on MUV with canonical
           featurization for atoms
         * ``'GCN_attentivefp_MUV'``: A GCN model trained on MUV with attentivefp
@@ -109,17 +111,17 @@ def load_pretrained(model_name, log=True):
         * ``'GAT_attentivefp_MUV'``: A GAT model trained on MUV with attentivefp
           featurization for atoms
         * ``'Weave_canonical_MUV'``: A Weave model trained on MUV with canonical
-          featurization for atoms
+          featurization for atoms and bonds
         * ``'Weave_attentivefp_MUV'``: A Weave model trained on MUV with attentivefp
-          featurization for atoms
+          featurization for atoms and bonds
         * ``'MPNN_canonical_MUV'``: An MPNN model trained on MUV with canonical
-          featurization for atoms
+          featurization for atoms and bonds
         * ``'MPNN_attentivefp_MUV'``: An MPNN model trained on MUV with attentivefp
-          featurization for atoms
+          featurization for atoms and bonds
         * ``'AttentiveFP_canonical_MUV'``: An AttentiveFP model trained on MUV with canonical
-          featurization for atoms
+          featurization for atoms and bonds
         * ``'AttentiveFP_attentivefp_MUV'``: An AttentiveFP model trained on MUV with attentivefp
-          featurization for atoms
+          featurization for atoms and bonds
         * ``'gin_supervised_contextpred_MUV'``: A GIN model pre-trained with supervised learning
           and context prediction, and fine-tuned on MUV
         * ``'gin_supervised_infomax_MUV'``: A GIN model pre-trained with supervised learning
