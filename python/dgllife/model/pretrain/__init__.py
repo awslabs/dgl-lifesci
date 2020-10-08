@@ -124,6 +124,8 @@ def load_pretrained(model_name, log=True):
           canonical featurization for atoms and bonds
         * ``'AttentiveFPattentivefp_FreeSolv'``: An AttentiveFP model trained on FreeSolv with
           attentivefp featurization for atoms and bonds
+        * ``'gin_supervised_contextpred_FreeSolv'``: A GIN model pre-trained with supervised
+          learning and context prediction, and fine-tuned on FreeSolv
         * ``'GCN_canonical_MUV'``: A GCN model trained on MUV with canonical
           featurization for atoms
         * ``'GCN_attentivefp_MUV'``: A GCN model trained on MUV with attentivefp
