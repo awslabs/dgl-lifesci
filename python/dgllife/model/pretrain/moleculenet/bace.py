@@ -20,7 +20,8 @@ bace_url = {
     'GAT_canonical_BACE': 'dgllife/pre_trained/gat_canonical_bace.pth',
     'GAT_attentivefp_BACE': 'dgllife/pre_trained/gat_attentivefp_bace_v2.pth',
     'Weave_canonical_BACE': 'dgllife/pre_trained/weave_canonical_bace.pth',
-    'Weave_attentivefp_BACE': 'dgllife/pre_trained/weave_attentivefp_bace.pth'
+    'Weave_attentivefp_BACE': 'dgllife/pre_trained/weave_attentivefp_bace.pth',
+    'MPNN_canonical_BACE': 'dgllife/pre_trained/mpnn_canonical_bace.pth'
 }
 
 def create_bace_model(model_name):
@@ -106,6 +107,16 @@ def create_bace_model(model_name):
                               graph_feats=32,
                               gaussian_expand=False,
                               n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_canonical_BACE':
+        return MPNNPredictor(node_in_feats=74,
+                             edge_in_feats=13,
+                             node_out_feats=64,
+                             edge_hidden_feats=64,
+                             num_step_message_passing=1,
+                             num_step_set2set=3,
+                             num_layer_set2set=1,
+                             n_tasks=n_tasks)
 
     else:
         return None
