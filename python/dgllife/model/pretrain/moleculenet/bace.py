@@ -19,7 +19,8 @@ bace_url = {
     'GCN_attentivefp_BACE': 'dgllife/pre_trained/gcn_attentivefp_bace.pth',
     'GAT_canonical_BACE': 'dgllife/pre_trained/gat_canonical_bace.pth',
     'GAT_attentivefp_BACE': 'dgllife/pre_trained/gat_attentivefp_bace_v2.pth',
-    'Weave_canonical_BACE': 'dgllife/pre_trained/weave_canonical_bace.pth'
+    'Weave_canonical_BACE': 'dgllife/pre_trained/weave_canonical_bace.pth',
+    'Weave_attentivefp_BACE': 'dgllife/pre_trained/weave_attentivefp_bace.pth'
 }
 
 def create_bace_model(model_name):
@@ -94,6 +95,15 @@ def create_bace_model(model_name):
                               num_gnn_layers=2,
                               gnn_hidden_feats=32,
                               graph_feats=256,
+                              gaussian_expand=False,
+                              n_tasks=n_tasks)
+
+    elif model_name == 'Weave_attentivefp_BACE':
+        return WeavePredictor(node_in_feats=39,
+                              edge_in_feats=11,
+                              num_gnn_layers=1,
+                              gnn_hidden_feats=32,
+                              graph_feats=32,
                               gaussian_expand=False,
                               n_tasks=n_tasks)
 
