@@ -27,7 +27,9 @@ freesolv_url = {
     'AttentiveFP_attentivefp_FreeSolv':
         'dgllife/pre_trained/attentivefp_attentivefp_freesolv.pth',
     'gin_supervised_contextpred_FreeSolv':
-        'dgllife/pre_trained/gin_supervised_contextpred_freesolv.pth'
+        'dgllife/pre_trained/gin_supervised_contextpred_freesolv.pth',
+    'gin_supervised_infomax_FreeSolv':
+        'dgllife/pre_trained/gin_supervised_infomax_freesolv.pth'
 }
 
 def create_freesolv_model(model_name):
@@ -162,6 +164,21 @@ def create_freesolv_model(model_name):
             JK=jk,
             dropout=0.5,
             readout='mean',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_infomax_FreeSolv':
+        jk = 'sum'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='sum',
             n_tasks=n_tasks
         )
         model.gnn.JK = jk
