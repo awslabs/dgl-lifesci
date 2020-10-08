@@ -18,7 +18,7 @@ bace_url = {
     'GCN_canonical_BACE': 'dgllife/pre_trained/gcn_canonical_bace.pth',
     'GCN_attentivefp_BACE': 'dgllife/pre_trained/gcn_attentivefp_bace.pth',
     'GAT_canonical_BACE': 'dgllife/pre_trained/gat_canonical_bace.pth',
-    'GAT_attentivefp_BACE': 'dgllife/pre_trained/gat_attentivefp_bace.pth'
+    'GAT_attentivefp_BACE': 'dgllife/pre_trained/gat_attentivefp_bace_v2.pth'
 }
 
 def create_bace_model(model_name):
