@@ -20,7 +20,8 @@ freesolv_url = {
     'GAT_canonical_FreeSolv': 'dgllife/pre_trained/gat_canonical_freesolv.pth',
     'GAT_attentivefp_FreeSolv': 'dgllife/pre_trained/gat_attentivefp_freesolv.pth',
     'Weave_canonical_FreeSolv': 'dgllife/pre_trained/weave_canonical_freesolv.pth',
-    'Weave_attentivefp_FreeSolv': 'dgllife/pre_trained/weave_attentivefp_freesolv.pth'
+    'Weave_attentivefp_FreeSolv': 'dgllife/pre_trained/weave_attentivefp_freesolv.pth',
+    'MPNN_canonical_FreeSolv': 'dgllife/pre_trained/mpnn_canonical_freesolv.pth'
 }
 
 def create_freesolv_model(model_name):
@@ -106,6 +107,16 @@ def create_freesolv_model(model_name):
                               graph_feats=16,
                               gaussian_expand=False,
                               n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_canonical_FreeSolv':
+        return MPNNPredictor(node_in_feats=74,
+                             edge_in_feats=13,
+                             node_out_feats=32,
+                             edge_hidden_feats=32,
+                             num_step_message_passing=1,
+                             num_step_set2set=2,
+                             num_layer_set2set=2,
+                             n_tasks=n_tasks)
 
     else:
         return None
