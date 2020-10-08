@@ -25,6 +25,7 @@ bace_url = {
     'MPNN_attentivefp_BACE': 'dgllife/pre_trained/mpnn_attentivefp_bace.pth',
     'AttentiveFP_canonical_BACE': 'dgllife/pre_trained/attentivefp_canonical_bace.pth',
     'AttentiveFP_attentivefp_BACE': 'dgllife/pre_trained/attentivefp_attentivefp_bace.pth',
+    'gin_supervised_contextpred_BACE': 'dgllife/pre_trained/gin_supervised_contextpred_bace.pth',
 }
 
 def create_bace_model(model_name):
@@ -148,6 +149,21 @@ def create_bace_model(model_name):
                                     graph_feat_size=32,
                                     dropout=0.12249297382460408,
                                     n_tasks=n_tasks)
+
+    elif model_name == 'gin_supervised_contextpred_BACE':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='max',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
 
     else:
         return None
