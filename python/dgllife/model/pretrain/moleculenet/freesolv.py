@@ -23,7 +23,9 @@ freesolv_url = {
     'Weave_attentivefp_FreeSolv': 'dgllife/pre_trained/weave_attentivefp_freesolv.pth',
     'MPNN_canonical_FreeSolv': 'dgllife/pre_trained/mpnn_canonical_freesolv.pth',
     'MPNN_attentivefp_FreeSolv': 'dgllife/pre_trained/mpnn_attentivefp_freesolv.pth',
-    'AttentiveFP_canonical_FreeSolv': 'dgllife/pre_trained/attentivefp_canonical_freesolv.pth'
+    'AttentiveFP_canonical_FreeSolv': 'dgllife/pre_trained/attentivefp_canonical_freesolv.pth',
+    'AttentiveFP_attentivefp_FreeSolv':
+        'dgllife/pre_trained/attentivefp_attentivefp_freesolv.pth',
 }
 
 def create_freesolv_model(model_name):
@@ -137,6 +139,15 @@ def create_freesolv_model(model_name):
                                     num_timesteps=3,
                                     graph_feat_size=128,
                                     dropout=0.4804978614147144,
+                                    n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_attentivefp_FreeSolv':
+        return AttentiveFPPredictor(node_feat_size=39,
+                                    edge_feat_size=11,
+                                    num_layers=3,
+                                    num_timesteps=4,
+                                    graph_feat_size=16,
+                                    dropout=0.16687520888732352,
                                     n_tasks=n_tasks)
 
     else:
