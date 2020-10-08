@@ -116,6 +116,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on BACE
         * ``'gin_supervised_masking_BACE'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on BACE
+        * ``'GCN_canonical_BBBP'``: A GCN model trained on BBBP with canonical
+          featurization for atoms
         * ``'GCN_canonical_FreeSolv'``: A GCN model trained on FreeSolv with canonical
           featurization for atoms
         * ``'GCN_attentivefp_FreeSolv'``: A GCN model trained on FreeSolv with attentivefp

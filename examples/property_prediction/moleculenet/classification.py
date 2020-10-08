@@ -114,7 +114,7 @@ if __name__ == '__main__':
     from utils import init_featurizer, mkdir_p, split_dataset, get_configure
 
     parser = ArgumentParser('Multi-label Binary Classification')
-    parser.add_argument('-d', '--dataset', choices=['MUV', 'BACE'],
+    parser.add_argument('-d', '--dataset', choices=['MUV', 'BACE', 'BBBP'],
                         help='Dataset to use')
     parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP',
                                                    'gin_supervised_contextpred',
