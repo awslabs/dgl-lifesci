@@ -74,16 +74,16 @@ def create_bace_model(model_name):
                             n_tasks=n_tasks)
 
     elif model_name == 'GAT_attentivefp_BACE':
-        dropout = 0.0003186967390128165
-        num_gnn_layers = 4
+        dropout = 0.09842987062340869
+        num_gnn_layers = 2
         return GATPredictor(in_feats=39,
-                            hidden_feats=[128] * num_gnn_layers,
-                            num_heads=[4] * num_gnn_layers,
+                            hidden_feats=[256] * num_gnn_layers,
+                            num_heads=[8] * num_gnn_layers,
                             feat_drops=[dropout] * num_gnn_layers,
                             attn_drops=[dropout] * num_gnn_layers,
-                            alphas=[0.03346677694595768] * num_gnn_layers,
-                            residuals=[True] * num_gnn_layers,
-                            predictor_hidden_feats=256,
+                            alphas=[0.6702823790658061] * num_gnn_layers,
+                            residuals=[False] * num_gnn_layers,
+                            predictor_hidden_feats=128,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
