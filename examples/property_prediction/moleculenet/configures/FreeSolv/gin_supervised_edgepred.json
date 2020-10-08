@@ -1,0 +1,8 @@
+{
+  "batch_size": 256,
+  "jk": "max",
+  "lr": 0.01365768733434948,
+  "patience": 30,
+  "readout": "sum",
+  "weight_decay": 2.9045567930334817e-05
+}
