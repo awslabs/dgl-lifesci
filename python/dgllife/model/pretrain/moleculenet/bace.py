@@ -22,7 +22,8 @@ bace_url = {
     'Weave_canonical_BACE': 'dgllife/pre_trained/weave_canonical_bace.pth',
     'Weave_attentivefp_BACE': 'dgllife/pre_trained/weave_attentivefp_bace.pth',
     'MPNN_canonical_BACE': 'dgllife/pre_trained/mpnn_canonical_bace.pth',
-    'MPNN_attentivefp_BACE': 'dgllife/pre_trained/mpnn_attentivefp_bace.pth'
+    'MPNN_attentivefp_BACE': 'dgllife/pre_trained/mpnn_attentivefp_bace.pth',
+    'AttentiveFP_canonical_BACE': 'dgllife/pre_trained/attentivefp_canonical_bace.pth'
 }
 
 def create_bace_model(model_name):
@@ -128,6 +129,15 @@ def create_bace_model(model_name):
                              num_step_set2set=1,
                              num_layer_set2set=1,
                              n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_canonical_BACE':
+        return AttentiveFPPredictor(node_feat_size=74,
+                                    edge_feat_size=13,
+                                    num_layers=2,
+                                    num_timesteps=4,
+                                    graph_feat_size=16,
+                                    dropout=0.39078446228187624,
+                                    n_tasks=n_tasks)
 
     else:
         return None
