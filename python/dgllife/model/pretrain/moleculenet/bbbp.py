@@ -49,7 +49,7 @@ def create_bbbp_model(model_name):
     elif model_name == 'GCN_attentivefp_BBBP':
         dropout = 0.2130511856011713
         num_gnn_layers = 2
-        return GCNPredictor(in_feats=74,
+        return GCNPredictor(in_feats=39,
                             hidden_feats=[128] * num_gnn_layers,
                             activation=[F.relu] * num_gnn_layers,
                             residual=[True] * num_gnn_layers,
