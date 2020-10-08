@@ -170,7 +170,7 @@ def create_freesolv_model(model_name):
         return model
 
     elif model_name == 'gin_supervised_infomax_FreeSolv':
-        jk = 'sum'
+        jk = 'max'
         model = GINPredictor(
             num_node_emb_list=[120, 3],
             num_edge_emb_list=[6, 3],
