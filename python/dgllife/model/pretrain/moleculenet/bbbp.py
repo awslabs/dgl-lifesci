@@ -16,6 +16,7 @@ __all__ = ['bbbp_url',
 
 bbbp_url = {
     'GCN_canonical_BBBP': 'dgllife/pre_trained/gcn_canonical_bbbp.pth',
+    'GCN_attentivefp_BBBP': 'dgllife/pre_trained/gcn_attentivefp_bbbp.pth'
 }
 
 def create_bbbp_model(model_name):
@@ -44,3 +45,19 @@ def create_bbbp_model(model_name):
                             predictor_hidden_feats=32,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
+
+    elif model_name == 'GCN_attentivefp_BBBP':
+        dropout = 0.2130511856011713
+        num_gnn_layers = 2
+        return GCNPredictor(in_feats=74,
+                            hidden_feats=[128] * num_gnn_layers,
+                            activation=[F.relu] * num_gnn_layers,
+                            residual=[True] * num_gnn_layers,
+                            batchnorm=[True] * num_gnn_layers,
+                            dropout=[dropout] * num_gnn_layers,
+                            predictor_hidden_feats=128,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    else:
+        return None

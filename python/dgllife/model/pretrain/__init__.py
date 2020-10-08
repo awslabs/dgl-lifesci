@@ -118,6 +118,8 @@ def load_pretrained(model_name, log=True):
           and masking, and fine-tuned on BACE
         * ``'GCN_canonical_BBBP'``: A GCN model trained on BBBP with canonical
           featurization for atoms
+        * ``'GCN_attentivefp_BBBP'``: A GCN model trained on BBBP with attentivefp
+          featurization for atoms
         * ``'GCN_canonical_FreeSolv'``: A GCN model trained on FreeSolv with canonical
           featurization for atoms
         * ``'GCN_attentivefp_FreeSolv'``: A GCN model trained on FreeSolv with attentivefp
