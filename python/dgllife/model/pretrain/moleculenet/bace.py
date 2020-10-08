@@ -16,7 +16,8 @@ __all__ = ['bace_url',
 
 bace_url = {
     'GCN_canonical_BACE': 'dgllife/pre_trained/gcn_canonical_bace.pth',
-    'GCN_attentivefp_BACE': 'dgllife/pre_trained/gcn_attentivefp_bace.pth'
+    'GCN_attentivefp_BACE': 'dgllife/pre_trained/gcn_attentivefp_bace.pth',
+    'GAT_canonical_BACE': 'dgllife/pre_trained/gat_canonical_bace.pth'
 }
 
 def create_bace_model(model_name):
@@ -55,6 +56,19 @@ def create_bace_model(model_name):
                             batchnorm=[False] * num_gnn_layers,
                             dropout=[dropout] * num_gnn_layers,
                             predictor_hidden_feats=256,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GAT_canonical_BACE':
+        dropout = 0.012993892934328621
+        return GATPredictor(in_feats=74,
+                            hidden_feats=[64],
+                            num_heads=[8],
+                            feat_drops=[dropout],
+                            attn_drops=[dropout],
+                            alphas=[0.2547844032722401],
+                            residuals=[False],
+                            predictor_hidden_feats=128,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
