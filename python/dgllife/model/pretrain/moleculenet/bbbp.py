@@ -21,7 +21,8 @@ bbbp_url = {
     'GAT_attentivefp_BBBP': 'dgllife/pre_trained/gat_attentivefp_bbbp.pth',
     'Weave_canonical_BBBP': 'dgllife/pre_trained/weave_canonical_bbbp.pth',
     'Weave_attentivefp_BBBP': 'dgllife/pre_trained/gat_attentivefp_bbbp.pth',
-    'MPNN_canonical_BBBP': 'dgllife/pre_trained/mpnn_canonical_bbbp.pth'
+    'MPNN_canonical_BBBP': 'dgllife/pre_trained/mpnn_canonical_bbbp.pth',
+    'MPNN_attentivefp_BBBP': 'dgllife/pre_trained/mpnn_attentivefp_bbbp.pth'
 }
 
 def create_bbbp_model(model_name):
@@ -118,6 +119,16 @@ def create_bbbp_model(model_name):
                              num_step_message_passing=1,
                              num_step_set2set=2,
                              num_layer_set2set=1,
+                             n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_attentivefp_BBBP':
+        return MPNNPredictor(node_in_feats=39,
+                             edge_in_feats=11,
+                             node_out_feats=64,
+                             edge_hidden_feats=64,
+                             num_step_message_passing=4,
+                             num_step_set2set=3,
+                             num_layer_set2set=2,
                              n_tasks=n_tasks)
 
     else:
