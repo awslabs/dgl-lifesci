@@ -19,7 +19,8 @@ bbbp_url = {
     'GCN_attentivefp_BBBP': 'dgllife/pre_trained/gcn_attentivefp_bbbp.pth',
     'GAT_canonical_BBBP': 'dgllife/pre_trained/gat_canonical_bbbp.pth',
     'GAT_attentivefp_BBBP': 'dgllife/pre_trained/gat_attentivefp_bbbp.pth',
-    'Weave_canonical_BBBP': 'dgllife/pre_trained/weave_canonical_bbbp.pth'
+    'Weave_canonical_BBBP': 'dgllife/pre_trained/weave_canonical_bbbp.pth',
+    'Weave_attentivefp_BBBP': 'dgllife/pre_trained/gat_attentivefp_bbbp.pth'
 }
 
 def create_bbbp_model(model_name):
@@ -95,6 +96,15 @@ def create_bbbp_model(model_name):
                               edge_in_feats=13,
                               num_gnn_layers=1,
                               gnn_hidden_feats=256,
+                              graph_feats=256,
+                              gaussian_expand=False,
+                              n_tasks=n_tasks)
+
+    elif model_name == 'Weave_attentivefp_BBBP':
+        return WeavePredictor(node_in_feats=39,
+                              edge_in_feats=11,
+                              num_gnn_layers=4,
+                              gnn_hidden_feats=32,
                               graph_feats=256,
                               gaussian_expand=False,
                               n_tasks=n_tasks)
