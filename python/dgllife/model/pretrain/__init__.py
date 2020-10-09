@@ -132,6 +132,8 @@ def load_pretrained(model_name, log=True):
           featurization for atoms and bonds
         * ``'MPNN_attentivefp_BBBP'``: An MPNN model trained on BBBP with attentivefp
           featurization for atoms and bonds
+        * ``'AttentiveFP_canonical_BBBP'``: An AttentiveFP model trained on BBBP with
+          canonical featurization for atoms and bonds
         * ``'GCN_canonical_FreeSolv'``: A GCN model trained on FreeSolv with canonical
           featurization for atoms
         * ``'GCN_attentivefp_FreeSolv'``: A GCN model trained on FreeSolv with attentivefp

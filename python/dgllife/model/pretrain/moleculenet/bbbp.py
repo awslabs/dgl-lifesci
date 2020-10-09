@@ -22,7 +22,8 @@ bbbp_url = {
     'Weave_canonical_BBBP': 'dgllife/pre_trained/weave_canonical_bbbp.pth',
     'Weave_attentivefp_BBBP': 'dgllife/pre_trained/gat_attentivefp_bbbp.pth',
     'MPNN_canonical_BBBP': 'dgllife/pre_trained/mpnn_canonical_bbbp.pth',
-    'MPNN_attentivefp_BBBP': 'dgllife/pre_trained/mpnn_attentivefp_bbbp.pth'
+    'MPNN_attentivefp_BBBP': 'dgllife/pre_trained/mpnn_attentivefp_bbbp.pth',
+    'AttentiveFP_canonical_BBBP': 'dgllife/pre_trained/attentivefp_canonical_bbbp.pth'
 }
 
 def create_bbbp_model(model_name):
@@ -130,6 +131,15 @@ def create_bbbp_model(model_name):
                              num_step_set2set=3,
                              num_layer_set2set=2,
                              n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_canonical_BBBP':
+        return AttentiveFPPredictor(node_feat_size=74,
+                                    edge_feat_size=13,
+                                    num_layers=1,
+                                    num_timesteps=5,
+                                    graph_feat_size=16,
+                                    dropout=0.22184205119419326,
+                                    n_tasks=n_tasks)
 
     else:
         return None
