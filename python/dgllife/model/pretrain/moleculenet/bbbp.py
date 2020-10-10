@@ -24,7 +24,11 @@ bbbp_url = {
     'MPNN_canonical_BBBP': 'dgllife/pre_trained/mpnn_canonical_bbbp.pth',
     'MPNN_attentivefp_BBBP': 'dgllife/pre_trained/mpnn_attentivefp_bbbp.pth',
     'AttentiveFP_canonical_BBBP': 'dgllife/pre_trained/attentivefp_canonical_bbbp.pth',
-    'AttentiveFP_attentivefp_BBBP': 'dgllife/pre_trained/attentivefp_attentivefp_bbbp.pth'
+    'AttentiveFP_attentivefp_BBBP': 'dgllife/pre_trained/attentivefp_attentivefp_bbbp.pth',
+    'gin_supervised_contextpred_BBBP': 'dgllife/pre_trained/gin_supervised_contextpred_bbbp.pth',
+    'gin_supervised_infomax_BBBP': 'dgllife/pre_trained/gin_supervised_infomax_bbbp.pth',
+    'gin_supervised_edgepred_BBBP': 'dgllife/pre_trained/gin_supervised_edgepred_bbbp.pth',
+    'gin_supervised_masking_BBBP': 'dgllife/pre_trained/gin_supervised_masking_bbbp.pth'
 }
 
 def create_bbbp_model(model_name):
@@ -150,6 +154,66 @@ def create_bbbp_model(model_name):
                                     graph_feat_size=128,
                                     dropout=0.4216675614776068,
                                     n_tasks=n_tasks)
+
+    elif model_name == 'gin_supervised_contextpred_BBBP':
+        jk = 'last'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='attention',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_infomax_BBBP':
+        jk = 'last'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='attention',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_edgepred_BBBP':
+        jk = 'sum'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='sum',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_masking_BBBP':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='sum',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
 
     else:
         return None
