@@ -31,8 +31,8 @@ def create_moleculenet_model(model_name):
     -------
     Created model
     """
-    for func in [create_bace_model, create_bbbp_model, create_freesolv_model,
-                 create_muv_model, create_tox21_model]:
+    for func in [create_bace_model, create_bbbp_model, create_clintox_model,
+                 create_freesolv_model, create_muv_model, create_tox21_model]:
         model = func(model_name)
         if model is not None:
             return model
