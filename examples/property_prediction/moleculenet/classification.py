@@ -114,7 +114,7 @@ if __name__ == '__main__':
     from utils import init_featurizer, mkdir_p, split_dataset, get_configure
 
     parser = ArgumentParser('Multi-label Binary Classification')
-    parser.add_argument('-d', '--dataset', choices=['MUV', 'BACE', 'BBBP'],
+    parser.add_argument('-d', '--dataset', choices=['MUV', 'BACE', 'BBBP', 'ClinTox'],
                         help='Dataset to use')
     parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP',
                                                    'gin_supervised_contextpred',
@@ -173,6 +173,12 @@ if __name__ == '__main__':
                        node_featurizer=args['node_featurizer'],
                        edge_featurizer=args['edge_featurizer'],
                        n_jobs=1 if args['num_workers'] == 0 else args['num_workers'])
+    elif args['dataset'] == 'ClinTox':
+        from dgllife.data import ClinTox
+        dataset = ClinTox(smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
+                          node_featurizer=args['node_featurizer'],
+                          edge_featurizer=args['edge_featurizer'],
+                          n_jobs=1 if args['num_workers'] == 0 else args['num_workers'])
     else:
         raise ValueError('Unexpected dataset: {}'.format(args['dataset']))
 
