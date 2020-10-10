@@ -16,7 +16,9 @@ __all__ = ['clintox_url',
 
 clintox_url = {
     'GCN_canonical_ClinTox': 'dgllife/pre_trained/gcn_canonical_clintox.pth',
-    'GCN_attentivefp_ClinTox': 'dgllife/pre_trained/gcn_attentivefp_clintox.pth'
+    'GCN_attentivefp_ClinTox': 'dgllife/pre_trained/gcn_attentivefp_clintox.pth',
+    'GAT_canonical_ClinTox': 'dgllife/pre_trained/gat_canonical_clintox.pth',
+    'GAT_attentivefp_ClinTox': 'dgllife/pre_trained/gat_attentivefp_clintox.pth'
 }
 
 def create_clintox_model(model_name):
@@ -56,6 +58,32 @@ def create_clintox_model(model_name):
                             batchnorm=[True] * num_gnn_layers,
                             dropout=[dropout] * num_gnn_layers,
                             predictor_hidden_feats=512,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GAT_canonical_ClinTox':
+        dropout = 0.1622787886635157
+        return GATPredictor(in_feats=74,
+                            hidden_feats=[256],
+                            num_heads=[4],
+                            feat_drops=[dropout],
+                            attn_drops=[dropout],
+                            alphas=[0.4828530106865167],
+                            residuals=[False],
+                            predictor_hidden_feats=128,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GAT_attentivefp_ClinTox':
+        dropout = 0.023789159870020463
+        return GATPredictor(in_feats=39,
+                            hidden_feats=[64],
+                            num_heads=[8],
+                            feat_drops=[dropout],
+                            attn_drops=[dropout],
+                            alphas=[0.3794180901463749],
+                            residuals=[True],
+                            predictor_hidden_feats=32,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
