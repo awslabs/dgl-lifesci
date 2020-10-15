@@ -165,7 +165,7 @@ def test_moleculenet():
     else:
         device = torch.device('cpu')
 
-    for dataset in ['BACE', 'BBBP', 'FreeSolv', 'MUV']:
+    for dataset in ['BACE', 'BBBP', 'ClinTox', 'FreeSolv', 'MUV', 'SIDER']:
         for featurizer_type in ['canonical', 'attentivefp']:
             if featurizer_type == 'canonical':
                 node_featurizer = CanonicalAtomFeaturizer(atom_data_field='hv')
@@ -203,6 +203,9 @@ def test_moleculenet():
                     model(g1.to(device), g1.ndata.pop('hv').to(device), g1.edata.pop('he').to(device))
                 remove_file('{}_{}_{}_pre_trained.pth'.format(
                     model_type.lower(), featurizer_type, dataset))
+
+        if dataset == 'ClinTox':
+            continue
 
         node_featurizer = PretrainAtomFeaturizer()
         edge_featurizer = PretrainBondFeaturizer()
