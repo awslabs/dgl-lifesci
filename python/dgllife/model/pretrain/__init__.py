@@ -152,6 +152,10 @@ def load_pretrained(model_name, log=True):
           featurization for atoms
         * ``'GAT_attentivefp_ClinTox'``: A GAT model trained on ClinTox with attentivefp
           featurization for atoms
+        * ``'Weave_canonical_ClinTox'``: A Weave model trained on ClinTox with canonical
+          featurization for atoms and bonds
+        * ``'Weave_attentivefp_ClinTox'``: A Weave model trained on ClinTox with attentivefp
+          featurization for atoms and bonds
         * ``'GCN_canonical_FreeSolv'``: A GCN model trained on FreeSolv with canonical
           featurization for atoms
         * ``'GCN_attentivefp_FreeSolv'``: A GCN model trained on FreeSolv with attentivefp
