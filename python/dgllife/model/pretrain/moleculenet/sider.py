@@ -18,7 +18,9 @@ sider_url = {
     'GCN_canonical_SIDER': 'dgllife/pre_trained/gcn_canonical_sider.pth',
     'GCN_attentivefp_SIDER': 'dgllife/pre_trained/gcn_attentivefp_sider.pth',
     'GAT_canonical_SIDER': 'dgllife/pre_trained/gat_canonical_sider.pth',
-    'GAT_attentivefp_SIDER': 'dgllife/pre_trained/gat_attentivefp_sider.pth'
+    'GAT_attentivefp_SIDER': 'dgllife/pre_trained/gat_attentivefp_sider.pth',
+    'Weave_canonical_SIDER': 'dgllife/pre_trained/weave_canonical_sider.pth',
+    'Weave_attentivefp_SIDER': 'dgllife/pre_trained/weave_attentivefp_sider.pth'
 }
 
 def create_sider_model(model_name):
@@ -88,6 +90,24 @@ def create_sider_model(model_name):
                             predictor_hidden_feats=128,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
+
+    elif model_name == 'Weave_canonical_SIDER':
+        return WeavePredictor(node_in_feats=74,
+                              edge_in_feats=13,
+                              num_gnn_layers=1,
+                              gnn_hidden_feats=64,
+                              graph_feats=16,
+                              gaussian_expand=False,
+                              n_tasks=n_tasks)
+
+    elif model_name == 'Weave_attentivefp_SIDER':
+        return WeavePredictor(node_in_feats=39,
+                              edge_in_feats=11,
+                              num_gnn_layers=3,
+                              gnn_hidden_feats=64,
+                              graph_feats=64,
+                              gaussian_expand=True,
+                              n_tasks=n_tasks)
 
     else:
         return None
