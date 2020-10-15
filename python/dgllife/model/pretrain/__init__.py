@@ -236,6 +236,10 @@ def load_pretrained(model_name, log=True):
           featurization for atoms and bonds
         * ``'MPNN_attentivefp_SIDER'``: An MPNN model trained on SIDER with attentivefp
           featurization for atoms and bonds
+        * ``'AttentiveFP_canonical_SIDER'``: An AttentiveFP model trained on SIDER with
+          canonical featurization for atoms and bonds
+        * ``'AttentiveFP_attentivefp_SIDER'``: An AttentiveFP model trained on SIDER with
+          attentivefp featurization for atoms and bonds
 
     log : bool
         Whether to print progress for model loading

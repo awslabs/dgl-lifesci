@@ -131,5 +131,23 @@ def create_sider_model(model_name):
                              num_layer_set2set=1,
                              n_tasks=n_tasks)
 
+    elif model_name == 'AttentiveFP_canonical_SIDER':
+        return AttentiveFPPredictor(node_feat_size=74,
+                                    edge_feat_size=13,
+                                    num_layers=5,
+                                    num_timesteps=2,
+                                    graph_feat_size=128,
+                                    dropout=0.4023383130974747,
+                                    n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_attentivefp_SIDER':
+        return AttentiveFPPredictor(node_feat_size=39,
+                                    edge_feat_size=11,
+                                    num_layers=2,
+                                    num_timesteps=1,
+                                    graph_feat_size=16,
+                                    dropout=0.4246486427806226,
+                                    n_tasks=n_tasks)
+
     else:
         return None
