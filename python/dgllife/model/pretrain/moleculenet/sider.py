@@ -16,7 +16,9 @@ __all__ = ['sider_url',
 
 sider_url = {
     'GCN_canonical_SIDER': 'dgllife/pre_trained/gcn_canonical_sider.pth',
-    'GCN_attentivefp_SIDER': 'dgllife/pre_trained/gcn_attentivefp_sider.pth'
+    'GCN_attentivefp_SIDER': 'dgllife/pre_trained/gcn_attentivefp_sider.pth',
+    'GAT_canonical_SIDER': 'dgllife/pre_trained/gat_canonical_sider.pth',
+    'GAT_attentivefp_SIDER': 'dgllife/pre_trained/gat_attentivefp_sider.pth'
 }
 
 def create_sider_model(model_name):
@@ -56,6 +58,34 @@ def create_sider_model(model_name):
                             batchnorm=[True] * num_gnn_layers,
                             dropout=[dropout] * num_gnn_layers,
                             predictor_hidden_feats=1024,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GAT_canonical_SIDER':
+        dropout = 0.026789468731402546
+        num_gnn_layers = 4
+        return GATPredictor(in_feats=74,
+                            hidden_feats=[256] * num_gnn_layers,
+                            num_heads=[8] * num_gnn_layers,
+                            feat_drops=[dropout] * num_gnn_layers,
+                            attn_drops=[dropout] * num_gnn_layers,
+                            alphas=[0.7874749485670144] * num_gnn_layers,
+                            residuals=[True] * num_gnn_layers,
+                            predictor_hidden_feats=64,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GAT_attentivefp_SIDER':
+        dropout = 0.5941912608794613
+        num_gnn_layers = 4
+        return GATPredictor(in_feats=39,
+                            hidden_feats=[256] * num_gnn_layers,
+                            num_heads=[4] * num_gnn_layers,
+                            feat_drops=[dropout] * num_gnn_layers,
+                            attn_drops=[dropout] * num_gnn_layers,
+                            alphas=[0.15881060281037407] * num_gnn_layers,
+                            residuals=[True] * num_gnn_layers,
+                            predictor_hidden_feats=128,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 

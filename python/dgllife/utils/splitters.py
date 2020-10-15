@@ -496,9 +496,9 @@ class ScaffoldSplitter(object):
                 print('Failed to compute the scaffold for molecule {:d} '
                       'and it will be excluded.'.format(i + 1))
 
+        scaffolds = {key: sorted(value) for key, value in scaffolds.items()}
         # Order groups of molecules by first comparing the size of groups
         # and then the index of the first compound in the group.
-        scaffolds = {key: sorted(value) for key, value in scaffolds.items()}
         scaffold_sets = [
             scaffold_set for (scaffold, scaffold_set) in sorted(
                 scaffolds.items(), key=lambda x: (len(x[1]), x[1][0]), reverse=True)
