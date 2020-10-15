@@ -22,7 +22,9 @@ sider_url = {
     'Weave_canonical_SIDER': 'dgllife/pre_trained/weave_canonical_sider.pth',
     'Weave_attentivefp_SIDER': 'dgllife/pre_trained/weave_attentivefp_sider.pth',
     'MPNN_canonical_SIDER': 'dgllife/pre_trained/mpnn_canonical_sider.pth',
-    'MPNN_attentivefp_SIDER': 'dgllife/pre_trained/mpnn_attentivefp_sider.pth'
+    'MPNN_attentivefp_SIDER': 'dgllife/pre_trained/mpnn_attentivefp_sider.pth',
+    'AttentiveFP_canonical_SIDER': 'dgllife/pre_trained/attentivefp_canonical_sider.pth',
+    'AttentiveFP_attentivefp_SIDER': 'dgllife/pre_trained/attentivefp_attentivefp_sider.pth'
 }
 
 def create_sider_model(model_name):
