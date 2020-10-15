@@ -240,6 +240,14 @@ def load_pretrained(model_name, log=True):
           canonical featurization for atoms and bonds
         * ``'AttentiveFP_attentivefp_SIDER'``: An AttentiveFP model trained on SIDER with
           attentivefp featurization for atoms and bonds
+        * ``'gin_supervised_contextpred_SIDER'``: A GIN model pre-trained with supervised learning
+          and context prediction, and fine-tuned on SIDER
+        * ``'gin_supervised_infomax_SIDER'``: A GIN model pre-trained with supervised learning
+          and infomax, and fine-tuned on SIDER
+        * ``'gin_supervised_edgepred_SIDER'``: A GIN model pre-trained with supervised learning
+          and edge prediction, and fine-tuned on SIDER
+        * ``'gin_supervised_masking_SIDER'``: A GIN model pre-trained with supervised learning
+          and masking, and fine-tuned on SIDER
 
     log : bool
         Whether to print progress for model loading

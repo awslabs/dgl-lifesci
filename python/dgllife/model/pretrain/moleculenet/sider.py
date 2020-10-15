@@ -24,7 +24,15 @@ sider_url = {
     'MPNN_canonical_SIDER': 'dgllife/pre_trained/mpnn_canonical_sider.pth',
     'MPNN_attentivefp_SIDER': 'dgllife/pre_trained/mpnn_attentivefp_sider.pth',
     'AttentiveFP_canonical_SIDER': 'dgllife/pre_trained/attentivefp_canonical_sider.pth',
-    'AttentiveFP_attentivefp_SIDER': 'dgllife/pre_trained/attentivefp_attentivefp_sider.pth'
+    'AttentiveFP_attentivefp_SIDER': 'dgllife/pre_trained/attentivefp_attentivefp_sider.pth',
+    'gin_supervised_contextpred_SIDER':
+        'dgllife/pre_trained/gin_supervised_contextpred_sider.pth',
+    'gin_supervised_infomax_SIDER':
+        'dgllife/pre_trained/gin_supervised_infomax_sider.pth',
+    'gin_supervised_edgepred_SIDER':
+        'dgllife/pre_trained/gin_supervised_edgepred_sider.pth',
+    'gin_supervised_masking_SIDER':
+        'dgllife/pre_trained/gin_supervised_masking_sider.pth'
 }
 
 def create_sider_model(model_name):
@@ -150,6 +158,66 @@ def create_sider_model(model_name):
                                     graph_feat_size=16,
                                     dropout=0.4246486427806226,
                                     n_tasks=n_tasks)
+
+    elif model_name == 'gin_supervised_contextpred_SIDER':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='max',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_infomax_SIDER':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='attention',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_edgepred_SIDER':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='attention',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_masking_SIDER':
+        jk = 'max'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='max',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
 
     else:
         return None
