@@ -20,7 +20,9 @@ clintox_url = {
     'GAT_canonical_ClinTox': 'dgllife/pre_trained/gat_canonical_clintox.pth',
     'GAT_attentivefp_ClinTox': 'dgllife/pre_trained/gat_attentivefp_clintox.pth',
     'Weave_canonical_ClinTox': 'dgllife/pre_trained/weave_canonical_clintox.pth',
-    'Weave_attentivefp_ClinTox': 'dgllife/pre_trained/weave_attentivefp_clintox.pth'
+    'Weave_attentivefp_ClinTox': 'dgllife/pre_trained/weave_attentivefp_clintox.pth',
+    'MPNN_canonical_ClinTox': 'dgllife/pre_trained/mpnn_canonical_clintox.pth',
+    'MPNN_attentivefp_ClinTox': 'dgllife/pre_trained/mpnn_attentivefp_clintox.pth'
 }
 
 def create_clintox_model(model_name):
@@ -106,6 +108,26 @@ def create_clintox_model(model_name):
                               graph_feats=128,
                               gaussian_expand=False,
                               n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_canonical_ClinTox':
+        return MPNNPredictor(node_in_feats=74,
+                             edge_in_feats=13,
+                             node_out_feats=32,
+                             edge_hidden_feats=32,
+                             num_step_message_passing=4,
+                             num_step_set2set=3,
+                             num_layer_set2set=2,
+                             n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_attentivefp_ClinTox':
+        return MPNNPredictor(node_in_feats=39,
+                             edge_in_feats=11,
+                             node_out_feats=64,
+                             edge_hidden_feats=32,
+                             num_step_message_passing=2,
+                             num_step_set2set=2,
+                             num_layer_set2set=2,
+                             n_tasks=n_tasks)
 
     else:
         return None
