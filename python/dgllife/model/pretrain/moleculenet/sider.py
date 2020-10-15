@@ -20,7 +20,9 @@ sider_url = {
     'GAT_canonical_SIDER': 'dgllife/pre_trained/gat_canonical_sider.pth',
     'GAT_attentivefp_SIDER': 'dgllife/pre_trained/gat_attentivefp_sider.pth',
     'Weave_canonical_SIDER': 'dgllife/pre_trained/weave_canonical_sider.pth',
-    'Weave_attentivefp_SIDER': 'dgllife/pre_trained/weave_attentivefp_sider.pth'
+    'Weave_attentivefp_SIDER': 'dgllife/pre_trained/weave_attentivefp_sider.pth',
+    'MPNN_canonical_SIDER': 'dgllife/pre_trained/mpnn_canonical_sider.pth',
+    'MPNN_attentivefp_SIDER': 'dgllife/pre_trained/mpnn_attentivefp_sider.pth'
 }
 
 def create_sider_model(model_name):
@@ -108,6 +110,26 @@ def create_sider_model(model_name):
                               graph_feats=64,
                               gaussian_expand=True,
                               n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_canonical_SIDER':
+        return MPNNPredictor(node_in_feats=74,
+                             edge_in_feats=13,
+                             node_out_feats=64,
+                             edge_hidden_feats=64,
+                             num_step_message_passing=5,
+                             num_step_set2set=2,
+                             num_layer_set2set=2,
+                             n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_attentivefp_SIDER':
+        return MPNNPredictor(node_in_feats=39,
+                             edge_in_feats=11,
+                             node_out_feats=64,
+                             edge_hidden_feats=32,
+                             num_step_message_passing=5,
+                             num_step_set2set=1,
+                             num_layer_set2set=1,
+                             n_tasks=n_tasks)
 
     else:
         return None
