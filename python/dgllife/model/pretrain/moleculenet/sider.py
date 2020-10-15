@@ -33,7 +33,7 @@ def create_sider_model(model_name):
     """
     n_tasks = 27
 
-    if model_name == 'GCN_canonical_ClinTox':
+    if model_name == 'GCN_canonical_SIDER':
         dropout = 0.034959769945995006
         num_gnn_layers = 3
         return GCNPredictor(in_feats=74,
@@ -46,7 +46,7 @@ def create_sider_model(model_name):
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
-    elif model_name == 'GCN_attentivefp_ClinTox':
+    elif model_name == 'GCN_attentivefp_SIDER':
         dropout = 0.08333992387843633
         num_gnn_layers = 4
         return GCNPredictor(in_feats=39,
