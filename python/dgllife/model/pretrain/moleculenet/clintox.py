@@ -22,7 +22,9 @@ clintox_url = {
     'Weave_canonical_ClinTox': 'dgllife/pre_trained/weave_canonical_clintox.pth',
     'Weave_attentivefp_ClinTox': 'dgllife/pre_trained/weave_attentivefp_clintox.pth',
     'MPNN_canonical_ClinTox': 'dgllife/pre_trained/mpnn_canonical_clintox.pth',
-    'MPNN_attentivefp_ClinTox': 'dgllife/pre_trained/mpnn_attentivefp_clintox.pth'
+    'MPNN_attentivefp_ClinTox': 'dgllife/pre_trained/mpnn_attentivefp_clintox.pth',
+    'AttentiveFP_canonical_ClinTox': 'dgllife/pre_trained/attentivefp_canonical_clintox.pth',
+    'AttentiveFP_attentivefp_ClinTox': 'dgllife/pre_trained/attentivefp_attentivefp_clintox.pth'
 }
 
 def create_clintox_model(model_name):
@@ -128,6 +130,24 @@ def create_clintox_model(model_name):
                              num_step_set2set=2,
                              num_layer_set2set=2,
                              n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_canonical_ClinTox':
+        return AttentiveFPPredictor(node_feat_size=74,
+                                    edge_feat_size=13,
+                                    num_layers=2,
+                                    num_timesteps=1,
+                                    graph_feat_size=64,
+                                    dropout=0.3391802249114625,
+                                    n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_attentivefp_ClinTox':
+        return AttentiveFPPredictor(node_feat_size=39,
+                                    edge_feat_size=11,
+                                    num_layers=1,
+                                    num_timesteps=2,
+                                    graph_feat_size=16,
+                                    dropout=0.08746338896051695,
+                                    n_tasks=n_tasks)
 
     else:
         return None
