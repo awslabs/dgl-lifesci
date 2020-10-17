@@ -252,6 +252,10 @@ def load_pretrained(model_name, log=True):
           featurization for atoms
         * ``'GCN_attentivefp_ToxCast'``: A GCN model trained on ToxCast with attentivefp
           featurization for atoms
+        * ``'GAT_canonical_ToxCast'``: A GAT model trained on ToxCast with canonical
+          featurization for atoms
+        * ``'GAT_attentivefp_ToxCast'``: A GAT model trained on ToxCast with attentivefp
+          featurization for atoms
 
     log : bool
         Whether to print progress for model loading
