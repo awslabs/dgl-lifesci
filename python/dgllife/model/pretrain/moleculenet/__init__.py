@@ -14,12 +14,13 @@ from .freesolv import *
 from .muv import *
 from .sider import *
 from .tox21 import *
+from .toxcast import *
 
 __all__ = ['moleculenet_url',
            'create_moleculenet_model']
 
 moleculenet_url = {**bace_url, **bbbp_url, **clintox_url, **freesolv_url, **muv_url, **sider_url,
-                   **tox21_url}
+                   **tox21_url, **toxcast_url}
 
 def create_moleculenet_model(model_name):
     """Create a model.
@@ -34,7 +35,8 @@ def create_moleculenet_model(model_name):
     Created model
     """
     for func in [create_bace_model, create_bbbp_model, create_clintox_model,
-                 create_freesolv_model, create_muv_model, create_sider_model, create_tox21_model]:
+                 create_freesolv_model, create_muv_model, create_sider_model,
+                 create_tox21_model, create_toxcast_model]:
         model = func(model_name)
         if model is not None:
             return model
