@@ -24,7 +24,15 @@ toxcast_url = {
     'MPNN_canonical_ToxCast': 'dgllife/pre_trained/mpnn_canonical_toxcast.pth',
     'MPNN_attentivefp_ToxCast': 'dgllife/pre_trained/mpnn_attentivefp_toxcast.pth',
     'AttentiveFP_canonical_ToxCast': 'dgllife/pre_trained/attentivefp_canonical_toxcast.pth',
-    'AttentiveFP_attentivefp_ToxCast': 'dgllife/pre_trained/attentivefp_attentivefp_toxcast.pth'
+    'AttentiveFP_attentivefp_ToxCast': 'dgllife/pre_trained/attentivefp_attentivefp_toxcast.pth',
+    'gin_supervised_contextpred_ToxCast':
+        'dgllife/pre_trained/gin_supervised_contextpred_toxcast.pth',
+    'gin_supervised_infomax_ToxCast':
+        'dgllife/pre_trained/gin_supervised_infomax_toxcast.pth',
+    'gin_supervised_edgepred_ToxCast':
+        'dgllife/pre_trained/gin_supervised_edgepred_toxcast.pth',
+    'gin_supervised_masking_ToxCast':
+        'dgllife/pre_trained/gin_supervised_masking_toxcast.pth'
 }
 
 def create_toxcast_model(model_name):
@@ -148,6 +156,66 @@ def create_toxcast_model(model_name):
                                     graph_feat_size=32,
                                     dropout=0.15914067005489962,
                                     n_tasks=n_tasks)
+
+    elif model_name == 'gin_supervised_contextpred_ToxCast':
+        jk = 'last'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='max',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_infomax_ToxCast':
+        jk = 'sum'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='sum',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_edgepred_ToxCast':
+        jk = 'sum'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='max',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_masking_ToxCast':
+        jk = 'sum'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='attention',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
 
     else:
         return None

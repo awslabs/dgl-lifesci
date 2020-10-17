@@ -268,6 +268,14 @@ def load_pretrained(model_name, log=True):
           canonical featurization for atoms and bonds
         * ``'AttentiveFP_attentivefp_ToxCast'``: An AttentiveFP model trained on ToxCast with
           attentivefp featurization for atoms and bonds
+        * ``'gin_supervised_contextpred_ToxCast'``: A GIN model pre-trained with supervised
+          learning and context prediction, and fine-tuned on ToxCast
+        * ``'gin_supervised_infomax_ToxCast'``: A GIN model pre-trained with supervised learning
+          and infomax, and fine-tuned on ToxCast
+        * ``'gin_supervised_edgepred_ToxCast'``: A GIN model pre-trained with supervised learning
+          and edge prediction, and fine-tuned on ToxCast
+        * ``'gin_supervised_masking_ToxCast'``: A GIN model pre-trained with supervised learning
+          and masking, and fine-tuned on ToxCast
 
     log : bool
         Whether to print progress for model loading
