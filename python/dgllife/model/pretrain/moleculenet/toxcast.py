@@ -196,7 +196,7 @@ def create_toxcast_model(model_name):
             emb_dim=300,
             JK=jk,
             dropout=0.5,
-            readout='max',
+            readout='attention',
             n_tasks=n_tasks
         )
         model.gnn.JK = jk
@@ -211,7 +211,7 @@ def create_toxcast_model(model_name):
             emb_dim=300,
             JK=jk,
             dropout=0.5,
-            readout='attention',
+            readout='max',
             n_tasks=n_tasks
         )
         model.gnn.JK = jk
