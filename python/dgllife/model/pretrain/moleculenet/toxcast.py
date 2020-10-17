@@ -18,7 +18,9 @@ toxcast_url = {
     'GCN_canonical_ToxCast': 'dgllife/pre_trained/gcn_canonical_toxcast.pth',
     'GCN_attentivefp_ToxCast': 'dgllife/pre_trained/gcn_attentivefp_toxcast.pth',
     'GAT_canonical_ToxCast': 'dgllife/pre_trained/gat_canonical_toxcast.pth',
-    'GAT_attentivefp_ToxCast': 'dgllife/pre_trained/gat_attentivefp_toxcast.pth'
+    'GAT_attentivefp_ToxCast': 'dgllife/pre_trained/gat_attentivefp_toxcast.pth',
+    'Weave_canonical_ToxCast': 'dgllife/pre_trained/weave_canonical_toxcast.pth',
+    'Weave_attentivefp_ToxCast': 'dgllife/pre_trained/weave_attentivefp_toxcast.pth'
 }
 
 def create_toxcast_model(model_name):
@@ -86,6 +88,24 @@ def create_toxcast_model(model_name):
                             predictor_hidden_feats=128,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
+
+    elif model_name == 'Weave_canonical_ToxCast':
+        return WeavePredictor(node_in_feats=74,
+                              edge_in_feats=13,
+                              num_gnn_layers=1,
+                              gnn_hidden_feats=256,
+                              graph_feats=256,
+                              gaussian_expand=False,
+                              n_tasks=n_tasks)
+
+    elif model_name == 'Weave_attentivefp_ToxCast':
+        return WeavePredictor(node_in_feats=39,
+                              edge_in_feats=11,
+                              num_gnn_layers=1,
+                              gnn_hidden_feats=128,
+                              graph_feats=128,
+                              gaussian_expand=False,
+                              n_tasks=n_tasks)
 
     else:
         return None

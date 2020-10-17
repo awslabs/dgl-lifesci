@@ -256,6 +256,10 @@ def load_pretrained(model_name, log=True):
           featurization for atoms
         * ``'GAT_attentivefp_ToxCast'``: A GAT model trained on ToxCast with attentivefp
           featurization for atoms
+        * ``'Weave_canonical_ToxCast'``: A Weave model trained on ToxCast with canonical
+          featurization for atoms and bonds
+        * ``'Weave_attentivefp_ToxCast'``: A Weave model trained on ToxCast with attentivefp
+          featurization for atoms and bonds
 
     log : bool
         Whether to print progress for model loading
