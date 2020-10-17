@@ -22,7 +22,9 @@ toxcast_url = {
     'Weave_canonical_ToxCast': 'dgllife/pre_trained/weave_canonical_toxcast.pth',
     'Weave_attentivefp_ToxCast': 'dgllife/pre_trained/weave_attentivefp_toxcast.pth',
     'MPNN_canonical_ToxCast': 'dgllife/pre_trained/mpnn_canonical_toxcast.pth',
-    'MPNN_attentivefp_ToxCast': 'dgllife/pre_trained/mpnn_attentivefp_toxcast.pth'
+    'MPNN_attentivefp_ToxCast': 'dgllife/pre_trained/mpnn_attentivefp_toxcast.pth',
+    'AttentiveFP_canonical_ToxCast': 'dgllife/pre_trained/attentivefp_canonical_toxcast.pth',
+    'AttentiveFP_attentivefp_ToxCast': 'dgllife/pre_trained/attentivefp_attentivefp_toxcast.pth'
 }
 
 def create_toxcast_model(model_name):
@@ -128,6 +130,24 @@ def create_toxcast_model(model_name):
                              num_step_set2set=3,
                              num_layer_set2set=3,
                              n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_canonical_ToxCast':
+        return AttentiveFPPredictor(node_feat_size=74,
+                                    edge_feat_size=13,
+                                    num_layers=1,
+                                    num_timesteps=1,
+                                    graph_feat_size=64,
+                                    dropout=0.00020996203951184622,
+                                    n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_attentivefp_ToxCast':
+        return AttentiveFPPredictor(node_feat_size=39,
+                                    edge_feat_size=11,
+                                    num_layers=1,
+                                    num_timesteps=3,
+                                    graph_feat_size=32,
+                                    dropout=0.15914067005489962,
+                                    n_tasks=n_tasks)
 
     else:
         return None
