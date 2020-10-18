@@ -18,7 +18,7 @@ bbbp_url = {
     'GCN_canonical_BBBP': 'dgllife/pre_trained/gcn_canonical_bbbp.pth',
     'GCN_attentivefp_BBBP': 'dgllife/pre_trained/gcn_attentivefp_bbbp.pth',
     'GAT_canonical_BBBP': 'dgllife/pre_trained/gat_canonical_bbbp.pth',
-    'GAT_attentivefp_BBBP': 'dgllife/pre_trained/gat_attentivefp_bbbp.pth',
+    'GAT_attentivefp_BBBP': 'dgllife/pre_trained/gat_attentivefp_bbbp_v2.pth',
     'Weave_canonical_BBBP': 'dgllife/pre_trained/weave_canonical_bbbp.pth',
     'Weave_attentivefp_BBBP': 'dgllife/pre_trained/gat_attentivefp_bbbp.pth',
     'MPNN_canonical_BBBP': 'dgllife/pre_trained/mpnn_canonical_bbbp.pth',
