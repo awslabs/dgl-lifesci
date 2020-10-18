@@ -200,6 +200,10 @@ def load_pretrained(model_name, log=True):
           featurization for atoms
         * ``'GAT_attentivefp_HIV'``: A GAT model trained on BACE with attentivefp
           featurization for atoms
+        * ``'Weave_canonical_HIV'``: A Weave model trained on HIV with canonical
+          featurization for atoms and bonds
+        * ``'Weave_attentivefp_HIV'``: A Weave model trained on HIV with attentivefp
+          featurization for atoms and bonds
         * ``'GCN_canonical_MUV'``: A GCN model trained on MUV with canonical
           featurization for atoms
         * ``'GCN_attentivefp_MUV'``: A GCN model trained on MUV with attentivefp
