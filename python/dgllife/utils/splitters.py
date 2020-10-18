@@ -15,7 +15,9 @@ from itertools import accumulate, chain
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem.rdmolops import FastFindRings
-from rdkit.Chem import AllChem
+# Todo
+# from rdkit.Chem import AllChem
+from rdkit.Chem.Scaffolds import MurckoScaffold
 
 import numpy as np
 import dgl.backend as F
@@ -489,14 +491,17 @@ class ScaffoldSplitter(object):
             # For mols that have not been sanitized, we need to compute their ring information
             try:
                 FastFindRings(mol)
-                mol_scaffold = AllChem.MurckoDecompose(mol)
+                # Todo
+                mol_scaffold = MurckoScaffold.MurckoScaffoldSmiles(
+                    mol=mol, includeChirality=False)
+                # mol_scaffold = AllChem.MurckoDecompose(mol)
                 # Group molecules that have the same scaffold
                 scaffolds[mol_scaffold].append(i)
             except:
                 print('Failed to compute the scaffold for molecule {:d} '
                       'and it will be excluded.'.format(i + 1))
-
-        scaffolds = {key: sorted(value) for key, value in scaffolds.items()}
+        # Todo
+        # scaffolds = {key: sorted(value) for key, value in scaffolds.items()}
         # Order groups of molecules by first comparing the size of groups
         # and then the index of the first compound in the group.
         scaffold_sets = [
