@@ -21,6 +21,8 @@ hiv_url = {
     'GAT_attentivefp_HIV': 'dgllife/pre_trained/gat_attentivefp_hiv.pth',
     'Weave_canonical_HIV': 'dgllife/pre_trained/weave_canonical_hiv.pth',
     'Weave_attentivefp_HIV': 'dgllife/pre_trained/weave_attentivefp_hiv.pth',
+    'MPNN_canonical_HIV': 'dgllife/pre_trained/mpnn_canonical_hiv.pth',
+    'MPNN_attentivefp_HIV': 'dgllife/pre_trained/mpnn_attentivefp_hiv.pth'
 }
 
 def create_hiv_model(model_name):
@@ -106,6 +108,26 @@ def create_hiv_model(model_name):
                               graph_feats=16,
                               gaussian_expand=False,
                               n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_canonical_HIV':
+        return MPNNPredictor(node_in_feats=74,
+                             edge_in_feats=13,
+                             node_out_feats=64,
+                             edge_hidden_feats=64,
+                             num_step_message_passing=4,
+                             num_step_set2set=1,
+                             num_layer_set2set=2,
+                             n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_attentivefp_HIV':
+        return MPNNPredictor(node_in_feats=39,
+                             edge_in_feats=11,
+                             node_out_feats=32,
+                             edge_hidden_feats=64,
+                             num_step_message_passing=3,
+                             num_step_set2set=3,
+                             num_layer_set2set=3,
+                             n_tasks=n_tasks)
 
     else:
         return None
