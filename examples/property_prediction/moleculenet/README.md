@@ -24,7 +24,8 @@
 | GCN + canonical            | 0.98        | 0.63         |
 | GCN + attentivefp          | 0.98        | 0.64         |
 | GAT + canonical            | 0.98        | 0.68         |
-| GAT + attentivefp          |
+| GAT + attentivefp          | 0.97        | 0.69         |
+| Weave + canonical          | 0.97        | 0.67         |
 
 ## ClinTox
 
