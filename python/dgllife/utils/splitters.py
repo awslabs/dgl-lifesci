@@ -15,7 +15,6 @@ from itertools import accumulate, chain
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem.rdmolops import FastFindRings
-# Todo
 from rdkit.Chem import AllChem
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
@@ -457,7 +456,7 @@ class ScaffoldSplitter(object):
     """
 
     @staticmethod
-    def get_ordered_scaffold_sets(molecules, log_every_n):
+    def get_ordered_scaffold_sets(molecules, log_every_n, scaffold_func):
         """Group molecules based on their Bemis-Murcko scaffolds and
         order these groups based on their sizes.
 
@@ -475,6 +474,10 @@ class ScaffoldSplitter(object):
             to learn the progress of processing. This can be done by printing a message whenever
             a batch of ``log_every_n`` molecules have been processed. If None, no messages will
             be printed.
+        scaffold_func : str
+            The function to use for computing scaffolds, which can be 'murcko_decompose' for
+            using rdkit.Chem.AllChem.MurckoDecompose or 'scaffold_smiles' for using
+            rdkit.Chem.Scaffolds.MurckoScaffold.MurckoScaffoldSmiles.
 
         Returns
         -------
@@ -482,6 +485,10 @@ class ScaffoldSplitter(object):
             Each element of the list is a list of int,
             representing the indices of compounds with a same scaffold.
         """
+        assert scaffold_func in ['murcko_decompose', 'scaffold_smiles'], \
+            "Expect scaffold_func to be 'murcko_decompose' or 'scaffold_smiles', " \
+            "got '{}'".format(scaffold_func)
+
         if log_every_n is not None:
             print('Start computing Bemis-Murcko scaffolds.')
         scaffolds = defaultdict(list)
@@ -491,17 +498,17 @@ class ScaffoldSplitter(object):
             # For mols that have not been sanitized, we need to compute their ring information
             try:
                 FastFindRings(mol)
-                # Todo
-                # mol_scaffold = MurckoScaffold.MurckoScaffoldSmiles(
-                #    mol=mol, includeChirality=False)
-                mol_scaffold = AllChem.MurckoDecompose(mol)
+                if scaffold_func == 'murcko_decompose':
+                    mol_scaffold = AllChem.MurckoDecompose(mol)
+                if scaffold_func == 'scaffold_smiles':
+                    mol_scaffold = MurckoScaffold.MurckoScaffoldSmiles(
+                        mol=mol, includeChirality=False)
                 # Group molecules that have the same scaffold
                 scaffolds[mol_scaffold].append(i)
             except:
                 print('Failed to compute the scaffold for molecule {:d} '
                       'and it will be excluded.'.format(i + 1))
-        # Todo
-        # scaffolds = {key: sorted(value) for key, value in scaffolds.items()}
+
         # Order groups of molecules by first comparing the size of groups
         # and then the index of the first compound in the group.
         scaffold_sets = [
@@ -513,7 +520,8 @@ class ScaffoldSplitter(object):
 
     @staticmethod
     def train_val_test_split(dataset, mols=None, sanitize=True,
-                             frac_train=0.8, frac_val=0.1, frac_test=0.1, log_every_n=1000):
+                             frac_train=0.8, frac_val=0.1, frac_test=0.1,
+                             log_every_n=1000, scaffold_func='murcko_decompose'):
         """Split the dataset into training, validation and test set based on molecular scaffolds.
 
         This spliting method ensures that molecules with a same scaffold will be collectively
@@ -551,6 +559,10 @@ class ScaffoldSplitter(object):
             to learn the progress of processing. This can be done by printing a message whenever
             a batch of ``log_every_n`` molecules have been processed. If None, no messages will
             be printed. Default to 1000.
+        scaffold_func : str
+            The function to use for computing scaffolds, which can be 'murcko_decompose' for
+            using rdkit.Chem.AllChem.MurckoDecompose or 'scaffold_smiles' for using
+            rdkit.Chem.Scaffolds.MurckoScaffold.MurckoScaffoldSmiles.
 
         Returns
         -------
@@ -562,7 +574,7 @@ class ScaffoldSplitter(object):
         train_val_test_sanity_check(frac_train, frac_val, frac_test)
         molecules = prepare_mols(dataset, mols, sanitize)
         scaffold_sets = ScaffoldSplitter.get_ordered_scaffold_sets(
-            molecules, log_every_n)
+            molecules, log_every_n, scaffold_func)
         train_indices, val_indices, test_indices = [], [], []
         train_cutoff = int(frac_train * len(molecules))
         val_cutoff = int((frac_train + frac_val) * len(molecules))
@@ -580,7 +592,7 @@ class ScaffoldSplitter(object):
 
     @staticmethod
     def k_fold_split(dataset, mols=None, sanitize=True,
-                     k=5, log_every_n=1000):
+                     k=5, log_every_n=1000, scaffold_func='murcko_decompose'):
         """Group molecules based on their scaffolds and sort groups based on their sizes.
         The groups are then split for k-fold cross validation.
 
@@ -614,6 +626,10 @@ class ScaffoldSplitter(object):
             to learn the progress of processing. This can be done by printing a message whenever
             a batch of ``log_every_n`` molecules have been processed. If None, no messages will
             be printed. Default to 1000.
+        scaffold_func : str
+            The function to use for computing scaffolds, which can be 'murcko_decompose' for
+            using rdkit.Chem.AllChem.MurckoDecompose or 'scaffold_smiles' for using
+            rdkit.Chem.Scaffolds.MurckoScaffold.MurckoScaffoldSmiles.
 
         Returns
         -------
@@ -625,7 +641,7 @@ class ScaffoldSplitter(object):
 
         molecules = prepare_mols(dataset, mols, sanitize)
         scaffold_sets = ScaffoldSplitter.get_ordered_scaffold_sets(
-            molecules, log_every_n)
+            molecules, log_every_n, scaffold_func)
 
         # k buckets that form a relatively balanced partition of the dataset
         index_buckets = [[] for _ in range(k)]
