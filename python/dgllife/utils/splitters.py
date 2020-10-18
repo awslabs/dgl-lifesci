@@ -16,7 +16,7 @@ from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem.rdmolops import FastFindRings
 # Todo
-# from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
 import numpy as np
@@ -492,9 +492,9 @@ class ScaffoldSplitter(object):
             try:
                 FastFindRings(mol)
                 # Todo
-                mol_scaffold = MurckoScaffold.MurckoScaffoldSmiles(
-                    mol=mol, includeChirality=False)
-                # mol_scaffold = AllChem.MurckoDecompose(mol)
+                # mol_scaffold = MurckoScaffold.MurckoScaffoldSmiles(
+                #    mol=mol, includeChirality=False)
+                mol_scaffold = AllChem.MurckoDecompose(mol)
                 # Group molecules that have the same scaffold
                 scaffolds[mol_scaffold].append(i)
             except:
