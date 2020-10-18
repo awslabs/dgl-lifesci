@@ -100,12 +100,15 @@ def main(args, exp_config, train_set, val_set, test_set):
 
     if not args['pretrain']:
         stopper.load_checkpoint(model)
+    val_score = run_an_eval_epoch(args, model, val_loader)
     test_score = run_an_eval_epoch(args, model, test_loader)
+    print('val {} {:.4f}'.format(args['metric'], val_score))
     print('test {} {:.4f}'.format(args['metric'], test_score))
 
     with open(args['result_path'] + '/eval.txt', 'w') as f:
         if not args['pretrain']:
             f.write('Best val {}: {}\n'.format(args['metric'], stopper.best_score))
+        f.write('Val {}: {}\n'.format(args['metric'], val_score))
         f.write('Test {}: {}\n'.format(args['metric'], test_score))
 
 if __name__ == '__main__':
