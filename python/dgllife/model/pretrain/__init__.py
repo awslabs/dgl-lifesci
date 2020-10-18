@@ -208,6 +208,18 @@ def load_pretrained(model_name, log=True):
           featurization for atoms and bonds
         * ``'MPNN_attentivefp_HIV'``: An MPNN model trained on HIV with attentivefp
           featurization for atoms and bonds
+        * ``'AttentiveFP_canonical_HIV'``: An AttentiveFP model trained on HIV with canonical
+          featurization for atoms and bonds
+        * ``'AttentiveFP_attentivefp_HIV'``: An AttentiveFP model trained on HIV with attentivefp
+          featurization for atoms and bonds
+        * ``'gin_supervised_contextpred_HIV'``: A GIN model pre-trained with supervised learning
+          and context prediction, and fine-tuned on HIV
+        * ``'gin_supervised_infomax_HIV'``: A GIN model pre-trained with supervised learning
+          and infomax, and fine-tuned on HIV
+        * ``'gin_supervised_edgepred_HIV'``: A GIN model pre-trained with supervised learning
+          and edge prediction, and fine-tuned on HIV
+        * ``'gin_supervised_masking_HIV'``: A GIN model pre-trained with supervised learning
+          and masking, and fine-tuned on HIV
         * ``'GCN_canonical_MUV'``: A GCN model trained on MUV with canonical
           featurization for atoms
         * ``'GCN_attentivefp_MUV'``: A GCN model trained on MUV with attentivefp
