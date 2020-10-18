@@ -196,6 +196,10 @@ def load_pretrained(model_name, log=True):
           featurization for atoms
         * ``'GCN_attentivefp_HIV'``: A GCN model trained on HIV with attentivefp
           featurization for atoms
+        * ``'GAT_canonical_HIV'``: A GAT model trained on BACE with canonical
+          featurization for atoms
+        * ``'GAT_attentivefp_HIV'``: A GAT model trained on BACE with attentivefp
+          featurization for atoms
         * ``'GCN_canonical_MUV'``: A GCN model trained on MUV with canonical
           featurization for atoms
         * ``'GCN_attentivefp_MUV'``: A GCN model trained on MUV with attentivefp
