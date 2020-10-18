@@ -22,7 +22,9 @@ hiv_url = {
     'Weave_canonical_HIV': 'dgllife/pre_trained/weave_canonical_hiv.pth',
     'Weave_attentivefp_HIV': 'dgllife/pre_trained/weave_attentivefp_hiv.pth',
     'MPNN_canonical_HIV': 'dgllife/pre_trained/mpnn_canonical_hiv.pth',
-    'MPNN_attentivefp_HIV': 'dgllife/pre_trained/mpnn_attentivefp_hiv.pth'
+    'MPNN_attentivefp_HIV': 'dgllife/pre_trained/mpnn_attentivefp_hiv.pth',
+    'AttentiveFP_canonical_HIV': 'dgllife/pre_trained/attentivefp_canonical_hiv.pth',
+    'AttentiveFP_attentivefp_HIV': 'dgllife/pre_trained/attentivefp_attentivefp_hiv.pth'
 }
 
 def create_hiv_model(model_name):
@@ -128,6 +130,24 @@ def create_hiv_model(model_name):
                              num_step_set2set=3,
                              num_layer_set2set=3,
                              n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_canonical_HIV':
+        return AttentiveFPPredictor(node_feat_size=74,
+                                    edge_feat_size=13,
+                                    num_layers=1,
+                                    num_timesteps=1,
+                                    graph_feat_size=256,
+                                    dropout=0.24511656823509329,
+                                    n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_attentivefp_HIV':
+        return AttentiveFPPredictor(node_feat_size=39,
+                                    edge_feat_size=11,
+                                    num_layers=1,
+                                    num_timesteps=2,
+                                    graph_feat_size=64,
+                                    dropout=0.22938425755507835,
+                                    n_tasks=n_tasks)
 
     else:
         return None
