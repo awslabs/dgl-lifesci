@@ -201,6 +201,12 @@ if __name__ == '__main__':
                       node_featurizer=args['node_featurizer'],
                       edge_featurizer=args['edge_featurizer'],
                       n_jobs=1 if args['num_workers'] == 0 else args['num_workers'])
+    elif args['dataset'] == 'PCBA':
+        from dgllife.data import PCBA
+        dataset = PCBA(smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
+                       node_featurizer=args['node_featurizer'],
+                       edge_featurizer=args['edge_featurizer'],
+                       n_jobs=1 if args['num_workers'] == 0 else args['num_workers'])
     else:
         raise ValueError('Unexpected dataset: {}'.format(args['dataset']))
 
