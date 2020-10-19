@@ -20,7 +20,9 @@ pcba_url = {
     'GAT_canonical_PCBA': 'dgllife/pre_trained/gat_canonical_pcba.pth',
     'GAT_attentivefp_PCBA': 'dgllife/pre_trained/gat_attentivefp_pcba.pth',
     'Weave_canonical_PCBA': 'dgllife/pre_trained/weave_canonical_pcba.pth',
-    'Weave_attentivefp_PCBA': 'dgllife/pre_trained/weave_attentivefp_pcba.pth'
+    'Weave_attentivefp_PCBA': 'dgllife/pre_trained/weave_attentivefp_pcba.pth',
+    'MPNN_canonical_HIV': 'dgllife/pre_trained/mpnn_canonical_hiv.pth',
+    'MPNN_attentivefp_HIV': 'dgllife/pre_trained/mpnn_attentivefp_hiv.pth'
 }
 
 def create_pcba_model(model_name):
@@ -108,6 +110,26 @@ def create_pcba_model(model_name):
                               graph_feats=64,
                               gaussian_expand=False,
                               n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_canonical_PCBA':
+        return MPNNPredictor(node_in_feats=74,
+                             edge_in_feats=13,
+                             node_out_feats=32,
+                             edge_hidden_feats=64,
+                             num_step_message_passing=1,
+                             num_step_set2set=3,
+                             num_layer_set2set=3,
+                             n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_attentivefp_PCBA':
+        return MPNNPredictor(node_in_feats=39,
+                             edge_in_feats=11,
+                             node_out_feats=64,
+                             edge_hidden_feats=32,
+                             num_step_message_passing=2,
+                             num_step_set2set=1,
+                             num_layer_set2set=1,
+                             n_tasks=n_tasks)
 
     else:
         return None

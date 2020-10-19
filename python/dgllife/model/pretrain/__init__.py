@@ -264,6 +264,10 @@ def load_pretrained(model_name, log=True):
           featurization for atoms and bonds
         * ``'Weave_attentivefp_PCBA'``: A Weave model trained on PCBA with attentivefp
           featurization for atoms and bonds
+        * ``'MPNN_canonical_PCBA'``: An MPNN model trained on PCBA with canonical
+          featurization for atoms and bonds
+        * ``'MPNN_attentivefp_PCBA'``: An MPNN model trained on PCBA with attentivefp
+          featurization for atoms and bonds
         * ``'GCN_canonical_SIDER'``: A GCN model trained on SIDER with canonical
           featurization for atoms
         * ``'GCN_attentivefp_SIDER'``: A GCN model trained on SIDER with attentivefp
