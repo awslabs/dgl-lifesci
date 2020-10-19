@@ -26,10 +26,35 @@
 | GAT + canonical            | 0.98        | 0.68         |
 | GAT + attentivefp          | 0.97        | 0.69         |
 | Weave + canonical          | 0.97        | 0.67         |
+| Weave + attentivefp        | 0.97        | 0.69         |
+| MPNN + canonical           | 0.96        | 0.65         |
+| MPNN + attentivefp         | 0.97        | 0.68         |
+| AttentiveFP + canonical    | 0.98        | 0.71         |
+| AttentiveFP + attentivefp  | 0.97        | 0.65         |
+| gin_supervised_contextpred | 0.95        | 0.63         |
+| gin_supervised_infomax     | 0.97        | 0.72         |
+| gin_supervised_edgepred    | 0.98        | 0.70         |
+| gin_supervised_masking     | 0.97        | 0.72         |
 
 ## ClinTox
 
+| method                     | Val ROC-AUC | Test ROC-AUC |
+| -------------------------- | ----------- | ------------ |
+| GCN + canonical            | 0.99        | 0.90         |
+| GCN + attentivefp          | 0.99        | 0.85         |
+| GAT + canonical            | 0.96        | 0.88         |
+| GAT + attentivefp          | 0.98        | 0.82         |
+| Weave + canonical          | 0.96        | 0.90         |
+| Weave + attentivefp        | 0.96        | 0.90         |
+| MPNN + canonical           | 0.99        | 0.84         |
+| MPNN + attentivefp         | 0.99        | 0.82         |
+| AttentiveFP + canonical    | 0.99        | 0.89         |
+| AttentiveFP + attentivefp  | 0.97        | 0.85         |
+
 ## FreeSolv
+
+| method                     | Val RMSE | Test RMSE |
+| -------------------------- | -------- | --------- |
 
 ## HIV
 
@@ -52,8 +77,59 @@
 
 ## MUV
 
+| method                     | Val ROC-AUC | Test ROC-AUC |
+| -------------------------- | ----------- | ------------ |
+| GCN + canonical            | 0.69        | 0.61         |
+| GCN + attentivefp          | 0.71        | 0.63         |
+| GAT + canonical            | 0.69        | 0.64         |
+| GAT + attentivefp          | 0.71        | 0.60         |
+| Weave + canonical          | 0.71        | 0.60         |
+| Weave + attentivefp        | 0.61        | 0.55         |
+| MPNN + canonical           | 0.73        | 0.60         |
+| MPNN + attentivefp         | 0.74        | 0.62         |
+| AttentiveFP + canonical    | 0.70        | 0.61         |
+| AttentiveFP + attentivefp  | 0.75        | 0.67         |
+| gin_supervised_contextpred | 0.72        | 0.61         |
+| gin_supervised_infomax     | 0.72        | 0.66         |
+| gin_supervised_edgepred    | 0.71        | 0.61         |
+| gin_supervised_masking     | 0.71        | 0.62         |
+
 ## SIDER
+
+| method                     | Val ROC-AUC | Test ROC-AUC |
+| -------------------------- | ----------- | ------------ |
+| GCN + canonical            | 0.61        | 0.58         |
+| GCN + attentivefp          | 0.65        | 0.62         |
+| GAT + canonical            | 0.59        | 0.52         |
+| GAT + attentivefp          | 0.57        | 0.52         |
+| Weave + canonical          | 0.61        | 0.58         |
+| Weave + attentivefp        | 0.56        | 0.62         |
+| MPNN + canonical           | 0.57        | 0.54         |
+| MPNN + attentivefp         | 0.56        | 0.50         |
+| AttentiveFP + canonical    | 0.57        | 0.53         |
+| AttentiveFP + attentivefp  | 0.57        | 0.49         |
+| gin_supervised_contextpred | 0.60        | 0.61         |
+| gin_supervised_infomax     | 0.61        | 0.63         |
+| gin_supervised_edgepred    | 0.62        | 0.66         |
+| gin_supervised_masking     | 0.61        | 0.58         |
 
 ## Tox21
 
-## ToxCast 
+## ToxCast
+
+| method                     | Val ROC-AUC | Test ROC-AUC |
+| -------------------------- | ----------- | ------------ |
+| GCN + canonical            | 0.64        | 0.62         |
+| GCN + attentivefp          | 0.68        | 0.64         |
+| GAT + canonical            | 0.66        | 0.64         |
+| GAT + attentivefp          | 0.63        | 0.59         |
+| Weave + canonical          | 0.63        | 0.62         |
+| Weave + attentivefp        | 0.62        | 0.61         |
+| MPNN + canonical           | 0.63        | 0.59         |
+| MPNN + attentivefp         | 0.63        | 0.59         |
+| AttentiveFP + canonical    | 0.62        | 0.57         |
+| AttentiveFP + attentivefp  | 0.62        | 0.59         |
+| gin_supervised_contextpred | 0.67        | 0.64         |
+| gin_supervised_infomax     | 0.62        | 0.59         |
+| gin_supervised_edgepred    | 0.61        | 0.59         |
+| gin_supervised_masking     | 0.63        | 0.58         |

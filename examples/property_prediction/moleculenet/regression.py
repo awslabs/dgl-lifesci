@@ -117,7 +117,7 @@ if __name__ == '__main__':
     from utils import init_featurizer, mkdir_p, split_dataset, get_configure
 
     parser = ArgumentParser('(Multitask) Regression')
-    parser.add_argument('-d', '--dataset', choices=['FreeSolv'],
+    parser.add_argument('-d', '--dataset', choices=['FreeSolv', 'Lipophilicity'],
                         help='Dataset to use')
     parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP',
                                                    'gin_supervised_contextpred',
@@ -163,6 +163,12 @@ if __name__ == '__main__':
                            node_featurizer=args['node_featurizer'],
                            edge_featurizer=args['edge_featurizer'],
                            n_jobs=1 if args['num_workers'] == 0 else args['num_workers'])
+    elif args['dataset'] == 'Lipophilicity':
+        from dgllife.data import Lipophilicity
+        dataset = Lipophilicity(smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
+                                node_featurizer=args['node_featurizer'],
+                                edge_featurizer=args['edge_featurizer'],
+                                n_jobs=1 if args['num_workers'] == 0 else args['num_workers'])
 
     args['n_tasks'] = dataset.n_tasks
     train_set, val_set, test_set = split_dataset(args, dataset)

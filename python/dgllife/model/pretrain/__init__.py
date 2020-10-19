@@ -220,6 +220,10 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on HIV
         * ``'gin_supervised_masking_HIV'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on HIV
+        * ``'GCN_canonical_Lipophilicity'``: A GCN model trained on Lipophilicity with canonical
+          featurization for atoms
+        * ``'GCN_attentivefp_Lipophilicity'``: A GCN model trained on Lipophilicity with
+          attentivefp featurization for atoms
         * ``'GCN_canonical_MUV'``: A GCN model trained on MUV with canonical
           featurization for atoms
         * ``'GCN_attentivefp_MUV'``: A GCN model trained on MUV with attentivefp
