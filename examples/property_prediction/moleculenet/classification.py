@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
     parser = ArgumentParser('Multi-label Binary Classification')
     parser.add_argument('-d', '--dataset', choices=['MUV', 'BACE', 'BBBP', 'ClinTox', 'SIDER',
-                                                    'ToxCast', 'HIV'],
+                                                    'ToxCast', 'HIV', 'PCBA'],
                         help='Dataset to use')
     parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP',
                                                    'gin_supervised_contextpred',

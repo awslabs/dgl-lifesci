@@ -252,6 +252,10 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on MUV
         * ``'gin_supervised_masking_MUV'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on MUV
+        * ``'GCN_canonical_PCBA'``: A GCN model trained on PCBA with canonical
+          featurization for atoms
+        * ``'GCN_attentivefp_PCBA'``: A GCN model trained on PCBA with attentivefp
+          featurization for atoms
         * ``'GCN_canonical_SIDER'``: A GCN model trained on SIDER with canonical
           featurization for atoms
         * ``'GCN_attentivefp_SIDER'``: A GCN model trained on SIDER with attentivefp

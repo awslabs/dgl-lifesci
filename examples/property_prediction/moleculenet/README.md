@@ -75,6 +75,8 @@
 | gin_supervised_edgepred    | 0.80        | 0.72         |
 | gin_supervised_masking     | 0.80        | 0.75         |
 
+## Lipophilicity
+
 ## MUV
 
 | method                     | Val ROC-AUC | Test ROC-AUC |
@@ -93,6 +95,12 @@
 | gin_supervised_infomax     | 0.72        | 0.66         |
 | gin_supervised_edgepred    | 0.71        | 0.61         |
 | gin_supervised_masking     | 0.71        | 0.62         |
+
+## PCBA
+
+| method                     | Val ROC-AUC | Test ROC-AUC |
+| -------------------------- | ----------- | ------------ |
+| GCN + canonical            | 
 
 ## SIDER
 
