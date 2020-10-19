@@ -114,6 +114,7 @@ class MoleculeCSVDataset(object):
             self.labels = label_dict['labels']
             if init_mask:
                 self.mask = label_dict['mask']
+            self.valid_ids = label_dict['valid_ids'].tolist()
         else:
             print('Processing dgl graphs from scratch...')
             if n_jobs > 1:
@@ -138,20 +139,23 @@ class MoleculeCSVDataset(object):
                     self.valid_ids.append(i)
                     graphs.append(g)
             self.graphs = graphs
-            self.smiles = [self.smiles[i] for i in self.valid_ids]
             _label_values = self.df[self.task_names].values
             # np.nan_to_num will also turn inf into a very large number
             self.labels = F.zerocopy_from_numpy(
                 np.nan_to_num(_label_values).astype(np.float32))[self.valid_ids]
+            valid_ids = torch.tensor(self.valid_ids)
             if init_mask:
                 self.mask = F.zerocopy_from_numpy(
                     (~np.isnan(_label_values)).astype(np.float32))[self.valid_ids]
                 save_graphs(self.cache_file_path, self.graphs,
-                            labels={'labels': self.labels, 'mask': self.mask})
+                            labels={'labels': self.labels, 'mask': self.mask,
+                                    'valid_ids': valid_ids})
             else:
                 self.mask = None
                 save_graphs(self.cache_file_path, self.graphs,
-                            labels={'labels': self.labels})
+                            labels={'labels': self.labels, 'valid_ids': valid_ids})
+
+        self.smiles = [self.smiles[i] for i in self.valid_ids]
 
     def __getitem__(self, item):
         """Get datapoint with index
