@@ -22,7 +22,9 @@ pcba_url = {
     'Weave_canonical_PCBA': 'dgllife/pre_trained/weave_canonical_pcba.pth',
     'Weave_attentivefp_PCBA': 'dgllife/pre_trained/weave_attentivefp_pcba.pth',
     'MPNN_canonical_PCBA': 'dgllife/pre_trained/mpnn_canonical_pcba.pth',
-    'MPNN_attentivefp_PCBA': 'dgllife/pre_trained/mpnn_attentivefp_pcba.pth'
+    'MPNN_attentivefp_PCBA': 'dgllife/pre_trained/mpnn_attentivefp_pcba.pth',
+    'AttentiveFP_canonical_PCBA': 'dgllife/pre_trained/attentivefp_canonical_pcba.pth',
+    'AttentiveFP_attentivefp_PCBA': 'dgllife/pre_trained/attentivefp_attentivefp_pcba.pth',
 }
 
 def create_pcba_model(model_name):
@@ -130,6 +132,24 @@ def create_pcba_model(model_name):
                              num_step_set2set=1,
                              num_layer_set2set=1,
                              n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_canonical_PCBA':
+        return AttentiveFPPredictor(node_feat_size=74,
+                                    edge_feat_size=13,
+                                    num_layers=2,
+                                    num_timesteps=3,
+                                    graph_feat_size=32,
+                                    dropout=0.05370268638522968,
+                                    n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_attentivefp_PCBA':
+        return AttentiveFPPredictor(node_feat_size=39,
+                                    edge_feat_size=11,
+                                    num_layers=3,
+                                    num_timesteps=2,
+                                    graph_feat_size=16,
+                                    dropout=0.31957324617702254,
+                                    n_tasks=n_tasks)
 
     else:
         return None
