@@ -100,7 +100,8 @@
 
 | method                     | Val ROC-AUC | Test ROC-AUC |
 | -------------------------- | ----------- | ------------ |
-| GCN + canonical            | 
+| GCN + canonical            | 0.74        | 0.74         |
+| GCN + attentivefp          | 0.75        | 0.75         |
 
 ## SIDER
 
