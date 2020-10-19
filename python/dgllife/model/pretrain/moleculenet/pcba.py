@@ -21,8 +21,8 @@ pcba_url = {
     'GAT_attentivefp_PCBA': 'dgllife/pre_trained/gat_attentivefp_pcba.pth',
     'Weave_canonical_PCBA': 'dgllife/pre_trained/weave_canonical_pcba.pth',
     'Weave_attentivefp_PCBA': 'dgllife/pre_trained/weave_attentivefp_pcba.pth',
-    'MPNN_canonical_HIV': 'dgllife/pre_trained/mpnn_canonical_hiv.pth',
-    'MPNN_attentivefp_HIV': 'dgllife/pre_trained/mpnn_attentivefp_hiv.pth'
+    'MPNN_canonical_PCBA': 'dgllife/pre_trained/mpnn_canonical_pcba.pth',
+    'MPNN_attentivefp_PCBA': 'dgllife/pre_trained/mpnn_attentivefp_pcba.pth'
 }
 
 def create_pcba_model(model_name):
