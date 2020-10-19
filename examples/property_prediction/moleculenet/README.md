@@ -106,7 +106,8 @@
 | GAT + attentivefp          | 0.62        | 0.62         |
 | Weave + canonical          | 0.64        | 0.65         | 
 | Weave + attentivefp        | 0.66        | 0.66         |
-| MPNN + canonical           |
+| MPNN + canonical           | 0.82        | 0.82         | 
+| MPNN + attentivefp         | 0.72        | 0.72         | 
 
 ## SIDER
 
