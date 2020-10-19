@@ -25,6 +25,10 @@ pcba_url = {
     'MPNN_attentivefp_PCBA': 'dgllife/pre_trained/mpnn_attentivefp_pcba.pth',
     'AttentiveFP_canonical_PCBA': 'dgllife/pre_trained/attentivefp_canonical_pcba.pth',
     'AttentiveFP_attentivefp_PCBA': 'dgllife/pre_trained/attentivefp_attentivefp_pcba.pth',
+    'gin_supervised_contextpred_PCBA': 'dgllife/pre_trained/gin_supervised_contextpred_pcba.pth',
+    'gin_supervised_infomax_PCBA': 'dgllife/pre_trained/gin_supervised_infomax_pcba.pth',
+    'gin_supervised_edgepred_PCBA': 'dgllife/pre_trained/gin_supervised_edgepred_pcba.pth',
+    'gin_supervised_masking_PCBA': 'dgllife/pre_trained/gin_supervised_masking_pcba.pth'
 }
 
 def create_pcba_model(model_name):
@@ -150,6 +154,66 @@ def create_pcba_model(model_name):
                                     graph_feat_size=16,
                                     dropout=0.31957324617702254,
                                     n_tasks=n_tasks)
+
+    elif model_name == 'gin_supervised_contextpred_PCBA':
+        jk = 'last'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='attention',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_infomax_PCBA':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='max',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_edgepred_PCBA':
+        jk = 'sum'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='attention',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_masking_PCBA':
+        jk = 'sum'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='attention',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
 
     else:
         return None

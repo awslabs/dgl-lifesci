@@ -108,6 +108,8 @@
 | Weave + attentivefp        | 0.66        | 0.66         |
 | MPNN + canonical           | 0.82        | 0.82         | 
 | MPNN + attentivefp         | 0.72        | 0.72         | 
+| AttentiveFP + canonical    | 0.69        | 0.68         |
+| AttentiveFP + attentivefp  |
 
 ## SIDER
 
