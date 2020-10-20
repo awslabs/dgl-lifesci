@@ -96,7 +96,7 @@ def split_dataset(args, dataset):
     if args['split'] == 'scaffold':
         train_set, val_set, test_set = ScaffoldSplitter.train_val_test_split(
             dataset, frac_train=train_ratio, frac_val=val_ratio, frac_test=test_ratio,
-            scaffold_func='scaffold_smiles')
+            scaffold_func='smiles')
     elif args['split'] == 'random':
         train_set, val_set, test_set = RandomSplitter.train_val_test_split(
             dataset, frac_train=train_ratio, frac_val=val_ratio, frac_test=test_ratio)

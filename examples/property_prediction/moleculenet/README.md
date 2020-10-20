@@ -113,7 +113,7 @@
 | gin_supervised_contextpred | 0.74        | 0.74         |
 | gin_supervised_infomax     | 0.72        | 0.72         |
 | gin_supervised_edgepred    | 0.62        | 0.62         |
-| gin_supervised_masking     |
+| gin_supervised_masking     | 0.84        | 0.84         |
 
 ## SIDER
 

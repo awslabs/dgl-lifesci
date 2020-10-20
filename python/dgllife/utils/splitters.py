@@ -498,9 +498,9 @@ class ScaffoldSplitter(object):
             # For mols that have not been sanitized, we need to compute their ring information
             try:
                 FastFindRings(mol)
-                if scaffold_func == 'murcko_decompose':
+                if scaffold_func == 'decompose':
                     mol_scaffold = AllChem.MurckoDecompose(mol)
-                if scaffold_func == 'scaffold_smiles':
+                if scaffold_func == 'smiles':
                     mol_scaffold = MurckoScaffold.MurckoScaffoldSmiles(
                         mol=mol, includeChirality=False)
                 # Group molecules that have the same scaffold
@@ -522,7 +522,7 @@ class ScaffoldSplitter(object):
     @staticmethod
     def train_val_test_split(dataset, mols=None, sanitize=True,
                              frac_train=0.8, frac_val=0.1, frac_test=0.1,
-                             log_every_n=1000, scaffold_func='murcko_decompose'):
+                             log_every_n=1000, scaffold_func='decompose'):
         """Split the dataset into training, validation and test set based on molecular scaffolds.
 
         This spliting method ensures that molecules with a same scaffold will be collectively
@@ -561,8 +561,8 @@ class ScaffoldSplitter(object):
             a batch of ``log_every_n`` molecules have been processed. If None, no messages will
             be printed. Default to 1000.
         scaffold_func : str
-            The function to use for computing scaffolds, which can be 'murcko_decompose' for
-            using rdkit.Chem.AllChem.MurckoDecompose or 'scaffold_smiles' for using
+            The function to use for computing scaffolds, which can be 'decompose' for
+            using rdkit.Chem.AllChem.MurckoDecompose or 'smiles' for using
             rdkit.Chem.Scaffolds.MurckoScaffold.MurckoScaffoldSmiles.
 
         Returns
@@ -593,7 +593,7 @@ class ScaffoldSplitter(object):
 
     @staticmethod
     def k_fold_split(dataset, mols=None, sanitize=True,
-                     k=5, log_every_n=1000, scaffold_func='murcko_decompose'):
+                     k=5, log_every_n=1000, scaffold_func='decompose'):
         """Group molecules based on their scaffolds and sort groups based on their sizes.
         The groups are then split for k-fold cross validation.
 
@@ -628,8 +628,8 @@ class ScaffoldSplitter(object):
             a batch of ``log_every_n`` molecules have been processed. If None, no messages will
             be printed. Default to 1000.
         scaffold_func : str
-            The function to use for computing scaffolds, which can be 'murcko_decompose' for
-            using rdkit.Chem.AllChem.MurckoDecompose or 'scaffold_smiles' for using
+            The function to use for computing scaffolds, which can be 'decompose' for
+            using rdkit.Chem.AllChem.MurckoDecompose or 'smiles' for using
             rdkit.Chem.Scaffolds.MurckoScaffold.MurckoScaffoldSmiles.
 
         Returns

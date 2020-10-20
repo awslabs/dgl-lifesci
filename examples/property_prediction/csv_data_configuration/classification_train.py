@@ -151,8 +151,14 @@ if __name__ == '__main__':
                         help='Header for the tasks to model. If None, we will model '
                              'all the columns except for the smiles_column in the CSV file. '
                              '(default: None)')
-    parser.add_argument('-s', '--split', choices=['scaffold', 'random'], default='scaffold',
-                        help='Dataset splitting method (default: scaffold)')
+    parser.add_argument('-s', '--split',
+                        choices=['scaffold_decompose', 'scaffold_smiles', 'random'],
+                        default='scaffold_smiles',
+                        help='Dataset splitting method (default: scaffold_smiles). For scaffold '
+                             'split based on rdkit.Chem.AllChem.MurckoDecompose, '
+                             'use scaffold_decompose. For scaffold split based on '
+                             'rdkit.Chem.Scaffolds.MurckoScaffold.MurckoScaffoldSmiles, '
+                             'use scaffold_smiles.')
     parser.add_argument('-sr', '--split-ratio', default='0.8,0.1,0.1', type=str,
                         help='Proportion of the dataset to use for training, validation and test, '
                              '(default: 0.8,0.1,0.1)')
