@@ -485,8 +485,8 @@ class ScaffoldSplitter(object):
             Each element of the list is a list of int,
             representing the indices of compounds with a same scaffold.
         """
-        assert scaffold_func in ['murcko_decompose', 'scaffold_smiles'], \
-            "Expect scaffold_func to be 'murcko_decompose' or 'scaffold_smiles', " \
+        assert scaffold_func in ['decompose', 'smiles'], \
+            "Expect scaffold_func to be 'decompose' or 'smiles', " \
             "got '{}'".format(scaffold_func)
 
         if log_every_n is not None:
