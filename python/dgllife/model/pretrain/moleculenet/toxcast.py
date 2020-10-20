@@ -9,7 +9,8 @@
 
 import torch.nn.functional as F
 
-from ...model_zoo import *
+from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
+    AttentiveFPPredictor, GINPredictor
 
 __all__ = ['toxcast_url',
            'create_toxcast_model']

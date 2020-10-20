@@ -9,7 +9,7 @@
 
 import torch.nn.functional as F
 
-from ...model_zoo import *
+from ...model_zoo import GCNPredictor
 
 __all__ = ['lipophilicity_url',
            'create_lipophilicity_model']

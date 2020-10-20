@@ -9,7 +9,8 @@
 
 import torch.nn.functional as F
 
-from ...model_zoo import *
+from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
+    AttentiveFPPredictor, GINPredictor
 
 __all__ = ['bbbp_url',
            'create_bbbp_model']

@@ -9,7 +9,8 @@
 
 import torch.nn.functional as F
 
-from ...model_zoo import *
+from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
+    AttentiveFPPredictor
 
 __all__ = ['clintox_url',
            'create_clintox_model']

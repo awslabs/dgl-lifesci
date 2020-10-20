@@ -9,7 +9,8 @@
 
 import torch.nn.functional as F
 
-from ...model_zoo import *
+from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
+    AttentiveFPPredictor, GINPredictor
 
 __all__ = ['sider_url',
            'create_sider_model']

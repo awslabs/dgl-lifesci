@@ -9,7 +9,8 @@
 
 import torch.nn.functional as F
 
-from ...model_zoo import *
+from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
+    AttentiveFPPredictor, GINPredictor
 
 __all__ = ['freesolv_url',
            'create_freesolv_model']

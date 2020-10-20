@@ -9,7 +9,7 @@
 
 import torch.nn.functional as F
 
-from ...model_zoo import *
+from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor
 
 __all__ = ['tox21_url',
            'create_tox21_model']
