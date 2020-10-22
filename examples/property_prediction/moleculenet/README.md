@@ -55,6 +55,9 @@
 
 | method                     | Val RMSE | Test RMSE |
 | -------------------------- | -------- | --------- |
+| GCN + canonical            | 1.67     | 3.12      |
+| GCN + attentivefp          | 1.35     | 2.31      |
+| GAT + canonical            |
 
 ## HIV
 

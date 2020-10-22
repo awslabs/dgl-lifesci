@@ -18,8 +18,8 @@ __all__ = ['freesolv_url',
 freesolv_url = {
     'GCN_canonical_FreeSolv': 'dgllife/pre_trained/gcn_canonical_freesolv_v3.pth',
     'GCN_attentivefp_FreeSolv': 'dgllife/pre_trained/gcn_attentivefp_freesolv_v2.pth',
-    'GAT_canonical_FreeSolv': 'dgllife/pre_trained/gat_canonical_freesolv.pth',
-    'GAT_attentivefp_FreeSolv': 'dgllife/pre_trained/gat_attentivefp_freesolv.pth',
+    'GAT_canonical_FreeSolv': 'dgllife/pre_trained/gat_canonical_freesolv_v2.pth',
+    'GAT_attentivefp_FreeSolv': 'dgllife/pre_trained/gat_attentivefp_freesolv_v2.pth',
     'Weave_canonical_FreeSolv': 'dgllife/pre_trained/weave_canonical_freesolv.pth',
     'Weave_attentivefp_FreeSolv': 'dgllife/pre_trained/weave_attentivefp_freesolv.pth',
     'MPNN_canonical_FreeSolv': 'dgllife/pre_trained/mpnn_canonical_freesolv.pth',
@@ -78,29 +78,29 @@ def create_freesolv_model(model_name):
                             n_tasks=n_tasks)
 
     elif model_name == 'GAT_canonical_FreeSolv':
-        dropout = 0.13537547757851973
+        dropout = 0.02327359604429937
         return GATPredictor(in_feats=74,
                             hidden_feats=[256],
-                            num_heads=[6],
+                            num_heads=[4],
                             feat_drops=[dropout],
                             attn_drops=[dropout],
-                            alphas=[0.9199722462937526],
-                            residuals=[False],
-                            predictor_hidden_feats=16,
+                            alphas=[0.6211392042947481],
+                            residuals=[True],
+                            predictor_hidden_feats=256,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
     elif model_name == 'GAT_attentivefp_FreeSolv':
-        dropout = 0.3235550393975303
-        num_gnn_layers = 4
+        dropout = 0.06949846918000477
+        num_gnn_layers = 2
         return GATPredictor(in_feats=39,
-                            hidden_feats=[64] * num_gnn_layers,
-                            num_heads=[4] * num_gnn_layers,
+                            hidden_feats=[32] * num_gnn_layers,
+                            num_heads=[8] * num_gnn_layers,
                             feat_drops=[dropout] * num_gnn_layers,
                             attn_drops=[dropout] * num_gnn_layers,
-                            alphas=[0.8613751164365371] * num_gnn_layers,
+                            alphas=[0.6294479518124414] * num_gnn_layers,
                             residuals=[True] * num_gnn_layers,
-                            predictor_hidden_feats=16,
+                            predictor_hidden_feats=64,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
