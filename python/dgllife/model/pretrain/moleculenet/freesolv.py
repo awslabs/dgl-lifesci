@@ -16,8 +16,8 @@ __all__ = ['freesolv_url',
            'create_freesolv_model']
 
 freesolv_url = {
-    'GCN_canonical_FreeSolv': 'dgllife/pre_trained/gcn_canonical_freesolv_v2.pth',
-    'GCN_attentivefp_FreeSolv': 'dgllife/pre_trained/gcn_attentivefp_freesolv.pth',
+    'GCN_canonical_FreeSolv': 'dgllife/pre_trained/gcn_canonical_freesolv_v3.pth',
+    'GCN_attentivefp_FreeSolv': 'dgllife/pre_trained/gcn_attentivefp_freesolv_v2.pth',
     'GAT_canonical_FreeSolv': 'dgllife/pre_trained/gat_canonical_freesolv.pth',
     'GAT_attentivefp_FreeSolv': 'dgllife/pre_trained/gat_attentivefp_freesolv.pth',
     'Weave_canonical_FreeSolv': 'dgllife/pre_trained/weave_canonical_freesolv.pth',
@@ -52,27 +52,28 @@ def create_freesolv_model(model_name):
     n_tasks = 1
 
     if model_name == 'GCN_canonical_FreeSolv':
-        dropout = 0.006589580021982596
+        num_gnn_layers = 2
+        dropout = 0.05769700663189804
         return GCNPredictor(in_feats=74,
-                            hidden_feats=[64],
-                            activation=[F.relu],
-                            residual=[False],
-                            batchnorm=[False],
-                            dropout=[dropout],
-                            predictor_hidden_feats=1024,
+                            hidden_feats=[32] * num_gnn_layers,
+                            activation=[F.relu] * num_gnn_layers,
+                            residual=[True] * num_gnn_layers,
+                            batchnorm=[False] * num_gnn_layers,
+                            dropout=[dropout] * num_gnn_layers,
+                            predictor_hidden_feats=64,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
     elif model_name == 'GCN_attentivefp_FreeSolv':
-        num_gnn_layers = 2
-        dropout = 0.004282780783275264
+        num_gnn_layers = 4
+        dropout = 0.09905316493862346
         return GCNPredictor(in_feats=39,
                             hidden_feats=[32] * num_gnn_layers,
                             activation=[F.relu] * num_gnn_layers,
                             residual=[True] * num_gnn_layers,
                             batchnorm=[False] * num_gnn_layers,
                             dropout=[dropout] * num_gnn_layers,
-                            predictor_hidden_feats=256,
+                            predictor_hidden_feats=32,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
