@@ -61,7 +61,9 @@
 | GAT + attentivefp          | 0.89     | 0.88      |
 | Weave + canonical          | 0.95     | 1.00      |
 | Weave + attentivefp        | 1.24     | 1.20      |
-| MPNN + canonical           |
+| MPNN + canonical           | 0.87     | 1.12      |
+| MPNN + attentivefp         | 0.95     | 1.02      |
+| AttentiveFP + canonical    |
 
 ## FreeSolv
 

@@ -24,6 +24,8 @@ esol_url = {
     'Weave_attentivefp_ESOL': 'dgllife/pre_trained/weave_attentivefp_esol.pth',
     'MPNN_canonical_ESOL': 'dgllife/pre_trained/mpnn_canonical_esol.pth',
     'MPNN_attentivefp_ESOL': 'dgllife/pre_trained/mpnn_attentivefp_esol.pth',
+    'AttentiveFP_canonical_ESOL': 'dgllife/pre_trained/attentivefp_canonical_esol.pth',
+    'AttentiveFP_attentivefp_ESOL': 'dgllife/pre_trained/attentivefp_attentivefp_esol.pth'
 }
 
 def create_esol_model(model_name):
@@ -127,6 +129,24 @@ def create_esol_model(model_name):
                              num_step_set2set=2,
                              num_layer_set2set=2,
                              n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_canonical_ESOL':
+        return AttentiveFPPredictor(node_feat_size=74,
+                                    edge_feat_size=13,
+                                    num_layers=3,
+                                    num_timesteps=5,
+                                    graph_feat_size=16,
+                                    dropout=0.3144543143291027,
+                                    n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_attentivefp_ESOL':
+        return AttentiveFPPredictor(node_feat_size=39,
+                                    edge_feat_size=11,
+                                    num_layers=5,
+                                    num_timesteps=5,
+                                    graph_feat_size=16,
+                                    dropout=0.19597186400407615,
+                                    n_tasks=n_tasks)
 
     else:
         return None
