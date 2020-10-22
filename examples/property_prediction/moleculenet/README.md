@@ -65,6 +65,10 @@
 | MPNN + attentivefp         | 0.95     | 1.02      |
 | AttentiveFP + canonical    | 0.86     | 0.82      |
 | AttentiveFP + attentivefp  | 0.91     | 0.93      |
+| gin_supervised_contextpred | 0.99     | 0.98      |
+| gin_supervised_infomax     | 1.09     | 0.97      |
+| gin_supervised_edgepred    | 1.29     | 1.50      | 
+| gin_supervised_masking     | 1.09     | 1.18      |
 
 ## FreeSolv
 
