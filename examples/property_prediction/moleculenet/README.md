@@ -63,7 +63,8 @@
 | Weave + attentivefp        | 1.51     | 3.74      |
 | MPNN + canonical           | 1.91     | 2.43      |
 | MPNN + attentivefp         | 1.85     | 2.44      |
-| AttentiveFP + canonical    |
+| AttentiveFP + canonical    | 1.67     | 3.26      |
+| AttentiveFP + attentivefp  | 1.25     | 3.01      |
 
 ## HIV
 
