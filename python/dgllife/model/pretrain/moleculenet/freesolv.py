@@ -24,9 +24,9 @@ freesolv_url = {
     'Weave_attentivefp_FreeSolv': 'dgllife/pre_trained/weave_attentivefp_freesolv_v2.pth',
     'MPNN_canonical_FreeSolv': 'dgllife/pre_trained/mpnn_canonical_freesolv_v2.pth',
     'MPNN_attentivefp_FreeSolv': 'dgllife/pre_trained/mpnn_attentivefp_freesolv_v2.pth',
-    'AttentiveFP_canonical_FreeSolv': 'dgllife/pre_trained/attentivefp_canonical_freesolv.pth',
+    'AttentiveFP_canonical_FreeSolv': 'dgllife/pre_trained/attentivefp_canonical_freesolv_v2.pth',
     'AttentiveFP_attentivefp_FreeSolv':
-        'dgllife/pre_trained/attentivefp_attentivefp_freesolv.pth',
+        'dgllife/pre_trained/attentivefp_attentivefp_freesolv_v2.pth',
     'gin_supervised_contextpred_FreeSolv':
         'dgllife/pre_trained/gin_supervised_contextpred_freesolv.pth',
     'gin_supervised_infomax_FreeSolv':
@@ -145,19 +145,19 @@ def create_freesolv_model(model_name):
     elif model_name == 'AttentiveFP_canonical_FreeSolv':
         return AttentiveFPPredictor(node_feat_size=74,
                                     edge_feat_size=13,
-                                    num_layers=3,
-                                    num_timesteps=3,
-                                    graph_feat_size=128,
-                                    dropout=0.4804978614147144,
+                                    num_layers=4,
+                                    num_timesteps=1,
+                                    graph_feat_size=32,
+                                    dropout=0.07118127568309571,
                                     n_tasks=n_tasks)
 
     elif model_name == 'AttentiveFP_attentivefp_FreeSolv':
         return AttentiveFPPredictor(node_feat_size=39,
                                     edge_feat_size=11,
-                                    num_layers=3,
-                                    num_timesteps=4,
-                                    graph_feat_size=16,
-                                    dropout=0.16687520888732352,
+                                    num_layers=1,
+                                    num_timesteps=1,
+                                    graph_feat_size=128,
+                                    dropout=0.1457037675069287,
                                     n_tasks=n_tasks)
 
     elif model_name == 'gin_supervised_contextpred_FreeSolv':

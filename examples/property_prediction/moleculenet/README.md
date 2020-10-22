@@ -61,7 +61,9 @@
 | GAT + attentivefp          | 2.32     | 2.51      |
 | Weave + canonical          | 1.71     | 3.13      |
 | Weave + attentivefp        | 1.51     | 3.74      |
-| MPNN + canonical           |
+| MPNN + canonical           | 1.91     | 2.43      |
+| MPNN + attentivefp         | 1.85     | 2.44      |
+| AttentiveFP + canonical    |
 
 ## HIV
 
