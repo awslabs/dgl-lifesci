@@ -51,6 +51,12 @@
 | AttentiveFP + canonical    | 0.99        | 0.89         |
 | AttentiveFP + attentivefp  | 0.97        | 0.85         |
 
+## ESOL
+
+| method                     | Val RMSE | Test RMSE |
+| -------------------------- | -------- | --------- |
+| GCN + canonical            | 
+
 ## FreeSolv
 
 | method                     | Val RMSE | Test RMSE |
@@ -65,6 +71,10 @@
 | MPNN + attentivefp         | 1.85     | 2.44      |
 | AttentiveFP + canonical    | 1.67     | 3.26      |
 | AttentiveFP + attentivefp  | 1.25     | 3.01      |
+| gin_supervised_contextpred | 1.77     | 3.37      |
+| gin_supervised_infomax     | 2.31     | 3.36      |
+| gin_supervised_edgepred    | 2.25     | 2.49      |
+| gin_supervised_masking     | 2.18     | 3.34      |
 
 ## HIV
 

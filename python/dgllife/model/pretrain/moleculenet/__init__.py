@@ -10,6 +10,7 @@
 from .bace import *
 from .bbbp import *
 from .clintox import *
+from .esol import *
 from .freesolv import *
 from .hiv import *
 from .lipophilicity import *
@@ -22,7 +23,7 @@ from .toxcast import *
 __all__ = ['moleculenet_url',
            'create_moleculenet_model']
 
-moleculenet_url = {**bace_url, **bbbp_url, **clintox_url, **freesolv_url, **hiv_url,
+moleculenet_url = {**bace_url, **bbbp_url, **clintox_url, **esol_url, **freesolv_url, **hiv_url,
                    **lipophilicity_url, **muv_url, **pcba_url, **sider_url, **tox21_url,
                    **toxcast_url}
 
@@ -38,7 +39,7 @@ def create_moleculenet_model(model_name):
     -------
     Created model
     """
-    for func in [create_bace_model, create_bbbp_model, create_clintox_model,
+    for func in [create_bace_model, create_bbbp_model, create_clintox_model, create_esol_model,
                  create_freesolv_model, create_hiv_model, create_lipophilicity_model,
                  create_muv_model, create_pcba_model, create_sider_model, create_tox21_model,
                  create_toxcast_model]:
