@@ -21,7 +21,9 @@ esol_url = {
     'GAT_canonical_ESOL': 'dgllife/pre_trained/gat_canonical_esol.pth',
     'GAT_attentivefp_ESOL': 'dgllife/pre_trained/gat_attentivefp_esol.pth',
     'Weave_canonical_ESOL': 'dgllife/pre_trained/weave_canonical_esol.pth',
-    'Weave_attentivefp_ESOL': 'dgllife/pre_trained/weave_attentivefp_esol.pth'
+    'Weave_attentivefp_ESOL': 'dgllife/pre_trained/weave_attentivefp_esol.pth',
+    'MPNN_canonical_ESOL': 'dgllife/pre_trained/mpnn_canonical_esol.pth',
+    'MPNN_attentivefp_ESOL': 'dgllife/pre_trained/mpnn_attentivefp_esol.pth',
 }
 
 def create_esol_model(model_name):
@@ -105,6 +107,26 @@ def create_esol_model(model_name):
                               graph_feats=256,
                               gaussian_expand=False,
                               n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_canonical_ESOL':
+        return MPNNPredictor(node_in_feats=74,
+                             edge_in_feats=13,
+                             node_out_feats=32,
+                             edge_hidden_feats=64,
+                             num_step_message_passing=3,
+                             num_step_set2set=2,
+                             num_layer_set2set=3,
+                             n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_attentivefp_ESOL':
+        return MPNNPredictor(node_in_feats=39,
+                             edge_in_feats=11,
+                             node_out_feats=32,
+                             edge_hidden_feats=64,
+                             num_step_message_passing=1,
+                             num_step_set2set=2,
+                             num_layer_set2set=2,
+                             n_tasks=n_tasks)
 
     else:
         return None
