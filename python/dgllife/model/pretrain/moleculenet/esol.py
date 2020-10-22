@@ -19,7 +19,9 @@ esol_url = {
     'GCN_canonical_ESOL': 'dgllife/pre_trained/gcn_canonical_esol.pth',
     'GCN_attentivefp_ESOL': 'dgllife/pre_trained/gcn_attentivefp_esol.pth',
     'GAT_canonical_ESOL': 'dgllife/pre_trained/gat_canonical_esol.pth',
-    'GAT_attentivefp_ESOL': 'dgllife/pre_trained/gat_attentivefp_esol.pth'
+    'GAT_attentivefp_ESOL': 'dgllife/pre_trained/gat_attentivefp_esol.pth',
+    'Weave_canonical_ESOL': 'dgllife/pre_trained/weave_canonical_esol.pth',
+    'Weave_attentivefp_ESOL': 'dgllife/pre_trained/weave_attentivefp_esol.pth'
 }
 
 def create_esol_model(model_name):
@@ -85,6 +87,24 @@ def create_esol_model(model_name):
                             predictor_hidden_feats=32,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
+
+    elif model_name == 'Weave_canonical_ESOL':
+        return WeavePredictor(node_in_feats=74,
+                              edge_in_feats=13,
+                              num_gnn_layers=3,
+                              gnn_hidden_feats=256,
+                              graph_feats=128,
+                              gaussian_expand=True,
+                              n_tasks=n_tasks)
+
+    elif model_name == 'Weave_attentivefp_ESOL':
+        return WeavePredictor(node_in_feats=39,
+                              edge_in_feats=11,
+                              num_gnn_layers=1,
+                              gnn_hidden_feats=32,
+                              graph_feats=256,
+                              gaussian_expand=False,
+                              n_tasks=n_tasks)
 
     else:
         return None

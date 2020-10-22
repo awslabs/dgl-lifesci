@@ -57,7 +57,9 @@
 | -------------------------- | -------- | --------- |
 | GCN + canonical            | 0.83     | 0.86      |
 | GCN + attentivefp          | 0.93     | 0.89      |
-| GAT + canonical            |
+| GAT + canonical            | 0.99     | 0.94      |
+| GAT + attentivefp          | 0.89     | 0.88      |
+| Weave + canonical          |
 
 ## FreeSolv
 
