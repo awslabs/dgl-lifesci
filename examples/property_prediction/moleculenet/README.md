@@ -57,7 +57,9 @@
 | -------------------------- | -------- | --------- |
 | GCN + canonical            | 1.67     | 3.12      |
 | GCN + attentivefp          | 1.35     | 2.31      |
-| GAT + canonical            |
+| GAT + canonical            | 2.57     | 2.73      |
+| GAT + attentivefp          | 2.32     | 2.51      |
+| Weave + canonical          | 
 
 ## HIV
 

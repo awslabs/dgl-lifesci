@@ -20,8 +20,8 @@ freesolv_url = {
     'GCN_attentivefp_FreeSolv': 'dgllife/pre_trained/gcn_attentivefp_freesolv_v2.pth',
     'GAT_canonical_FreeSolv': 'dgllife/pre_trained/gat_canonical_freesolv_v2.pth',
     'GAT_attentivefp_FreeSolv': 'dgllife/pre_trained/gat_attentivefp_freesolv_v2.pth',
-    'Weave_canonical_FreeSolv': 'dgllife/pre_trained/weave_canonical_freesolv.pth',
-    'Weave_attentivefp_FreeSolv': 'dgllife/pre_trained/weave_attentivefp_freesolv.pth',
+    'Weave_canonical_FreeSolv': 'dgllife/pre_trained/weave_canonical_freesolv_v3.pth',
+    'Weave_attentivefp_FreeSolv': 'dgllife/pre_trained/weave_attentivefp_freesolv_v2.pth',
     'MPNN_canonical_FreeSolv': 'dgllife/pre_trained/mpnn_canonical_freesolv.pth',
     'MPNN_attentivefp_FreeSolv': 'dgllife/pre_trained/mpnn_attentivefp_freesolv.pth',
     'AttentiveFP_canonical_FreeSolv': 'dgllife/pre_trained/attentivefp_canonical_freesolv.pth',
@@ -107,17 +107,17 @@ def create_freesolv_model(model_name):
     elif model_name == 'Weave_canonical_FreeSolv':
         return WeavePredictor(node_in_feats=74,
                               edge_in_feats=13,
-                              num_gnn_layers=2,
-                              gnn_hidden_feats=32,
-                              graph_feats=32,
+                              num_gnn_layers=1,
+                              gnn_hidden_feats=64,
+                              graph_feats=64,
                               gaussian_expand=False,
                               n_tasks=n_tasks)
 
     elif model_name == 'Weave_attentivefp_FreeSolv':
         return WeavePredictor(node_in_feats=39,
                               edge_in_feats=11,
-                              num_gnn_layers=2,
-                              gnn_hidden_feats=128,
+                              num_gnn_layers=1,
+                              gnn_hidden_feats=32,
                               graph_feats=16,
                               gaussian_expand=False,
                               n_tasks=n_tasks)
