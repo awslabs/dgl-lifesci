@@ -25,7 +25,11 @@ esol_url = {
     'MPNN_canonical_ESOL': 'dgllife/pre_trained/mpnn_canonical_esol.pth',
     'MPNN_attentivefp_ESOL': 'dgllife/pre_trained/mpnn_attentivefp_esol.pth',
     'AttentiveFP_canonical_ESOL': 'dgllife/pre_trained/attentivefp_canonical_esol.pth',
-    'AttentiveFP_attentivefp_ESOL': 'dgllife/pre_trained/attentivefp_attentivefp_esol.pth'
+    'AttentiveFP_attentivefp_ESOL': 'dgllife/pre_trained/attentivefp_attentivefp_esol.pth',
+    'gin_supervised_contextpred_ESOL': 'dgllife/pre_trained/gin_supervised_contextpred_esol.pth',
+    'gin_supervised_infomax_ESOL': 'dgllife/pre_trained/gin_supervised_infomax_esol.pth',
+    'gin_supervised_edgepred_ESOL': 'dgllife/pre_trained/gin_supervised_edgepred_esol.pth',
+    'gin_supervised_masking_ESOL': 'dgllife/pre_trained/gin_supervised_masking_esol.pth'
 }
 
 def create_esol_model(model_name):
@@ -147,6 +151,66 @@ def create_esol_model(model_name):
                                     graph_feat_size=16,
                                     dropout=0.19597186400407615,
                                     n_tasks=n_tasks)
+
+    elif model_name == 'gin_supervised_contextpred_ESOL':
+        jk = 'last'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='sum',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_infomax_ESOL':
+        jk = 'sum'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='sum',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_edgepred_ESOL':
+        jk = 'max'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='mean',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_masking_ESOL':
+        jk = 'last'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='mean',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
 
     else:
         return None

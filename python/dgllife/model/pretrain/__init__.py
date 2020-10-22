@@ -184,6 +184,14 @@ def load_pretrained(model_name, log=True):
           canonical featurization for atoms and bonds
         * ``'AttentiveFP_attentivefp_ESOL'``: An AttentiveFP model trained on ESOL with
           attentivefp featurization for atoms and bonds
+        * ``'gin_supervised_contextpred_ESOL'``: A GIN model pre-trained with supervised
+          learning and context prediction, and fine-tuned on ESOL
+        * ``'gin_supervised_infomax_ESOL'``: A GIN model pre-trained with supervised learning
+          and infomax, and fine-tuned on ESOL
+        * ``'gin_supervised_edgepred_ESOL'``: A GIN model pre-trained with supervised learning
+          and edge prediction, and fine-tuned on ESOL
+        * ``'gin_supervised_masking_ESOL'``: A GIN model pre-trained with supervised learning
+          and masking, and fine-tuned on ESOL
         * ``'GCN_canonical_FreeSolv'``: A GCN model trained on FreeSolv with canonical
           featurization for atoms
         * ``'GCN_attentivefp_FreeSolv'``: A GCN model trained on FreeSolv with attentivefp

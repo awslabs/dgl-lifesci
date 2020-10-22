@@ -63,7 +63,8 @@
 | Weave + attentivefp        | 1.24     | 1.20      |
 | MPNN + canonical           | 0.87     | 1.12      |
 | MPNN + attentivefp         | 0.95     | 1.02      |
-| AttentiveFP + canonical    |
+| AttentiveFP + canonical    | 0.86     | 0.82      |
+| AttentiveFP + attentivefp  | 0.91     | 0.93      |
 
 ## FreeSolv
 
