@@ -55,7 +55,9 @@
 
 | method                     | Val RMSE | Test RMSE |
 | -------------------------- | -------- | --------- |
-| GCN + canonical            | 
+| GCN + canonical            | 0.83     | 0.86      |
+| GCN + attentivefp          | 0.93     | 0.89      |
+| GAT + canonical            |
 
 ## FreeSolv
 

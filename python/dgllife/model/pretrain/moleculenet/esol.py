@@ -17,7 +17,9 @@ __all__ = ['esol_url',
 
 esol_url = {
     'GCN_canonical_ESOL': 'dgllife/pre_trained/gcn_canonical_esol.pth',
-    'GCN_attentivefp_ESOL': 'dgllife/pre_trained/gcn_attentivefp_esol.pth'
+    'GCN_attentivefp_ESOL': 'dgllife/pre_trained/gcn_attentivefp_esol.pth',
+    'GAT_canonical_ESOL': 'dgllife/pre_trained/gat_canonical_esol.pth',
+    'GAT_attentivefp_ESOL': 'dgllife/pre_trained/gat_attentivefp_esol.pth'
 }
 
 def create_esol_model(model_name):
@@ -55,6 +57,32 @@ def create_esol_model(model_name):
                             batchnorm=[False],
                             dropout=[dropout],
                             predictor_hidden_feats=256,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GAT_canonical_ESOL':
+        dropout = 0.28070328302954156
+        return GATPredictor(in_feats=74,
+                            hidden_feats=[32],
+                            num_heads=[4],
+                            feat_drops=[dropout],
+                            attn_drops=[dropout],
+                            alphas=[0.4994779445224584],
+                            residuals=[True],
+                            predictor_hidden_feats=16,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GAT_attentivefp_ESOL':
+        dropout = 0.00033036046538620356
+        return GATPredictor(in_feats=39,
+                            hidden_feats=[32],
+                            num_heads=[8],
+                            feat_drops=[dropout],
+                            attn_drops=[dropout],
+                            alphas=[0.7197105722372982],
+                            residuals=[False],
+                            predictor_hidden_feats=32,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
