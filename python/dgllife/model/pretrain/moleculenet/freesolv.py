@@ -22,8 +22,8 @@ freesolv_url = {
     'GAT_attentivefp_FreeSolv': 'dgllife/pre_trained/gat_attentivefp_freesolv_v2.pth',
     'Weave_canonical_FreeSolv': 'dgllife/pre_trained/weave_canonical_freesolv_v3.pth',
     'Weave_attentivefp_FreeSolv': 'dgllife/pre_trained/weave_attentivefp_freesolv_v2.pth',
-    'MPNN_canonical_FreeSolv': 'dgllife/pre_trained/mpnn_canonical_freesolv.pth',
-    'MPNN_attentivefp_FreeSolv': 'dgllife/pre_trained/mpnn_attentivefp_freesolv.pth',
+    'MPNN_canonical_FreeSolv': 'dgllife/pre_trained/mpnn_canonical_freesolv_v2.pth',
+    'MPNN_attentivefp_FreeSolv': 'dgllife/pre_trained/mpnn_attentivefp_freesolv_v2.pth',
     'AttentiveFP_canonical_FreeSolv': 'dgllife/pre_trained/attentivefp_canonical_freesolv.pth',
     'AttentiveFP_attentivefp_FreeSolv':
         'dgllife/pre_trained/attentivefp_attentivefp_freesolv.pth',
@@ -127,19 +127,19 @@ def create_freesolv_model(model_name):
                              edge_in_feats=13,
                              node_out_feats=32,
                              edge_hidden_feats=32,
-                             num_step_message_passing=1,
+                             num_step_message_passing=4,
                              num_step_set2set=2,
-                             num_layer_set2set=2,
+                             num_layer_set2set=3,
                              n_tasks=n_tasks)
 
     elif model_name == 'MPNN_attentivefp_FreeSolv':
         return MPNNPredictor(node_in_feats=39,
                              edge_in_feats=11,
                              node_out_feats=32,
-                             edge_hidden_feats=32,
-                             num_step_message_passing=3,
-                             num_step_set2set=3,
-                             num_layer_set2set=3,
+                             edge_hidden_feats=64,
+                             num_step_message_passing=2,
+                             num_step_set2set=2,
+                             num_layer_set2set=1,
                              n_tasks=n_tasks)
 
     elif model_name == 'AttentiveFP_canonical_FreeSolv':
