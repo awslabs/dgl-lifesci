@@ -54,7 +54,7 @@ def load_dataset(args):
                     sanitize=args['sanitize'], calc_charges=False,
                     remove_hs=args['remove_hs'], use_conformation=True,
                     construct_graph_and_featurize = partial(potentialNet_graph_construction_featurization, distance_bins=args['distance_bins']),
-                    zero_padding=True, num_processes=6)
+                    zero_padding=True)
         elif args['model'] =='ACNN':
             dataset = PDBBind(subset=args['subset'],
                           load_binding_pocket=args['load_binding_pocket'],

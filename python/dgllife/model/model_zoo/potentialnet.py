@@ -53,7 +53,7 @@ class PotentialNet(nn.Module):
         self.stage_1_model = Customized_GatedGraphConv(in_feats=f_in,
                                         out_feats=f_bond,
                                         f_gather=f_gather,
-                                        n_etypes=12,
+                                        n_etypes=5,
                                         n_steps=n_bond_conv_steps,
                                         dropout=dropouts[0]
                                         )

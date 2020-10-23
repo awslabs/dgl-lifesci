@@ -18,18 +18,18 @@ PotentialNet_PDBBind_core_pocket_random = {
     'shuffle': False,
     'sanitize': False,
     'remove_hs': False,
-    'n_etypes': 12,
     'distance_bins': [1.5, 2.5, 3.5, 4.5, 5.5],
-    'f_in': 74,
-    'f_bond': 128, # has to be larger than f_in
-    'f_spatial':64,
+    'f_in': 40,
+    'f_bond': 50, # has to be larger than f_in
+    'f_spatial':32,
     'f_gather':64,
-    'n_rows_fc':[32, 16],
+    'n_rows_fc':[32],
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':1,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 3,
+    'wd': 1e-07,
+    'num_epochs': 2,
     'metrics': ['r2', 'mae'],
     'split': 'random'
 }
@@ -46,18 +46,18 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'shuffle': False,
     'sanitize': False,
     'remove_hs': False,
-    'n_etypes': 12,
     'distance_bins': [1.5, 2.5, 3.5, 4.5, 5.5],
-    'f_in': 74,
-    'f_bond': 128, # has to be larger than f_in
-    'f_spatial':128,
-    'f_gather':128,
-    'n_rows_fc':[64, 32],
+    'f_in': 40,
+    'f_bond': 50, # has to be larger than f_in
+    'f_gather': 55,
+    'f_spatial': 64,
+    'n_rows_fc':[32],
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':1,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 2,
+    'num_epochs': 100,
+    'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'random'
 }

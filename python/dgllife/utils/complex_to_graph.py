@@ -121,6 +121,12 @@ def potentialNet_graph_construction_featurization(ligand_mol,
                    canonical_atom_order=True)
 
     complex_bigraph = batch([ligand_bigraph, protein_bigraph])
+    # remove features that never appear
+    zero_h_cols = [5, 13, 14, 16, 17, 19, 20, 21, 22, 23, 24, 27, 30, 31, 33, 36, 38, 39, 40, 42, 50, 51, 52, 53, 58, 59, 60, 62, 63, 64, 65, 66, 67, 73]
+    zero_e_cols = [4,  5,  7,  8,  9, 10, 11]
+    complex_bigraph.ndata['h'] = np.delete(complex_bigraph.ndata['h'], zero_h_cols, axis=1)
+    complex_bigraph.edata['e'] = np.delete(complex_bigraph.edata['e'], zero_e_cols, axis=1)
+
 
     # Construct knn grpah for stage 2
     complex_coordinates = np.concatenate([ligand_coordinates, protein_coordinates])
