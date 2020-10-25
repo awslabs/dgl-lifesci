@@ -114,7 +114,9 @@
 | -------------------------- | -------- | --------- |
 | GCN + canonical            | 0.74     | 0.76      |
 | GCN + attentivefp          | 0.51     | 0.68      |
-| GAT + canonical            |
+| GAT + canonical            | 0.81     | 0.85      |
+| GAT + attentivefp          | 0.57     | 0.73      |
+| Weave + canonical          |
 
 ## MUV
 

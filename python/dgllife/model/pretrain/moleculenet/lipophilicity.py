@@ -9,7 +9,7 @@
 
 import torch.nn.functional as F
 
-from ...model_zoo import GCNPredictor, GATPredictor
+from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor
 
 __all__ = ['lipophilicity_url',
            'create_lipophilicity_model']
@@ -18,7 +18,9 @@ lipophilicity_url = {
     'GCN_canonical_Lipophilicity': 'dgllife/pre_trained/gcn_canonical_lipophilicity_v2.pth',
     'GCN_attentivefp_Lipophilicity': 'dgllife/pre_trained/gcn_attentivefp_lipophilicity_v2.pth',
     'GAT_canonical_Lipophilicity': 'dgllife/pre_trained/gat_canonical_lipophilicity.pth',
-    'GAT_attentivefp_Lipophilicity': 'dgllife/pre_trained/gat_attentivefp_lipophilicity.pth'
+    'GAT_attentivefp_Lipophilicity': 'dgllife/pre_trained/gat_attentivefp_lipophilicity.pth',
+    'Weave_canonical_Lipophilicity': 'dgllife/pre_trained/weave_canonical_lipophilicity.pth',
+    'Weave_attentivefp_Lipophilicity': 'dgllife/pre_trained/weave_attentivefp_lipophilicity.pth'
 }
 
 def create_lipophilicity_model(model_name):
@@ -87,6 +89,24 @@ def create_lipophilicity_model(model_name):
                             predictor_hidden_feats=64,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
+
+    elif model_name == 'Weave_canonical_Lipophilicity':
+        return WeavePredictor(node_in_feats=74,
+                              edge_in_feats=13,
+                              num_gnn_layers=2,
+                              gnn_hidden_feats=64,
+                              graph_feats=256,
+                              gaussian_expand=False,
+                              n_tasks=n_tasks)
+
+    elif model_name == 'Weave_attentivefp_Lipophilicity':
+        return WeavePredictor(node_in_feats=39,
+                              edge_in_feats=11,
+                              num_gnn_layers=2,
+                              gnn_hidden_feats=64,
+                              graph_feats=128,
+                              gaussian_expand=True,
+                              n_tasks=n_tasks)
 
     else:
         return None
