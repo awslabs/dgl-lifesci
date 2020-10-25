@@ -9,7 +9,7 @@
 
 import torch.nn.functional as F
 
-from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor
+from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor
 
 __all__ = ['tox21_url',
            'create_tox21_model']
@@ -23,7 +23,9 @@ tox21_url = {
     'GAT_canonical_Tox21': 'dgllife/pre_trained/gat_canonical_tox21.pth',
     'GAT_attentivefp_Tox21': 'dgllife/pre_trained/gat_attentivefp_tox21.pth',
     'Weave_canonical_Tox21': 'dgllife/pre_trained/weave_canonical_tox21.pth',
-    'Weave_attentivefp_Tox21': 'dgllife/pre_trained/weave_attentivefp_tox21.pth'
+    'Weave_attentivefp_Tox21': 'dgllife/pre_trained/weave_attentivefp_tox21.pth',
+    'MPNN_canonical_Tox21': 'dgllife/pre_trained/mpnn_canonical_tox21.pth',
+    'MPNN_attentivefp_Tox21': 'dgllife/pre_trained/mpnn_attentivefp_tox21.pth'
 }
 
 def create_tox21_model(model_name):
@@ -132,6 +134,26 @@ def create_tox21_model(model_name):
                               graph_feats=256,
                               gaussian_expand=True,
                               n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_canonical_Tox21':
+        return MPNNPredictor(node_in_feats=74,
+                             edge_in_feats=13,
+                             node_out_feats=32,
+                             edge_hidden_feats=64,
+                             num_step_message_passing=1,
+                             num_step_set2set=3,
+                             num_layer_set2set=3,
+                             n_tasks=n_tasks)
+
+    elif model_name == 'MPNN_attentivefp_Tox21':
+        return MPNNPredictor(node_in_feats=39,
+                             edge_in_feats=11,
+                             node_out_feats=32,
+                             edge_hidden_feats=64,
+                             num_step_message_passing=3,
+                             num_step_set2set=2,
+                             num_layer_set2set=2,
+                             n_tasks=n_tasks)
 
     else:
         return None
