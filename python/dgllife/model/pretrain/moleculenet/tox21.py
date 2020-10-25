@@ -160,7 +160,7 @@ def create_tox21_model(model_name):
                              num_layer_set2set=2,
                              n_tasks=n_tasks)
 
-    elif model_name == 'AttentiveFP_canonical_Lipophilicity':
+    elif model_name == 'AttentiveFP_canonical_Tox21':
         return AttentiveFPPredictor(node_feat_size=74,
                                     edge_feat_size=13,
                                     num_layers=1,
@@ -169,7 +169,7 @@ def create_tox21_model(model_name):
                                     dropout=0.02557007921295823,
                                     n_tasks=n_tasks)
 
-    elif model_name == 'AttentiveFP_attentivefp_Lipophilicity':
+    elif model_name == 'AttentiveFP_attentivefp_Tox21':
         return AttentiveFPPredictor(node_feat_size=39,
                                     edge_feat_size=11,
                                     num_layers=2,
