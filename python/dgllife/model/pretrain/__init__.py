@@ -252,6 +252,30 @@ def load_pretrained(model_name, log=True):
           featurization for atoms
         * ``'GCN_attentivefp_Lipophilicity'``: A GCN model trained on Lipophilicity with
           attentivefp featurization for atoms
+        * ``'GAT_canonical_Lipophilicity'``: A GAT model trained on Lipophilicity with canonical
+          featurization for atoms
+        * ``'GAT_attentivefp_Lipophilicity'``: A GAT model trained on Lipophilicity with
+          attentivefp featurization for atoms
+        * ``'Weave_canonical_Lipophilicity'``: A Weave model trained on Lipophilicity with
+          canonical featurization for atoms and bonds
+        * ``'Weave_attentivefp_Lipophilicity'``: A Weave model trained on Lipophilicity with
+          attentivefp featurization for atoms and bonds
+        * ``'MPNN_canonical_Lipophilicity'``: An MPNN model trained on Lipophilicity with
+          canonical featurization for atoms and bonds
+        * ``'MPNN_attentivefp_Lipophilicity'``: An MPNN model trained on Lipophilicity with
+          attentivefp featurization for atoms and bonds
+        * ``'AttentiveFP_canonical_Lipophilicity'``: An AttentiveFP model trained on
+          Lipophilicity with canonical featurization for atoms and bonds
+        * ``'AttentiveFP_attentivefp_Lipophilicity'``: An AttentiveFP model trained on
+          Lipophilicity with attentivefp featurization for atoms and bonds
+        * ``'gin_supervised_contextpred_Lipophilicity'``: A GIN model pre-trained with supervised
+          learning and context prediction, and fine-tuned on Lipophilicity
+        * ``'gin_supervised_infomax_Lipophilicity'``: A GIN model pre-trained with supervised
+          learning and infomax, and fine-tuned on Lipophilicity
+        * ``'gin_supervised_edgepred_Lipophilicity'``: A GIN model pre-trained with supervised
+          learning and edge prediction, and fine-tuned on Lipophilicity
+        * ``'gin_supervised_masking_Lipophilicity'``: A GIN model pre-trained with supervised
+          learning and masking, and fine-tuned on Lipophilicity
         * ``'GCN_canonical_MUV'``: A GCN model trained on MUV with canonical
           featurization for atoms
         * ``'GCN_attentivefp_MUV'``: A GCN model trained on MUV with attentivefp
@@ -328,6 +352,34 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on SIDER
         * ``'gin_supervised_masking_SIDER'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on SIDER
+        * ``'GCN_canonical_Tox21'``: A GCN model trained on Tox21 with canonical
+          featurization for atoms
+        * ``'GCN_attentivefp_Tox21'``: A GCN model trained on Tox21 with attentivefp
+          featurization for atoms
+        * ``'GAT_canonical_Tox21'``: A GAT model trained on Tox21 with canonical
+          featurization for atoms
+        * ``'GAT_attentivefp_Tox21'``: A GAT model trained on Tox21 with attentivefp
+          featurization for atoms
+        * ``'Weave_canonical_Tox21'``: A Weave model trained on Tox21 with canonical
+          featurization for atoms and bonds
+        * ``'Weave_attentivefp_Tox21'``: A Weave model trained on Tox21 with attentivefp
+          featurization for atoms and bonds
+        * ``'MPNN_canonical_Tox21'``: An MPNN model trained on Tox21 with canonical
+          featurization for atoms and bonds
+        * ``'MPNN_attentivefp_Tox21'``: An MPNN model trained on Tox21 with attentivefp
+          featurization for atoms and bonds
+        * ``'AttentiveFP_canonical_Tox21'``: An AttentiveFP model trained on Tox21 with
+          canonical featurization for atoms and bonds
+        * ``'AttentiveFP_attentivefp_Tox21'``: An AttentiveFP model trained on Tox21 with
+          attentivefp featurization for atoms and bonds
+        * ``'gin_supervised_contextpred_Tox21'``: A GIN model pre-trained with supervised
+          learning and context prediction, and fine-tuned on Tox21
+        * ``'gin_supervised_infomax_Tox21'``: A GIN model pre-trained with supervised learning
+          and infomax, and fine-tuned on Tox21
+        * ``'gin_supervised_edgepred_Tox21'``: A GIN model pre-trained with supervised learning
+          and edge prediction, and fine-tuned on Tox21
+        * ``'gin_supervised_masking_Tox21'``: A GIN model pre-trained with supervised learning
+          and masking, and fine-tuned on Tox21
         * ``'GCN_canonical_ToxCast'``: A GCN model trained on ToxCast with canonical
           featurization for atoms
         * ``'GCN_attentivefp_ToxCast'``: A GCN model trained on ToxCast with attentivefp

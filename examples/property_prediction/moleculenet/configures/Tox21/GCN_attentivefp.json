@@ -1,0 +1,12 @@
+{
+  "batch_size": 128,
+  "batchnorm": true,
+  "dropout": 0.5432104441360837,
+  "gnn_hidden_feats": 256,
+  "lr": 0.0008308729010190474,
+  "num_gnn_layers": 4,
+  "patience": 3,
+  "predictor_hidden_feats": 512,
+  "residual": false,
+  "weight_decay": 0.00104683904967067
+}
