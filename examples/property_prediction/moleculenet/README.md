@@ -122,10 +122,10 @@
 | MPNN + attentivefp         | 0.56     | 0.68      |
 | AttentiveFP + canonical    | 0.69     | 0.73      |
 | AttentiveFP + attentivefp  | 0.71     | 0.73      |
-| gin_supervised_contextpred |
-| gin_supervised_infomax     |
-| gin_supervised_edgepred    |
-| gin_supervised_masking     |
+| gin_supervised_contextpred | 0.73     | 0.81      |
+| gin_supervised_infomax     | 0.76     | 0.78      |
+| gin_supervised_edgepred    | 0.75     | 0.79      |
+| gin_supervised_masking     | 0.59     | 0.71      |
 
 ## MUV
 
