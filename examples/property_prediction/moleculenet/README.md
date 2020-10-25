@@ -190,7 +190,9 @@
 | -------------------------- | ----------- | ------------ |
 | GCN + canonical            | 0.82        | 0.77         |
 | GCN + attentivefp          | 0.82        | 0.79         |
-| GAT + canonical            | 
+| GAT + canonical            | 0.73        | 0.71         |
+| GAT + attentivefp          | 0.75        | 0.72         |
+| Weave + canonical          |
 
 ## ToxCast
 

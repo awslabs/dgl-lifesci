@@ -21,7 +21,9 @@ tox21_url = {
     'GCN_canonical_Tox21': 'dgllife/pre_trained/gcn_canonical_tox21.pth',
     'GCN_attentivefp_Tox21': 'dgllife/pre_trained/gcn_attentivefp_tox21.pth',
     'GAT_canonical_Tox21': 'dgllife/pre_trained/gat_canonical_tox21.pth',
-    'GAT_attentivefp_Tox21': 'dgllife/pre_trained/gat_attentivefp_tox21.pth'
+    'GAT_attentivefp_Tox21': 'dgllife/pre_trained/gat_attentivefp_tox21.pth',
+    'Weave_canonical_Tox21': 'dgllife/pre_trained/weave_canonical_tox21.pth',
+    'Weave_attentivefp_Tox21': 'dgllife/pre_trained/weave_attentivefp_tox21.pth'
 }
 
 def create_tox21_model(model_name):
@@ -112,6 +114,24 @@ def create_tox21_model(model_name):
                             predictor_hidden_feats=128,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
+
+    elif model_name == 'Weave_canonical_Tox21':
+        return WeavePredictor(node_in_feats=74,
+                              edge_in_feats=13,
+                              num_gnn_layers=5,
+                              gnn_hidden_feats=256,
+                              graph_feats=64,
+                              gaussian_expand=True,
+                              n_tasks=n_tasks)
+
+    elif model_name == 'Weave_attentivefp_Tox21':
+        return WeavePredictor(node_in_feats=39,
+                              edge_in_feats=11,
+                              num_gnn_layers=1,
+                              gnn_hidden_feats=64,
+                              graph_feats=256,
+                              gaussian_expand=True,
+                              n_tasks=n_tasks)
 
     else:
         return None
