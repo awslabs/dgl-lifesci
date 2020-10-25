@@ -186,6 +186,12 @@
 
 ## Tox21
 
+| method                     | Val ROC-AUC | Test ROC-AUC |
+| -------------------------- | ----------- | ------------ |
+| GCN + canonical            | 0.82        | 0.77         |
+| GCN + attentivefp          | 0.82        | 0.79         |
+| GAT + canonical            | 
+
 ## ToxCast
 
 | method                     | Val ROC-AUC | Test ROC-AUC |

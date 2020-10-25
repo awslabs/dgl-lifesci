@@ -19,7 +19,9 @@ tox21_url = {
     'GAT_Tox21': 'dgllife/pre_trained/gat_tox21.pth',
     'Weave_Tox21': 'dgllife/pre_trained/weave_tox21.pth',
     'GCN_canonical_Tox21': 'dgllife/pre_trained/gcn_canonical_tox21.pth',
-    'GCN_attentivefp_Tox21': 'dgllife/pre_trained/gcn_attentivefp_tox21.pth'
+    'GCN_attentivefp_Tox21': 'dgllife/pre_trained/gcn_attentivefp_tox21.pth',
+    'GAT_canonical_Tox21': 'dgllife/pre_trained/gat_canonical_tox21.pth',
+    'GAT_attentivefp_Tox21': 'dgllife/pre_trained/gat_attentivefp_tox21.pth'
 }
 
 def create_tox21_model(model_name):
@@ -82,6 +84,32 @@ def create_tox21_model(model_name):
                             batchnorm=[True] * num_gnn_layers,
                             dropout=[dropout] * num_gnn_layers,
                             predictor_hidden_feats=512,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GAT_canonical_Tox21':
+        dropout = 0.06205513003092991
+        return GATPredictor(in_feats=74,
+                            hidden_feats=[128],
+                            num_heads=[4],
+                            feat_drops=[dropout],
+                            attn_drops=[dropout],
+                            alphas=[0.574285650239047],
+                            residuals=[True],
+                            predictor_hidden_feats=32,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GAT_attentivefp_Tox21':
+        dropout = 0.21647573234277548
+        return GATPredictor(in_feats=39,
+                            hidden_feats=[64],
+                            num_heads=[4],
+                            feat_drops=[dropout],
+                            attn_drops=[dropout],
+                            alphas=[0.3471639890634216],
+                            residuals=[False],
+                            predictor_hidden_feats=128,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
