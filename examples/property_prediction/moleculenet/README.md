@@ -118,6 +118,8 @@
 | GAT + attentivefp          | 0.57     | 0.73      |
 | Weave + canonical          | 0.83     | 0.80      |
 | Weave + attentivefp        | 0.49     | 0.67      |
+| MPNN + canonical           | 0.72     | 0.73      |
+| MPNN + attentivefp         | 0.56     | 0.68      |
 
 ## MUV
 

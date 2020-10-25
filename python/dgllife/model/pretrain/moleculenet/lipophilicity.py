@@ -9,7 +9,8 @@
 
 import torch.nn.functional as F
 
-from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor
+from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
+    AttentiveFPPredictor
 
 __all__ = ['lipophilicity_url',
            'create_lipophilicity_model']
@@ -22,7 +23,11 @@ lipophilicity_url = {
     'Weave_canonical_Lipophilicity': 'dgllife/pre_trained/weave_canonical_lipophilicity.pth',
     'Weave_attentivefp_Lipophilicity': 'dgllife/pre_trained/weave_attentivefp_lipophilicity.pth',
     'MPNN_canonical_Lipophilicity': 'dgllife/pre_trained/mpnn_canonical_lipophilicity.pth',
-    'MPNN_attentivefp_Lipophilicity': 'dgllife/pre_trained/mpnn_attentivefp_lipophilicity.pth'
+    'MPNN_attentivefp_Lipophilicity': 'dgllife/pre_trained/mpnn_attentivefp_lipophilicity.pth',
+    'AttentiveFP_canonical_Lipophilicity':
+        'dgllife/pre_trained/attentivefp_canonical_lipophilicity.pth',
+    'AttentiveFP_attentivefp_Lipophilicity':
+        'dgllife/pre_trained/attentivefp_attentivefp_lipophilicity.pth'
 }
 
 def create_lipophilicity_model(model_name):
@@ -129,6 +134,24 @@ def create_lipophilicity_model(model_name):
                              num_step_set2set=1,
                              num_layer_set2set=2,
                              n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_canonical_Lipophilicity':
+        return AttentiveFPPredictor(node_feat_size=74,
+                                    edge_feat_size=13,
+                                    num_layers=2,
+                                    num_timesteps=4,
+                                    graph_feat_size=16,
+                                    dropout=0.18905153162605368,
+                                    n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_attentivefp_Lipophilicity':
+        return AttentiveFPPredictor(node_feat_size=39,
+                                    edge_feat_size=11,
+                                    num_layers=1,
+                                    num_timesteps=4,
+                                    graph_feat_size=256,
+                                    dropout=0.1392528529851128,
+                                    n_tasks=n_tasks)
 
     else:
         return None
