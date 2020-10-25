@@ -194,7 +194,9 @@
 | GAT + attentivefp          | 0.75        | 0.72         |
 | Weave + canonical          | 0.56        | 0.56         |
 | Weave + attentivefp        | 0.75        | 0.73         |
-| MPNN + canonical           | 
+| MPNN + canonical           | 0.72        | 0.70         |
+| MPNN + attentivefp         | 0.73        | 0.68         |
+| 
 
 ## ToxCast
 

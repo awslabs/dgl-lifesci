@@ -1,0 +1,10 @@
+{
+  "batch_size": 32,
+  "dropout": 0.02557007921295823,
+  "graph_feat_size": 32,
+  "lr": 0.0025274616878070413,
+  "num_layers": 1,
+  "num_timesteps": 5,
+  "patience": 3,
+  "weight_decay": 0.0017458430442674627
+}

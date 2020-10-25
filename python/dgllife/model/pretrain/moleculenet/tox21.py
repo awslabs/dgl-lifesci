@@ -9,7 +9,8 @@
 
 import torch.nn.functional as F
 
-from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor
+from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
+    AttentiveFPPredictor
 
 __all__ = ['tox21_url',
            'create_tox21_model']
@@ -25,7 +26,11 @@ tox21_url = {
     'Weave_canonical_Tox21': 'dgllife/pre_trained/weave_canonical_tox21.pth',
     'Weave_attentivefp_Tox21': 'dgllife/pre_trained/weave_attentivefp_tox21.pth',
     'MPNN_canonical_Tox21': 'dgllife/pre_trained/mpnn_canonical_tox21.pth',
-    'MPNN_attentivefp_Tox21': 'dgllife/pre_trained/mpnn_attentivefp_tox21.pth'
+    'MPNN_attentivefp_Tox21': 'dgllife/pre_trained/mpnn_attentivefp_tox21.pth',
+    'AttentiveFP_canonical_Tox21':
+        'dgllife/pre_trained/attentivefp_canonical_tox21.pth',
+    'AttentiveFP_attentivefp_Tox21':
+        'dgllife/pre_trained/attentivefp_attentivefp_tox21.pth',
 }
 
 def create_tox21_model(model_name):
@@ -154,6 +159,24 @@ def create_tox21_model(model_name):
                              num_step_set2set=2,
                              num_layer_set2set=2,
                              n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_canonical_Lipophilicity':
+        return AttentiveFPPredictor(node_feat_size=74,
+                                    edge_feat_size=13,
+                                    num_layers=1,
+                                    num_timesteps=5,
+                                    graph_feat_size=32,
+                                    dropout=0.02557007921295823,
+                                    n_tasks=n_tasks)
+
+    elif model_name == 'AttentiveFP_attentivefp_Lipophilicity':
+        return AttentiveFPPredictor(node_feat_size=39,
+                                    edge_feat_size=11,
+                                    num_layers=2,
+                                    num_timesteps=4,
+                                    graph_feat_size=16,
+                                    dropout=0.08321482571554469,
+                                    n_tasks=n_tasks)
 
     else:
         return None
