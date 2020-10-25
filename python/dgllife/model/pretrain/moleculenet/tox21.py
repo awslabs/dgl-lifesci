@@ -10,7 +10,7 @@
 import torch.nn.functional as F
 
 from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
-    AttentiveFPPredictor
+    AttentiveFPPredictor, GINPredictor
 
 __all__ = ['tox21_url',
            'create_tox21_model']
@@ -31,6 +31,14 @@ tox21_url = {
         'dgllife/pre_trained/attentivefp_canonical_tox21.pth',
     'AttentiveFP_attentivefp_Tox21':
         'dgllife/pre_trained/attentivefp_attentivefp_tox21.pth',
+    'gin_supervised_contextpred_Tox21':
+        'dgllife/pre_trained/gin_supervised_contextpred_tox21.pth',
+    'gin_supervised_infomax_Tox21':
+        'dgllife/pre_trained/gin_supervised_infomax_tox21.pth',
+    'gin_supervised_edgepred_Tox21':
+        'dgllife/pre_trained/gin_supervised_edgepred_tox21.pth',
+    'gin_supervised_masking_Tox21':
+        'dgllife/pre_trained/gin_supervised_masking_tox21.pth',
 }
 
 def create_tox21_model(model_name):
@@ -177,6 +185,66 @@ def create_tox21_model(model_name):
                                     graph_feat_size=16,
                                     dropout=0.08321482571554469,
                                     n_tasks=n_tasks)
+
+    elif model_name == 'gin_supervised_contextpred_Tox21':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='attention',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_infomax_Tox21':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='max',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_edgepred_Tox21':
+        jk = 'sum'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='attention',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_masking_Tox21':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='mean',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
 
     else:
         return None

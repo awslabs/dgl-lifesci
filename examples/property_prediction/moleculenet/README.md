@@ -196,7 +196,12 @@
 | Weave + attentivefp        | 0.75        | 0.73         |
 | MPNN + canonical           | 0.72        | 0.70         |
 | MPNN + attentivefp         | 0.73        | 0.68         |
-| AttentiveFP + canonical    | 
+| AttentiveFP + canonical    | 0.73        | 0.70         |
+| AttentiveFP + attentivefp  | 0.79        | 0.74         |
+| gin_supervised_contextpred | 
+| gin_supervised_infomax     | 
+| gin_supervised_edgepred    | 
+| gin_supervised_masking     | 
 
 ## ToxCast
 
