@@ -166,7 +166,7 @@ def test_moleculenet():
         device = torch.device('cpu')
 
     for dataset in ['BACE', 'BBBP', 'ClinTox', 'FreeSolv', 'HIV', 'MUV', 'SIDER', 'ToxCast',
-                    'PCBA', 'ESOL']:
+                    'PCBA', 'ESOL', 'Lipophilicity']:
         for featurizer_type in ['canonical', 'attentivefp']:
             if featurizer_type == 'canonical':
                 node_featurizer = CanonicalAtomFeaturizer(atom_data_field='hv')

@@ -110,6 +110,10 @@
 
 ## Lipophilicity
 
+| method                     | Val ROC-AUC | Test ROC-AUC |
+| -------------------------- | ----------- | ------------ |
+| GCN + canonical            | 
+
 ## MUV
 
 | method                     | Val ROC-AUC | Test ROC-AUC |

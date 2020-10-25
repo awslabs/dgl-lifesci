@@ -15,8 +15,8 @@ __all__ = ['lipophilicity_url',
            'create_lipophilicity_model']
 
 lipophilicity_url = {
-    'GCN_canonical_Lipophilicity': 'dgllife/pre_trained/gcn_canonical_lipophilicity.pth',
-    'GCN_attentivefp_Lipophilicity': 'dgllife/pre_trained/gcn_attentivefp_lipophilicity.pth',
+    'GCN_canonical_Lipophilicity': 'dgllife/pre_trained/gcn_canonical_lipophilicity_v2.pth',
+    'GCN_attentivefp_Lipophilicity': 'dgllife/pre_trained/gcn_attentivefp_lipophilicity_v2.pth',
 }
 
 def create_lipophilicity_model(model_name):
@@ -34,28 +34,28 @@ def create_lipophilicity_model(model_name):
     n_tasks = 1
 
     if model_name == 'GCN_canonical_Lipophilicity':
-        dropout = 0.06340136794124641
+        dropout = 0.28857669330071006
         num_gnn_layers = 2
         return GCNPredictor(in_feats=74,
-                            hidden_feats=[256] * num_gnn_layers,
-                            activation=[F.relu] * num_gnn_layers,
-                            residual=[True] * num_gnn_layers,
-                            batchnorm=[False] * num_gnn_layers,
-                            dropout=[dropout] * num_gnn_layers,
-                            predictor_hidden_feats=128,
-                            predictor_dropout=dropout,
-                            n_tasks=n_tasks)
-
-    elif model_name == 'GCN_attentivefp_Lipophilicity':
-        dropout = 0.004773252268686784
-        num_gnn_layers = 4
-        return GCNPredictor(in_feats=39,
                             hidden_feats=[128] * num_gnn_layers,
                             activation=[F.relu] * num_gnn_layers,
                             residual=[True] * num_gnn_layers,
                             batchnorm=[False] * num_gnn_layers,
                             dropout=[dropout] * num_gnn_layers,
-                            predictor_hidden_feats=256,
+                            predictor_hidden_feats=16,
+                            predictor_dropout=dropout,
+                            n_tasks=n_tasks)
+
+    elif model_name == 'GCN_attentivefp_Lipophilicity':
+        dropout = 0.0690767663743611
+        num_gnn_layers = 2
+        return GCNPredictor(in_feats=39,
+                            hidden_feats=[64] * num_gnn_layers,
+                            activation=[F.relu] * num_gnn_layers,
+                            residual=[True] * num_gnn_layers,
+                            batchnorm=[False] * num_gnn_layers,
+                            dropout=[dropout] * num_gnn_layers,
+                            predictor_hidden_feats=128,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
 
