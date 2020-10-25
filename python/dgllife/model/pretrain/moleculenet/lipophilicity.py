@@ -10,7 +10,7 @@
 import torch.nn.functional as F
 
 from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
-    AttentiveFPPredictor
+    AttentiveFPPredictor, GINPredictor
 
 __all__ = ['lipophilicity_url',
            'create_lipophilicity_model']
@@ -27,7 +27,15 @@ lipophilicity_url = {
     'AttentiveFP_canonical_Lipophilicity':
         'dgllife/pre_trained/attentivefp_canonical_lipophilicity.pth',
     'AttentiveFP_attentivefp_Lipophilicity':
-        'dgllife/pre_trained/attentivefp_attentivefp_lipophilicity.pth'
+        'dgllife/pre_trained/attentivefp_attentivefp_lipophilicity.pth',
+    'gin_supervised_contextpred_Lipophilicity':
+        'dgllife/pre_trained/gin_supervised_contextpred_lipophilicity.pth',
+    'gin_supervised_infomax_Lipophilicity':
+        'dgllife/pre_trained/gin_supervised_infomax_lipophilicity.pth',
+    'gin_supervised_edgepred_Lipophilicity':
+        'dgllife/pre_trained/gin_supervised_edgepred_lipophilicity.pth',
+    'gin_supervised_masking_Lipophilicity':
+        'dgllife/pre_trained/gin_supervised_masking_lipophilicity.pth'
 }
 
 def create_lipophilicity_model(model_name):
@@ -152,6 +160,66 @@ def create_lipophilicity_model(model_name):
                                     graph_feat_size=256,
                                     dropout=0.1392528529851128,
                                     n_tasks=n_tasks)
+
+    elif model_name == 'gin_supervised_contextpred_Lipophilicity':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='sum',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_infomax_Lipophilicity':
+        jk = 'max'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='mean',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_edgepred_Lipophilicity':
+        jk = 'concat'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='sum',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
+
+    elif model_name == 'gin_supervised_masking_Lipophilicity':
+        jk = 'last'
+        model = GINPredictor(
+            num_node_emb_list=[120, 3],
+            num_edge_emb_list=[6, 3],
+            num_layers=5,
+            emb_dim=300,
+            JK=jk,
+            dropout=0.5,
+            readout='sum',
+            n_tasks=n_tasks
+        )
+        model.gnn.JK = jk
+        return model
 
     else:
         return None

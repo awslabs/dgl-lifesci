@@ -120,6 +120,12 @@
 | Weave + attentivefp        | 0.49     | 0.67      |
 | MPNN + canonical           | 0.72     | 0.73      |
 | MPNN + attentivefp         | 0.56     | 0.68      |
+| AttentiveFP + canonical    | 0.69     | 0.73      |
+| AttentiveFP + attentivefp  | 0.71     | 0.73      |
+| gin_supervised_contextpred |
+| gin_supervised_infomax     |
+| gin_supervised_edgepred    |
+| gin_supervised_masking     |
 
 ## MUV
 
