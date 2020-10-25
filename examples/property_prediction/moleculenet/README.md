@@ -198,10 +198,10 @@
 | MPNN + attentivefp         | 0.73        | 0.68         |
 | AttentiveFP + canonical    | 0.73        | 0.70         |
 | AttentiveFP + attentivefp  | 0.79        | 0.74         |
-| gin_supervised_contextpred | 
-| gin_supervised_infomax     | 
-| gin_supervised_edgepred    | 
-| gin_supervised_masking     | 
+| gin_supervised_contextpred | 0.77        | 0.75         |
+| gin_supervised_infomax     | 0.82        | 0.78         |
+| gin_supervised_edgepred    | 0.83        | 0.80         |
+| gin_supervised_masking     | 0.77        | 0.75         |
 
 ## ToxCast
 
