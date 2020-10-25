@@ -110,9 +110,11 @@
 
 ## Lipophilicity
 
-| method                     | Val ROC-AUC | Test ROC-AUC |
-| -------------------------- | ----------- | ------------ |
-| GCN + canonical            | 
+| method                     | Val RMSE | Test RMSE |
+| -------------------------- | -------- | --------- |
+| GCN + canonical            | 0.74     | 0.76      |
+| GCN + attentivefp          | 0.51     | 0.68      |
+| GAT + canonical            |
 
 ## MUV
 
