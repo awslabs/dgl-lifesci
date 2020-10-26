@@ -18,14 +18,14 @@ PotentialNet_PDBBind_core_pocket_random = {
     'shuffle': False,
     'sanitize': False,
     'remove_hs': False,
-    'distance_bins': [1.5, 2.5, 3.5, 4.5, 5.5],
+    'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 40,
     'f_bond': 50, # has to be larger than f_in
-    'f_spatial':32,
     'f_gather':64,
+    'f_spatial':75, # has to be larger than f_gather
     'n_rows_fc':[32],
     'n_bond_conv_steps':2,
-    'n_spatial_conv_steps':1,
+    'n_spatial_conv_steps':2,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
     'wd': 1e-07,
@@ -46,7 +46,7 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'shuffle': False,
     'sanitize': False,
     'remove_hs': False,
-    'distance_bins': [1.5, 2.5, 3.5, 4.5, 5.5],
+    'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 40,
     'f_bond': 50, # has to be larger than f_in
     'f_gather': 55,

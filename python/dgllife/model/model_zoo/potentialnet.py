@@ -57,11 +57,11 @@ class PotentialNet(nn.Module):
                                         n_steps=n_bond_conv_steps,
                                         dropout=dropouts[0]
                                         )
-        self.stage_2_model = StagedGGNN(f_gru_in=f_gather,
-                                        f_gru_out=f_spatial,
+        self.stage_2_model = Customized_GatedGraphConv(in_feats=f_gather,
+                                        out_feats=f_spatial,
                                         f_gather=f_gather,
-                                        n_etypes=n_etypes, # 1, temporal solution
-                                        n_gconv_steps=n_spatial_conv_steps,
+                                        n_etypes=n_etypes, # num_distance_bins + 5 covalent types
+                                        n_steps=n_spatial_conv_steps,
                                         dropout=dropouts[1]
                                         )
         self.stage_3_model = StagedFCNN(f_in=f_gather,
@@ -73,7 +73,7 @@ class PotentialNet(nn.Module):
         batch_num_nodes = bigraph.batch_num_nodes()
         # bigraph, stage_1_etypes = process_etypes(bigraph_canonical)
         h = self.stage_1_model(graph=bigraph, feat=bigraph.ndata['h'])
-        h = self.stage_2_model(graph=knn_graph, features=h, etypes=knn_graph.edata['d'])
+        h = self.stage_2_model(graph=knn_graph, feat=h)
         x = self.stage_3_model(batch_num_nodes=batch_num_nodes, features=h) 
         return x
 

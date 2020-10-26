@@ -66,14 +66,20 @@ def flattern_graph(graph):
     g.remove_edges(g.num_edges()-1) # remove the edge we just added
     return g
 
+def int_2_one_hot(a):
+    n = len(a)
+    b = np.zeros((n, a.max()+1))
+    b[np.arange(n), a] = 1
+    return b
+
 def potentialNet_graph_construction_featurization(ligand_mol,
                                               protein_mol,
                                               ligand_coordinates,
                                               protein_coordinates,
                                               max_num_ligand_atoms=None,
                                               max_num_protein_atoms=None,
-                                              max_num_neighbors=12,
-                                              distance_bins = [1.5, 2.5, 3.5, 4.5, 5.5],
+                                              max_num_neighbors=6,
+                                              distance_bins = [1.5, 2.5, 3.5, 4.5],
                                               strip_hydrogens=False):
     assert ligand_coordinates is not None, 'Expect ligand_coordinates to be provided.'
     assert protein_coordinates is not None, 'Expect protein_coordinates to be provided.'
@@ -125,7 +131,7 @@ def potentialNet_graph_construction_featurization(ligand_mol,
     zero_h_cols = [5, 13, 14, 16, 17, 19, 20, 21, 22, 23, 24, 27, 30, 31, 33, 36, 38, 39, 40, 42, 50, 51, 52, 53, 58, 59, 60, 62, 63, 64, 65, 66, 67, 73]
     zero_e_cols = [4,  5,  7,  8,  9, 10, 11]
     complex_bigraph.ndata['h'] = np.delete(complex_bigraph.ndata['h'], zero_h_cols, axis=1)
-    complex_bigraph.edata['e'] = np.delete(complex_bigraph.edata['e'], zero_e_cols, axis=1)
+    complex_bigraph.edata['e'] = np.delete(complex_bigraph.edata['e'], zero_e_cols, axis=1) # 5 edge types remain
 
 
     # Construct knn grpah for stage 2
@@ -139,9 +145,22 @@ def potentialNet_graph_construction_featurization(ligand_mol,
     complex_knn_graph = graph([])
     complex_knn_graph.add_nodes(len(complex_coordinates))
     complex_knn_graph.add_edges(complex_srcs, complex_dsts)
-    complex_knn_graph.edata['d'] = F.zerocopy_from_numpy(
-        (np.digitize(complex_dists, bins=distance_bins, right=True)).astype(np.long))
+    d_features = np.digitize(complex_dists, bins=distance_bins, right=True)
+    d_one_hot = int_2_one_hot(d_features)
     
+
+    # add bond types and bonds (from bigraph) to stage 2
+    u, v = complex_bigraph.edges()    
+    complex_knn_graph.add_edges(u.to(F.int64), v.to(F.int64))
+    n_d, f_d = d_one_hot.shape
+    n_e, f_e = complex_bigraph.edata['e'].shape
+    complex_knn_graph.edata['e'] = F.zerocopy_from_numpy(
+        np.block([
+            [d_one_hot, np.zeros((n_d, f_e))],
+            [np.zeros((n_e, f_d)), np.array(complex_bigraph.edata['e'])]
+        ]).astype(np.long)
+    )
+
     return complex_bigraph, complex_knn_graph
 
 

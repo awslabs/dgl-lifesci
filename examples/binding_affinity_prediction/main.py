@@ -15,12 +15,12 @@ from utils import set_random_seed, load_dataset, collate, load_model
 def rand_hyperparams():
     import numpy.random as nrd
     hyper_params = {}
-    hyper_params['f_bond'] = nrd.randint(74,129)
-    hyper_params['f_gather'] = nrd.randint(64,129)
+    hyper_params['f_bond'] = nrd.randint(40,129)
+    hyper_params['f_gather'] = nrd.randint(41,129)
     hyper_params['f_spatial'] = nrd.randint(hyper_params['f_gather'], 129)
     hyper_params['n_bond_conv_steps'] = nrd.randint(1,3)
-    hyper_params['n_spatial_conv_steps'] = nrd.randint(1,4)
-    hyper_params['wd'] = nrd.choice([0, 1e-7, 1e-5, 1e-3])
+    hyper_params['n_spatial_conv_steps'] = nrd.randint(1,3)
+    hyper_params['wd'] = nrd.choice([1e-7, 1e-5, 1e-3])
     hyper_params['dropouts'] = [nrd.choice([0, 0.1, 0.25, 0.4]) for i in range(3)]
     hyper_params['n_rows_fc'] = [nrd.choice([64, 32, 16])]
     return hyper_params
@@ -53,12 +53,13 @@ def run_a_train_epoch(args, epoch, model, data_loader,
         optimizer.step()
         train_meter.update(prediction, labels)
     avg_loss = epoch_loss / len(data_loader.dataset)
-    total_scores = {metric: train_meter.compute_metric(metric, 'mean')
-                    for metric in args['metrics']}
-    msg = 'epoch {:d}/{:d}, training | loss {:.4f}'.format(
-        epoch + 1, args['num_epochs'], avg_loss)
-    msg = update_msg_from_scores(msg, total_scores)
-    print(msg)
+    if (args['num_epochs'] - epoch) <= 6: # print only the last 5 epochs
+        total_scores = {metric: train_meter.compute_metric(metric, 'mean')
+                        for metric in args['metrics']}
+        msg = 'epoch {:d}/{:d}, training | loss {:.4f}'.format(
+            epoch + 1, args['num_epochs'], avg_loss)
+        msg = update_msg_from_scores(msg, total_scores)
+        print(msg)
 
 def run_an_eval_epoch(args, model, data_loader):
     model.eval()

@@ -132,7 +132,7 @@ def load_model(args):
                      features_to_use=args['atomic_numbers_considered'],
                      radial=args['radial'])
     if args['model'] == 'PotentialNet': 
-        model = PotentialNet(n_etypes= (len(args['distance_bins'])),
+        model = PotentialNet(n_etypes= (len(args['distance_bins'])+ 5),
                  f_in=args['f_in'],
                  f_bond=args['f_bond'],
                  f_spatial=args['f_spatial'],
