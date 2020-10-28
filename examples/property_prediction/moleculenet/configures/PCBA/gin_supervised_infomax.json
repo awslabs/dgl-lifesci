@@ -1,0 +1,8 @@
+{
+  "batch_size": 512,
+  "jk": "concat",
+  "lr": 0.000252666257799225,
+  "patience": 3,
+  "readout": "max",
+  "weight_decay": 0.0008467516338932003
+}

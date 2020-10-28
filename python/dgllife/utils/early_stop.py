@@ -76,10 +76,10 @@ class EarlyStopping(object):
                 dt.date(), dt.hour, dt.minute, dt.second)
 
         if metric is not None:
-            assert metric in ['r2', 'mae', 'rmse', 'roc_auc_score'], \
+            assert metric in ['r2', 'mae', 'rmse', 'roc_auc_score', 'pr_auc_score'], \
                 "Expect metric to be 'r2' or 'mae' or " \
                 "'rmse' or 'roc_auc_score', got {}".format(metric)
-            if metric in ['r2', 'roc_auc_score']:
+            if metric in ['r2', 'roc_auc_score', 'pr_auc_score']:
                 print('For metric {}, the higher the better'.format(metric))
                 mode = 'higher'
             if metric in ['mae', 'rmse']:
