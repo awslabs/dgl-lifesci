@@ -1,3 +1,51 @@
+# MoleculeNet
+
+[MoleculeNet](https://arxiv.org/abs/1703.00564) is a popular benchmark for molecular machine learning.
+For validating the robustness of DGL-LifeSci, we report the results of applying the 
+[command-line interface](../csv_data_configuration) against 12 datasets in MoleculeNet, including 
+9 classification datasets (BACE, BBBP, ClinTox, HIV, MUV, PCBA, SIDER, Tox21 and ToxCast) and 
+3 regression datasets (ESOL, FreeSolv and Lipophilicity). 
+
+For all these datasets, we use a scaffold split and perform a hyperparameter search with 
+Bayesian Optimization for 32 trials. For each trial, we train a randomly initialized model
+until the validation performance no longer gets improved for a number of epochs. The model
+achieving the best validation performance across trials is then evaluated on the test set.
+
+To train a model on a classification dataset, use 
+
+```bash
+python classification.py -d DATASET -mo MODEL -f FEATURE 
+```
+
+where:
+- `DATASET` specifies the dataset for experiment, which can be one of `MUV`, `BACE`, `BBBP`, 
+  `ClinTox`, `SIDER`, `ToxCast`, `HIV`, `PCBA`, `Tox21`
+- `MODEL` specifies the model to use, which can be one of `GCN`, `GAT`, `Weave`, `MPNN`, 
+  `AttentiveFP`, `gin_supervised_contextpred`, `gin_supervised_infomax`, 
+  `gin_supervised_edgepred`, `gin_supervised_masking`
+- `FEATURE ` specifies the featurization method to use, which can be one of `canonical`, 
+  `attentivefp`. This argument can be omitted if the model is one of `gin_supervised_*`.
+  
+To train a model on a regression dataset, use
+
+```bash
+python regression.py -d DATASET -mo MODEL -f FEATURE 
+```
+
+where:
+- `DATASET` specifies the dataset for experiment, which can be one of `FreeSolv`, 
+  `Lipophilicity`, `ESOL`
+- `MODEL` specifies the model to use, which can be one of `GCN`, `GAT`, `Weave`, `MPNN`, 
+  `AttentiveFP`, `gin_supervised_contextpred`, `gin_supervised_infomax`, 
+  `gin_supervised_edgepred`, `gin_supervised_masking`
+- `FEATURE ` specifies the featurization method to use, which can be one of `canonical`, 
+  `attentivefp`. This argument can be omitted if the model is one of `gin_supervised_*`.
+
+For both cases above, you can directly evaluate a pre-trained model without training from
+scratch by appending `-p`.
+
+The performance of the pre-trained models can be found below.
+
 ## BACE
 
 | method                     | Val ROC-AUC | Test ROC-AUC |

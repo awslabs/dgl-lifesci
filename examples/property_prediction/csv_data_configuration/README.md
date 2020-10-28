@@ -3,6 +3,8 @@
 The scripts in this directory are helpful for quickly prototyping a GNN-based model for molecular property 
 prediction on a new CSV dataset.
 
+The command line interface has been tested against the MoleculeNet benchmark. For more details, see [here](../moleculenet).
+
 ## Data Preparation
 
 For training, we assume that the molecular properties are recorded in a CSV file, where one column holds the SMILES strings 
