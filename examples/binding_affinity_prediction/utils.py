@@ -53,8 +53,10 @@ def load_dataset(args):
                     load_binding_pocket=args['load_binding_pocket'], 
                     sanitize=args['sanitize'], calc_charges=False,
                     remove_hs=args['remove_hs'], use_conformation=True,
-                    construct_graph_and_featurize = partial(potentialNet_graph_construction_featurization, distance_bins=args['distance_bins']),
-                    zero_padding=True)
+                    construct_graph_and_featurize = partial(potentialNet_graph_construction_featurization, 
+                        distance_bins=args['distance_bins'],
+                        max_num_neighbors=args['max_num_neighbors']),
+                    zero_padding=True, print_featurization=args['print_featurization'])
         elif args['model'] =='ACNN':
             dataset = PDBBind(subset=args['subset'],
                           load_binding_pocket=args['load_binding_pocket'],

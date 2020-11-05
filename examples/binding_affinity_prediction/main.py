@@ -15,14 +15,15 @@ from utils import set_random_seed, load_dataset, collate, load_model
 def rand_hyperparams():
     import numpy.random as nrd
     hyper_params = {}
-    hyper_params['f_bond'] = nrd.randint(40,129)
-    hyper_params['f_gather'] = nrd.randint(41,129)
+    hyper_params['f_bond'] = nrd.randint(70,120)
+    hyper_params['f_gather'] = nrd.randint(80,129)
     hyper_params['f_spatial'] = nrd.randint(hyper_params['f_gather'], 129)
     hyper_params['n_bond_conv_steps'] = nrd.randint(1,3)
-    hyper_params['n_spatial_conv_steps'] = nrd.randint(1,3)
-    hyper_params['wd'] = nrd.choice([1e-7, 1e-5, 1e-3])
-    hyper_params['dropouts'] = [nrd.choice([0, 0.1, 0.25, 0.4]) for i in range(3)]
-    hyper_params['n_rows_fc'] = [nrd.choice([64, 32, 16])]
+    hyper_params['n_spatial_conv_steps'] = nrd.randint(1,2)
+    hyper_params['wd'] = nrd.choice([1e-7, 1e-5])
+    hyper_params['dropouts'] = [nrd.choice([0, 0.25, 0.4]) for i in range(3)]
+    hyper_params['n_rows_fc'] = [nrd.choice([16])]
+    hyper_params['max_num_neighbors'] = nrd.randint(3, 13)
     return hyper_params
 
 def update_msg_from_scores(msg, scores):
@@ -139,7 +140,9 @@ if __name__ == '__main__':
     args['exp'] = '_'.join([args['model'], args['dataset']])
     args.update(get_exp_configure(args['exp']))
 
-    if False: # do hyperparameter search
+    rand_hyper_search = True
+    args['print_featurization'] = not rand_hyper_search
+    if rand_hyper_search: # do hyperparameter search
         customized_hps = rand_hyperparams()
         args.update(customized_hps)
         for k, v in customized_hps.items():

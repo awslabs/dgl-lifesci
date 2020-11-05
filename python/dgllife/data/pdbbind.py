@@ -78,7 +78,7 @@ class PDBBind(object):
     def __init__(self, subset, load_binding_pocket=True, sanitize=False, calc_charges=False,
                  remove_hs=False, use_conformation=True,
                  construct_graph_and_featurize=ACNN_graph_construction_and_featurization,
-                 zero_padding=True, num_processes=64):
+                 zero_padding=True, num_processes=64, print_featurization=True):
         self.task_names = ['-logKd/Ki']
         self.n_tasks = len(self.task_names)
 
@@ -100,7 +100,7 @@ class PDBBind(object):
 
         self._preprocess(extracted_data_path, index_label_file, load_binding_pocket,
                          sanitize, calc_charges, remove_hs, use_conformation,
-                         construct_graph_and_featurize, zero_padding, num_processes)
+                         construct_graph_and_featurize, zero_padding, num_processes, print_featurization)
 
     def _filter_out_invalid(self, ligands_loaded, proteins_loaded, use_conformation):
         """Filter out invalid ligand-protein pairs.
@@ -143,7 +143,7 @@ class PDBBind(object):
 
     def _preprocess(self, root_path, index_label_file, load_binding_pocket,
                     sanitize, calc_charges, remove_hs, use_conformation,
-                    construct_graph_and_featurize, zero_padding, num_processes):
+                    construct_graph_and_featurize, zero_padding, num_processes, print_featurization):
         """Preprocess the dataset.
 
         The pre-processing proceeds as follows:
@@ -249,7 +249,8 @@ class PDBBind(object):
         print('Start constructing graphs and featurizing them.')
         self.graphs = []
         for i in range(len(self)):
-            print('Constructing and featurizing datapoint {:d}/{:d}'.format(i+1, len(self)))
+            if print_featurization:
+                print('Constructing and featurizing datapoint {:d}/{:d}'.format(i+1, len(self)))
             self.graphs.append(construct_graph_and_featurize(
                 self.ligand_mols[i], self.protein_mols[i],
                 self.ligand_coordinates[i], self.protein_coordinates[i],
