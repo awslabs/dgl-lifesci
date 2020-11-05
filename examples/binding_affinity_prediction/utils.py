@@ -7,12 +7,27 @@ import dgl
 import numpy as np
 import random
 import torch
+import numpy.random as nrd
 
 from dgl.data.utils import Subset
 from dgllife.data import PDBBind
 from dgllife.model import ACNN, PotentialNet
 from dgllife.utils import RandomSplitter, ScaffoldSplitter, SingleTaskStratifiedSplitter
 from itertools import accumulate
+
+
+def rand_hyperparams():
+    hyper_params = {}
+    hyper_params['f_bond'] = nrd.randint(70,120)
+    hyper_params['f_gather'] = nrd.randint(80,129)
+    hyper_params['f_spatial'] = nrd.randint(hyper_params['f_gather'], 129)
+    hyper_params['n_bond_conv_steps'] = nrd.randint(1,3)
+    hyper_params['n_spatial_conv_steps'] = nrd.randint(1,2)
+    hyper_params['wd'] = nrd.choice([1e-7, 1e-5])
+    hyper_params['dropouts'] = [nrd.choice([0, 0.25, 0.4]) for i in range(3)]
+    hyper_params['n_rows_fc'] = [nrd.choice([16])]
+    hyper_params['max_num_neighbors'] = nrd.randint(3, 13)
+    return hyper_params
 
 def set_random_seed(seed=0):
     """Set random seed.
@@ -103,9 +118,10 @@ def load_dataset(args):
         else:
             raise ValueError('Expect the splitting method '
                              'to be "random", "scaffold", "stratified" or "temporal", got {}'.format(args['split']))
-        train_labels = torch.stack([train_set.dataset.labels[i] for i in train_set.indices])
-        train_set.labels_mean = train_labels.mean(dim=0)
-        train_set.labels_std = train_labels.std(dim=0)
+        if args['frac_train'] > 0:
+            train_labels = torch.stack([train_set.dataset.labels[i] for i in train_set.indices])
+            train_set.labels_mean = train_labels.mean(dim=0)
+            train_set.labels_std = train_labels.std(dim=0)
 
     return dataset, train_set, val_set, test_set
 

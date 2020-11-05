@@ -9,22 +9,8 @@ import torch.nn as nn
 from dgllife.utils.eval import Meter
 from torch.utils.data import DataLoader
 
-from utils import set_random_seed, load_dataset, collate, load_model
+from utils import set_random_seed, load_dataset, collate, load_model, rand_hyperparams
 
-
-def rand_hyperparams():
-    import numpy.random as nrd
-    hyper_params = {}
-    hyper_params['f_bond'] = nrd.randint(70,120)
-    hyper_params['f_gather'] = nrd.randint(80,129)
-    hyper_params['f_spatial'] = nrd.randint(hyper_params['f_gather'], 129)
-    hyper_params['n_bond_conv_steps'] = nrd.randint(1,3)
-    hyper_params['n_spatial_conv_steps'] = nrd.randint(1,2)
-    hyper_params['wd'] = nrd.choice([1e-7, 1e-5])
-    hyper_params['dropouts'] = [nrd.choice([0, 0.25, 0.4]) for i in range(3)]
-    hyper_params['n_rows_fc'] = [nrd.choice([16])]
-    hyper_params['max_num_neighbors'] = nrd.randint(3, 13)
-    return hyper_params
 
 def update_msg_from_scores(msg, scores):
     for metric, score in scores.items():
@@ -86,9 +72,13 @@ def main(args):
     args['device'] = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     set_random_seed(args['random_seed'])
 
-    dataset, train_set, val_set, test_set = load_dataset(args)
+    _, train_set, val_set, _ = load_dataset(args) 
     args['train_mean'] = train_set.labels_mean.to(args['device'])
     args['train_std'] = train_set.labels_std.to(args['device'])
+    test_loader_dict = {'subset': 'core', 'frac_train':0, 'frac_val': 0, 'frac_test': 1}
+    args.update(test_loader_dict)
+    _, _, _, test_set = load_dataset(args)
+
     train_loader = DataLoader(dataset=train_set,
                               batch_size=args['batch_size'],
                               shuffle=args['shuffle'],
@@ -112,14 +102,14 @@ def main(args):
 
     for epoch in range(args['num_epochs']):
         run_a_train_epoch(args, epoch, model, train_loader, loss_fn, optimizer)
-
-    test_scores = run_an_eval_epoch(args, model, test_loader)
-    test_msg = update_msg_from_scores('test results', test_scores)
-    print(test_msg)
-    if args['frac_val'] > 0:
-        val_scores = run_an_eval_epoch(args, model, val_loader)
-        val_msg = update_msg_from_scores('validation results', val_scores)
-        print(val_msg)
+        if len(val_set) > 0:
+            val_scores = run_an_eval_epoch(args, model, val_loader)
+            val_msg = update_msg_from_scores('validation results', val_scores)
+            print(val_msg)
+        if args['frac_test'] > 0:
+            test_scores = run_an_eval_epoch(args, model, test_loader)
+            test_msg = update_msg_from_scores('test results', test_scores)
+            print(test_msg)
 
 if __name__ == '__main__':
     import argparse
@@ -140,7 +130,7 @@ if __name__ == '__main__':
     args['exp'] = '_'.join([args['model'], args['dataset']])
     args.update(get_exp_configure(args['exp']))
 
-    rand_hyper_search = True
+    rand_hyper_search = False
     args['print_featurization'] = not rand_hyper_search
     if rand_hyper_search: # do hyperparameter search
         customized_hps = rand_hyperparams()

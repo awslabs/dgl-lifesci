@@ -78,7 +78,7 @@ class PDBBind(object):
     def __init__(self, subset, load_binding_pocket=True, sanitize=False, calc_charges=False,
                  remove_hs=False, use_conformation=True,
                  construct_graph_and_featurize=ACNN_graph_construction_and_featurization,
-                 zero_padding=True, num_processes=64, print_featurization=True):
+                 zero_padding=True, num_processes=12, print_featurization=True):
         self.task_names = ['-logKd/Ki']
         self.n_tasks = len(self.task_names)
 
