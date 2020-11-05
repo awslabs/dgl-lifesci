@@ -58,7 +58,7 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'n_spatial_conv_steps':1,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 2,
+    'num_epochs': 100,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'random'

@@ -3,6 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -40,13 +41,14 @@ def run_a_train_epoch(args, epoch, model, data_loader,
         optimizer.step()
         train_meter.update(prediction, labels)
     avg_loss = epoch_loss / len(data_loader.dataset)
-    if (args['num_epochs'] - epoch) <= 6: # print only the last 5 epochs
-        total_scores = {metric: train_meter.compute_metric(metric, 'mean')
-                        for metric in args['metrics']}
-        msg = 'epoch {:d}/{:d}, training | loss {:.4f}'.format(
-            epoch + 1, args['num_epochs'], avg_loss)
-        msg = update_msg_from_scores(msg, total_scores)
-        print(msg)
+    # if (args['num_epochs'] - epoch) <= 6: # print only the last 5 epochs
+    total_scores = {metric: train_meter.compute_metric(metric, 'mean')
+                    for metric in args['metrics']}
+    msg = 'epoch {:d}/{:d}, training | loss {:.4f}'.format(
+        epoch + 1, args['num_epochs'], avg_loss)
+    msg = update_msg_from_scores(msg, total_scores)
+    print(msg)
+    return total_scores
 
 def run_an_eval_epoch(args, model, data_loader):
     model.eval()
@@ -100,16 +102,24 @@ def main(args):
     optimizer = torch.optim.Adam(model.parameters(), lr=args['lr'], weight_decay=args['wd'])
     model.to(args['device'])
 
-    for epoch in range(args['num_epochs']):
-        run_a_train_epoch(args, epoch, model, train_loader, loss_fn, optimizer)
+    n_epochs = args['num_epochs']
+    train_r2, val_r2, test_r2 = np.zeros(n_epochs), np.zeros(n_epochs), np.zeros(n_epochs)
+    for epoch in range(n_epochs):
+        train_scores = run_a_train_epoch(args, epoch, model, train_loader, loss_fn, optimizer)
+        train_r2[epoch] = train_scores['r2']
         if len(val_set) > 0:
             val_scores = run_an_eval_epoch(args, model, val_loader)
             val_msg = update_msg_from_scores('validation results', val_scores)
             print(val_msg)
-        if args['frac_test'] > 0:
+            val_r2[epoch] = val_scores['r2']
+        if len(test_set) > 0:
             test_scores = run_an_eval_epoch(args, model, test_loader)
             test_msg = update_msg_from_scores('test results', test_scores)
             print(test_msg)
+            test_r2[epoch] = test_scores['r2']
+        print('')
+    # save model r2 at each epoch
+    np.savez('model_r2.npz', train_r2=train_r2, val_r2=val_r2, test_r2=test_r2)
 
 if __name__ == '__main__':
     import argparse
@@ -131,12 +141,13 @@ if __name__ == '__main__':
     args.update(get_exp_configure(args['exp']))
 
     rand_hyper_search = False
-    args['print_featurization'] = not rand_hyper_search
+    # args['print_featurization'] = not rand_hyper_search
+    args['print_featurization'] = False
     if rand_hyper_search: # do hyperparameter search
         customized_hps = rand_hyperparams()
         args.update(customized_hps)
-        for k, v in customized_hps.items():
-            print(f'{k}: {v}')
+    for k, v in args.items():
+        print(f'{k}: {v}')
 
     main(args)
     print('')
