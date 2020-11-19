@@ -133,7 +133,7 @@ def load_molecule(molecule_file, sanitize=False, calc_charges=False,
                 warnings.warn('Unable to compute charges for the molecule.')
 
         if remove_hs:
-            mol = Chem.RemoveHs(mol)
+            mol = Chem.RemoveHs(mol, sanitize=sanitize)
     except:
         return None, None
 
