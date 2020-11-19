@@ -119,7 +119,7 @@ def main(args):
             test_r2[epoch] = test_scores['r2']
         print('')
     # save model r2 at each epoch
-    np.savez('model_r2.npz', train_r2=train_r2, val_r2=val_r2, test_r2=test_r2)
+    # np.savez('model_r2_1106.npz', train_r2=train_r2, val_r2=val_r2, test_r2=test_r2)
 
 if __name__ == '__main__':
     import argparse
@@ -142,7 +142,7 @@ if __name__ == '__main__':
 
     rand_hyper_search = False
     # args['print_featurization'] = not rand_hyper_search
-    args['print_featurization'] = False
+    args['print_featurization'] = True
     if rand_hyper_search: # do hyperparameter search
         customized_hps = rand_hyperparams()
         args.update(customized_hps)

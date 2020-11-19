@@ -35,9 +35,9 @@ PotentialNet_PDBBind_core_pocket_random = {
     'split': 'random'
 }
 
-PotentialNet_PDBBind_refined_pocket_random = { 
+PotentialNet_PDBBind_core_pocket_scaffold = { 
     'dataset': 'PDBBind',
-    'subset': 'refined',
+    'subset': 'core',
     'load_binding_pocket': True,
     'random_seed': 123,
     'frac_train': 0.8,
@@ -58,10 +58,68 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'n_spatial_conv_steps':1,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 100,
+    'num_epochs': 2,
+    'wd': 1e-07,
+    'metrics': ['r2', 'mae'],
+    'split': 'scaffold'
+}
+
+PotentialNet_PDBBind_refined_pocket_random = { 
+    'dataset': 'PDBBind',
+    'subset': 'refined',
+    'load_binding_pocket': True,
+    'random_seed': 123,
+    'frac_train': 0.8,
+    'frac_val': 0.2,
+    'frac_test': 0.,
+    'batch_size': 40,
+    'shuffle': False,
+    'sanitize': False,
+    'remove_hs': False,
+    'max_num_neighbors': 5, ##
+    'distance_bins': [1.5, 2.5, 3.5, 4.5],
+    'f_in': 40,
+    'f_bond': 73, # has to be larger than f_in
+    'f_gather':90,
+    'f_spatial': 90, # better to the same as f_gather
+    'n_rows_fc':[32],
+    'n_bond_conv_steps':2,
+    'n_spatial_conv_steps':2,
+    'dropouts': [0.25, 0.25, 0.25],
+    'lr': 0.001,
+    'num_epochs': 300,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'random'
+}
+
+PotentialNet_PDBBind_refined_pocket_scaffold = { 
+    'dataset': 'PDBBind',
+    'subset': 'refined',
+    'load_binding_pocket': True,
+    'random_seed': 123,
+    'frac_train': 0.8,
+    'frac_val': 0.2,
+    'frac_test': 0.,
+    'batch_size': 40,
+    'shuffle': False,
+    'sanitize': False,
+    'remove_hs': False,
+    'max_num_neighbors': 5, ##
+    'distance_bins': [1.5, 2.5, 3.5, 4.5],
+    'f_in': 40,
+    'f_bond': 73, # has to be larger than f_in
+    'f_gather':90,
+    'f_spatial': 90, # better to the same as f_gather
+    'n_rows_fc':[32],
+    'n_bond_conv_steps':2,
+    'n_spatial_conv_steps':2,
+    'dropouts': [0.25, 0.25, 0.25],
+    'lr': 0.001,
+    'num_epochs': 3,
+    'wd': 1e-07,
+    'metrics': ['r2', 'mae'],
+    'split': 'scaffold'
 }
 
 ACNN_PDBBind_core_pocket_random = {
@@ -82,6 +140,7 @@ ACNN_PDBBind_core_pocket_random = {
         1., 6., 7., 8., 9., 11., 12., 15., 16., 17., 20., 25., 30., 35., 53.]),
     'radial': [[12.0], [0.0, 4.0, 8.0], [4.0]],
     'lr': 0.001,
+    'wd': 1e-07,
     'num_epochs': 120,
     'metrics': ['r2', 'mae'],
     'split': 'random'
@@ -106,6 +165,7 @@ ACNN_PDBBind_core_pocket_scaffold = {
         1., 6., 7., 8., 9., 11., 12., 15., 16., 17., 20., 25., 30., 35., 53.]),
     'radial': [[12.0], [0.0, 4.0, 8.0], [4.0]],
     'lr': 0.001,
+    'wd': 1e-07,
     'num_epochs': 170,
     'metrics': ['r2', 'mae'],
     'split': 'scaffold'
@@ -259,7 +319,9 @@ experiment_configures = {
     'ACNN_PDBBind_refined_pocket_stratified': ACNN_PDBBind_refined_pocket_stratified,
     'ACNN_PDBBind_refined_pocket_temporal': ACNN_PDBBind_refined_pocket_temporal,
     'PotentialNet_PDBBind_core_pocket_random' : PotentialNet_PDBBind_core_pocket_random,
-    'PotentialNet_PDBBind_refined_pocket_random' : PotentialNet_PDBBind_refined_pocket_random
+    'PotentialNet_PDBBind_refined_pocket_random' : PotentialNet_PDBBind_refined_pocket_random,
+    'PotentialNet_PDBBind_refined_pocket_scaffold': PotentialNet_PDBBind_refined_pocket_scaffold,
+    'PotentialNet_PDBBind_core_pocket_scaffold': PotentialNet_PDBBind_core_pocket_scaffold,
 }
 
 def get_exp_configure(exp_name):
