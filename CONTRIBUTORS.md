@@ -14,3 +14,4 @@ Contributors
 * [Yangkang Zhang](https://github.com/yangkang98): GNNOGBPredictor, graph property prediction for ogbg-ppa, support for GuacaMol in JTVAE
 * [Sooheon Kim](https://github.com/sooheon): Parallel processing for dataset construction from a CSV file
 * [Krishna Sirumalla](https://github.com/skrsna): Fix for regression_inference.py and classification_inference.py; support non-ring systems for ScaffoldSplitter
+* [Joshua Meyers](https://github.com/JoshuaMeyers): Fix for load_molecule
