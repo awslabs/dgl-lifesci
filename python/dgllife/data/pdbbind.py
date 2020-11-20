@@ -7,7 +7,9 @@
 
 import dgl.backend as F
 import numpy as np
+import multiprocessing
 import os
+from functools import partial
 import pandas as pd
 
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
@@ -78,7 +80,7 @@ class PDBBind(object):
     def __init__(self, subset, load_binding_pocket=True, sanitize=False, calc_charges=False,
                  remove_hs=False, use_conformation=True,
                  construct_graph_and_featurize=ACNN_graph_construction_and_featurization,
-                 zero_padding=True, num_processes=12, print_featurization=True):
+                 zero_padding=True, num_processes=8):
         self.task_names = ['-logKd/Ki']
         self.n_tasks = len(self.task_names)
 
@@ -100,7 +102,7 @@ class PDBBind(object):
 
         self._preprocess(extracted_data_path, index_label_file, load_binding_pocket,
                          sanitize, calc_charges, remove_hs, use_conformation,
-                         construct_graph_and_featurize, zero_padding, num_processes, print_featurization)
+                         construct_graph_and_featurize, zero_padding, num_processes)
 
     def _filter_out_invalid(self, ligands_loaded, proteins_loaded, use_conformation):
         """Filter out invalid ligand-protein pairs.
@@ -143,7 +145,7 @@ class PDBBind(object):
 
     def _preprocess(self, root_path, index_label_file, load_binding_pocket,
                     sanitize, calc_charges, remove_hs, use_conformation,
-                    construct_graph_and_featurize, zero_padding, num_processes, print_featurization):
+                    construct_graph_and_featurize, zero_padding, num_processes):
         """Preprocess the dataset.
 
         The pre-processing proceeds as follows:
@@ -246,15 +248,26 @@ class PDBBind(object):
             max_num_ligand_atoms = None
             max_num_protein_atoms = None
 
+        construct_graph_and_featurize = partial(construct_graph_and_featurize, 
+                            max_num_ligand_atoms=max_num_ligand_atoms,
+                            max_num_protein_atoms=max_num_protein_atoms)
+
         print('Start constructing graphs and featurizing them.')
-        self.graphs = []
-        for i in range(len(self)):
-            if print_featurization:
-                print('Constructing and featurizing datapoint {:d}/{:d}'.format(i+1, len(self)))
-            self.graphs.append(construct_graph_and_featurize(
-                self.ligand_mols[i], self.protein_mols[i],
-                self.ligand_coordinates[i], self.protein_coordinates[i],
-                max_num_ligand_atoms, max_num_protein_atoms))
+        num_mols = len(self)
+        # self.graphs = []
+        # for i in range(num_mols):
+        #     print('Constructing and featurizing datapoint {:d}/{:d}'.format(i+1, num_mols))
+        #     self.graphs.append(construct_graph_and_featurize(
+        #         self.ligand_mols[i], self.protein_mols[i],
+        #         self.ligand_coordinates[i], self.protein_coordinates[i],))
+
+        # construct graphs with multiprocessing
+        pool = multiprocessing.Pool(processes=num_processes)
+        self.graphs = pool.starmap(construct_graph_and_featurize, 
+                            zip(self.ligand_mols, self.protein_mols,
+                            self.ligand_coordinates, self.protein_coordinates))
+        print('Done. Number of graphs', len(self.graphs))
+
 
     def __len__(self):
         """Get the size of the dataset.

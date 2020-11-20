@@ -141,8 +141,6 @@ if __name__ == '__main__':
     args.update(get_exp_configure(args['exp']))
 
     rand_hyper_search = False
-    # args['print_featurization'] = not rand_hyper_search
-    args['print_featurization'] = True
     if rand_hyper_search: # do hyperparameter search
         customized_hps = rand_hyperparams()
         args.update(customized_hps)
