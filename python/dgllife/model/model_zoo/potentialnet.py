@@ -196,7 +196,7 @@ class Customized_GatedGraphConv(nn.Module):
             for _ in range(self._n_steps):
                 graph.ndata['h'] = h
                 for i in range(self._n_etypes):
-                    eids = graph.edata['e'][:,i].nonzero().view(-1).type(graph.idtype)
+                    eids = graph.edata['e'][:,i].nonzero(as_tuple=False).view(-1).type(graph.idtype)
                     if len(eids) > 0:
                         graph.apply_edges(
                             lambda edges: {'W_e*h': self.linears[i](edges.src['h'])},
