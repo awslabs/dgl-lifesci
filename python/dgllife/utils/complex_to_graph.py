@@ -15,7 +15,7 @@ from ..utils.featurizers import CanonicalAtomFeaturizer, CanonicalBondFeaturizer
 
 __all__ = ['ACNN_graph_construction_and_featurization', 
            'potentialNet_graph_construction_featurization', 
-           'flattern_graph']
+           ]
 
 def filter_out_hydrogens(mol):
     """Get indices for non-hydrogen atoms.
@@ -59,14 +59,9 @@ def get_atomic_numbers(mol, indices):
         atomic_numbers.append(atom.GetAtomicNum())
     return atomic_numbers
 
-def flattern_graph(graph):
-    """Flattern a batched graph by removing batch infomation
-    """
-    g = dgl.add_edges(graph, [0], [0]) # add dummy edge to new graph
-    g.remove_edges(g.num_edges()-1) # remove the edge we just added
-    return g
-
 def int_2_one_hot(a):
+    """Convert integer encodings on a vector to a matrix of one-hot-encoding
+    """
     n = len(a)
     b = np.zeros((n, a.max()+1))
     b[np.arange(n), a] = 1
@@ -119,12 +114,12 @@ def potentialNet_graph_construction_featurization(ligand_mol,
     ligand_bigraph = mol_to_bigraph(ligand_mol, add_self_loop=False,
                    node_featurizer=node_featurizer,
                    edge_featurizer=edge_featurizer,
-                   canonical_atom_order=True
+                   canonical_atom_order=False, # Keep the original atomic order
                    )
     protein_bigraph = mol_to_bigraph(protein_mol, add_self_loop=False,
                    node_featurizer=node_featurizer,
                    edge_featurizer=edge_featurizer,
-                   canonical_atom_order=True)
+                   canonical_atom_order=False)
 
     complex_bigraph = batch([ligand_bigraph, protein_bigraph])
     # remove features that never appear
@@ -148,7 +143,6 @@ def potentialNet_graph_construction_featurization(ligand_mol,
     d_features = np.digitize(complex_dists, bins=distance_bins, right=True)
     d_one_hot = int_2_one_hot(d_features)
     
-
     # add bond types and bonds (from bigraph) to stage 2
     u, v = complex_bigraph.edges()    
     complex_knn_graph.add_edges(u.to(F.int64), v.to(F.int64))
@@ -160,7 +154,6 @@ def potentialNet_graph_construction_featurization(ligand_mol,
             [np.zeros((n_e, f_d)), np.array(complex_bigraph.edata['e'])]
         ]).astype(np.long)
     )
-
     return complex_bigraph, complex_knn_graph
 
 

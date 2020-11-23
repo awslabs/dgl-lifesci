@@ -71,6 +71,7 @@ def run_an_eval_epoch(args, model, data_loader):
     return total_scores
 
 def main(args):
+    torch.multiprocessing.set_sharing_strategy('file_system') # test
     args['device'] = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     set_random_seed(args['random_seed'])
 

@@ -266,7 +266,7 @@ class PDBBind(object):
         self.graphs = pool.starmap(construct_graph_and_featurize, 
                             zip(self.ligand_mols, self.protein_mols,
                             self.ligand_coordinates, self.protein_coordinates))
-        print('Done. Number of graphs', len(self.graphs))
+        print(f'Done constructing {len(self.graphs)} graphs.')
 
 
     def __len__(self):
