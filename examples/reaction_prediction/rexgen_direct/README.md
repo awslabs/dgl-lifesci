@@ -334,14 +334,20 @@ python candidate_ranking_eval.py
 You can train a model on new datasets with
 
 ```bash
-python candidate_ranking_train.py --train-path train_valid_reactions.proc --val-path val_valid_reactions.proc
+python candidate_ranking_train.py --train-path train_valid_reactions.proc --val-path val_valid_reactions.proc -cmp X
 ```
+
+where `X` is the path to a trained model for reaction center prediction. You can use our 
+pre-trained model by not specifying `-cmp`.
 
 For evaluation,
 
 ```bash
-python candidate_ranking_train.py --eval-path test_valid_reactions.proc
+python candidate_ranking_eval.py --model-path X -cmp Y --eval-path test_valid_reactions.proc
 ```
+
+where `X` is the path to a trained model for candidate ranking and `Y` is the path to a trained model 
+for reaction center prediction. As in training, you can use our pre-trained model by not specifying `-cmp`.
 
 ### Common Issues
 
