@@ -8,7 +8,7 @@
 import numpy as np
 import dgl.backend as F
 
-from dgl import graph, bipartite, hetero_from_relations, heterograph, batch
+from dgl import graph, heterograph, batch
 
 from ..utils.mol_to_graph import k_nearest_neighbors, mol_to_bigraph
 from ..utils.featurizers import CanonicalAtomFeaturizer, CanonicalBondFeaturizer
@@ -73,9 +73,51 @@ def potentialNet_graph_construction_featurization(ligand_mol,
                                               protein_coordinates,
                                               max_num_ligand_atoms=None,
                                               max_num_protein_atoms=None,
-                                              max_num_neighbors=6,
+                                              max_num_neighbors=4,
                                               distance_bins = [1.5, 2.5, 3.5, 4.5],
                                               strip_hydrogens=False):
+    """Graph construction and featurization for `PotentialNet for Molecular Property Prediction
+     <https://pubs.acs.org/doi/10.1021/acscentsci.8b00507>`__.
+
+    Parameters
+    ----------
+    ligand_mol : rdkit.Chem.rdchem.Mol
+        RDKit molecule instance.
+    protein_mol : rdkit.Chem.rdchem.Mol
+        RDKit molecule instance.
+    ligand_coordinates : Float Tensor of shape (V1, 3)
+        Atom coordinates in a ligand.
+    protein_coordinates : Float Tensor of shape (V2, 3)
+        Atom coordinates in a protein.
+    max_num_ligand_atoms : int or None
+        Maximum number of atoms in ligands for zero padding, which should be no smaller than
+        ligand_mol.GetNumAtoms() if not None. If None, no zero padding will be performed.
+        Default to None.
+    max_num_protein_atoms : int or None
+        Maximum number of atoms in proteins for zero padding, which should be no smaller than
+        protein_mol.GetNumAtoms() if not None. If None, no zero padding will be performed.
+        Default to None.
+    distance_bins : list
+        Sequence of distance edges to determine the edge types.
+    max_num_neighbors : int
+        Maximum number of neighbors allowed for each atom. Default to 12.
+    strip_hydrogens : bool
+        Whether to exclude hydrogen atoms. Default to False.
+
+    Returns
+    -------
+    complex_bigraph : DGLGraph
+        Bigraph with ligand and protein (pocket) combined and canonical features extracted.
+        The atom features are stored as DGLGraph.ndata['h'].
+        The edge types are stored as DGLGraph.edata['e'].
+        The bigraphs of ligand and protein are batched together as one complex graph.
+    complex_knn_graph : DGLGraph
+        K-nearest-neighbor graph with ligand and protein (pocket) combined and edge features extracted based on distances.
+        The edge types are stored as DGLGraph.edata['e'].
+        The knn-graphs of ligand and protein are batched together as one complex graph.
+
+    """
+
     assert ligand_coordinates is not None, 'Expect ligand_coordinates to be provided.'
     assert protein_coordinates is not None, 'Expect protein_coordinates to be provided.'
     if max_num_ligand_atoms is not None:

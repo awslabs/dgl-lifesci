@@ -5,27 +5,9 @@ import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
 from dgl import function as fn
-from dgl.nn.pytorch.conv import GatedGraphConv
 from torch.nn import init
 
 __all__ = ['PotentialNet']
-
-def process_etypes(graph):
-    """convert one-hot encoding edge types to label encoding, and add duplicated edges
-    """
-    edata = graph.edata['e']
-    etypes = th.tensor([], dtype=th.long, device=graph.device)
-    for i in range(edata.shape[0]):
-        encodings = th.nonzero(edata[i,])
-        etypes = th.cat([etypes, encodings[0]])
-        src, dst = graph.find_edges(i)
-        encodings = encodings.view(-1)
-        num_2_add = encodings[1:].shape # start from the second
-        # add edges repeatedly to represent different edge types
-        graph.add_edges(src.repeat(num_2_add), dst.repeat(num_2_add)) 
-        etypes = th.cat([etypes, encodings[1:]])
-    del graph.edata['e']
-    return graph, etypes
 
 def sum_ligand_features(h, batch_num_nodes):
     """Computes the sum of ligand features h from batch_num_nodes"""
@@ -71,7 +53,6 @@ class PotentialNet(nn.Module):
 
     def forward(self, bigraph, knn_graph):
         batch_num_nodes = bigraph.batch_num_nodes()
-        # bigraph, stage_1_etypes = process_etypes(bigraph_canonical)
         h = self.stage_1_model(graph=bigraph, feat=bigraph.ndata['h'])
         h = self.stage_2_model(graph=knn_graph, feat=h)
         x = self.stage_3_model(batch_num_nodes=batch_num_nodes, features=h) 

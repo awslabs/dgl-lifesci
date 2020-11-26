@@ -49,6 +49,8 @@ class PDBBind(object):
         In moleculenet, we can use either the "refined" subset or the "core" subset. We can
         retrieve them by setting ``subset`` to be ``'refined'`` or ``'core'``. The size
         of the ``'core'`` set is 195 and the size of the ``'refined'`` set is 3706.
+    pdb_version : str
+        The version of PDBBind dataset. Currently implemented: ``'v2007'``, ``'v2015'``.
     load_binding_pocket : bool
         Whether to load binding pockets or full proteins. Default to True.
     sanitize : bool
@@ -75,34 +77,91 @@ class PDBBind(object):
         is not desired for sensitive scenarios. Default to True.
     num_processes : int or None
         Number of worker processes to use. If None,
-        then we will use the number of CPUs in the system. Default to 64.
+        then we will use the number of CPUs in the system. Default None.
     """
-    def __init__(self, subset, load_binding_pocket=True, sanitize=False, calc_charges=False,
+    def __init__(self, subset, pdb_version, load_binding_pocket=True, sanitize=False, calc_charges=False,
                  remove_hs=False, use_conformation=True,
                  construct_graph_and_featurize=ACNN_graph_construction_and_featurization,
-                 zero_padding=True, num_processes=8):
+                 zero_padding=True, num_processes=None):
         self.task_names = ['-logKd/Ki']
         self.n_tasks = len(self.task_names)
-
-        self._url = 'dataset/pdbbind_v2015.tar.gz'
-        root_dir_path = get_download_dir()
-        data_path = root_dir_path + '/pdbbind_v2015.tar.gz'
-        extracted_data_path = root_dir_path + '/pdbbind_v2015'
-        download(_get_dgl_url(self._url), path=data_path, overwrite=False)
-        extract_archive(data_path, extracted_data_path)
-
-        if subset == 'core':
-            index_label_file = extracted_data_path + '/v2015/INDEX_core_data.2013'
-        elif subset == 'refined':
-            index_label_file = extracted_data_path + '/v2015/INDEX_refined_data.2015'
-        else:
-            raise ValueError(
-                'Expect the subset_choice to be either '
-                'core or refined, got {}'.format(subset))
-
-        self._preprocess(extracted_data_path, index_label_file, load_binding_pocket,
+        self._read_data_files(pdb_version, subset, load_binding_pocket)
+        self._preprocess(load_binding_pocket,
                          sanitize, calc_charges, remove_hs, use_conformation,
                          construct_graph_and_featurize, zero_padding, num_processes)
+
+    def _read_data_files(self, pdb_version, subset, load_binding_pocket):
+        """Download and extract pdbbind data files specified by the version"""
+        root_dir_path = get_download_dir()
+        if pdb_version == 'v2015':
+            self._url = 'dataset/pdbbind_v2015.tar.gz'
+            data_path = root_dir_path + '/pdbbind_v2015.tar.gz'
+            extracted_data_path = root_dir_path + '/pdbbind_v2015'
+            download(_get_dgl_url(self._url), path=data_path, overwrite=False)
+            extract_archive(data_path, extracted_data_path)
+
+            if subset == 'core':
+                index_label_file = extracted_data_path + '/v2015/INDEX_core_data.2013'
+            elif subset == 'refined':
+                index_label_file = extracted_data_path + '/v2015/INDEX_refined_data.2015'
+            else:
+                raise ValueError(
+                    'Expect the subset_choice to be either '
+                'core or refined, got {}'.format(subset))
+
+        if pdb_version == 'v2007':
+            download_url = 'http://www.pdbbind.org.cn/download/pdbbind_v2007.tar.gz' 
+            data_path = root_dir_path + '/pdbbind_v2007.tar.gz'
+            extracted_data_path = root_dir_path + '/pdbbind_v2007'
+            download(download_url, path=data_path, overwrite=False)
+            extract_archive(data_path, extracted_data_path)
+
+            if subset == 'core':
+                index_label_file = extracted_data_path + '/v2007/INDEX.2007.core.data'
+            elif subset == 'refined':
+                index_label_file = extracted_data_path + '/v2007/INDEX.2007.refined.data'
+            else:
+                raise ValueError(
+                    'Expect the subset_choice to be either '
+                'core or refined, got {}'.format(subset))
+
+        contents = []
+        with open(index_label_file, 'r') as f:
+            for line in f.readlines():
+                if line[0] != "#":
+                    splitted_elements = line.split()
+                    if pdb_version == 'v2015':
+                        if len(splitted_elements) == 8:
+                            # Ignore "//"
+                            contents.append(splitted_elements[:5] + splitted_elements[6:])
+                        else:
+                            print('Incorrect data format.')
+                            print(splitted_elements)
+                    elif pdb_version == 'v2007':
+                        if len(splitted_elements) == 6:
+                            contents.append(splitted_elements)
+                        else:
+                            contents.append(splitted_elements[:5] + [' '.join(splitted_elements[5:])])
+
+        if pdb_version == 'v2015':
+            self.df = pd.DataFrame(contents, columns=(
+                'PDB_code', 'resolution', 'release_year',
+                '-logKd/Ki', 'Kd/Ki', 'reference', 'ligand_name'))
+        elif pdb_version == 'v2007':
+            self.df = pd.DataFrame(contents, columns=(
+                'PDB_code', 'resolution', 'release_year',
+                '-logKd/Ki', 'Kd/Ki', 'cluster_ID'))
+
+        pdbs = self.df['PDB_code'].tolist()
+
+        self.ligand_files = [os.path.join(
+            extracted_data_path, pdb_version, pdb, '{}_ligand.sdf'.format(pdb)) for pdb in pdbs]
+        if load_binding_pocket:
+            self.protein_files = [os.path.join(
+                extracted_data_path, pdb_version, pdb, '{}_pocket.pdb'.format(pdb)) for pdb in pdbs]
+        else:
+            self.protein_files = [os.path.join(
+                extracted_data_path, pdb_version, pdb, '{}_protein.pdb'.format(pdb)) for pdb in pdbs]
 
     def _filter_out_invalid(self, ligands_loaded, proteins_loaded, use_conformation):
         """Filter out invalid ligand-protein pairs.
@@ -143,7 +202,7 @@ class PDBBind(object):
                 self.protein_mols.append(protein_mol)
                 self.protein_coordinates.append(protein_coordinates)
 
-    def _preprocess(self, root_path, index_label_file, load_binding_pocket,
+    def _preprocess(self, load_binding_pocket,
                     sanitize, calc_charges, remove_hs, use_conformation,
                     construct_graph_and_featurize, zero_padding, num_processes):
         """Preprocess the dataset.
@@ -157,10 +216,6 @@ class PDBBind(object):
 
         Parameters
         ----------
-        root_path : str
-            Root path for molecule files.
-        index_label_file : str
-            Path to the index file for the dataset.
         load_binding_pocket : bool
             Whether to load binding pockets or full proteins.
         sanitize : bool
@@ -186,32 +241,9 @@ class PDBBind(object):
             Number of worker processes to use. If None,
             then we will use the number of CPUs in the system.
         """
-        contents = []
-        with open(index_label_file, 'r') as f:
-            for line in f.readlines():
-                if line[0] != "#":
-                    splitted_elements = line.split()
-                    if len(splitted_elements) == 8:
-                        # Ignore "//"
-                        contents.append(splitted_elements[:5] + splitted_elements[6:])
-                    else:
-                        print('Incorrect data format.')
-                        print(splitted_elements)
-        self.df = pd.DataFrame(contents, columns=(
-            'PDB_code', 'resolution', 'release_year',
-            '-logKd/Ki', 'Kd/Ki', 'reference', 'ligand_name'))
-        pdbs = self.df['PDB_code'].tolist()
-
-        self.ligand_files = [os.path.join(
-            root_path, 'v2015', pdb, '{}_ligand.sdf'.format(pdb)) for pdb in pdbs]
-        if load_binding_pocket:
-            self.protein_files = [os.path.join(
-                root_path, 'v2015', pdb, '{}_pocket.pdb'.format(pdb)) for pdb in pdbs]
-        else:
-            self.protein_files = [os.path.join(
-                root_path, 'v2015', pdb, '{}_protein.pdb'.format(pdb)) for pdb in pdbs]
-
-        num_processes = min(num_processes, len(pdbs))
+        if num_processes is None:
+            num_processes = multiprocessing.cpu_count()
+        num_processes = min(num_processes, len(self.df))
 
         print('Loading ligands...')
         ligands_loaded = multiprocess_load_molecules(self.ligand_files,
@@ -233,7 +265,7 @@ class PDBBind(object):
         self.df = self.df.iloc[self.indices]
         self.labels = F.zerocopy_from_numpy(self.df[self.task_names].values.astype(np.float32))
         print('Finished cleaning the dataset, '
-              'got {:d}/{:d} valid pairs'.format(len(self), len(pdbs)))
+              'got {:d}/{:d} valid pairs'.format(len(self), len(self.df)))
 
         # Prepare zero padding
         if zero_padding:
@@ -295,8 +327,10 @@ class PDBBind(object):
             RDKit molecule instance for the ligand molecule.
         rdkit.Chem.rdchem.Mol
             RDKit molecule instance for the protein molecule.
-        DGLHeteroGraph
+        DGLHeteroGraph or tuple of DGLGraphs
             Pre-processed DGLHeteroGraph with features extracted.
+            For ACNN, a signle DGLHeteroGraph;
+            For PotentialNet, a tuple of a bigraph of the complex and a KNN graph of the complex.
         Float32 tensor
             Label for the datapoint.
         """

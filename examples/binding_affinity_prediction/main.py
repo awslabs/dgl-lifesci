@@ -135,7 +135,8 @@ if __name__ == '__main__':
                                  'PDBBind_core_pocket_stratified', 'PDBBind_core_pocket_temporal',
                                  'PDBBind_refined_pocket_random', 'PDBBind_refined_pocket_scaffold',
                                  'PDBBind_refined_pocket_stratified', 'PDBBind_refined_pocket_temporal'],
-                        help='Dataset to use')
+                        help='Data subset to use')
+    parser.add_argument('-v', '--version', type=str, choices=['v2007', 'v2015'])
 
     args = parser.parse_args().__dict__
     args['exp'] = '_'.join([args['model'], args['dataset']])
@@ -148,6 +149,7 @@ if __name__ == '__main__':
     for k, v in args.items():
         print(f'{k}: {v}')
 
+    print('')
     main(args)
     print('')
     print('')
