@@ -9,12 +9,13 @@ This is a DGL implementation of the following paper based on PyTorch.
 
 ## Usage
 **1. Self-supervised pre-training**
-``` python
+
+``` bash
 python pretrain_masking.py  --output_model_file OUTPUT_MODEL_PATH
 python pretrain_contextpred.py  --output_model_file OUTPUT_MODEL_PATH # to-do
 ```
 **2. Supervised pre-training**
-``` python
+``` bash
 python pretrain_supervised.py --output_model_file OUTPUT_MODEL_PATH --input_model_file INPUT_MODEL_PATH
 ```
 ## Experiment Results
