@@ -10,7 +10,7 @@ import numpy as np
 import os
 import torch
 
-from dgl import save_graphs, load_graphs
+from dgl.data.utils import save_graphs, load_graphs
 
 from ..utils.io import pmap
 
