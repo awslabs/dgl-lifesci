@@ -769,6 +769,41 @@ class ConcatFeaturizer(object):
         particular data type, e.g. ``rdkit.Chem.rdchem.Atom``. Each function is of signature
         ``func(data_type) -> list of float or bool or int``. The resulting order of
         the features will follow that of the functions in the list.
+
+    Examples
+    --------
+
+    Setup for demo.
+
+    >>> from dgllife.utils import ConcatFeaturizer
+    >>> from rdkit import Chem
+    >>> smi = 'CCO'
+    >>> mol = Chem.MolFromSmiles(smi)
+
+    Concatenate multiple atom descriptors as a single node feature.
+
+    >>> from dgllife.utils import atom_degree, atomic_number, BaseAtomFeaturizer
+    >>> # Construct a featurizer for featurizing one atom a time
+    >>> atom_concat_featurizer = ConcatFeaturizer([atom_degree, atomic_number])
+    >>> # Construct a featurizer for featurizing all atoms in a molecule
+    >>> mol_atom_featurizer = BaseAtomFeaturizer({'h': atom_concat_featurizer})
+    >>> mol_atom_featurizer(mol)
+    {'h': tensor([[1., 6.],
+                  [2., 6.],
+                  [1., 8.]])}
+
+    Conctenate multiple bond descriptors as a single edge feature.
+
+    >>> from dgllife.utils import bond_type_one_hot, bond_is_in_ring, BaseBondFeaturizer
+    >>> # Construct a featurizer for featurizing one bond a time
+    >>> bond_concat_featurizer = ConcatFeaturizer([bond_type_one_hot, bond_is_in_ring])
+    >>> # Construct a featurizer for featurizing all bonds in a molecule
+    >>> mol_bond_featurizer = BaseBondFeaturizer({'h': bond_concat_featurizer})
+    >>> mol_bond_featurizer(mol)
+    {'h': tensor([[1., 0., 0., 0., 0.],
+                  [1., 0., 0., 0., 0.],
+                  [1., 0., 0., 0., 0.],
+                  [1., 0., 0., 0., 0.]])}
     """
     def __init__(self, func_list):
         self.func_list = func_list
