@@ -24,6 +24,12 @@ class GCNLayer(nn.Module):
         Number of input node features.
     out_feats : int
         Number of output node features.
+    gnn_norm : str
+        The message passing normalizer, which can be `'right'`, `'both'` or `'none'`. The
+        `'right'` normalizer divides the aggregated messages by each node's in-degree.
+        The `'both'` normalizer corresponds to the symmetric adjacency normalization in
+        the original GCN paper. The `'none'` normalizer simply sums the messages.
+        Default to be 'none'.
     activation : activation function
         Default to be None.
     residual : bool
@@ -35,13 +41,13 @@ class GCNLayer(nn.Module):
         The probability for dropout. Default to be 0., i.e. no
         dropout is performed.
     """
-    def __init__(self, in_feats, out_feats, activation=None,
+    def __init__(self, in_feats, out_feats, gnn_norm='none', activation=None,
                  residual=True, batchnorm=True, dropout=0.):
         super(GCNLayer, self).__init__()
 
         self.activation = activation
         self.graph_conv = GraphConv(in_feats=in_feats, out_feats=out_feats,
-                                    norm='none', activation=activation)
+                                    norm=gnn_norm, activation=activation)
         self.dropout = nn.Dropout(dropout)
 
         self.residual = residual
@@ -99,6 +105,13 @@ class GCN(nn.Module):
         ``hidden_feats[i]`` gives the size of node representations after the i-th GCN layer.
         ``len(hidden_feats)`` equals the number of GCN layers.  By default, we use
         ``[64, 64]``.
+    gnn_norm : list of str
+        ``gnn_norm[i]`` gives the message passing normalizer for the i-th GCN layer, which
+        can be `'right'`, `'both'` or `'none'`. The `'right'` normalizer divides the aggregated
+        messages by each node's in-degree. The `'both'` normalizer corresponds to the symmetric
+        adjacency normalization in the original GCN paper. The `'none'` normalizer simply sums
+        the messages. ``len(gnn_norm)`` equals the number of GCN layers. By default, we use
+        ``['none', 'none']``.
     activation : list of activation functions or None
         If not None, ``activation[i]`` gives the activation function to be used for
         the i-th GCN layer. ``len(activation)`` equals the number of GCN layers.
@@ -116,14 +129,16 @@ class GCN(nn.Module):
         ``len(dropout)`` equals the number of GCN layers. By default, no dropout is
         performed for all layers.
     """
-    def __init__(self, in_feats, hidden_feats=None, activation=None, residual=None,
-                 batchnorm=None, dropout=None):
+    def __init__(self, in_feats, hidden_feats=None, gnn_norm=None, activation=None,
+                 residual=None, batchnorm=None, dropout=None):
         super(GCN, self).__init__()
 
         if hidden_feats is None:
             hidden_feats = [64, 64]
 
         n_layers = len(hidden_feats)
+        if gnn_norm is None:
+            gnn_norm = ['none' for _ in range(n_layers)]
         if activation is None:
             activation = [F.relu for _ in range(n_layers)]
         if residual is None:
@@ -132,16 +147,16 @@ class GCN(nn.Module):
             batchnorm = [True for _ in range(n_layers)]
         if dropout is None:
             dropout = [0. for _ in range(n_layers)]
-        lengths = [len(hidden_feats), len(activation),
+        lengths = [len(hidden_feats), len(gnn_norm), len(activation),
                    len(residual), len(batchnorm), len(dropout)]
-        assert len(set(lengths)) == 1, 'Expect the lengths of hidden_feats, activation, ' \
-                                       'residual, batchnorm and dropout to be the same, ' \
-                                       'got {}'.format(lengths)
+        assert len(set(lengths)) == 1, 'Expect the lengths of hidden_feats, gnn_norm, ' \
+                                       'activation, residual, batchnorm and dropout to ' \
+                                       'be the same, got {}'.format(lengths)
 
         self.hidden_feats = hidden_feats
         self.gnn_layers = nn.ModuleList()
         for i in range(n_layers):
-            self.gnn_layers.append(GCNLayer(in_feats, hidden_feats[i], activation[i],
+            self.gnn_layers.append(GCNLayer(in_feats, hidden_feats[i], gnn_norm[i], activation[i],
                                             residual[i], batchnorm[i], dropout[i]))
             in_feats = hidden_feats[i]
 
