@@ -133,6 +133,14 @@ def main(args, path_to_candidate_bonds):
                 t0 = time.time()
                 model.train()
 
+    # Final results
+    torch.save({'model_state_dict': model.state_dict()},
+               args['result_path'] + 'model_final.pkl')
+    prediction_summary = 'final\n' + candidate_ranking_eval(args, model, val_loader)
+    print(prediction_summary)
+    with open(args['result_path'] + '/val_eval.txt', 'a') as f:
+        f.write(prediction_summary)
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
