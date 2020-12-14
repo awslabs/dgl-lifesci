@@ -35,6 +35,13 @@ class GCNPredictor(nn.Module):
         ``hidden_feats[i]`` gives the size of node representations after the i-th GCN layer.
         ``len(hidden_feats)`` equals the number of GCN layers. By default, we use
         ``[64, 64]``.
+    gnn_norm : list of str
+        ``gnn_norm[i]`` gives the message passing normalizer for the i-th GCN layer, which
+        can be `'right'`, `'both'` or `'none'`. The `'right'` normalizer divides the aggregated
+        messages by each node's in-degree. The `'both'` normalizer corresponds to the symmetric
+        adjacency normalization in the original GCN paper. The `'none'` normalizer simply sums
+        the messages. ``len(gnn_norm)`` equals the number of GCN layers. By default, we use
+        ``['none', 'none']``.
     activation : list of activation functions or None
         If None, no activation will be applied. If not None, ``activation[i]`` gives the
         activation function to be used for the i-th GCN layer. ``len(activation)`` equals
@@ -64,9 +71,10 @@ class GCNPredictor(nn.Module):
     predictor_dropout : float
         The probability for dropout in the output MLP predictor. Default to 0.
     """
-    def __init__(self, in_feats, hidden_feats=None, activation=None, residual=None, batchnorm=None,
-                 dropout=None, classifier_hidden_feats=128, classifier_dropout=0., n_tasks=1,
-                 predictor_hidden_feats=128, predictor_dropout=0.):
+    def __init__(self, in_feats, hidden_feats=None, gnn_norm=None, activation=None,
+                 residual=None, batchnorm=None, dropout=None, classifier_hidden_feats=128,
+                 classifier_dropout=0., n_tasks=1, predictor_hidden_feats=128,
+                 predictor_dropout=0.):
         super(GCNPredictor, self).__init__()
 
         if predictor_hidden_feats == 128 and classifier_hidden_feats != 128:
@@ -81,6 +89,7 @@ class GCNPredictor(nn.Module):
 
         self.gnn = GCN(in_feats=in_feats,
                        hidden_feats=hidden_feats,
+                       gnn_norm=gnn_norm,
                        activation=activation,
                        residual=residual,
                        batchnorm=batchnorm,
