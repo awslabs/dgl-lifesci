@@ -12,7 +12,7 @@ We cover various applications in our
 `examples <https://github.com/awslabs/dgl-lifesci/tree/master/examples>`_, including:
 
 * `Molecular property prediction <https://github.com/awslabs/dgl-lifesci/tree/master/examples/property_prediction>`_
-* `Attention visualization <https://github.com/awslabs/dgl-lifesci/tree/attention/examples/property_prediction/pubchem_aromaticity>`_
+* `Attention visualization <https://github.com/awslabs/dgl-lifesci/tree/master/examples/property_prediction/pubchem_aromaticity>`_
 * `Generative models <https://github.com/awslabs/dgl-lifesci/tree/master/examples/generative_models>`_
 * `Protein-ligand binding affinity prediction <https://github.com/awslabs/dgl-lifesci/tree/master/examples/binding_affinity_prediction>`_
 * `Reaction prediction <https://github.com/awslabs/dgl-lifesci/tree/master/examples/reaction_prediction>`_
