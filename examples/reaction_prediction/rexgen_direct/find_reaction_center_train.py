@@ -124,6 +124,16 @@ def main(rank, dev_id, args):
                 model.train()
         synchronize(args['num_devices'])
 
+    # Final results
+    if rank == 0:
+        prediction_summary = 'final result ' + \
+                             reaction_center_final_eval(args, args['top_ks_val'], model, val_loader, easy=True)
+        print(prediction_summary)
+        with open(args['result_path'] + '/val_eval.txt', 'a') as f:
+            f.write(prediction_summary)
+        torch.save({'model_state_dict': model.state_dict()},
+                   args['result_path'] + '/model_final.pkl')
+
 def run(rank, dev_id, args):
     dist_init_method = 'tcp://{master_ip}:{master_port}'.format(
         master_ip=args['master_ip'], master_port=args['master_port'])
