@@ -549,7 +549,8 @@ def prepare_reaction_center(args, reaction_center_config):
         else:
             dataset = WLNCenterDataset(raw_file_path=args['{}_path'.format(subset)],
                                        mol_graph_path='{}.bin'.format(subset),
-                                       num_processes=args['num_processes'])
+                                       num_processes=args['num_processes'],
+                                       reaction_validity_result_prefix=subset)
 
         dataloader = DataLoader(dataset, batch_size=args['reaction_center_batch_size'],
                                 collate_fn=collate_center, shuffle=False)

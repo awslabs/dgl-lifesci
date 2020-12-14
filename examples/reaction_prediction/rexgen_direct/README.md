@@ -223,7 +223,7 @@ where `X`, `Y` are paths to the new training/validation dataset as described abo
 For evaluation,
 
 ```bash
-python find_reaction_center_eval.py --eval-path Z
+python find_reaction_center_eval.py --test-path Z
 ```
 
 where `Z` is the path to the new test set as described above.
@@ -340,16 +340,16 @@ python candidate_ranking_train.py --train-path X --val-path Y -cmp Z
 where `X`, `Y` are paths to the new training/validation dataset as in reaction center prediction. `Z` is
 the path to a trained model for reaction center prediction. You can use our pre-trained model by not specifying `-cmp`.
 
-The script also assumes that `train_valid_reactions.proc` and `val_valid_reactions.proc` are in the current directory.
-
 For evaluation,
 
 ```bash
-python candidate_ranking_eval.py --model-path X -cmp Y --eval-path test_valid_reactions.proc
+python candidate_ranking_eval.py --model-path X -cmp Y --test-path Z
 ```
 
-where `X` is the path to a trained model for candidate ranking and `Y` is the path to a trained model 
-for reaction center prediction. As in training, you can use our pre-trained model by not specifying `-cmp`.
+where `X` is the path to a trained model for candidate ranking, `Y` is the path to a trained model 
+for reaction center prediction, and `Z` is the path to the new test dataset as in reaction center prediction.
+You can use the pre-trained model for reaction center prediction by not specifying `-cmp` and use the pre-trained
+model for candidate ranking by not specifying `--model-path`.
 
 ### Common Issues
 
