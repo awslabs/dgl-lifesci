@@ -218,7 +218,7 @@ You can then train a model on new datasets with
 python find_reaction_center_train.py --train-path X --val-path Y
 ```
 
-where `X`, `Y` are paths to the new training/validation as described above.
+where `X`, `Y` are paths to the new training/validation dataset as described above.
 
 For evaluation,
 
@@ -334,11 +334,13 @@ python candidate_ranking_eval.py
 You can train a model on new datasets with
 
 ```bash
-python candidate_ranking_train.py --train-path train_valid_reactions.proc --val-path val_valid_reactions.proc -cmp X
+python candidate_ranking_train.py --train-path X --val-path Y -cmp Z
 ```
 
-where `X` is the path to a trained model for reaction center prediction. You can use our 
-pre-trained model by not specifying `-cmp`.
+where `X`, `Y` are paths to the new training/validation dataset as in reaction center prediction. `Z` is
+the path to a trained model for reaction center prediction. You can use our pre-trained model by not specifying `-cmp`.
+
+The script also assumes that `train_valid_reactions.proc` and `val_valid_reactions.proc` are in the current directory.
 
 For evaluation,
 
