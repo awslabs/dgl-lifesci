@@ -24,7 +24,7 @@ def main(args, path_to_candidate_bonds):
             num_processes=args['num_processes'])
     else:
         train_set = WLNRankDataset(
-            path_to_reaction_file=args['train_path'] + '.proc',
+            path_to_reaction_file='train_valid_reactions.proc',
             candidate_bond_path=path_to_candidate_bonds['train'], mode='train',
             max_num_change_combos_per_reaction=args['max_num_change_combos_per_reaction_train'],
             num_processes=args['num_processes'])
@@ -36,7 +36,7 @@ def main(args, path_to_candidate_bonds):
             num_processes=args['num_processes'])
     else:
         val_set = WLNRankDataset(
-            path_to_reaction_file=args['val_path'] + '.proc',
+            path_to_reaction_file='val_valid_reactions.proc',
             candidate_bond_path=path_to_candidate_bonds['val'], mode='val',
             max_num_change_combos_per_reaction=args['max_num_change_combos_per_reaction_eval'],
             num_processes=args['num_processes'])
