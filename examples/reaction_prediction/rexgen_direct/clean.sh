@@ -1,0 +1,11 @@
+rm -rf center_results
+rm -rf candidate_results
+rm -f train.bin
+rm -f train_valid_reactions.proc
+rm -f train_invalid_reactions.proc
+rm -f val.bin
+rm -f val_valid_reactions.proc
+rm -f val_invalid_reactions.proc
+rm -f test.bin
+rm -f test_valid_reactions.proc
+rm -f test_invalid_reactions.proc

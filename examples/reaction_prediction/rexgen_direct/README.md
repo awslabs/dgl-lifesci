@@ -153,7 +153,6 @@ In addition, atom mapping information is provided.
 
 **Notice**
 
-
 The atom mapping numbers in the rxn should be consecutive integers starting from 1, or it will report [the molAtomMapNumber issue](https://github.com/awslabs/dgl-lifesci/issues/33).
 To avoid the problem, you could convert the raw rxn smiles with explicit hydrgogen atoms to the rxn smiles without hydrogen atoms by RDKit befor adding map ids for the rxn smiles.
 
@@ -210,7 +209,8 @@ Then, add map for the rxn smiles.
 ```
 the oxygen atom will be labelled as 15.
 
-
+Lastly, if you use the scripts for multiple different datasets, you need to delete local cached files with `. clean.sh` 
+before working on a new dataset.
 
 You can then train a model on new datasets with 
 
