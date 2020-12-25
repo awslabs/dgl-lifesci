@@ -97,8 +97,7 @@ def train(args, model_list, train_dataloader, optimizer, criterion, device):
                     pred_edge = edge_linear(logits)
                     # for every edge, add two corresponding node feature.
                     masked_edge_pairs = bg.find_edges(masked_edges_indices)
-                    masked_edges_logits = pred_edge[masked_edge_pairs[0]] + \
-                                          pred_edge[masked_edge_pairs[1]]
+                    masked_edges_logits = pred_edge[masked_edge_pairs[0]] + pred_edge[masked_edge_pairs[1]]
                     loss_edge = criterion(masked_edges_logits, masked_edges_labels)
                     edge_acc = compute_accuracy(masked_edges_logits, masked_edges_labels)
                     loss = loss_node + loss_edge
