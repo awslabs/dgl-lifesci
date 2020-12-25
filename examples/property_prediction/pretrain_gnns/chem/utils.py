@@ -6,7 +6,7 @@ def find_neighbor_edges(g, node_id):
     predecessors = g.predecessors(node_id)
     successors = g.successors(node_id)
     predecessors_edges = g.edge_ids(predecessors, torch.full(predecessors.shape, node_id, dtype=torch.long))
-    successors_edges = g.edge_ids(successors, torch.full(successors.shape, node_id, dtype=torch.long))
+    successors_edges = g.edge_ids(torch.full(successors.shape, node_id, dtype=torch.long), successors)
     return torch.cat((predecessors_edges, successors_edges))
 
 
