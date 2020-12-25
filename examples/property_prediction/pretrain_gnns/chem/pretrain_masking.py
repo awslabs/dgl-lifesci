@@ -9,7 +9,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 import pandas as pd
-from random import sample
+import random
 
 import dgl
 from rdkit import Chem
@@ -32,8 +32,8 @@ def collate_masking(graphs, args):
     bg = dgl.batch(graphs)
     # masked nodes/edges indices in batched graph
     masked_nodes_indices = torch.LongTensor(
-        sample(range(bg.number_of_nodes()), int(bg.number_of_nodes() * args.mask_rate)))
-    if args.mask_edge == 1:
+        random.sample(range(bg.num_nodes()), int(bg.num_nodes() * args.mask_rate)))
+    if args.mask_edge:
         masked_edges_indices = mask_edges(bg, masked_nodes_indices)
 
     node_feats = [
@@ -49,7 +49,7 @@ def collate_masking(graphs, args):
     # mask these nodes labels
     node_feats[0][masked_nodes_indices] = 118
 
-    if args.mask_edge == 1:
+    if args.mask_edge:
         # export masked edges labels
         masked_edges_labels = edge_feats[0][masked_edges_indices]
         # mask these edges labels
@@ -66,7 +66,7 @@ def collate_masking(graphs, args):
 
 
 def train(args, model_list, train_dataloader, optimizer, criterion, device):
-    if args.mask_edge == 1:
+    if args.mask_edge:
         model, node_linear, edge_linear = model_list
     else:
         model, node_linear = model_list
@@ -74,7 +74,7 @@ def train(args, model_list, train_dataloader, optimizer, criterion, device):
     for epoch in range(1, args.epochs):
         model.train()
         node_linear.train()
-        if args.mask_edge == 1:
+        if args.mask_edge:
             edge_linear.train()
         with tqdm.tqdm(train_dataloader) as tq_train:
             for step, (bg, node_feats, edge_feats, masked_indices, masked_labels) in enumerate(tq_train):
@@ -85,7 +85,7 @@ def train(args, model_list, train_dataloader, optimizer, criterion, device):
                 edge_feats = [e.to(device) for e in edge_feats]
                 masked_nodes_indices = torch.LongTensor(masked_nodes_indices).to(device)
                 masked_nodes_labels = torch.LongTensor(masked_nodes_labels).to(device)
-                if args.mask_edge == 1:
+                if args.mask_edge:
                     masked_edges_indices = torch.LongTensor(masked_edges_indices).to(device)
                     masked_edges_labels = torch.LongTensor(masked_edges_labels).to(device)
                 bg = bg.to(device)
@@ -95,7 +95,7 @@ def train(args, model_list, train_dataloader, optimizer, criterion, device):
                 pred_node = node_linear(logits)
                 loss_node = criterion(pred_node[masked_nodes_indices], masked_nodes_labels)
                 node_acc = compute_accuracy(pred_node[masked_nodes_indices], masked_nodes_labels)
-                if args.mask_edge == 1:
+                if args.mask_edge:
                     pred_edge = edge_linear(logits)
                     # for every edge, add two corresponding node feature.
                     masked_edges_logits = pred_edge[bg.find_edges(masked_edges_indices)[0]] + \
@@ -136,31 +136,35 @@ def main():
     parser.add_argument('--emb_dim', type=int, default=300,
                         help='embedding dimensions (default: 300)')
     parser.add_argument('--dropout_ratio', type=float, default=0,
-                        help='dropout ratio (default: 0)')
+                        help='ratio of masking nodes (atoms)')
     parser.add_argument('--mask_rate', type=float, default=0.15,
                         help='dropout ratio (default: 0.15)')
-    parser.add_argument('--mask_edge', type=int, default=0,
-                        help='whether to mask edges or not together with atoms')
+    parser.add_argument('--mask_edge', action='store_true',
+                        help='whether to mask all edges connected to masked nodes (atoms) (default: False)')
     parser.add_argument('--JK', type=str, default="last",
                         help='how the node features are combined across layers. last, sum, max or concat')
     parser.add_argument('--dataset', type=str, default='zinc_standard_agent',
                         help='root directory of dataset for pretraining')
-    parser.add_argument('--output_model_file', type=str, default='', help='filename to output the model')
-    parser.add_argument('--seed', type=int, default=0, help="Seed.")
+    parser.add_argument('--output_model_file', type=str, default='model.pth', help='filename to output the model')
+    parser.add_argument('--seed', type=int, default=0, help="Random seed.")
     parser.add_argument('--num_workers', type=int, default=8, help='number of workers for dataset loading')
     args = parser.parse_args()
     print(args)
 
+    # set seed
+    random.seed(args.seed)
     torch.manual_seed(args.seed)
+    dgl.random.seed(args.seed)
+
     if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(args.seed)
+        torch.cuda.manual_seed(args.seed)
 
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
 
-    if args.zinc_standard_agent is not 'zinc_standard_agent':
+    if args.dataset != 'zinc_standard_agent':
         raise ValueError('Dataset should be zinc_standard_agent.')
     df = pd.read_csv('./zinc.csv')
-    # df = pd.read_csv('./test_tiny_data_zinc.txt')
+
     atom_featurizer = PretrainAtomFeaturizer()
     bond_featurizer = PretrainBondFeaturizer()
     dataset = PretrainMaskingMoleculeCSVDataset(df=df,
@@ -183,16 +187,16 @@ def main():
                             emb_dim=args.emb_dim,
                             JK=args.JK,
                             dropout=args.dropout_ratio)
-    node_linear = torch.nn.Linear(args.emb_dim, 119)
-    if args.mask_edge == 1:
-        edge_linear = torch.nn.Linear(args.emb_dim, 6)
+    node_linear = nn.Linear(args.emb_dim, 119)
+    if args.mask_edge:
+        edge_linear = nn.Linear(args.emb_dim, 6)
 
     model.to(device)
     node_linear.to(device)
-    if args.mask_edge == 1:
+    if args.mask_edge:
         edge_linear.to(device)
 
-    if args.mask_edge == 1:
+    if args.mask_edge:
         all_params = itertools.chain(model.parameters(), node_linear.parameters(), edge_linear.parameters())
     else:
         all_params = itertools.chain(model.parameters(), node_linear.parameters())
@@ -200,7 +204,7 @@ def main():
     optimizer = torch.optim.Adam(all_params, lr=args.lr, weight_decay=args.decay)
     criterion = nn.CrossEntropyLoss()
 
-    if args.mask_edge == 1:
+    if args.mask_edge:
         model_list = (model, node_linear, edge_linear)
     else:
         model_list = (model, node_linear)
