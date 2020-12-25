@@ -81,11 +81,11 @@ def train(args, model_list, train_dataloader, optimizer, criterion, device):
 
                 node_feats = [n.to(device) for n in node_feats]
                 edge_feats = [e.to(device) for e in edge_feats]
-                masked_nodes_indices = torch.LongTensor(masked_nodes_indices).to(device)
-                masked_nodes_labels = torch.LongTensor(masked_nodes_labels).to(device)
+                masked_nodes_indices = masked_nodes_indices.to(device)
+                masked_nodes_labels = masked_nodes_labels.to(device)
                 if args.mask_edge:
-                    masked_edges_indices = torch.LongTensor(masked_edges_indices).to(device)
-                    masked_edges_labels = torch.LongTensor(masked_edges_labels).to(device)
+                    masked_edges_indices = masked_edges_indices.to(device)
+                    masked_edges_labels = masked_edges_labels.to(device)
                 bg = bg.to(device)
 
                 logits = model(bg, node_feats, edge_feats)
