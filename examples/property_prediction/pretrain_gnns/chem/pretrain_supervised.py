@@ -87,16 +87,19 @@ def main():
     parser.add_argument('--dataset', type=str, default='chembl_filtered',
                         help='root directory of dataset. For now, only classification.')
     parser.add_argument('--gnn_type', type=str, default="gin")
-    parser.add_argument('--input_model_file', type=str, default='', help='filename to read the model (if there is any)')
+    parser.add_argument('--input_model_file', type=str, default=None,
+                        help='filename to read the model if there is any. (default: None)')
     parser.add_argument('--output_model_file', type=str, default='', help='filename to output the pre-trained model')
-    parser.add_argument('--seed', type=int, default=0, help="Seed.")
+    parser.add_argument('--seed', type=int, default=0, help="Random seed.")
     parser.add_argument('--num_workers', type=int, default=8, help='number of workers for dataset loading')
     args = parser.parse_args()
     print(args)
 
+    # set seed
     torch.manual_seed(args.seed)
+    dgl.seed(args.seed)
     if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(args.seed)
+        torch.cuda.manual_seed(args.seed)
 
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
 
@@ -109,11 +112,11 @@ def main():
                          readout=args.graph_pooling,
                          n_tasks=1310)
 
-    if not args.input_model_file == "":
-        model.load_state_dict(torch.load(args.input_model_file + ".pth"))
+    if args.input_model_file != "":
+        model.load_state_dict(torch.load(args.input_model_file))
     model.to(device)
 
-    if args.zinc_standard_agent is not 'chembl_filtered':
+    if args.dataset != 'chembl_filtered':
         raise ValueError('Dataset should be chembl_filtered.')
     with open('./supervised_chembl_rev.pkl', 'rb') as f:
         data = pickle.load(f)
@@ -137,7 +140,7 @@ def main():
     train(args, model, train_dataloader, optimizer, criterion, device)
 
     if not args.output_model_file == "":
-        torch.save(model.state_dict(), args.output_model_file + ".pth")
+        torch.save(model.state_dict(), args.output_model_file)
 
 
 if __name__ == "__main__":
