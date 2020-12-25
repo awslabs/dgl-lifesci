@@ -1,17 +1,13 @@
 import argparse
 import pickle
 import tqdm
-import csv
 from functools import partial
-import itertools
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 import dgl
-from rdkit import Chem
 from dgllife.utils import PretrainAtomFeaturizer
 from dgllife.utils import PretrainBondFeaturizer
 from dgllife.utils import smiles_to_bigraph

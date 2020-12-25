@@ -1,6 +1,4 @@
 import torch
-import dgl
-import numpy as np
 
 
 def find_neighbor_edges(g, node_id):
