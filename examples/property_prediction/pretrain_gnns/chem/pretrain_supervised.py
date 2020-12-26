@@ -42,10 +42,14 @@ def train(args, model, train_dataloader, optimizer, criterion, device):
 
                 logits = model(bg, node_feats, edge_feats)
 
+                # The possible values are {-1, 0, 1} in `labels`.
+                # "1" means positive, and "-1" means negative. "0" indicates the molecule is invalid.
                 is_valid = labels ** 2 > 0
                 is_valid = is_valid.to(device)
                 labels = labels.type_as(logits)
+                # Negative labels will be changed from "-1" to "0"
                 loss = criterion(logits, (labels + 1) / 2)
+                # Replace invalid molecule labels from "-1" to "0".
                 loss = torch.where(is_valid, loss, torch.zeros(loss.shape).to(loss.device).to(loss.dtype))
                 loss = torch.sum(loss) / torch.sum(is_valid)
 
