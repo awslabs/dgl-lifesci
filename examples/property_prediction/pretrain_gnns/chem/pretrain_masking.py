@@ -15,7 +15,7 @@ from dgllife.utils import PretrainAtomFeaturizer
 from dgllife.utils import PretrainBondFeaturizer
 from dgllife.utils import smiles_to_bigraph
 
-from model import GINMaskingModel
+from dgllife.model.model_zoo.gin_predictor import GINPredictor
 from utils import *
 
 
@@ -181,12 +181,13 @@ def main():
 
     # 118 atom number plus 1 masked node type = 119
     # 4 bond type plus self-loop plus 1 masked node type = 6
-    model = GINMaskingModel(num_node_emb_list=[119, 4],
+    model = GINPredictor(num_node_emb_list=[119, 4],
                             num_edge_emb_list=[6, 3],
                             num_layers=args.num_layer,
                             emb_dim=args.emb_dim,
                             JK=args.JK,
-                            dropout=args.dropout_ratio)
+                            dropout=args.dropout_ratio,
+                            readout='skip')
     node_linear = nn.Linear(args.emb_dim, 119)
     if args.mask_edge:
         edge_linear = nn.Linear(args.emb_dim, 6)
