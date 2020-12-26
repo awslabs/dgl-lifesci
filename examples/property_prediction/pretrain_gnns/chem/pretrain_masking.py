@@ -142,7 +142,7 @@ def main():
     parser.add_argument('--JK', type=str, default="last",
                         help='how the node features are combined across layers. last, sum, max or concat. (default: last)')
     parser.add_argument('--dataset', type=str, default='zinc_standard_agent',
-                        help='root directory of dataset for pretraining. (default: zinc_standard_agent)')
+                        help='path of the dataset for self-supervised pretraining. (default: zinc_standard_agent)')
     parser.add_argument('--output_model_file', type=str, default='pretrain_masking.pth',
                         help='filename to output the model. (default: pretrain_masking.pth)')
     parser.add_argument('--seed', type=int, default=0, help="Random seed.")

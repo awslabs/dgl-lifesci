@@ -15,11 +15,15 @@ python pretrain_masking.py  --output_model_file OUTPUT_MODEL_PATH
 ```
 The self-supervised pre-training model will be found in `OUTPUT_MODEL_PATH` after training. (default filename: pretrain_masking.pth)
 
+If a custom dataset is specified, the path need to be provided with `--dataset`. The custom dataset is supposed to be a text file, which every line is a molecule SMILES. 
+
 **2. Supervised pre-training**
 ``` bash
 python pretrain_supervised.py --output_model_file OUTPUT_MODEL_PATH --input_model_file INPUT_MODEL_PATH
 ```
 The supervised pre-training model will be found in `OUTPUT_MODEL_PATH` after training. (default filename: pretrain_supervised.pth)
+
+If a custom dataset is specified, the path need to be provided with `--dataset`. The custom dataset is supposed to be a `.pkl` file, which is pickled from "a list of tuples". The first element in every `tuple` should be a molecule SMILES in class `str`, and the second element should be the corresponding label in class `torch.Tensor`. The possible values are {-1, 0, 1} in labels. "1" means positive, and "-1" means negative. "0" indicates the molecule is invalid.
 
 ## Experiment Results
 - to-do

@@ -85,8 +85,7 @@ def main():
     parser.add_argument('--JK', type=str, default="last",
                         help='how the node features across layers are combined. last, sum, max or concat. (default: last)')
     parser.add_argument('--dataset', type=str, default='chembl_filtered',
-                        help='root directory of dataset. For now, only classification (default: chembl_filtered)')
-    # parser.add_argument('--gnn_type', type=str, default="gin")
+                        help='path of the dataset. For now, only classification (default: chembl_filtered)')
     parser.add_argument('--input_model_file', type=str, default=None,
                         help='filename to read the model if there is any. (default: None)')
     parser.add_argument('--output_model_file', type=str, default='pretrain_supervised.pth',
