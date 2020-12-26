@@ -12,7 +12,7 @@ This is a DGL implementation of the following paper based on PyTorch.
 ## Usage
 **1. Self-supervised pre-training**
 
-This paper purposed an attribute masking pre-training method. It randomly mask input node/edge attributes by replacing them with special masked indicators, then the GNN will predict those attributes based on neighboring structure.
+This paper purposed an attribute masking pre-training method. It randomly masks input node/edge attributes by replacing them with special masked indicators, then the GNN will predict those attributes based on neighboring structure.
 
 ``` bash
 python pretrain_masking.py  --output_model_file OUTPUT_MODEL_PATH
