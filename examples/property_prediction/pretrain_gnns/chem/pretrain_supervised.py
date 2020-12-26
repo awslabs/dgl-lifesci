@@ -81,9 +81,17 @@ def main():
     parser.add_argument('--dropout_ratio', type=float, default=0.2,
                         help='dropout ratio. (default: 0.2)')
     parser.add_argument('--graph_pooling', type=str, default="mean",
-                        help='graph level pooling. sum, mean, max, set2set or attention. (default: mean)')
+                        help='graph level pooling, or readout.'
+                             'for computing graph representations out of node representations, '
+                             'which can be `sum`, `mean`, `max` or `attention`. (default: mean)')  # todo: set2set
     parser.add_argument('--JK', type=str, default="last",
-                        help='how the node features across layers are combined. last, sum, max or concat. (default: last)')
+                        help='JK for jumping knowledge '
+                             'decides how we are going to combine the all-layer node representations for the final output.'
+                             'It can be `concat`, `last`, `max` or `sum`. (default: last)'
+                             '`concat`: concatenate the output node representations from all GIN layers'
+                             '`last`: use the node representations from the last GIN layer'
+                             '`max`: apply max pooling to the node representations across all GIN layers'
+                             '`sum`: sum the output node representations from all GIN layers')
     parser.add_argument('--dataset', type=str, default='chembl_filtered',
                         help='path of the dataset. For now, only classification (default: chembl_filtered)')
     parser.add_argument('--input_model_file', type=str, default=None,

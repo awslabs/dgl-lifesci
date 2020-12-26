@@ -130,17 +130,23 @@ def main():
     parser.add_argument('--decay', type=float, default=0,
                         help='weight decay (default: 0)')
     parser.add_argument('--num_layer', type=int, default=5,
-                        help='number of GNN message passing layers (default: 5).')
+                        help='number of GNN message passing layers. (default: 5)')
     parser.add_argument('--emb_dim', type=int, default=300,
-                        help='embedding dimensions (default: 300)')
+                        help='embedding dimensions. (default: 300)')
     parser.add_argument('--dropout_ratio', type=float, default=0,
                         help='ratio of masking nodes (atoms). (default: 0)')
     parser.add_argument('--mask_rate', type=float, default=0.15,
                         help='dropout ratio (default: 0.15)')
     parser.add_argument('--mask_edge', action='store_true',
-                        help='whether to mask all edges connected to masked nodes (atoms) (default: False)')
+                        help='whether to mask all edges connected to masked nodes (atoms). (default: False)')
     parser.add_argument('--JK', type=str, default="last",
-                        help='how the node features are combined across layers. last, sum, max or concat. (default: last)')
+                        help='JK for jumping knowledge '
+                             'decides how we are going to combine the all-layer node representations for the final output.'
+                             'It can be `concat`, `last`, `max` or `sum`. (default: last)'
+                             '`concat`: concatenate the output node representations from all GIN layers'
+                             '`last`: use the node representations from the last GIN layer'
+                             '`max`: apply max pooling to the node representations across all GIN layers'
+                             '`sum`: sum the output node representations from all GIN layers')
     parser.add_argument('--dataset', type=str, default='zinc_standard_agent',
                         help='path of the dataset for self-supervised pretraining. (default: zinc_standard_agent)')
     parser.add_argument('--output_model_file', type=str, default='pretrain_masking.pth',
@@ -182,12 +188,12 @@ def main():
     # 118 atom number plus 1 masked node type = 119
     # 4 bond type plus self-loop plus 1 masked node type = 6
     model = GINPredictor(num_node_emb_list=[119, 4],
-                            num_edge_emb_list=[6, 3],
-                            num_layers=args.num_layer,
-                            emb_dim=args.emb_dim,
-                            JK=args.JK,
-                            dropout=args.dropout_ratio,
-                            readout='skip')
+                         num_edge_emb_list=[6, 3],
+                         num_layers=args.num_layer,
+                         emb_dim=args.emb_dim,
+                         JK=args.JK,
+                         dropout=args.dropout_ratio,
+                         readout='skip')
     node_linear = nn.Linear(args.emb_dim, 119)
     if args.mask_edge:
         edge_linear = nn.Linear(args.emb_dim, 6)
