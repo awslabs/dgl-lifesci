@@ -85,8 +85,8 @@ def main():
     # parser.add_argument('--gnn_type', type=str, default="gin")
     parser.add_argument('--input_model_file', type=str, default=None,
                         help='filename to read the model if there is any. (default: None)')
-    parser.add_argument('--output_model_file', type=str, default='',
-                        help='filename to output the pre-trained model. (default: None)')
+    parser.add_argument('--output_model_file', type=str, default='pretrain_supervised.pth',
+                        help='filename to output the pre-trained model. (default: pretrain_supervised.pth)')
     parser.add_argument('--seed', type=int, default=0, help="Random seed.")
     parser.add_argument('--num_workers', type=int, default=8,
                         help='number of workers for dataset loading. (default: 8)')
