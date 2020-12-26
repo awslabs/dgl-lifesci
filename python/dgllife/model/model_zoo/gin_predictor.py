@@ -58,7 +58,7 @@ class GINPredictor(nn.Module):
         Dropout to apply to the output of each GIN layer. Default to 0.5.
     readout : str
         Readout for computing graph representations out of node representations, which
-        can be ``'sum'``, ``'mean'``, ``'max'``, or ``'attention'``. Default to 'mean'.
+        can be ``'sum'``, ``'mean'``, ``'max'``, ``'attention'``, or ``'skip'``. Default to 'mean'.
     n_tasks : int
         Number of tasks, which is also the output size. Default to 1.
     """
@@ -90,9 +90,11 @@ class GINPredictor(nn.Module):
             else:
                 self.readout = GlobalAttentionPooling(
                     gate_nn=nn.Linear(emb_dim, 1))
+        elif readout == 'skip':
+            self.readout = 'skip'
         else:
             raise ValueError("Expect readout to be 'sum', 'mean', "
-                             "'max' or 'attention', got {}".format(readout))
+                             "'max', 'attention' or 'skip', got {}".format(readout))
 
         if JK == 'concat':
             self.predict = nn.Linear((num_layers + 1) * emb_dim, n_tasks)
@@ -123,5 +125,7 @@ class GINPredictor(nn.Module):
             * B for the number of graphs in the batch
         """
         node_feats = self.gnn(g, categorical_node_feats, categorical_edge_feats)
+        if self.readout == 'skip':
+            return self.predict(node_feats)
         graph_feats = self.readout(g, node_feats)
         return self.predict(graph_feats)
