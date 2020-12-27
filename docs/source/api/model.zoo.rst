@@ -77,11 +77,6 @@ DGMG
 .. automodule:: dgllife.model.model_zoo.dgmg
     :members:
 
-JTNN
-````
-.. autoclass:: dgllife.model.model_zoo.jtnn.DGLJTNNVAE
-    :members:
-
 Reaction Prediction
 
 WLN for Reaction Center Prediction
