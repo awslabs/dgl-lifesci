@@ -184,7 +184,7 @@ class GetContext(nn.Module):
         dict
             Mapping ``'he1'`` to updated edge features.
         """
-        return {'he1': torch.cat([edges.src['hv'], edges.data['he']], dim=1)}
+        return {'he1': torch.cat([edges.dst['hv'], edges.data['he']], dim=1)}
 
     def apply_edges2(self, edges):
         """Edge feature update.
@@ -199,7 +199,7 @@ class GetContext(nn.Module):
         dict
             Mapping ``'he2'`` to updated edge features.
         """
-        return {'he2': torch.cat([edges.dst['hv_new'], edges.data['he1']], dim=1)}
+        return {'he2': torch.cat([edges.src['hv_new'], edges.data['he1']], dim=1)}
 
     def forward(self, g, node_feats, edge_feats):
         """Incorporate edge features and update node representations.
