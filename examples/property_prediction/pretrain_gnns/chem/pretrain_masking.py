@@ -169,15 +169,16 @@ def main():
 
     if args.dataset != 'zinc_standard_agent':
         raise ValueError('Dataset should be zinc_standard_agent.')
-    df = pd.read_csv('./zinc.csv')
+    data = pd.read_csv('./zinc.csv')
 
     atom_featurizer = PretrainAtomFeaturizer()
     bond_featurizer = PretrainBondFeaturizer()
-    dataset = PretrainMaskingMoleculeCSVDataset(df=df,
-                                                smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
-                                                node_featurizer=atom_featurizer,
-                                                edge_featurizer=bond_featurizer,
-                                                smiles_column='smiles')
+    dataset = PretrainDataset(data=data,
+                              smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
+                              node_featurizer=atom_featurizer,
+                              edge_featurizer=bond_featurizer,
+                              smiles_column='smiles',
+                              task='masking')
 
     train_dataloader = DataLoader(dataset=dataset,
                                   batch_size=args.batch_size,

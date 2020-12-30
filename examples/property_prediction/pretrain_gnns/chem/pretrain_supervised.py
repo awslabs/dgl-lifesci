@@ -13,7 +13,7 @@ from dgllife.utils import PretrainBondFeaturizer
 from dgllife.utils import smiles_to_bigraph
 from dgllife.model.model_zoo.gin_predictor import GINPredictor
 
-from utils import PretrainSupervisedMoleculeCSVDataset
+from utils import PretrainDataset
 
 
 def collate(samples):
@@ -132,10 +132,11 @@ def main():
 
     atom_featurizer = PretrainAtomFeaturizer()
     bond_featurizer = PretrainBondFeaturizer()
-    dataset = PretrainSupervisedMoleculeCSVDataset(data=data,
-                                                   smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
-                                                   node_featurizer=atom_featurizer,
-                                                   edge_featurizer=bond_featurizer)
+    dataset = PretrainDataset(data=data,
+                              smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
+                              node_featurizer=atom_featurizer,
+                              edge_featurizer=bond_featurizer,
+                              task='supervised')
 
     train_dataloader = DataLoader(dataset=dataset,
                                   batch_size=args.batch_size,
