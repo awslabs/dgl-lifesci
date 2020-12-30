@@ -21,7 +21,7 @@ from .gnn_ogb_predictor import *
 try:
     # DGMG requires RDKit support
     from .dgmg import *
-    from .jtnn import *
+    from .jtvae import *
 except ImportError:
     pass
 

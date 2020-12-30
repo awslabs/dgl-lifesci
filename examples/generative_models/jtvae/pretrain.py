@@ -10,11 +10,12 @@
 import rdkit
 import sys
 import torch
-import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 
-from dgllife.utils.jtvae import JTVAEVocab
+from dgllife.data import JTVAEZINC, JTVAEDataset, JTVAECollator
+from dgllife.model import JTNNVAE
+from dgllife.utils import JTVAEVocab
 from torch.utils.data import DataLoader
 
 def main(args):
@@ -26,25 +27,21 @@ def main(args):
     else:
         device = torch.device('cuda:0')
 
-    dataset = JTVAEDataset(args.train_path)
+    vocab = JTVAEVocab(file_path=args.train_path)
+    if args.train_path is None:
+        dataset = JTVAEZINC('train', vocab)
+    else:
+        dataset = JTVAEDataset(args.train_path, vocab)
     dataloader = DataLoader(dataset,
                             batch_size=args.batch_size,
                             shuffle=True,
                             num_workers=4,
-                            collate_fn=lambda x: x,
+                            collate_fn=JTVAECollator(),
                             drop_last=True)
 
-    vocab = JTVAEVocab(file_path=args.train_path)
-    model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth)
-
-    # TODO: make this a function of model class
-    for param in model.parameters():
-        if param.dim() == 1:
-            nn.init.constant(param, 0)
-        else:
-            nn.init.xavier_normal(param)
-
-    model = model.to(device)
+    model = JTNNVAE(vocab, args.hidden_size, args.latent_size,
+                    args.depth, data_path=args.train_path).to(device)
+    model.reset_parameters()
     print("Model #Params: {:d}K".format(sum([x.nelement() for x in model.parameters()]) / 1000))
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
@@ -53,15 +50,17 @@ def main(args):
     for epoch in range(args.max_epoch):
         word_acc, topo_acc, assm_acc, steo_acc = 0, 0, 0, 0
 
-        for it, batch in enumerate(dataloader):
+        for it, (batch_trees, batch_tree_graphs, batch_mol_graphs) in enumerate(dataloader):
+            """
             for mol_tree in batch:
                 for node in mol_tree.nodes:
                     if node.label not in node.cands:
                         node.cands.append(node.label)
                         node.cand_mols.append(node.label_mol)
-
-            model.zero_grad()
-            loss, kl_div, wacc, tacc, sacc, dacc = model(batch, beta=0)
+            """
+            loss, kl_div, wacc, tacc, sacc, dacc = model(
+                batch_trees, batch_tree_graphs, batch_mol_graphs, beta=0)
+            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 

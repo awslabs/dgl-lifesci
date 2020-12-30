@@ -7,95 +7,14 @@
 #
 # MolTree in JTVAE
 
+import dgl
+import numpy as np
+import torch
+
 from rdkit import Chem
 
 from .chemutils import get_mol, decode_stereo, get_clique_mol, get_smiles, enum_assemble, \
     set_atommap, tree_decomp
-
-class MolTreeNode(object):
-    """A node in a junction tree.
-
-    Parameters
-    ----------
-    smiles : str
-        A SMILES string.
-    clique : list of int
-        ID for the atoms corresponding to the SMILES string in the original molecule.
-    """
-    def __init__(self, smiles, clique=None):
-        if clique is None:
-            clique = []
-
-        self.smiles = smiles
-        self.mol = get_mol(self.smiles)
-
-        self.clique = [x for x in clique]  # copy
-        self.neighbors = []
-
-    def add_neighbor(self, nei_node):
-        """Add a neighbor
-
-        Parameters
-        ----------
-        nei_node : MolTreeNode
-            A neighboring node in the junction tree.
-        """
-        self.neighbors.append(nei_node)
-
-    def recover(self, original_mol):
-        """Get the SMILES string in the original molecule.
-
-        Parameters
-        ----------
-        original_mol : rdkit.Chem.rdchem.Mol
-            The original molecule.
-
-        Returns
-        -------
-        str
-            A SMILES string.
-        """
-        clique = []
-        clique.extend(self.clique)
-        if not self.is_leaf:
-            for cidx in self.clique:
-                original_mol.GetAtomWithIdx(cidx).SetAtomMapNum(self.nid)
-
-        for nei_node in self.neighbors:
-            clique.extend(nei_node.clique)
-            if nei_node.is_leaf:  # Leaf node, no need to mark
-                continue
-            for cidx in nei_node.clique:
-                # allow singleton node override the atom mapping
-                if cidx not in self.clique or len(nei_node.clique) == 1:
-                    atom = original_mol.GetAtomWithIdx(cidx)
-                    atom.SetAtomMapNum(nei_node.nid)
-
-        clique = list(set(clique))
-        label_mol = get_clique_mol(original_mol, clique)
-        self.label = Chem.MolToSmiles(Chem.MolFromSmiles(get_smiles(label_mol)))
-        self.label_mol = get_mol(self.label)
-
-        for cidx in clique:
-            original_mol.GetAtomWithIdx(cidx).SetAtomMapNum(0)
-
-        return self.label
-
-    def assemble(self):
-        """Assemble the node with its successors"""
-        neighbors = [nei for nei in self.neighbors if nei.mol.GetNumAtoms() > 1]
-        neighbors = sorted(neighbors, key=lambda x: x.mol.GetNumAtoms(), reverse=True)
-        singletons = [nei for nei in self.neighbors if nei.mol.GetNumAtoms() == 1]
-        neighbors = singletons + neighbors
-
-        cands = enum_assemble(self, neighbors)
-        if len(cands) > 0:
-            self.cands, self.cand_mols, _ = zip(*cands)
-            self.cands = list(self.cands)
-            self.cand_mols = list(self.cand_mols)
-        else:
-            self.cands = []
-            self.cand_mols = []
 
 class MolTree(object):
     """Junction tree.
@@ -108,7 +27,7 @@ class MolTree(object):
     def __init__(self, smiles):
         self.smiles = smiles
         self.mol = get_mol(smiles)
-        self.nodes = []
+        self.nodes_dict = {}
 
         # Stereo Generation
         mol = Chem.MolFromSmiles(smiles)
@@ -117,6 +36,7 @@ class MolTree(object):
             self.smiles3D = None
             self.smiles2D = None
             self.stereo_cands = []
+            self.graph = dgl.graph(([], []), idtype=torch.int32)
             return
 
         self.smiles3D = Chem.MolToSmiles(mol, isomericSmiles=True)
@@ -128,24 +48,51 @@ class MolTree(object):
         root = 0
         for i, c in enumerate(cliques):
             cmol = get_clique_mol(self.mol, c)
-            node = MolTreeNode(get_smiles(cmol), c)
-            self.nodes.append(node)
+            csmiles = get_smiles(cmol)
+            self.nodes_dict[i] = {'smiles': csmiles, 'mol': get_mol(csmiles), 'clique': c}
+
             if min(c) == 0:
                 root = i
 
-        for x, y in edges:
-            self.nodes[x].add_neighbor(self.nodes[y])
-            self.nodes[y].add_neighbor(self.nodes[x])
-
+        # Make the clique with atom ID 0 the root
+        root_changed = False
         if root > 0:
-            self.nodes[0], self.nodes[root] = self.nodes[root], self.nodes[0]
+            root_changed = True
+            for attr in self.nodes_dict[0]:
+                self.nodes_dict[0][attr], self.nodes_dict[root][attr] = \
+                    self.nodes_dict[root][attr], self.nodes_dict[0][attr]
 
-        for i, node in enumerate(self.nodes):
-            node.nid = i + 1
-            if len(node.neighbors) > 1:
+        # Construct DGLGraph for the junction tree
+        src = np.zeros((len(edges) * 2,), dtype='int')
+        dst = np.zeros((len(edges) * 2,), dtype='int')
+
+        def _switch_id(id, root, root_changed):
+            if not root_changed:
+                return id
+            if id == root:
+                return 0
+            elif id == 0:
+                return root
+            else:
+                return id
+
+        for i, (_x, _y) in enumerate(edges):
+            x = _switch_id(_x, root, root_changed)
+            y = _switch_id(_y, root, root_changed)
+
+            src[2 * i] = x
+            dst[2 * i] = y
+            src[2 * i + 1] = y
+            dst[2 * i + 1] = x
+
+        self.graph = dgl.graph((src, dst), num_nodes=len(cliques), idtype=torch.int32)
+
+        for i in self.nodes_dict:
+            self.nodes_dict[i]['nid'] = i + 1
+            if self.graph.out_degrees(i) > 1:
                 # Leaf node mol is not marked
-                set_atommap(node.mol, node.nid)
-            node.is_leaf = (len(node.neighbors) == 1)
+                set_atommap(self.nodes_dict[i]['mol'], self.nodes_dict[i]['nid'])
+            self.nodes_dict[i]['is_leaf'] = (self.graph.out_degrees(i) == 1)
 
     def size(self):
         """Get the number of nodes in the junction tree.
@@ -155,14 +102,85 @@ class MolTree(object):
         int
             Number of nodes in the junction tree.
         """
-        return len(self.nodes)
+        return self.graph.num_nodes()
+
+    def _recover_node(self, i, original_mol):
+        """Get the SMILES string corresponding to the i-th cluster in the
+        original molecule.
+
+        Parameters
+        ----------
+        i : int
+            The id of a cluster.
+        original_mol : rdkit.Chem.rdchem.Mol
+            The original molecule.
+
+        Returns
+        -------
+        str
+            A SMILES string.
+        """
+        node = self.nodes_dict[i]
+
+        clique = []
+        clique.extend(node['clique'])
+        if not node['is_leaf']:
+            for cidx in node['clique']:
+                original_mol.GetAtomWithIdx(cidx).SetAtomMapNum(node['nid'])
+
+        for j in self.graph.successors(i).numpy():
+            nei_node = self.nodes_dict[j]
+            clique.extend(nei_node['clique'])
+            if nei_node['is_leaf']:  # Leaf node, no need to mark
+                continue
+            for cidx in nei_node['clique']:
+                # allow singleton node override the atom mapping
+                if cidx not in node['clique'] or len(nei_node['clique']) == 1:
+                    atom = original_mol.GetAtomWithIdx(cidx)
+                    atom.SetAtomMapNum(nei_node['nid'])
+
+        clique = list(set(clique))
+        label_mol = get_clique_mol(original_mol, clique)
+        node['label'] = Chem.MolToSmiles(Chem.MolFromSmiles(get_smiles(label_mol)))
+        node['label_mol'] = get_mol(node['label'])
+
+        for cidx in clique:
+            original_mol.GetAtomWithIdx(cidx).SetAtomMapNum(0)
+
+        return node['label']
 
     def recover(self):
         """Get the SMILES string corresponding to all clusters in the original molecule."""
-        for node in self.nodes:
-            node.recover(self.mol)
+        for i in self.nodes_dict:
+            self._recover_node(i, self.mol)
+
+    def _assemble_node(self, i):
+        """Assemble a cluster with its successors.
+
+        Parameters
+        ----------
+        i : int
+            The id of a cluster.
+        """
+        neighbors = [self.nodes_dict[j] for j in self.graph.successors(i).numpy()
+                     if self.nodes_dict[j]['mol'].GetNumAtoms() > 1]
+        neighbors = sorted(neighbors, key=lambda x: x['mol'].GetNumAtoms(), reverse=True)
+        singletons = [self.nodes_dict[j] for j in self.graph.successors(i).numpy()
+                      if self.nodes_dict[j]['mol'].GetNumAtoms() == 1]
+        # All successors sorted based on their size
+        neighbors = singletons + neighbors
+
+        cands = enum_assemble(self.nodes_dict[i], neighbors)
+
+        if len(cands) > 0:
+            cands, cand_mols, _ = list(zip(*cands))
+            self.nodes_dict[i]['cands'] = list(cands)
+            self.nodes_dict[i]['cand_mols'] = list(cand_mols)
+        else:
+            self.nodes_dict[i]['cands'] = []
+            self.nodes_dict[i]['cand_mols'] = []
 
     def assemble(self):
         """Assemble each cluster with its successors."""
-        for node in self.nodes:
-            node.assemble()
+        for i in self.nodes_dict:
+            self._assemble_node(i)

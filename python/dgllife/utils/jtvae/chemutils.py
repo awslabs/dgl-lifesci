@@ -214,7 +214,7 @@ def enum_attach(ctr_mol, nei_node, amap, singletons):
     ----------
     ctr_mol : rdkit.Chem.rdchem.Mol
         The central molecule.
-    nei_node : MolTreeNode
+    nei_node : dict
         A cluster to attach to the central molecule.
     amap : list of 3-tuples
         Each tuple consists of the id of the neighboring cluster,
@@ -228,7 +228,7 @@ def enum_attach(ctr_mol, nei_node, amap, singletons):
     list
         Each element is of the form "amap", corresponding to an attachment configuration.
     """
-    nei_mol, nei_idx = nei_node.mol, nei_node.nid
+    nei_mol, nei_idx = nei_node['mol'], nei_node['nid']
     att_confs = []
     # A black list of atoms in the central molecule connected to singletons
     black_list = [atom_idx for nei_id, atom_idx, _ in amap if nei_id in singletons]
@@ -295,9 +295,9 @@ def attach_mols(ctr_mol, neighbors, prev_nodes, nei_amap):
     ----------
     ctr_mol : rdkit.Chem.rdchem.Mol
         The central molecule.
-    neighbors : list of MolTreeNode
+    neighbors : list of dict
         Each element contains the information of a neighboring cluster.
-    prev_nodes : list of MolTreeNode
+    prev_nodes : list of dict
         Each element contains the information of a previous cluster.
     nei_amap : dict
         nei_amap[nei_id][nei_atom] maps an atom in a neighboring cluster
@@ -308,9 +308,9 @@ def attach_mols(ctr_mol, neighbors, prev_nodes, nei_amap):
     rdkit.Chem.rdchem.Mol
         The central molecule with clusters attached.
     """
-    prev_nids = [node.nid for node in prev_nodes]
+    prev_nids = [node['nid'] for node in prev_nodes]
     for nei_node in prev_nodes + neighbors:
-        nei_id,nei_mol = nei_node.nid, nei_node.mol
+        nei_id, nei_mol = nei_node['nid'], nei_node['mol']
         amap = nei_amap[nei_id]
         for atom in nei_mol.GetAtoms():
             if atom.GetIdx() not in amap:
@@ -339,9 +339,9 @@ def local_attach(ctr_mol, neighbors, prev_nodes, amap_list):
     ----------
     ctr_mol : rdkit.Chem.rdchem.Mol
         The central molecule.
-    neighbors : list of MolTreeNode
+    neighbors : list of dict
         Each element contains the information of a neighboring cluster.
-    prev_nodes : list of MolTreeNode
+    prev_nodes : list of dict
         Each element contains the information of a neighboring cluster.
     amap_list : list of 3-tuples
         Each tuple consists of the id of the neighboring cluster,
@@ -354,7 +354,7 @@ def local_attach(ctr_mol, neighbors, prev_nodes, amap_list):
         The central molecule with the clusters attached.
     """
     ctr_mol = copy_edit_mol(ctr_mol)
-    nei_amap = {nei.nid:{} for nei in prev_nodes + neighbors}
+    nei_amap = {nei['nid']: {} for nei in prev_nodes + neighbors}
 
     for nei_id, ctr_atom, nei_atom in amap_list:
         nei_amap[nei_id][nei_atom] = ctr_atom
@@ -369,9 +369,9 @@ def enum_assemble(node, neighbors, prev_nodes=None, prev_amap=None, max_ncand=20
     ----------
     node : MolTree
         The information of the central molecule.
-    neighbors : list of MolTreeNode
+    neighbors : list of dict
         Each element contains the information of a neighboring cluster.
-    prev_nodes : list of MolTreeNode
+    prev_nodes : list of dict
         Each element contains the information of a neighboring cluster.
     prev_amap : list of 3-tuples
         Each tuple consists of the id of the neighboring cluster,
@@ -395,8 +395,8 @@ def enum_assemble(node, neighbors, prev_nodes=None, prev_amap=None, max_ncand=20
         prev_amap = []
 
     all_attach_confs = []
-    singletons = [nei_node.nid for nei_node in neighbors + prev_nodes
-                  if nei_node.mol.GetNumAtoms() == 1]
+    singletons = [nei_node['nid'] for nei_node in neighbors + prev_nodes
+                  if nei_node['mol'].GetNumAtoms() == 1]
 
     def search(cur_amap, depth):
         if len(all_attach_confs) > max_ncand:
@@ -406,11 +406,11 @@ def enum_assemble(node, neighbors, prev_nodes=None, prev_amap=None, max_ncand=20
             return
 
         nei_node = neighbors[depth]
-        cand_amap = enum_attach(node.mol, nei_node, cur_amap, singletons)
+        cand_amap = enum_attach(node['mol'], nei_node, cur_amap, singletons)
         cand_smiles = set()
         candidates = []
         for amap in cand_amap:
-            cand_mol = local_attach(node.mol, neighbors[:depth+1], prev_nodes, amap)
+            cand_mol = local_attach(node['mol'], neighbors[:depth+1], prev_nodes, amap)
             cand_mol = sanitize(cand_mol)
             if cand_mol is None:
                 continue
@@ -430,7 +430,7 @@ def enum_assemble(node, neighbors, prev_nodes=None, prev_amap=None, max_ncand=20
     cand_smiles = set()
     candidates = []
     for amap in all_attach_confs:
-        cand_mol = local_attach(node.mol, neighbors, prev_nodes, amap)
+        cand_mol = local_attach(node['mol'], neighbors, prev_nodes, amap)
         cand_mol = Chem.MolFromSmiles(Chem.MolToSmiles(cand_mol))
         smiles = Chem.MolToSmiles(cand_mol)
         if smiles in cand_smiles:
