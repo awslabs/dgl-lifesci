@@ -68,3 +68,42 @@ class PretrainSupervisedMoleculeCSVDataset(object):
 
     def __len__(self):
         return len(self.smiles)
+
+
+class PretrainDataset(object):
+    """
+    adapted from https://lifesci.dgl.ai/_modules/dgllife/data/csv_dataset.html#MoleculeCSVDataset
+    used for pretrain_masking(task=masking) and pretrain_supervised(task=supervised) task.
+    """
+
+    def __init__(self, data, smiles_to_graph, node_featurizer, edge_featurizer, task=None):
+        self.data = data
+        self.smiles_to_graph = smiles_to_graph
+        self.node_featurizer = node_featurizer
+        self.edge_featurizer = edge_featurizer
+        self.task = task
+        self._pre_process()
+
+    def __getitem__(self, item):
+        s = self.smiles[item]
+        graph = self.smiles_to_graph(s,
+                                     node_featurizer=self.node_featurizer,
+                                     edge_featurizer=self.edge_featurizer)
+        if self.task == 'masking':
+            return graph
+        elif self.task == 'supervised':
+            label = self.labels[item]
+            return graph, label
+        else:
+            raise ValueError('Dataset task should be either `masking` or `supervised`.')
+
+    def _pre_process(self):
+        if self.task == 'supervised':
+            self.smiles, self.labels = zip(*self.data)
+        elif self.task == 'masking':
+            pass
+        else:
+            raise ValueError('Dataset task should be either `masking` or `supervised`.')
+
+    def __len__(self):
+        return len(self.smiles)
