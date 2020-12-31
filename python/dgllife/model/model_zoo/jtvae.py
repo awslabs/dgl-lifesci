@@ -71,7 +71,6 @@ def get_root_ids(graphs):
     batch_num_nodes = graphs.batch_num_nodes().cpu()
     batch_num_nodes = torch.cat([torch.tensor([0]), batch_num_nodes], dim=0)
     root_ids = torch.cumsum(batch_num_nodes, dim=0)[:-1]
-    root_ids = root_ids.to(dtype=graphs.idtype)
 
     return root_ids
 
@@ -113,7 +112,7 @@ class JTNNEncoder(nn.Module):
         # Get the ID of the root nodes, the first node of all trees
         root_ids = get_root_ids(tree_graphs)
 
-        for eid in level_order(tree_graphs, root_ids):
+        for eid in level_order(tree_graphs, root_ids.to(dtype=tree_graphs.idtype)):
             line_tree_graphs.pull(v=eid, message_func=fn.copy_u('h', 'h_nei'),
                                   reduce_func=fn.sum('h_nei', 'sum_h'))
             line_tree_graphs.pull(v=eid, message_func=self.gru_message,
@@ -123,9 +122,9 @@ class JTNNEncoder(nn.Module):
         # Readout
         tree_graphs.ndata['h'] = torch.zeros(tree_graphs.num_nodes(), self.hidden_size).to(device)
         tree_graphs.edata['h'] = line_tree_graphs.ndata['h']
-        tree_graphs.pull(v=root_ids.to(device=device), message_func=fn.copy_e('h', 'm'),
+        tree_graphs.pull(v=root_ids.to(dtype=tree_graphs.idtype, device=device),
+                         message_func=fn.copy_e('h', 'm'),
                          reduce_func=fn.sum('m', 'h'))
-        root_ids = root_ids.long()
         root_vec = torch.cat([
             tree_graphs.ndata['x'][root_ids],
             tree_graphs.ndata['h'][root_ids]
@@ -222,7 +221,7 @@ class JTNNDecoder(nn.Module):
             # Exploit the fact that the reduce function is a sum of incoming messages,
             # and uncomputed messages are zero vectors.
             'h': torch.zeros(line_num_nodes, self.hidden_size).to(device),
-            'vec': dgl.broadcast_nodes(line_tree_graphs, tree_vec),
+            'vec': dgl.broadcast_edges(tree_graphs, tree_vec),
             'sum_h': torch.zeros(line_num_nodes, self.hidden_size).to(device),
             'sum_gated_h': torch.zeros(line_num_nodes, self.hidden_size).to(device)
         })
@@ -237,7 +236,7 @@ class JTNNDecoder(nn.Module):
         pred_mol_vecs.append(tree_vec)
 
         # Traverse the tree and predict on children
-        for eid, p in dfs_order(tree_graphs, root_ids):
+        for eid, p in dfs_order(tree_graphs, root_ids.to(dtype=tree_graphs.idtype)):
             # Message passing excluding the target
             line_tree_graphs.pull(v=eid, message_func=fn.copy_u('h', 'h_nei'),
                                   reduce_func=fn.sum('h_nei', 'sum_h'))
@@ -249,6 +248,7 @@ class JTNNDecoder(nn.Module):
             # By construction, the edges of the raw graph follow the order of
             # (i1, j1), (j1, i1), (i2, j2), (j2, i2), ... The order of the nodes
             # in the line graph corresponds to the order of the edges in the raw graph.
+            eid = eid.long()
             reverse_eid = torch.bitwise_xor(eid, 1)
             cur_o = line_tree_graphs.ndata['sum_h'][eid] + \
                     line_tree_graphs.ndata['h'][reverse_eid]
@@ -267,13 +267,14 @@ class JTNNDecoder(nn.Module):
             #Hidden states for clique prediction
             if len(pred_list) > 0:
                 pred_mol_vecs.append(line_tree_graphs.ndata['vec'][pred_list])
-                pred_targets.extend(line_tree_graphs.ndata['h'][pred_list])
+                pred_hiddens.append(line_tree_graphs.ndata['h'][pred_list])
+                pred_targets.extend(line_tree_graphs.ndata['dst_wid'][pred_list])
 
         #Last stop at root
-        cur_x = torch.LongTensor(tree_graphs.ndata['x'][root_ids])
+        cur_x = tree_graphs.ndata['x'][root_ids]
         tree_graphs.edata['h'] = line_tree_graphs.ndata['h']
-        tree_graphs.pull(v=root_ids, message_func=fn.copy_e('h', 'm'),
-                         reduce_func=fn.sum('m', 'cur_o'))
+        tree_graphs.pull(v=root_ids.to(dtype=tree_graphs.idtype),
+                         message_func=fn.copy_e('h', 'm'), reduce_func=fn.sum('m', 'cur_o'))
         stop_hidden = torch.cat([cur_x, tree_graphs.ndata['cur_o'][root_ids], tree_vec], dim=1)
         stop_hiddens.append(stop_hidden)
         stop_targets.extend([0] * batch_size)
@@ -445,7 +446,7 @@ class JTMPN(nn.Module):
         self.W_h = nn.Linear(hidden_size, hidden_size, bias=False)
         self.W_o = nn.Linear(in_node_feats + hidden_size, hidden_size)
 
-    def forward(self, tree_graphs, cand_graphs, tree_mess,
+    def forward(self, cand_graphs, tree_graphs, tree_mess,
                 tree_mess_source_edges, tree_mess_target_edges):
         cand_graphs = cand_graphs.local_var()
         binput = self.W_i(cand_graphs.edata['x'])
@@ -454,7 +455,7 @@ class JTMPN(nn.Module):
         if tree_mess_source_edges.shape[0] > 0:
             src_u, src_v = tree_mess_source_edges.unbind(1)
             tgt_u, tgt_v = tree_mess_target_edges.unbind(1)
-            eid = tree_graphs.eid_ids(src_u, src_v).long()
+            eid = tree_graphs.edge_ids(src_u, src_v).long()
             cand_graphs.edges[tgt_u, tgt_v].data['t_m'] = tree_mess[eid]
 
         line_cand_graphs = dgl.line_graph(cand_graphs, backtracking=False, shared=True)
@@ -539,13 +540,10 @@ class JTNNVAE(nn.Module):
                   batch_size
 
         epsilon = torch.randn(batch_size, self.latent_size // 2)
-        tree_vec = tree_mean + torch.exp(tree_log_var // 2) * epsilon
-
-        import ipdb
-        ipdb.set_trace()
+        tree_vec = tree_mean + torch.exp(tree_log_var / 2) * epsilon
 
         epsilon = torch.randn(batch_size, self.latent_size // 2)
-        mol_vec = mol_mean + torch.exp(mol_log_var // 2) * epsilon
+        mol_vec = mol_mean + torch.exp(mol_log_var / 2) * epsilon
 
         word_loss, topo_loss, word_acc, topo_acc = self.decoder(batch_tree_graphs, tree_vec)
         assm_loss, assm_acc = self.assm(batch_trees, cand_batch_idx, batch_cand_graphs,
@@ -577,7 +575,7 @@ class JTNNVAE(nn.Module):
         cnt, tot, acc = 0, 0, 0
         all_loss = []
         for i, tree in enumerate(batch_trees):
-            for i, node in enumerate(tree.nodes_dict):
+            for i, node in tree.nodes_dict.items():
                 num_cands = len(node['cands'])
                 if node['is_leaf'] or num_cands == 1:
                     continue
@@ -630,9 +628,9 @@ class JTNNVAE(nn.Module):
         mol_log_var = -torch.abs(self.G_var(mol_vec))  # Following Mueller et al.
 
         epsilon = torch.randn(1, self.latent_size // 2)
-        tree_vec = tree_mean + torch.exp(tree_log_var // 2) * epsilon
+        tree_vec = tree_mean + torch.exp(tree_log_var / 2) * epsilon
         epsilon = torch.randn(1, self.latent_size // 2)
-        mol_vec = mol_mean + torch.exp(mol_log_var // 2) * epsilon
+        mol_vec = mol_mean + torch.exp(mol_log_var / 2) * epsilon
         return self.decode(tree_vec, mol_vec, prob_decode)
 
     def recon_eval(self, smiles):
@@ -648,9 +646,9 @@ class JTNNVAE(nn.Module):
         all_smiles = []
         for _ in range(10):
             epsilon = torch.randn(1, self.latent_size // 2)
-            tree_vec = tree_mean + torch.exp(tree_log_var // 2) * epsilon
+            tree_vec = tree_mean + torch.exp(tree_log_var / 2) * epsilon
             epsilon = torch.randn(1, self.latent_size // 2)
-            mol_vec = mol_mean + torch.exp(mol_log_var // 2) * epsilon
+            mol_vec = mol_mean + torch.exp(mol_log_var / 2) * epsilon
             for _ in range(10):
                 new_smiles = self.decode(tree_vec, mol_vec, prob_decode=True)
                 all_smiles.append(new_smiles)

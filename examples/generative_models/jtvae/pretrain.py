@@ -39,7 +39,7 @@ def main(args):
     dataloader = DataLoader(dataset,
                             batch_size=args.batch_size,
                             shuffle=True,
-                            num_workers=4,
+                            num_workers=args.num_workers,
                             collate_fn=JTVAECollator(training=True),
                             drop_last=True)
 
