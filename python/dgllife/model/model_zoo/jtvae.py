@@ -105,7 +105,9 @@ class JTNNEncoder(nn.Module):
             'src_x_r': self.W_r(line_tree_graphs.ndata['src_x']),
             # Exploit the fact that the reduce function is a sum of incoming messages,
             # and uncomputed messages are zero vectors.
-            'h': torch.zeros(line_tree_graphs.num_nodes(), self.hidden_size).to(device)
+            'h': torch.zeros(line_tree_graphs.num_nodes(), self.hidden_size).to(device),
+            'sum_h': torch.zeros(line_tree_graphs.num_nodes(), self.hidden_size).to(device),
+            'sum_gated_h': torch.zeros(line_tree_graphs.num_nodes(), self.hidden_size).to(device)
         })
 
         # Get the ID of the root nodes, the first node of all trees
@@ -116,12 +118,11 @@ class JTNNEncoder(nn.Module):
                                   reduce_func=fn.sum('h_nei', 'sum_h'))
             line_tree_graphs.pull(v=eid, message_func=self.gru_message,
                                   reduce_func=fn.sum('m', 'sum_gated_h'))
-            import ipdb
-            ipdb.set_trace()
             line_tree_graphs.apply_nodes(self.gru_update, v=eid)
 
         # Readout
         root_ids = root_ids.long()
+        tree_graphs.ndata['h'] = torch.zeros(tree_graphs.num_nodes(), self.hidden_size).to(device)
         tree_graphs.edata['h'] = line_tree_graphs.ndata['h']
         tree_graphs.pull(v=root_ids, message_func=fn.copy_e('h', 'm'),
                          reduce_func=fn.sum('m', 'h'))
