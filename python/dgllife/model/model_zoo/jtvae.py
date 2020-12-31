@@ -201,13 +201,6 @@ class JTNNDecoder(nn.Module):
         self.pred_loss = nn.CrossEntropyLoss(size_average=False)
         self.stop_loss = nn.BCEWithLogitsLoss(size_average=False)
 
-    def get_trace(self, node):
-        super_root = MolTreeNode("")
-        super_root.idx = -1
-        trace = []
-        dfs(trace, node, super_root)
-        return [(x.smiles, y.smiles, z) for x, y, z in trace]
-
     def forward(self, tree_graphs, tree_vec):
         device = tree_vec.device
         batch_size = tree_graphs.batch_size
@@ -505,9 +498,9 @@ class JTNNVAE(nn.Module):
     def reset_parameters(self):
         for param in self.parameters():
             if param.dim() == 1:
-                nn.init.constant(param, 0)
+                nn.init.constant_(param.data, 0)
             else:
-                nn.init.xavier_normal(param)
+                nn.init.xavier_normal_(param.data)
 
     def encode(self, batch_tree_graphs, batch_mol_graphs):
         tree_mess, tree_vec = self.jtnn(batch_tree_graphs)
@@ -681,7 +674,7 @@ class JTNNVAE(nn.Module):
         tree_mess = self.jtnn([pred_root])[0]
 
         cur_mol = copy_edit_mol(pred_root.mol)
-        global_amap = [{}] + [{} for node in pred_nodes]
+        global_amap = [{}] + [{} for _ in pred_nodes]
         global_amap[1] = {atom.GetIdx(): atom.GetIdx() for atom in cur_mol.GetAtoms()}
 
         cur_mol = self.dfs_assemble(tree_mess, mol_vec, pred_nodes, cur_mol, global_amap, [], pred_root, None,
