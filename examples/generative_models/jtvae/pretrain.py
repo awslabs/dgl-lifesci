@@ -53,13 +53,6 @@ def main(args):
                  batch_cand_graphs, tree_mess_source_edges, tree_mess_target_edges,
                  stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs) \
                 in enumerate(dataloader):
-            """
-            for mol_tree in batch:
-                for node in mol_tree.nodes:
-                    if node.label not in node.cands:
-                        node.cands.append(node.label)
-                        node.cand_mols.append(node.label_mol)
-            """
             batch_tree_graphs = batch_tree_graphs.to(device)
             batch_mol_graphs = batch_mol_graphs.to(device)
             cand_batch_idx = cand_batch_idx.to(device)
@@ -68,6 +61,7 @@ def main(args):
             tree_mess_target_edges = tree_mess_target_edges.to(device)
             stereo_cand_batch_idx = stereo_cand_batch_idx.to(device)
             batch_stereo_cand_graphs = batch_stereo_cand_graphs.to(device)
+
             loss, kl_div, wacc, tacc, sacc, dacc = model(
                 batch_trees, batch_tree_graphs, batch_mol_graphs, cand_batch_idx,
                 batch_cand_graphs, tree_mess_source_edges, tree_mess_target_edges,
@@ -102,7 +96,7 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('-t', '--train-path', type=str,
                         help='Path to the training molecules, with one SMILES string a line')
-    parser.add_argument('-s', '--save-path', type=str,
+    parser.add_argument('-s', '--save-path', type=str, default='pre_model',
                         help='Directory to save model checkpoints')
     parser.add_argument('-b', '--batch-size', type=int, default=40,
                         help='Batch size')

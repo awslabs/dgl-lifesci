@@ -170,6 +170,11 @@ class JTVAEDataset(Dataset):
             mol_tree.recover()
             mol_tree.assemble()
 
+            for node_id, node in mol_tree.nodes_dict.items():
+                if node['label'] not in node['cands']:
+                    node['cands'].append(node['label'])
+                    node['cand_mols'].append(node['label_mol'])
+
             wid = [self.vocab.get_index(mol_tree.nodes_dict[i]['smiles'])
                    for i in mol_tree.nodes_dict]
             mol_tree.graph.ndata['wid'] = torch.LongTensor(wid)
