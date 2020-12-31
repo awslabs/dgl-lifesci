@@ -45,7 +45,7 @@ def main(args):
 
     model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth).to(device)
     model.reset_parameters()
-    print("Model #Params: {:d}K".format(sum([x.nelement() for x in model.parameters()]) / 1000))
+    print("Model #Params: {:d}K".format(sum([x.nelement() for x in model.parameters()]) // 1000))
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     scheduler = lr_scheduler.ExponentialLR(optimizer, args.gamma)
