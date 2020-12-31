@@ -540,6 +540,10 @@ class JTNNVAE(nn.Module):
 
         epsilon = torch.randn(batch_size, self.latent_size // 2)
         tree_vec = tree_mean + torch.exp(tree_log_var // 2) * epsilon
+
+        import ipdb
+        ipdb.set_trace()
+
         epsilon = torch.randn(batch_size, self.latent_size // 2)
         mol_vec = mol_mean + torch.exp(mol_log_var // 2) * epsilon
 

@@ -116,7 +116,7 @@ if __name__ == '__main__':
                         help='Multiplicative factor for learning rate decay')
     parser.add_argument('-me', '--max-epoch', type=int, default=3,
                         help='Maximum number of epochs for training')
-    parser.add_argument('-nw', '--num-workers', type=int, default=4,
+    parser.add_argument('-nw', '--num-workers', type=int, default=0,
                         help='Number of subprocesses for data loading')
     parser.add_argument('-pi', '--print-iter', type=int, default=20,
                         help='Frequency for printing evaluation metrics')
