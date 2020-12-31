@@ -35,12 +35,12 @@ def main(args):
     if args.train_path is None:
         dataset = JTVAEZINC('train', vocab)
     else:
-        dataset = JTVAEDataset(args.train_path, vocab)
+        dataset = JTVAEDataset(args.train_path, vocab, training=True)
     dataloader = DataLoader(dataset,
                             batch_size=args.batch_size,
                             shuffle=True,
                             num_workers=4,
-                            collate_fn=JTVAECollator(),
+                            collate_fn=JTVAECollator(training=True),
                             drop_last=True)
 
     model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth).to(device)
