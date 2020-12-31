@@ -181,6 +181,8 @@ class JTVAEDataset(Dataset):
             except:
                 print('Wrong vocab index')
                 print(mol_tree.smiles)
+                import ipdb
+                ipdb.set_trace()
             mol_tree.graph.ndata['wid'] = torch.LongTensor(wid)
 
             # Construct molecular graphs
@@ -256,7 +258,7 @@ class JTVAEZINC(JTVAEDataset):
         dir = get_download_dir()
         _url = _get_dgl_url('dataset/jtvae.zip')
         zip_file_path = '{}/jtvae.zip'.format(dir)
-        download(_url, path=zip_file_path)
+        download(_url, path=zip_file_path, overwrite=False)
         extract_archive(zip_file_path, '{}/jtvae'.format(dir))
 
         if subset == 'train':

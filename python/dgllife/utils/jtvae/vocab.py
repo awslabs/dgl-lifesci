@@ -34,7 +34,7 @@ class JTVAEVocab(object):
             default_dir = get_download_dir()
             vocab_file = '{}/jtvae/vocab.txt'.format(default_dir)
             zip_file_path = '{}/jtvae.zip'.format(default_dir)
-            download(_get_dgl_url('dataset/jtvae.zip'), path=zip_file_path)
+            download(_get_dgl_url('dataset/jtvae.zip'), path=zip_file_path, overwrite=False)
             extract_archive(zip_file_path, '{}/jtvae'.format(default_dir))
 
             with open(vocab_file, 'r') as f:

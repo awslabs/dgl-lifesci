@@ -201,8 +201,8 @@ class JTNNDecoder(nn.Module):
         self.U_s = nn.Linear(hidden_size, 1)
 
         # Loss Functions
-        self.pred_loss = nn.CrossEntropyLoss(size_average=False)
-        self.stop_loss = nn.BCEWithLogitsLoss(size_average=False)
+        self.pred_loss = nn.CrossEntropyLoss(reduction='sum')
+        self.stop_loss = nn.BCEWithLogitsLoss(reduction='sum')
 
     def forward(self, tree_graphs, tree_vec):
         device = tree_vec.device
@@ -495,10 +495,10 @@ class JTNNVAE(nn.Module):
         self.G_mean = nn.Linear(hidden_size, latent_size // 2)
         self.G_var = nn.Linear(hidden_size, latent_size // 2)
 
-        self.assm_loss = nn.CrossEntropyLoss(size_average=False)
+        self.assm_loss = nn.CrossEntropyLoss(reduction='sum')
         self.use_stereo = stereo
         if stereo:
-            self.stereo_loss = nn.CrossEntropyLoss(size_average=False)
+            self.stereo_loss = nn.CrossEntropyLoss(reduction='sum')
 
     def reset_parameters(self):
         for param in self.parameters():
