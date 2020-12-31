@@ -565,6 +565,7 @@ class JTNNVAE(nn.Module):
 
     def assm(self, batch_trees, cand_batch_idx, cand_graphs, tree_graphs, tree_mess_source_edges,
              tree_mess_target_edges, mol_vec, tree_mess):
+        device = batch_trees.device
         cand_vec = self.jtmpn(cand_graphs, tree_graphs, tree_mess,
                               tree_mess_source_edges, tree_mess_target_edges)
         cand_vec = self.G_mean(cand_vec)
@@ -591,7 +592,7 @@ class JTNNVAE(nn.Module):
                 if cur_score[label].item() >= cur_score.max().item():
                     acc += 1
 
-                label = torch.LongTensor([label])
+                label = torch.LongTensor([label]).to(device)
                 all_loss.append(self.assm_loss(cur_score.view(1, -1), label))
 
         all_loss = sum(all_loss) / len(batch_trees)
