@@ -52,7 +52,7 @@ class GRUUpdate(nn.Module):
             torch.cat([node.data['src_x'], node.data['sum_h']], dim=1)))
         h_input = torch.cat([node.data['src_x'], node.data['sum_gated_h']], dim=1)
         pre_h = torch.tanh(self.W_h(h_input))
-        new_h = (1.0 - z) * node.data['sum_h'] + z * pre_h
+        new_h = (torch.tensor(1.0).to(z.device) - z) * node.data['sum_h'] + z * pre_h
         return {'h': new_h}
 
 def level_order(forest, roots):
@@ -122,7 +122,8 @@ class JTNNEncoder(nn.Module):
         # Readout
         tree_graphs.ndata['h'] = torch.zeros(tree_graphs.num_nodes(), self.hidden_size).to(device)
         tree_graphs.edata['h'] = line_tree_graphs.ndata['h']
-        tree_graphs.pull(v=root_ids.to(dtype=tree_graphs.idtype, device=device),
+        root_ids = root_ids.to(device)
+        tree_graphs.pull(v=root_ids.to(dtype=tree_graphs.idtype),
                          message_func=fn.copy_e('h', 'm'),
                          reduce_func=fn.sum('m', 'h'))
         root_vec = torch.cat([
@@ -167,7 +168,6 @@ def can_assemble(node_x, node_y):
     return len(cands) > 0
 
 def dfs_order(forest, roots):
-    device = forest.device
     edges = dfs_labeled_edges_generator(forest, roots, has_reverse_edge=True)
     for e, l in zip(*edges):
         # Exploit the fact that the reverse edge ID equals to 1 xor forward
@@ -232,7 +232,7 @@ class JTNNDecoder(nn.Module):
 
         # Predict root
         pred_hiddens.append(torch.zeros(batch_size, self.hidden_size).to(device))
-        pred_targets.extend(tree_graphs.ndata['wid'][root_ids].cpu().tolist())
+        pred_targets.append(tree_graphs.ndata['wid'][root_ids.to(device)])
         pred_mol_vecs.append(tree_vec)
 
         # Traverse the tree and predict on children
@@ -252,14 +252,14 @@ class JTNNDecoder(nn.Module):
             # (i1, j1), (j1, i1), (i2, j2), (j2, i2), ... The order of the nodes
             # in the line graph corresponds to the order of the edges in the raw graph.
             eid = eid.long()
-            reverse_eid = torch.bitwise_xor(eid, 1)
+            reverse_eid = torch.bitwise_xor(eid, torch.tensor(1).to(device))
             cur_o = line_tree_graphs.ndata['sum_h'][eid] + \
                     line_tree_graphs.ndata['h'][reverse_eid]
 
             # Gather targets
-            mask = (p == 0)
+            mask = (p == torch.tensor(0).to(device))
             pred_list = eid[mask]
-            stop_target = 1 - p
+            stop_target = torch.tensor(1).to(device) - p
 
             # Hidden states for stop prediction
             stop_hidden = torch.cat([line_tree_graphs.ndata['src_x'][eid],
@@ -271,16 +271,17 @@ class JTNNDecoder(nn.Module):
             if len(pred_list) > 0:
                 pred_mol_vecs.append(line_tree_graphs.ndata['vec'][pred_list])
                 pred_hiddens.append(line_tree_graphs.ndata['h'][pred_list])
-                pred_targets.extend(line_tree_graphs.ndata['dst_wid'][pred_list])
+                pred_targets.append(line_tree_graphs.ndata['dst_wid'][pred_list])
 
         #Last stop at root
+        root_ids = root_ids.to(device)
         cur_x = tree_graphs.ndata['x'][root_ids]
         tree_graphs.edata['h'] = line_tree_graphs.ndata['h']
-        tree_graphs.pull(v=root_ids.to(device=device, dtype=tree_graphs.idtype),
+        tree_graphs.pull(v=root_ids.to(dtype=tree_graphs.idtype),
                          message_func=fn.copy_e('h', 'm'), reduce_func=fn.sum('m', 'cur_o'))
         stop_hidden = torch.cat([cur_x, tree_graphs.ndata['cur_o'][root_ids], tree_vec], dim=1)
         stop_hiddens.append(stop_hidden)
-        stop_targets.extend([0] * batch_size)
+        stop_targets.extend(torch.zeros(batch_size).to(device))
 
         # Predict next clique
         pred_hiddens = torch.cat(pred_hiddens, dim=0)
@@ -288,7 +289,7 @@ class JTNNDecoder(nn.Module):
         pred_vecs = torch.cat([pred_hiddens, pred_mol_vecs], dim=1)
         pred_vecs = F.relu(self.W(pred_vecs))
         pred_scores = self.W_o(pred_vecs)
-        pred_targets = torch.LongTensor(pred_targets).to(device)
+        pred_targets = torch.cat(pred_targets, dim=0)
 
         pred_loss = self.pred_loss(pred_scores, pred_targets) / batch_size
         _, preds = torch.max(pred_scores, dim=1)
