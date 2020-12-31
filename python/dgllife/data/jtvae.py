@@ -343,7 +343,11 @@ class JTVAECollator(object):
         batch_cand_graphs = list(itertools.chain.from_iterable(batch_cand_graphs))
         batch_cand_graphs = dgl.batch(batch_cand_graphs)
         batch_stereo_cand_graphs = list(itertools.chain.from_iterable(batch_stereo_cand_graphs))
-        batch_stereo_cand_graphs = dgl.batch(batch_stereo_cand_graphs)
+        if len(batch_stereo_cand_graphs) == 0:
+            batch_stereo_cand_graphs = dgl.graph(([], []), idtype=batch_cand_graphs.idtype,
+                                                 device=batch_cand_graphs.device)
+        else:
+            batch_stereo_cand_graphs = dgl.batch(batch_stereo_cand_graphs)
 
         if len(tree_mess_source_edges) == 0:
             tree_mess_source_edges = torch.zeros(0, 2).int()
