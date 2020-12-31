@@ -104,7 +104,7 @@ if __name__ == '__main__':
                         help='Directory to save model checkpoints')
     parser.add_argument('-b', '--batch-size', type=int, default=40,
                         help='Batch size')
-    parser.add_argument('-w', '--hidden-size', type=int, default=200,
+    parser.add_argument('-w', '--hidden-size', type=int, default=450,
                         help='Hidden size')
     parser.add_argument('-l', '--latent-size', type=int, default=56,
                         help='Latent size')
