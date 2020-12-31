@@ -220,8 +220,7 @@ class JTVAEDataset(Dataset):
                     stereo_cands.append(mol_tree.smiles3D)
 
                 for cand in stereo_cands:
-                    if isinstance(cand, str):
-                        print(cand)
+                    cand = get_mol(cand)
                     cg = mol_to_bigraph(cand, node_featurizer=self.atom_featurizer_enc,
                                         edge_featurizer=self.bond_featurizer_enc,
                                         canonical_atom_order=False)
