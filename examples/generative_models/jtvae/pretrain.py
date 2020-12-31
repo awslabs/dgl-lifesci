@@ -18,7 +18,11 @@ from dgllife.model import JTNNVAE
 from dgllife.utils import JTVAEVocab
 from torch.utils.data import DataLoader
 
+from utils import mkdir_p
+
 def main(args):
+    mkdir_p(args.save_path)
+
     lg = rdkit.RDLogger.logger()
     lg.setLevel(rdkit.RDLogger.CRITICAL)
 
