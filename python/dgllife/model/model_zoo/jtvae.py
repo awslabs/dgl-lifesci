@@ -565,7 +565,7 @@ class JTNNVAE(nn.Module):
 
     def assm(self, batch_trees, cand_batch_idx, cand_graphs, tree_graphs, tree_mess_source_edges,
              tree_mess_target_edges, mol_vec, tree_mess):
-        device = batch_trees.device
+        device = cand_graphs.device
         cand_vec = self.jtmpn(cand_graphs, tree_graphs, tree_mess,
                               tree_mess_source_edges, tree_mess_target_edges)
         cand_vec = self.G_mean(cand_vec)
