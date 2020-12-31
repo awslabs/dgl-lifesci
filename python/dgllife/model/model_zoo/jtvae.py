@@ -612,7 +612,7 @@ class JTNNVAE(nn.Module):
         stereo_cands = self.mpn(batch_stereo_cand_graphs)
         stereo_cands = self.G_mean(stereo_cands)
         stereo_labels = mol_vec[batch_idx]
-        scores = torch.nn.CosineSimilarity()(stereo_cands, stereo_labels)
+        scores = nn.CosineSimilarity()(stereo_cands, stereo_labels)
 
         st, acc = 0, 0
         all_loss = []

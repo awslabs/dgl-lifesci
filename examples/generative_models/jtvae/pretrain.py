@@ -33,7 +33,7 @@ def main(args):
 
     vocab = JTVAEVocab(file_path=args.train_path)
     if args.train_path is None:
-        dataset = JTVAEZINC('train', vocab)
+        dataset = JTVAEZINC('train', vocab, cache=True)
     else:
         dataset = JTVAEDataset(args.train_path, vocab, training=True)
     dataloader = DataLoader(dataset,
