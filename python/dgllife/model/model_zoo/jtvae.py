@@ -288,7 +288,7 @@ class JTNNDecoder(nn.Module):
         pred_vecs = torch.cat([pred_hiddens, pred_mol_vecs], dim=1)
         pred_vecs = F.relu(self.W(pred_vecs))
         pred_scores = self.W_o(pred_vecs)
-        pred_targets = torch.LongTensor(pred_targets)
+        pred_targets = torch.LongTensor(pred_targets).to(device)
 
         pred_loss = self.pred_loss(pred_scores, pred_targets) / batch_size
         _, preds = torch.max(pred_scores, dim=1)
@@ -299,7 +299,7 @@ class JTNNDecoder(nn.Module):
         stop_hiddens = torch.cat(stop_hiddens, dim=0)
         stop_vecs = F.relu(self.U(stop_hiddens))
         stop_scores = self.U_s(stop_vecs).squeeze()
-        stop_targets = torch.Tensor(stop_targets)
+        stop_targets = torch.Tensor(stop_targets).to(device)
 
         stop_loss = self.stop_loss(stop_scores, stop_targets) / batch_size
         stops = torch.ge(stop_scores, 0).float()
