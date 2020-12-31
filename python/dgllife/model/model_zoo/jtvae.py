@@ -540,8 +540,8 @@ class JTNNVAE(nn.Module):
 
         z_mean = torch.cat([tree_mean, mol_mean], dim=1)
         z_log_var = torch.cat([tree_log_var, mol_log_var], dim=1)
-        kl_loss = -0.5 * torch.sum(1.0 + z_log_var - z_mean * z_mean - torch.exp(z_log_var)) / \
-                  batch_size
+        kl_loss = -0.5 * torch.sum(torch.tensor(1.0).to(device) + z_log_var - z_mean * z_mean -
+                                   torch.exp(z_log_var)) / batch_size
 
         epsilon = torch.randn(batch_size, self.latent_size // 2).to(device)
         tree_vec = tree_mean + torch.exp(tree_log_var / 2) * epsilon
