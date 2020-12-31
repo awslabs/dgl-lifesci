@@ -226,7 +226,7 @@ class JTVAEDataset(Dataset):
                                         canonical_atom_order=False)
                     cg.apply_edges(fn.copy_u('x', 'src'))
                     cg.edata['x'] = torch.cat([cg.edata.pop('src'), cg.edata['x']], dim=1)
-                    stereo_cands.append(cg)
+                    stereo_cand_graphs.append(cg)
 
             if self.cache:
                 self.cand_graphs[idx] = cand_graphs
