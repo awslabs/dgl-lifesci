@@ -39,8 +39,7 @@ def main(args):
                             collate_fn=JTVAECollator(),
                             drop_last=True)
 
-    model = JTNNVAE(vocab, args.hidden_size, args.latent_size,
-                    args.depth, data_path=args.train_path).to(device)
+    model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth).to(device)
     model.reset_parameters()
     print("Model #Params: {:d}K".format(sum([x.nelement() for x in model.parameters()]) / 1000))
 
@@ -50,7 +49,10 @@ def main(args):
     for epoch in range(args.max_epoch):
         word_acc, topo_acc, assm_acc, steo_acc = 0, 0, 0, 0
 
-        for it, (batch_trees, batch_tree_graphs, batch_mol_graphs) in enumerate(dataloader):
+        for it, (batch_trees, batch_tree_graphs, batch_mol_graphs, cand_batch_idx,
+                 batch_cand_graphs, tree_mess_source_edges, tree_mess_target_edges,
+                 stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs) \
+                in enumerate(dataloader):
             """
             for mol_tree in batch:
                 for node in mol_tree.nodes:
@@ -58,8 +60,18 @@ def main(args):
                         node.cands.append(node.label)
                         node.cand_mols.append(node.label_mol)
             """
+            batch_tree_graphs = batch_tree_graphs.to(device)
+            batch_mol_graphs = batch_mol_graphs.to(device)
+            cand_batch_idx = cand_batch_idx.to(device)
+            batch_cand_graphs = batch_cand_graphs.to(device)
+            tree_mess_source_edges = tree_mess_source_edges.to(device)
+            tree_mess_target_edges = tree_mess_target_edges.to(device)
+            stereo_cand_batch_idx = stereo_cand_batch_idx.to(device)
+            batch_stereo_cand_graphs = batch_stereo_cand_graphs.to(device)
             loss, kl_div, wacc, tacc, sacc, dacc = model(
-                batch_trees, batch_tree_graphs, batch_mol_graphs, beta=0)
+                batch_trees, batch_tree_graphs, batch_mol_graphs, cand_batch_idx,
+                batch_cand_graphs, tree_mess_source_edges, tree_mess_target_edges,
+                stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs, beta=0)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
