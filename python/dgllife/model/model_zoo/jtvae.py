@@ -172,7 +172,7 @@ def dfs_order(forest, roots):
     for e, l in zip(*edges):
         # Exploit the fact that the reverse edge ID equals to 1 xor forward
         # edge ID. Normally, this should be done using find_edges().
-        yield e ^ l.to(device), l.to(device=device, dtype=forest.idtype)
+        yield e ^ l, l
 
 class JTNNDecoder(nn.Module):
     def __init__(self, vocab, hidden_size, latent_size, embedding=None):
@@ -237,6 +237,9 @@ class JTNNDecoder(nn.Module):
 
         # Traverse the tree and predict on children
         for eid, p in dfs_order(tree_graphs, root_ids.to(dtype=tree_graphs.idtype)):
+            eid = eid.to(device)
+            p = p.to(device=device, dtype=tree_graphs.idtype)
+
             # Message passing excluding the target
             line_tree_graphs.pull(v=eid, message_func=fn.copy_u('h', 'h_nei'),
                                   reduce_func=fn.sum('h_nei', 'sum_h'))
