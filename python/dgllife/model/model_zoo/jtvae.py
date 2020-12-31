@@ -276,7 +276,7 @@ class JTNNDecoder(nn.Module):
         #Last stop at root
         cur_x = tree_graphs.ndata['x'][root_ids]
         tree_graphs.edata['h'] = line_tree_graphs.ndata['h']
-        tree_graphs.pull(v=root_ids.to(dtype=tree_graphs.idtype),
+        tree_graphs.pull(v=root_ids.to(device=device, dtype=tree_graphs.idtype),
                          message_func=fn.copy_e('h', 'm'), reduce_func=fn.sum('m', 'cur_o'))
         stop_hidden = torch.cat([cur_x, tree_graphs.ndata['cur_o'][root_ids], tree_vec], dim=1)
         stop_hiddens.append(stop_hidden)
