@@ -527,6 +527,7 @@ class JTNNVAE(nn.Module):
                 batch_cand_graphs, tree_mess_source_edges, tree_mess_target_edges,
                 stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs, beta=0):
         batch_size = batch_tree_graphs.batch_size
+        device = batch_tree_graphs.device
         tree_mess, tree_vec, mol_vec = self.encode(batch_tree_graphs, batch_mol_graphs)
 
         tree_mean = self.T_mean(tree_vec)
@@ -539,10 +540,10 @@ class JTNNVAE(nn.Module):
         kl_loss = -0.5 * torch.sum(1.0 + z_log_var - z_mean * z_mean - torch.exp(z_log_var)) / \
                   batch_size
 
-        epsilon = torch.randn(batch_size, self.latent_size // 2)
+        epsilon = torch.randn(batch_size, self.latent_size // 2).to(device)
         tree_vec = tree_mean + torch.exp(tree_log_var / 2) * epsilon
 
-        epsilon = torch.randn(batch_size, self.latent_size // 2)
+        epsilon = torch.randn(batch_size, self.latent_size // 2).to(device)
         mol_vec = mol_mean + torch.exp(mol_log_var / 2) * epsilon
 
         word_loss, topo_loss, word_acc, topo_acc = self.decoder(batch_tree_graphs, tree_vec)
