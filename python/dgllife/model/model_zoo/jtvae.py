@@ -116,6 +116,8 @@ class JTNNEncoder(nn.Module):
                                   reduce_func=fn.sum('h_nei', 'sum_h'))
             line_tree_graphs.pull(v=eid, message_func=self.gru_message,
                                   reduce_func=fn.sum('m', 'sum_gated_h'))
+            import ipdb
+            ipdb.set_trace()
             line_tree_graphs.apply_nodes(self.gru_update, v=eid)
 
         # Readout
