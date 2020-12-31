@@ -206,7 +206,6 @@ class JTVAEDataset(Dataset):
                 if node['is_leaf'] or len(node['cands']) == 1:
                     continue
                 for cand in node['cand_mols']:
-                    print(cand)
                     cg = mol_to_bigraph(cand, node_featurizer=self.atom_featurizer_dec,
                                         edge_featurizer=self.bond_featurizer_dec,
                                         canonical_atom_order=False)
@@ -222,8 +221,7 @@ class JTVAEDataset(Dataset):
 
                 for cand in stereo_cands:
                     if isinstance(cand, str):
-                        import ipdb
-                        ipdb.set_trace()
+                        print(cand)
                     cg = mol_to_bigraph(cand, node_featurizer=self.atom_featurizer_enc,
                                         edge_featurizer=self.bond_featurizer_enc,
                                         canonical_atom_order=False)
