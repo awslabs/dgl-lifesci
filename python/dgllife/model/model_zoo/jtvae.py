@@ -553,11 +553,12 @@ class JTNNVAE(nn.Module):
         assm_loss, assm_acc = self.assm(batch_trees, cand_batch_idx, batch_cand_graphs,
                                         batch_tree_graphs, tree_mess_source_edges,
                                         tree_mess_target_edges, mol_vec, tree_mess)
+
         if self.use_stereo:
             stereo_loss, stereo_acc = self.stereo(stereo_cand_batch_idx, stereo_cand_labels,
                                                   batch_stereo_cand_graphs, mol_vec)
         else:
-            stereo_loss, stereo_acc = 0, 0
+            stereo_loss, stereo_acc = torch.tensor(0.).to(device), 0
 
         loss = word_loss + topo_loss + assm_loss + 2 * stereo_loss + beta * kl_loss
 
