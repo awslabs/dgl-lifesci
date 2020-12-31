@@ -569,7 +569,6 @@ class JTNNVAE(nn.Module):
                               tree_mess_source_edges, tree_mess_target_edges)
         cand_vec = self.G_mean(cand_vec)
 
-        cand_batch_idx = torch.LongTensor(cand_batch_idx)
         mol_vec = mol_vec[cand_batch_idx]
 
         mol_vec = mol_vec.view(-1, 1, self.latent_size // 2)
