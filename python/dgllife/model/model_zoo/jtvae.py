@@ -597,14 +597,18 @@ class JTNNVAE(nn.Module):
                 label = torch.LongTensor([label]).to(device)
                 all_loss.append(self.assm_loss(cur_score.view(1, -1), label))
 
-        all_loss = sum(all_loss) / len(batch_trees)
+        if len(all_loss) > 0:
+            all_loss = sum(all_loss) / len(batch_trees)
+        else:
+            all_loss = torch.zeros(1).to(device)
         return all_loss, acc * 1.0 / cnt
 
     def stereo(self, batch_idx, batch_labels, batch_stereo_cand_graphs, mol_vec):
-        if len(batch_labels) == 0:
-            return torch.zeros(1), 1.0
-
         device = batch_stereo_cand_graphs.device
+
+        if len(batch_labels) == 0:
+            return torch.zeros(1).to(device), 1.0
+
         stereo_cands = self.mpn(batch_stereo_cand_graphs)
         stereo_cands = self.G_mean(stereo_cands)
         stereo_labels = mol_vec[batch_idx]
