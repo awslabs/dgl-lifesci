@@ -196,7 +196,7 @@ class JTVAEDataset(Dataset):
         if not self.training:
             return mol_tree, mol_graph
 
-        if self.cache and self.trees[idx] is not None:
+        if self.cache and self.cand_graphs[idx] is not None:
             cand_graphs = self.cand_graphs[idx]
             stereo_cand_graphs = self.stereo_cand_graphs[idx]
         else:
