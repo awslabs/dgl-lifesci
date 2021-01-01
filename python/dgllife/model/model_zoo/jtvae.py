@@ -574,10 +574,10 @@ class JTNNVAE(nn.Module):
         self.writer.add_scalar('Loss/assm', assm_loss.detach().cpu().item(), self.step_count)
         self.writer.add_scalar('Loss/stereo', stereo_loss.detach().cpu().item(), self.step_count)
         self.writer.add_scalar('Loss/kl', kl_loss.detach().cpu().item(), self.step_count)
-        self.writer.add_scalar('Acc/word', word_acc.detach().cpu().item(), self.step_count)
-        self.writer.add_scalar('Acc/topo', topo_acc.detach().cpu().item(), self.step_count)
-        self.writer.add_scalar('Acc/assm', assm_acc.detach().cpu().item(), self.step_count)
-        self.writer.add_scalar('Acc/stereo', stereo_acc.detach().cpu().item(), self.step_count)
+        self.writer.add_scalar('Acc/word', word_acc, self.step_count)
+        self.writer.add_scalar('Acc/topo', topo_acc, self.step_count)
+        self.writer.add_scalar('Acc/assm', assm_acc, self.step_count)
+        self.writer.add_scalar('Acc/stereo', stereo_acc, self.step_count)
         self.step_count += 1
 
         return loss, kl_loss.item(), word_acc, topo_acc, assm_acc, stereo_acc
