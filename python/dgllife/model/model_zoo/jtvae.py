@@ -563,6 +563,8 @@ class JTNNVAE(nn.Module):
 
         loss = word_loss + topo_loss + assm_loss + 2 * stereo_loss + beta * kl_loss
 
+        print('Stereo loss: ', stereo_loss)
+
         return loss, kl_loss.item(), word_acc, topo_acc, assm_acc, stereo_acc
 
     def assm(self, batch_trees, cand_batch_idx, cand_graphs, tree_graphs, tree_mess_source_edges,
