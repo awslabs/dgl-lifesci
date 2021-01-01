@@ -12,6 +12,8 @@ import sys
 import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
+# TODO
+from torch.utils.tensorboard import SummaryWriter
 
 from dgllife.data import JTVAEZINC, JTVAEDataset, JTVAECollator
 from dgllife.model import JTNNVAE
@@ -43,7 +45,9 @@ def main(args):
                             collate_fn=JTVAECollator(training=True),
                             drop_last=True)
 
-    model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth).to(device)
+    # TODO
+    writer = SummaryWriter()
+    model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth, writer).to(device)
     model.reset_parameters()
     print("Model #Params: {:d}K".format(sum([x.nelement() for x in model.parameters()]) // 1000))
 

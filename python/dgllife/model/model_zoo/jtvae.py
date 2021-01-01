@@ -482,7 +482,8 @@ class JTMPN(nn.Module):
         return dgl.mean_nodes(cand_graphs, 'atom_hiddens')
 
 class JTNNVAE(nn.Module):
-    def __init__(self, vocab, hidden_size, latent_size, depth, stereo=True):
+    # TODO
+    def __init__(self, vocab, hidden_size, latent_size, depth, writer, stereo=True):
         super(JTNNVAE, self).__init__()
         self.vocab = vocab
         self.hidden_size = hidden_size
@@ -504,6 +505,10 @@ class JTNNVAE(nn.Module):
         self.use_stereo = stereo
         if stereo:
             self.stereo_loss = nn.CrossEntropyLoss(reduction='sum')
+
+        # TODO
+        self.writer = writer
+        self.step_count = 0
 
     def reset_parameters(self):
         for param in self.parameters():
@@ -563,7 +568,17 @@ class JTNNVAE(nn.Module):
 
         loss = word_loss + topo_loss + assm_loss + 2 * stereo_loss + beta * kl_loss
 
-        print('Stereo loss: ', stereo_loss)
+        # TODO
+        self.writer.add_scalar('Loss/word', word_loss.detach().cpu().item(), self.step_count)
+        self.writer.add_scalar('Loss/topo', topo_loss.detach().cpu().item(), self.step_count)
+        self.writer.add_scalar('Loss/assm', assm_loss.detach().cpu().item(), self.step_count)
+        self.writer.add_scalar('Loss/stereo', stereo_loss.detach().cpu().item(), self.step_count)
+        self.writer.add_scalar('Loss/kl', kl_loss.detach().cpu().item(), self.step_count)
+        self.writer.add_scalar('Acc/word', word_acc.detach().cpu().item(), self.step_count)
+        self.writer.add_scalar('Acc/topo', topo_acc.detach().cpu().item(), self.step_count)
+        self.writer.add_scalar('Acc/assm', assm_acc.detach().cpu().item(), self.step_count)
+        self.writer.add_scalar('Acc/stereo', stereo_acc.detach().cpu().item(), self.step_count)
+        self.step_count += 1
 
         return loss, kl_loss.item(), word_acc, topo_acc, assm_acc, stereo_acc
 
