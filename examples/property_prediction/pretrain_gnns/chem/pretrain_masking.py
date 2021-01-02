@@ -194,7 +194,7 @@ def main():
                          emb_dim=args.emb_dim,
                          JK=args.JK,
                          dropout=args.dropout_ratio,
-                         n_tasks=args.emb_dim,
+                         n_tasks=0,
                          readout='skip')
     node_linear = nn.Linear(args.emb_dim, 119)
     if args.mask_edge:
