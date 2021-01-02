@@ -81,7 +81,7 @@ class PretrainDataset(object):
     def __init__(self, data, smiles_to_graph, node_featurizer, edge_featurizer, smiles_column, task=None):
         self.data = data
         self.smiles_column = smiles_column
-        self.smiles = self.df[self.smiles_column].tolist()
+        self.smiles = self.data[self.smiles_column].tolist()
         self.smiles_to_graph = smiles_to_graph
         self.node_featurizer = node_featurizer
         self.edge_featurizer = edge_featurizer
