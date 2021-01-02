@@ -95,8 +95,10 @@ class GINPredictor(nn.Module):
         else:
             raise ValueError("Expect readout to be 'sum', 'mean', "
                              "'max', 'attention' or 'skip', got {}".format(readout))
-
-        if JK == 'concat':
+            
+        if n_tasks == 0:
+            self.predict = None
+        elif JK == 'concat':
             self.predict = nn.Linear((num_layers + 1) * emb_dim, n_tasks)
         else:
             self.predict = nn.Linear(emb_dim, n_tasks)
@@ -125,7 +127,7 @@ class GINPredictor(nn.Module):
             * B for the number of graphs in the batch
         """
         node_feats = self.gnn(g, categorical_node_feats, categorical_edge_feats)
-        if self.readout == 'skip':
-            return self.predict(node_feats)
         graph_feats = self.readout(g, node_feats)
+        if self.predict == None:
+            return graph_feats
         return self.predict(graph_feats)
