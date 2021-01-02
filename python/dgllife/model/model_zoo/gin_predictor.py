@@ -60,7 +60,7 @@ class GINPredictor(nn.Module):
         Readout for computing graph representations out of node representations, which
         can be ``'sum'``, ``'mean'``, ``'max'``, ``'attention'``, or ``'skip'``. Default to 'mean'.
     n_tasks : int
-        Number of tasks, which is also the output size. Default to 1.
+        Number of tasks, which is also the output size. Default to 1. (0 indicates skipping)
     """
     def __init__(self, num_node_emb_list, num_edge_emb_list, num_layers=5,
                  emb_dim=300, JK='last', dropout=0.5, readout='mean', n_tasks=1):
@@ -95,7 +95,7 @@ class GINPredictor(nn.Module):
         else:
             raise ValueError("Expect readout to be 'sum', 'mean', "
                              "'max', 'attention' or 'skip', got {}".format(readout))
-            
+        
         if n_tasks == 0:
             self.predict = None
         elif JK == 'concat':
@@ -127,7 +127,7 @@ class GINPredictor(nn.Module):
             * B for the number of graphs in the batch
         """
         node_feats = self.gnn(g, categorical_node_feats, categorical_edge_feats)
+        if self.readout == 'skip' and self.predict == None:
+            return node_feats
         graph_feats = self.readout(g, node_feats)
-        if self.predict == None:
-            return graph_feats
         return self.predict(graph_feats)
