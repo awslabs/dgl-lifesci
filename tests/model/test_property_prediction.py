@@ -359,6 +359,41 @@ def test_gnn_ogb_predictor():
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
            torch.Size([bg.batch_size, 2])
 
+def test_nf_predictor():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats = test_graph1()
+    g, node_feats = g.to(device), node_feats.to(device)
+    bg, batch_node_feats = test_graph2()
+    bg, batch_node_feats = bg.to(device), batch_node_feats.to(device)
+
+    # Test default setting
+    nf_predictor = NFPredictor(in_feats=1).to(device)
+    nf_predictor.eval()
+    assert nf_predictor(g, node_feats).shape == torch.Size([1, 1])
+    nf_predictor.train()
+    assert nf_predictor(bg, batch_node_feats).shape == torch.Size([2, 1])
+
+    # Test configured setting
+    nf_predictor = NFPredictor(in_feats=1,
+                               n_tasks=2,
+                               hidden_feats=[2, 2],
+                               max_degree=5,
+                               activation=[None, None],
+                               batchnorm=[False, False],
+                               dropout=[0.1, 0.1],
+                               dense_size=4,
+                               dense_batchnorm=False,
+                               dense_dropout=0.1,
+                               dense_activation=None).to(device)
+    nf_predictor.eval()
+    assert nf_predictor(g, node_feats).shape == torch.Size([1, 2])
+    nf_predictor.train()
+    assert nf_predictor(bg, batch_node_feats).shape == torch.Size([2, 2])
+
 if __name__ == '__main__':
     test_attentivefp_predictor()
     test_mlp_predictor()
@@ -370,3 +405,4 @@ if __name__ == '__main__':
     test_schnet_predictor()
     test_weave_predictor()
     test_gnn_ogb_predictor()
+    test_nf_predictor()
