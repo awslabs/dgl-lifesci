@@ -394,6 +394,34 @@ def test_gnn_ogb():
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
            torch.Size([bg.num_nodes(), 2])
 
+def test_nf():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats = test_graph1()
+    g, node_feats = g.to(device), node_feats.to(device)
+    bg, batch_node_feats = test_graph2()
+    bg, batch_node_feats = bg.to(device), batch_node_feats.to(device)
+
+    # Test default setting
+    gnn = NFGNN(in_feats=1).to(device)
+    gnn.reset_parameters()
+    assert gnn(g, node_feats).shape == torch.Size([3, 64])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 64])
+
+    # Test configured setting
+    gnn = NFGNN(in_feats=1,
+                hidden_feats=[2, 2, 2],
+                max_degree=5,
+                activation=[None, None, None],
+                batchnorm=[False, False, False],
+                dropout=[0.5, 0.5, 0.5]).to(device)
+    gnn.reset_parameters()
+    assert gnn(g, node_feats).shape == torch.Size([3, 2])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 2])
+
 if __name__ == '__main__':
     test_attentivefp()
     test_gat()
@@ -406,3 +434,4 @@ if __name__ == '__main__':
     test_wln()
     test_gnn_ogb()
     test_graphsage()
+    test_nf()
