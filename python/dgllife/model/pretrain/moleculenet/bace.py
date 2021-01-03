@@ -10,7 +10,7 @@
 import torch.nn.functional as F
 
 from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
-    AttentiveFPPredictor, GINPredictor
+    AttentiveFPPredictor, GINPredictor, NFPredictor
 
 __all__ = ['bace_url',
            'create_bace_model']
@@ -29,7 +29,8 @@ bace_url = {
     'gin_supervised_contextpred_BACE': 'dgllife/pre_trained/gin_supervised_contextpred_bace.pth',
     'gin_supervised_infomax_BACE': 'dgllife/pre_trained/gin_supervised_infomax_bace.pth',
     'gin_supervised_edgepred_BACE': 'dgllife/pre_trained/gin_supervised_edgepred_bace.pth',
-    'gin_supervised_masking_BACE': 'dgllife/pre_trained/gin_supervised_masking_bace.pth'
+    'gin_supervised_masking_BACE': 'dgllife/pre_trained/gin_supervised_masking_bace.pth',
+    'NF_canonical_BACE': 'dgllife/pre_trained/nf_canonical_bace.pth'
 }
 
 def create_bace_model(model_name):
@@ -213,6 +214,18 @@ def create_bace_model(model_name):
         )
         model.gnn.JK = jk
         return model
+
+    elif model_name == 'NF_canonical_BACE':
+        num_gnn_layers = 1
+        dropout = 0.14096514656248904
+        return NFPredictor(in_feats=74,
+                           n_tasks=n_tasks,
+                           hidden_feats=[32] * num_gnn_layers,
+                           batchnorm=[True] * num_gnn_layers,
+                           dropout=[dropout] * num_gnn_layers,
+                           predictor_hidden_size=1024,
+                           predictor_batchnorm=True,
+                           predictor_dropout=dropout)
 
     else:
         return None
