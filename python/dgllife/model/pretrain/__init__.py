@@ -356,6 +356,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on SIDER
         * ``'gin_supervised_masking_SIDER'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on SIDER
+        * ``'NF_canonical_SIDER'``: An NF model trained on SIDER with canonical
+          featurization for atoms
         * ``'GCN_canonical_Tox21'``: A GCN model trained on Tox21 with canonical
           featurization for atoms
         * ``'GCN_attentivefp_Tox21'``: A GCN model trained on Tox21 with attentivefp

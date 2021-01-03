@@ -10,7 +10,7 @@
 import torch.nn.functional as F
 
 from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
-    AttentiveFPPredictor, GINPredictor
+    AttentiveFPPredictor, GINPredictor, NFPredictor
 
 __all__ = ['sider_url',
            'create_sider_model']
@@ -33,7 +33,8 @@ sider_url = {
     'gin_supervised_edgepred_SIDER':
         'dgllife/pre_trained/gin_supervised_edgepred_sider.pth',
     'gin_supervised_masking_SIDER':
-        'dgllife/pre_trained/gin_supervised_masking_sider.pth'
+        'dgllife/pre_trained/gin_supervised_masking_sider.pth',
+    'NF_canonical_SIDER': 'dgllife/pre_trained/nf_canonical_sider.pth'
 }
 
 def create_sider_model(model_name):
@@ -219,6 +220,18 @@ def create_sider_model(model_name):
         )
         model.gnn.JK = jk
         return model
+
+    elif model_name == 'nf_canonical_SIDER':
+        dropout = 0.3004340538386648
+        num_gnn_layers = 1
+        return NFPredictor(in_feats=74,
+                           n_tasks=n_tasks,
+                           hidden_feats=[64] * num_gnn_layers,
+                           batchnorm=[True] * num_gnn_layers,
+                           dropout=[dropout] * num_gnn_layers,
+                           predictor_hidden_size=32,
+                           predictor_batchnorm=True,
+                           predictor_dropout=dropout)
 
     else:
         return None
