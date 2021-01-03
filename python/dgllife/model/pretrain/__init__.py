@@ -382,6 +382,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on Tox21
         * ``'gin_supervised_masking_Tox21'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on Tox21
+        * ``'NF_canonical_Tox21'``: An NF model trained on Tox21 with canonical
+          featurization for atoms
         * ``'GCN_canonical_ToxCast'``: A GCN model trained on ToxCast with canonical
           featurization for atoms
         * ``'GCN_attentivefp_ToxCast'``: A GCN model trained on ToxCast with attentivefp

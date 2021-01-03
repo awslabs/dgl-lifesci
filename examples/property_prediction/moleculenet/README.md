@@ -251,6 +251,7 @@ The performance of the pre-trained models can be found below.
 | gin_supervised_infomax     | 0.82        | 0.78         |
 | gin_supervised_edgepred    | 0.83        | 0.80         |
 | gin_supervised_masking     | 0.77        | 0.75         |
+| NF + canonical             | 0.80        | 0.75         |
 
 ## ToxCast
 
