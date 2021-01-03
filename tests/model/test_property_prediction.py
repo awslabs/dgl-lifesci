@@ -385,10 +385,10 @@ def test_nf_predictor():
                                activation=[None, None],
                                batchnorm=[False, False],
                                dropout=[0.1, 0.1],
-                               dense_size=4,
-                               dense_batchnorm=False,
-                               dense_dropout=0.1,
-                               dense_activation=None).to(device)
+                               predictor_size=4,
+                               predictor_batchnorm=False,
+                               predictor_dropout=0.1,
+                               predictor_activation=None).to(device)
     nf_predictor.eval()
     assert nf_predictor(g, node_feats).shape == torch.Size([1, 2])
     nf_predictor.train()
