@@ -221,7 +221,7 @@ def create_sider_model(model_name):
         model.gnn.JK = jk
         return model
 
-    elif model_name == 'nf_canonical_SIDER':
+    elif model_name == 'NF_canonical_SIDER':
         dropout = 0.3004340538386648
         num_gnn_layers = 1
         return NFPredictor(in_feats=74,
