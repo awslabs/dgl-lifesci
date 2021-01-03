@@ -10,7 +10,7 @@
 import torch.nn.functional as F
 
 from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
-    AttentiveFPPredictor, GINPredictor
+    AttentiveFPPredictor, GINPredictor, NFPredictor
 
 __all__ = ['hiv_url',
            'create_hiv_model']
@@ -29,7 +29,8 @@ hiv_url = {
     'gin_supervised_contextpred_HIV': 'dgllife/pre_trained/gin_supervised_contextpred_hiv.pth',
     'gin_supervised_infomax_HIV': 'dgllife/pre_trained/gin_supervised_infomax_hiv.pth',
     'gin_supervised_edgepred_HIV': 'dgllife/pre_trained/gin_supervised_edgepred_hiv.pth',
-    'gin_supervised_masking_HIV': 'dgllife/pre_trained/gin_supervised_masking_hiv.pth'
+    'gin_supervised_masking_HIV': 'dgllife/pre_trained/gin_supervised_masking_hiv.pth',
+    'NF_canonical_HIV': 'dgllife/pre_trained/nf_canonical_hiv.pth'
 }
 
 def create_hiv_model(model_name):
@@ -213,6 +214,18 @@ def create_hiv_model(model_name):
         )
         model.gnn.JK = jk
         return model
+
+    elif model_name == 'NF_canonical_HIV':
+        dropout = 0.29642808718861385
+        num_gnn_layers = 4
+        return NFPredictor(in_feats=74,
+                           n_tasks=n_tasks,
+                           hidden_feats=[64] * num_gnn_layers,
+                           batchnorm=[True] * num_gnn_layers,
+                           dropout=[dropout] * num_gnn_layers,
+                           predictor_hidden_size=256,
+                           predictor_batchnorm=True,
+                           predictor_dropout=dropout)
 
     else:
         return None

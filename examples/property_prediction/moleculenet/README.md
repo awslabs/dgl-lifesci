@@ -156,6 +156,7 @@ The performance of the pre-trained models can be found below.
 | gin_supervised_infomax     | 0.88        | 0.76         |
 | gin_supervised_edgepred    | 0.80        | 0.72         |
 | gin_supervised_masking     | 0.80        | 0.75         |
+| NF + canonical             | 0.80        | 0.74         |
 
 ## Lipophilicity
 
