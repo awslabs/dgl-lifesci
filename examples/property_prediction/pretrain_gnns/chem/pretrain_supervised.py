@@ -83,7 +83,11 @@ def main():
     parser.add_argument('--graph_pooling', type=str, default="mean",
                         help='graph level pooling, or readout.'
                              'for computing graph representations out of node representations, '
-                             'which can be `sum`, `mean`, `max` or `attention`. (default: mean)')  # todo: set2set
+                             'which can be `sum`, `mean`, `max` or `attention`. (default: mean)'
+                             '`sum`: apply sum pooling over the nodes in the graph.'
+                             '`mean`: apply average pooling over the nodes in the graph.'
+                             '`max`: apply max pooling over the nodes in the graph.'
+                             '`attention`: apply Global Attention Pooling over the nodes in the graph.')  # TODO: set2set
     parser.add_argument('--JK', type=str, default="last",
                         help='JK for jumping knowledge '
                              'decides how we are going to combine the all-layer node representations for the final output.'
