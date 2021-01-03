@@ -124,7 +124,8 @@ if __name__ == '__main__':
                                                    'gin_supervised_contextpred',
                                                    'gin_supervised_infomax',
                                                    'gin_supervised_edgepred',
-                                                   'gin_supervised_masking'],
+                                                   'gin_supervised_masking',
+                                                   'NF'],
                         help='Model to use')
     parser.add_argument('-f', '--featurizer-type', choices=['canonical', 'attentivefp'],
                         help='Featurization for atoms (and bonds). This is required for models '

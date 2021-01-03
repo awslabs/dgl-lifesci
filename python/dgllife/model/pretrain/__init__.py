@@ -144,6 +144,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on BBBP
         * ``'gin_supervised_masking_BBBP'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on BBBP
+        * ``'NF_canonical_BBBP'``: An NF model pre-trained on BBBP with canonical
+          featurization for atoms
         * ``'GCN_canonical_ClinTox'``: A GCN model trained on ClinTox with canonical
           featurization for atoms
         * ``'GCN_attentivefp_ClinTox'``: A GCN model trained on ClinTox with attentivefp

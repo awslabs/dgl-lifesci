@@ -22,7 +22,7 @@ where:
   `ClinTox`, `SIDER`, `ToxCast`, `HIV`, `PCBA`, `Tox21`
 - `MODEL` specifies the model to use, which can be one of `GCN`, `GAT`, `Weave`, `MPNN`, 
   `AttentiveFP`, `gin_supervised_contextpred`, `gin_supervised_infomax`, 
-  `gin_supervised_edgepred`, `gin_supervised_masking`
+  `gin_supervised_edgepred`, `gin_supervised_masking`, `NF`
 - `FEATURE ` specifies the featurization method to use, which can be one of `canonical`, 
   `attentivefp`. This argument can be omitted if the model is one of `gin_supervised_*`.
   
@@ -83,6 +83,7 @@ The performance of the pre-trained models can be found below.
 | gin_supervised_infomax     | 0.97        | 0.72         |
 | gin_supervised_edgepred    | 0.98        | 0.70         |
 | gin_supervised_masking     | 0.97        | 0.72         |
+| NF + canonical             | 0.98        | 0.66         |
 
 ## ClinTox
 
