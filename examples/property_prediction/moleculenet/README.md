@@ -274,3 +274,4 @@ The performance of the pre-trained models can be found below.
 | gin_supervised_infomax     | 0.62        | 0.59         |
 | gin_supervised_edgepred    | 0.61        | 0.59         |
 | gin_supervised_masking     | 0.63        | 0.58         |
+| NF + canonical             | 0.63        | 0.60         |

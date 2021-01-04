@@ -418,6 +418,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on ToxCast
         * ``'gin_supervised_masking_ToxCast'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on ToxCast
+        * ``'NF_canonical_ToxCast'``: An NF model trained on ToxCast with canonical
+          featurization for atoms and bonds
 
     log : bool
         Whether to print progress for model loading

@@ -10,7 +10,7 @@
 import torch.nn.functional as F
 
 from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
-    AttentiveFPPredictor, GINPredictor
+    AttentiveFPPredictor, GINPredictor, NFPredictor
 
 __all__ = ['toxcast_url',
            'create_toxcast_model']
@@ -33,7 +33,8 @@ toxcast_url = {
     'gin_supervised_edgepred_ToxCast':
         'dgllife/pre_trained/gin_supervised_edgepred_toxcast.pth',
     'gin_supervised_masking_ToxCast':
-        'dgllife/pre_trained/gin_supervised_masking_toxcast.pth'
+        'dgllife/pre_trained/gin_supervised_masking_toxcast.pth',
+    'NF_canonical_ToxCast': 'dgllife/pre_trained/nf_canonical_toxcast.pth'
 }
 
 def create_toxcast_model(model_name):
@@ -217,6 +218,18 @@ def create_toxcast_model(model_name):
         )
         model.gnn.JK = jk
         return model
+
+    elif model_name == 'NF_canonical_ToxCast':
+        num_gnn_layers = 4
+        dropout = 0.23659695490588817
+        return NFPredictor(in_feats=74,
+                           n_tasks=n_tasks,
+                           hidden_feats=[128] * num_gnn_layers,
+                           batchnorm=[True] * num_gnn_layers,
+                           dropout=[dropout] * num_gnn_layers,
+                           predictor_hidden_size=512,
+                           predictor_batchnorm=True,
+                           predictor_dropout=dropout)
 
     else:
         return None
