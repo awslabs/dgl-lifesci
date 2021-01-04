@@ -220,7 +220,7 @@ def main():
     train(args, model_list, train_dataloader, optimizer, criterion, device)
 
     if not args.output_model_file == "":
-        torch.save(model.state_dict(), args.output_model_file)
+        torch.save(model.gnn.state_dict(), args.output_model_file)
 
 
 if __name__ == "__main__":
