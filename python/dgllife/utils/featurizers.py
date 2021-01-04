@@ -2049,7 +2049,7 @@ class AttentiveFPBondFeaturizer(BaseBondFeaturizer):
     >>> bond_featurizer.feat_size('feat')
     10
 
-    # Featurization with self loops to add
+    >>> # Featurization with self loops to add
     >>> bond_featurizer = AttentiveFPBondFeaturizer(bond_data_field='feat', self_loop=True)
     >>> bond_featurizer(mol)
     {'feat': tensor([[1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
