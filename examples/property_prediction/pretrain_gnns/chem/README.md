@@ -30,4 +30,16 @@ The supervised pre-training model will be found in `OUTPUT_MODEL_PATH` after tra
 If a custom dataset is specified, the path needs to be provided with `--dataset`. The custom dataset is supposed to be a `.pkl` file, which is pickled from "a list of tuples". The first element in every `tuple` should be a molecule SMILES in class `str`, and the second element should be its corresponding label in class `torch.Tensor`. Possible values are {-1, 0, 1} in labels. "1" means positive, and "-1" means negative. "0" indicates the molecule is invalid.
 
 ## Experiment Results
-- to-do
+
+With the default parameters, pre-trained models performed as following.
+
+| Datset  | AUC (GIN_pretrained) |
+| :-----: | :------------------: |
+|  BBBP   |        0.7175        |
+|  Tox21  |        0.7267        |
+| ToxCast |        0.6222        |
+|  SIDER  |        0.5897        |
+| ClinTox |        0.7944        |
+|   MUV   |        0.7944        |
+|   HIV   |        0.7452        |
+|  BACE   |        0.7734        |
