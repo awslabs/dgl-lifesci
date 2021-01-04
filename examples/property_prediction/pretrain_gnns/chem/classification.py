@@ -9,15 +9,15 @@ import torch.nn as nn
 
 from dgllife.utils import PretrainAtomFeaturizer
 from dgllife.utils import PretrainBondFeaturizer
-from dgllife.model import load_pretrained
-from dgllife.utils import smiles_to_bigraph, Meter
+from dgllife.utils import smiles_to_bigraph, Meter, EarlyStopping
+from dgllife.model.model_zoo.gin_predictor import GINPredictor
 
 from torch.utils.data import DataLoader
 
 from utils import split_dataset, collate_molgraphs
 
 
-def train(args, epoch, model, data_loader, loss_criterion, optimizer):
+def train(args, epoch, model, data_loader, loss_criterion, optimizer, device):
     model.train()
     train_meter = Meter()
     for batch_id, batch_data in enumerate(data_loader):
@@ -27,15 +27,15 @@ def train(args, epoch, model, data_loader, loss_criterion, optimizer):
             # Avoid potential issues with batch normalization
             continue
 
-        labels, masks = labels.to(args.device), masks.to(args.device)
-        bg = bg.to(args.device)
+        labels, masks = labels.to(device), masks.to(device)
+        bg = bg.to(device)
         node_feats = [
-            bg.ndata.pop('atomic_number').to(args.device),
-            bg.ndata.pop('chirality_type').to(args.device)
+            bg.ndata.pop('atomic_number').to(device),
+            bg.ndata.pop('chirality_type').to(device)
         ]
         edge_feats = [
-            bg.edata.pop('bond_type').to(args.device),
-            bg.edata.pop('bond_direction_type').to(args.device)
+            bg.edata.pop('bond_type').to(device),
+            bg.edata.pop('bond_direction_type').to(device)
         ]
         logits = model(bg, node_feats, edge_feats)
         # Mask non-existing labels
@@ -56,29 +56,28 @@ def train(args, epoch, model, data_loader, loss_criterion, optimizer):
         epoch + 1, args.num_epochs, args.metric, train_score))
 
 
-def evaluation(args, model, data_loader):
+def evaluation(args, model, data_loader, device):
     model.eval()
     eval_meter = Meter()
     with torch.no_grad():
         for batch_id, batch_data in enumerate(data_loader):
             smiles, bg, labels, masks = batch_data
-            labels = labels.to(args.device)
-            bg = bg.to(args.device)
+            labels = labels.to(device)
+            bg = bg.to(device)
             node_feats = [
-                bg.ndata.pop('atomic_number').to(args.device),
-                bg.ndata.pop('chirality_type').to(args.device)
+                bg.ndata.pop('atomic_number').to(device),
+                bg.ndata.pop('chirality_type').to(device)
             ]
             edge_feats = [
-                bg.edata.pop('bond_type').to(args.device),
-                bg.edata.pop('bond_direction_type').to(args.device)
+                bg.edata.pop('bond_type').to(device),
+                bg.edata.pop('bond_direction_type').to(device)
             ]
             logits = model(bg, node_feats, edge_feats)
             eval_meter.update(logits, labels, masks)
     return np.mean(eval_meter.compute_metric(args.metric))
 
 
-def main(args, dataset):
-    args.n_tasks = dataset.n_tasks
+def main(args, dataset, device):
     train_set, val_set, test_set = split_dataset(args, dataset)
     train_loader = DataLoader(dataset=train_set, batch_size=32, shuffle=True,
                               collate_fn=collate_molgraphs, num_workers=args.num_workers)
@@ -86,23 +85,41 @@ def main(args, dataset):
                             collate_fn=collate_molgraphs, num_workers=args.num_workers)
     test_loader = DataLoader(dataset=test_set, batch_size=32,
                              collate_fn=collate_molgraphs, num_workers=args.num_workers)
-    if args.pretrain:
-        model = load_pretrained('{}_{}'.format(args.model, args.dataset)).to(args.device)
-    else:
-        pass
-
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.decay)
+    
+    model = GINPredictor(num_node_emb_list=[119, 4],
+                         num_edge_emb_list=[6, 3],
+                         num_layers=5,
+                         emb_dim=300,
+                         JK='last',
+                         dropout=0.2,
+                         readout='mean',
+                         n_tasks=dataset.n_tasks)
+    model.gnn.load_state_dict(torch.load('./pretrain_supervised.pth'))
+    model.to(device)
+    
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0)
     criterion = nn.BCEWithLogitsLoss(reduction='none')
+    stopper = EarlyStopping()
 
-    for epoch in range(1, args.num_epochs):
-        train(args, epoch, model, train_loader, criterion, optimizer)
-        val_score = evaluation(args, model, val_loader)
-
-    evaluation(args, model, test_loader)
+    for epoch in range(0, args.num_epochs):
+        train(args, epoch, model, train_loader, criterion, optimizer, device)
+        val_score = evaluation(args, model, val_loader, device)
+        early_stop = stopper.step(val_score, model)
+        print('epoch {:d}/{:d}, validation {} {:.4f}, best validation {} {:.4f}'.format(
+            epoch + 1, args.num_epochs, args.metric,
+            val_score, args.metric, stopper.best_score))
+        
+        if early_stop:
+            break
+    stopper.load_checkpoint(model)
+    test_score = evaluation(args, model, test_loader, device)
+    print('test {} {:.4f}'.format(args.metric, test_score))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='pretrain_downstream_classification_task')
+    parser.add_argument('--device', type=int, default=0,
+                        help='which gpu to use if any. (default: 0)')
     parser.add_argument('-d', '--dataset', choices=['MUV', 'BACE', 'BBBP', 'ClinTox', 'SIDER',
                                                     'ToxCast', 'HIV', 'PCBA', 'Tox21'],
                         help='Dataset to use')
@@ -131,6 +148,8 @@ if __name__ == '__main__':
                         help='Path to save training results (default: classification_results)')
     args = parser.parse_args()
     print(args)
+
+    device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
 
     atom_featurizer = PretrainAtomFeaturizer()
     bond_featurizer = PretrainBondFeaturizer()
@@ -201,4 +220,4 @@ if __name__ == '__main__':
     else:
         raise ValueError('Unexpected dataset: {}'.format(args.dataset))
 
-    main(args, dataset)
+    main(args, dataset, device)
