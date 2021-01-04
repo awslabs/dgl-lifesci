@@ -23,7 +23,7 @@ If a custom dataset is specified, the path need to be provided with `--dataset`.
 
 **2. Supervised pre-training**
 ``` bash
-python pretrain_supervised.py --output_model_file OUTPUT_MODEL_PATH --input_model_file INPUT_MODEL_PATH
+python pretrain_supervised.py --input_model_file INPUT_MODEL_PATH --output_model_file OUTPUT_MODEL_PATH
 ```
 The supervised pre-training model will be found in `OUTPUT_MODEL_PATH` after training (default filename: pretrain_supervised.pth).
 
@@ -39,7 +39,7 @@ With the default parameters, pre-trained models performed as following.
 |  Tox21  |        0.7267        |
 | ToxCast |        0.6222        |
 |  SIDER  |        0.5897        |
-| ClinTox |        0.7944        |
+| ClinTox |         N/A          |
 |   MUV   |        0.7944        |
 |   HIV   |        0.7452        |
 |  BACE   |        0.7734        |
