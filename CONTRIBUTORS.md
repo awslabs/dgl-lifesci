@@ -16,3 +16,4 @@ Contributors
 * [Krishna Sirumalla](https://github.com/skrsna): Fix for regression_inference.py and classification_inference.py; support non-ring systems for ScaffoldSplitter
 * [Joshua Meyers](https://github.com/JoshuaMeyers): Fix for load_molecule
 * [Pavol Drotar](https://github.com/padr31): Fix for import
+* [Nanxuan Zhou](https://github.com/xnuohz): Fix for doc
