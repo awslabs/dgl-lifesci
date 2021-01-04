@@ -126,7 +126,7 @@ def main():
                          n_tasks=1310)
 
     if args.input_model_file != "":
-        model.load_state_dict(torch.load(args.input_model_file))
+        model.gnn.load_state_dict(torch.load(args.input_model_file))
     model.to(device)
 
     if args.dataset != 'chembl_filtered':
@@ -154,7 +154,7 @@ def main():
     train(args, model, train_dataloader, optimizer, criterion, device)
 
     if not args.output_model_file == "":
-        torch.save(model.state_dict(), args.output_model_file)
+        torch.save(model.gnn.state_dict(), args.output_model_file)
 
 
 if __name__ == "__main__":
