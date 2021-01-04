@@ -211,7 +211,7 @@ class NFGNN(nn.Module):
         self.gnn_layers = nn.ModuleList()
         for i in range(n_layers):
             self.gnn_layers.append(NFLayer(in_feats, hidden_feats[i], max_degree, activation[i],
-                                            batchnorm[i], dropout[i]))
+                                           batchnorm[i], dropout[i]))
             in_feats = hidden_feats[i]
 
     def reset_parameters(self):
