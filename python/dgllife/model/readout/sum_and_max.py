@@ -18,7 +18,7 @@ class SumAndMax(nn.Module):
     representations and concatenate the results.
     """
     def __init__(self):
-        super(SumAndMax, self).__init__()
+        pass
 
     def forward(self, bg, feats):
         """Readout
