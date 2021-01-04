@@ -53,44 +53,44 @@ class NFPredictor(nn.Module):
         ``dropout[i]`` decides the dropout to be applied on the output of the i-th NF layer.
         ``len(dropout)`` equals the number of NF layers. By default, dropout is not applied
         for all NF layers.
-    dense_size : int
-        Size for the output of the linear layer after GNN. Default to be 128.
-    dense_batchnorm : bool
-        Whether to apply batch normalization to the output of the linear layer after GNN.
+    predicor_hidden_size : int
+        Size for hidden representations in the output MLP predictor. Default to be 128.
+    predictor_batchnorm : bool
+        Whether to apply batch normalization in the output MLP predictor. Default to be True.
         Default to be True.
-    dense_dropout : float
-        The dropout probability for the output of the linear layer after GNN. Default to be 0.
-    dense_activation : activation function
-        The activation function for the output of the linear layer after GNN. Default to be Tanh.
+    predictor_dropout : float
+        The dropout probability in the output MLP predictor. Default to be 0.
+    predictor_activation : activation function
+        The activation function in the output MLP predictor. Default to be Tanh.
     """
     def __init__(self, in_feats, n_tasks=1, hidden_feats=None, max_degree=10, activation=None,
-                 batchnorm=None, dropout=None, dense_size=128, dense_batchnorm=True,
-                 dense_dropout=0., dense_activation=torch.tanh):
+                 batchnorm=None, dropout=None, predictor_hidden_size=128, predictor_batchnorm=True,
+                 predictor_dropout=0., predictor_activation=torch.tanh):
         super(NFPredictor, self).__init__()
 
         self.gnn = NFGNN(in_feats, hidden_feats, max_degree, activation, batchnorm, dropout)
         gnn_out_feats = self.gnn.gnn_layers[-1].out_feats
 
-        self.node_to_graph = nn.Linear(gnn_out_feats, dense_size)
-        if dense_batchnorm:
-            self.dense_bn = nn.BatchNorm1d(dense_size)
+        self.node_to_graph = nn.Linear(gnn_out_feats, predictor_hidden_size)
+        if predictor_batchnorm:
+            self.predictor_bn = nn.BatchNorm1d(predictor_hidden_size)
         else:
-            self.dense_bn = None
-        if dense_dropout > 0:
-            self.dense_dropout = nn.Dropout(dense_dropout)
+            self.predictor_bn = None
+        if predictor_dropout > 0:
+            self.predictor_dropout = nn.Dropout(predictor_dropout)
         else:
-            self.dense_dropout = None
+            self.predictor_dropout = None
 
         self.readout = SumAndMax()
-        self.dense_activation = dense_activation
-        self.predict = nn.Linear(2 * dense_size, n_tasks)
+        self.predictor_activation = predictor_activation
+        self.predict = nn.Linear(2 * predictor_hidden_size, n_tasks)
 
     def reset_parameters(self):
         """Reinitialize model parameters."""
         self.gnn.reset_parameters()
         self.node_to_graph.reset_parameters()
-        if self.dense_bn is not None:
-            self.dense_bn.reset_parameters()
+        if self.predictor_bn is not None:
+            self.predictor_bn.reset_parameters()
 
     def forward(self, g, feats):
         """Update node representations.
@@ -112,13 +112,13 @@ class NFPredictor(nn.Module):
         feats = self.gnn(g, feats)
         feats = self.node_to_graph(feats)
 
-        if self.dense_bn is not None:
-            feats = self.dense_bn(feats)
-        if self.dense_dropout is not None:
-            feats = self.dense_dropout(feats)
+        if self.predictor_bn is not None:
+            feats = self.predictor_bn(feats)
+        if self.predictor_dropout is not None:
+            feats = self.predictor_dropout(feats)
         graph_feats = self.readout(g, feats)
 
-        if self.dense_activation is not None:
-            graph_feats = self.dense_activation(graph_feats)
+        if self.predictor_activation is not None:
+            graph_feats = self.predictor_activation(graph_feats)
 
         return self.predict(graph_feats)

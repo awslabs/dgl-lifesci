@@ -22,7 +22,7 @@ where:
   `ClinTox`, `SIDER`, `ToxCast`, `HIV`, `PCBA`, `Tox21`
 - `MODEL` specifies the model to use, which can be one of `GCN`, `GAT`, `Weave`, `MPNN`, 
   `AttentiveFP`, `gin_supervised_contextpred`, `gin_supervised_infomax`, 
-  `gin_supervised_edgepred`, `gin_supervised_masking`
+  `gin_supervised_edgepred`, `gin_supervised_masking`, `NF`
 - `FEATURE ` specifies the featurization method to use, which can be one of `canonical`, 
   `attentivefp`. This argument can be omitted if the model is one of `gin_supervised_*`.
   
@@ -64,6 +64,7 @@ The performance of the pre-trained models can be found below.
 | gin_supervised_infomax     | 0.74        | 0.71         |
 | gin_supervised_edgepred    | 0.76        | 0.86         |
 | gin_supervised_masking     | 0.71        | 0.74         |
+| NF + canonical             | 0.71        | 0.80         |
 
 ## BBBP
 
@@ -83,6 +84,7 @@ The performance of the pre-trained models can be found below.
 | gin_supervised_infomax     | 0.97        | 0.72         |
 | gin_supervised_edgepred    | 0.98        | 0.70         |
 | gin_supervised_masking     | 0.97        | 0.72         |
+| NF + canonical             | 0.98        | 0.66         |
 
 ## ClinTox
 
@@ -155,6 +157,7 @@ The performance of the pre-trained models can be found below.
 | gin_supervised_infomax     | 0.88        | 0.76         |
 | gin_supervised_edgepred    | 0.80        | 0.72         |
 | gin_supervised_masking     | 0.80        | 0.75         |
+| NF + canonical             | 0.80        | 0.74         |
 
 ## Lipophilicity
 
@@ -231,6 +234,7 @@ The performance of the pre-trained models can be found below.
 | gin_supervised_infomax     | 0.61        | 0.63         |
 | gin_supervised_edgepred    | 0.62        | 0.66         |
 | gin_supervised_masking     | 0.61        | 0.58         |
+| NF + canonical             | 0.58        | 0.53         |
 
 ## Tox21
 
@@ -250,6 +254,7 @@ The performance of the pre-trained models can be found below.
 | gin_supervised_infomax     | 0.82        | 0.78         |
 | gin_supervised_edgepred    | 0.83        | 0.80         |
 | gin_supervised_masking     | 0.77        | 0.75         |
+| NF + canonical             | 0.80        | 0.75         |
 
 ## ToxCast
 
@@ -269,3 +274,4 @@ The performance of the pre-trained models can be found below.
 | gin_supervised_infomax     | 0.62        | 0.59         |
 | gin_supervised_edgepred    | 0.61        | 0.59         |
 | gin_supervised_masking     | 0.63        | 0.58         |
+| NF + canonical             | 0.63        | 0.60         |
