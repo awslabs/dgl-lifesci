@@ -95,7 +95,7 @@ class GINPredictor(nn.Module):
         else:
             raise ValueError("Expect readout to be 'sum', 'mean', "
                              "'max', 'attention' or 'skip', got {}".format(readout))
-        
+
         if n_tasks == 0:
             self.predict = None
         elif JK == 'concat':
@@ -127,7 +127,7 @@ class GINPredictor(nn.Module):
             * B for the number of graphs in the batch
         """
         node_feats = self.gnn(g, categorical_node_feats, categorical_edge_feats)
-        if self.readout == 'skip' and self.predict == None:
+        if self.readout == 'skip' and self.predict is None:
             return node_feats
         graph_feats = self.readout(g, node_feats)
         return self.predict(graph_feats)
