@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # adapted from
 # https://github.com/awslabs/dgl-lifesci/blob/master/examples/property_prediction/moleculenet/classification.py
 

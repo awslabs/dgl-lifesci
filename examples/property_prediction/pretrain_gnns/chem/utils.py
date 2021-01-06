@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import torch
 import dgl
 from dgllife.utils import ScaffoldSplitter, RandomSplitter
