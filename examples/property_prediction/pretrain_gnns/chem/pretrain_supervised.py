@@ -50,7 +50,8 @@ def train(args, model, train_dataloader, optimizer, criterion, device):
                 # Negative labels will be changed from "-1" to "0"
                 loss = criterion(logits, (labels + 1) / 2)
                 # Replace invalid molecule labels from "-1" to "0".
-                loss = torch.where(is_valid, loss, torch.zeros(loss.shape).to(loss.device).to(loss.dtype))
+                loss = torch.where(is_valid, loss, torch.zeros(
+                    loss.shape).to(loss.device).to(loss.dtype))
                 loss = torch.sum(loss) / torch.sum(is_valid)
 
                 optimizer.zero_grad()
@@ -98,8 +99,8 @@ def main():
                              '`sum`: sum the output node representations from all GIN layers')
     parser.add_argument('--dataset', type=str, default='chembl_filtered',
                         help='path of the dataset. For now, only classification (default: chembl_filtered)')
-    parser.add_argument('--input_model_file', type=str, default=None,
-                        help='filename to read the model if there is any. (default: None)')
+    parser.add_argument('--input_model_file', type=str, default='pretrain_masking.pth',
+                        help='filename to read the model if there is any. (default: pretrain_masking.pth)')
     parser.add_argument('--output_model_file', type=str, default='pretrain_supervised.pth',
                         help='filename to output the pre-trained model. (default: pretrain_supervised.pth)')
     parser.add_argument('--seed', type=int, default=0, help="Random seed.")
@@ -114,7 +115,8 @@ def main():
     if torch.cuda.is_available():
         torch.cuda.manual_seed(args.seed)
 
-    device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device("cuda:" + str(args.device)
+                          ) if torch.cuda.is_available() else torch.device("cpu")
 
     model = GINPredictor(num_node_emb_list=[119, 4],
                          num_edge_emb_list=[6, 3],
@@ -137,7 +139,8 @@ def main():
     atom_featurizer = PretrainAtomFeaturizer()
     bond_featurizer = PretrainBondFeaturizer()
     dataset = PretrainDataset(data=data,
-                              smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
+                              smiles_to_graph=partial(
+                                  smiles_to_bigraph, add_self_loop=True),
                               node_featurizer=atom_featurizer,
                               edge_featurizer=bond_featurizer,
                               task='supervised')
@@ -148,7 +151,8 @@ def main():
                                   num_workers=args.num_workers,
                                   collate_fn=collate)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.decay)
+    optimizer = torch.optim.Adam(
+        model.parameters(), lr=args.lr, weight_decay=args.decay)
     criterion = nn.BCEWithLogitsLoss(reduction='none')
 
     train(args, model, train_dataloader, optimizer, criterion, device)

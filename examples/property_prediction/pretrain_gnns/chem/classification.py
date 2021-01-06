@@ -60,8 +60,8 @@ def evaluation(args, model, data_loader, device):
     model.eval()
     eval_meter = Meter()
     with torch.no_grad():
-        for batch_id, batch_data in enumerate(data_loader):
-            smiles, bg, labels, masks = batch_data
+        for _, batch_data in enumerate(data_loader):
+            _, bg, labels, masks = batch_data
             labels = labels.to(device)
             bg = bg.to(device)
             node_feats = [
@@ -85,7 +85,7 @@ def main(args, dataset, device):
                             collate_fn=collate_molgraphs, num_workers=args.num_workers)
     test_loader = DataLoader(dataset=test_set, batch_size=32,
                              collate_fn=collate_molgraphs, num_workers=args.num_workers)
-    
+
     model = GINPredictor(num_node_emb_list=[119, 4],
                          num_edge_emb_list=[6, 3],
                          num_layers=5,
@@ -94,9 +94,10 @@ def main(args, dataset, device):
                          dropout=0.2,
                          readout='mean',
                          n_tasks=dataset.n_tasks)
-    model.gnn.load_state_dict(torch.load('./pretrain_supervised.pth'))
+    if args.input_model_file != '':
+        model.gnn.load_state_dict(torch.load(args.input_model_file))
     model.to(device)
-    
+
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0)
     criterion = nn.BCEWithLogitsLoss(reduction='none')
     stopper = EarlyStopping()
@@ -108,7 +109,7 @@ def main(args, dataset, device):
         print('epoch {:d}/{:d}, validation {} {:.4f}, best validation {} {:.4f}'.format(
             epoch + 1, args.num_epochs, args.metric,
             val_score, args.metric, stopper.best_score))
-        
+
         if early_stop:
             break
     stopper.load_checkpoint(model)
@@ -144,8 +145,8 @@ if __name__ == '__main__':
                         help='Number of processes for data loading (default: 0)')
     parser.add_argument('-pe', '--print-every', type=int, default=20,
                         help='Print the training progress every X mini-batches')
-    parser.add_argument('-rp', '--result-path', type=str, default='classification_results',
-                        help='Path to save training results (default: classification_results)')
+    parser.add_argument('--input_model_file', type=str, default='pretrain_supervised.pth',
+                        help='filename to input the pre-trained model if there is any. (default: pretrain_supervised.pth)')
     args = parser.parse_args()
     print(args)
 
