@@ -15,6 +15,7 @@ import dgl
 from dgllife.utils import PretrainAtomFeaturizer
 from dgllife.utils import PretrainBondFeaturizer
 from dgllife.utils import smiles_to_bigraph
+from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 
 from dgllife.model.model_zoo.gin_predictor import GINPredictor
 from utils import *
@@ -168,9 +169,15 @@ def main():
 
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
 
-    if args.dataset != 'zinc_standard_agent':
-        raise ValueError('Dataset should be zinc_standard_agent.')
-    data = pd.read_csv('./zinc.csv')
+    if args.dataset == 'zinc_standard_agent':
+        url = 'dataset/pretrain_gnns.zip'
+        data_path = get_download_dir() + '/pretrain_gnns.zip'
+        dir_path = get_download_dir() + '/pretrain_gnns'
+        download(_get_dgl_url(url), path=data_path, overwrite=False)
+        extract_archive(data_path, dir_path)
+        data = pd.read_csv(dir_path + '/zinc.csv')
+    else:
+        data = pd.read_csv(args.dataset)
 
     atom_featurizer = PretrainAtomFeaturizer()
     bond_featurizer = PretrainBondFeaturizer()
