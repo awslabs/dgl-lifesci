@@ -12,6 +12,7 @@ import dgl
 from dgllife.utils import PretrainAtomFeaturizer
 from dgllife.utils import PretrainBondFeaturizer
 from dgllife.utils import smiles_to_bigraph
+from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 from dgllife.model.model_zoo.gin_predictor import GINPredictor
 
 from utils import PretrainDataset
@@ -132,10 +133,17 @@ def main():
         model.gnn.load_state_dict(torch.load(args.input_model_file))
     model.to(device)
 
-    if args.dataset != 'chembl_filtered':
-        raise ValueError('Dataset should be chembl_filtered.')
-    with open('./supervised_chembl_rev.pkl', 'rb') as f:
-        data = pickle.load(f)
+    if args.dataset == 'chembl_filtered':
+        url = 'dataset/pretrain_gnns.zip'
+        data_path = get_download_dir() + '/pretrain_gnns.zip'
+        dir_path = get_download_dir() + '/pretrain_gnns'
+        download(_get_dgl_url(url), path=data_path, overwrite=False)
+        extract_archive(data_path, dir_path)
+        with open(dir_path + '/supervised_chembl_rev.pkl', 'rb') as f:
+            data = pickle.load(f)
+    else:
+        with open(args.dataset, 'rb') as f:
+            data = pickle.load(f)
 
     atom_featurizer = PretrainAtomFeaturizer()
     bond_featurizer = PretrainBondFeaturizer()
