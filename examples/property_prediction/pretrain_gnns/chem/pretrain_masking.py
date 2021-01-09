@@ -73,7 +73,7 @@ def train(args, model_list, train_dataloader, optimizer, criterion, device):
     else:
         model, node_linear = model_list
 
-    for epoch in range(1, args.epochs):
+    for epoch in range(0, args.epochs):
         model.train()
         node_linear.train()
         if args.mask_edge:
@@ -110,7 +110,7 @@ def train(args, model_list, train_dataloader, optimizer, criterion, device):
                     edge_acc = 0
 
                 tq_train.set_postfix_str(
-                    "Epoch: {} Step: {} Loss: {:.4f} node_acc: {:.4f} edge_acc: {:.4f}".format(epoch,
+                    "Epoch: {} Step: {} Loss: {:.4f} node_acc: {:.4f} edge_acc: {:.4f}".format(epoch + 1,
                                                                                                step + 1,
                                                                                                loss.item(),
                                                                                                node_acc,

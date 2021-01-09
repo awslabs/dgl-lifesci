@@ -26,7 +26,7 @@ def collate(samples):
 
 
 def train(args, model, train_dataloader, optimizer, criterion, device):
-    for epoch in range(1, args.epochs):
+    for epoch in range(0, args.epochs):
         model.train()
         with tqdm.tqdm(train_dataloader) as tq_train:
             for step, (bg, labels) in enumerate(tq_train):
@@ -60,7 +60,7 @@ def train(args, model, train_dataloader, optimizer, criterion, device):
                 loss.backward()
                 optimizer.step()
                 tq_train.set_postfix_str(
-                    "Epoch: {} Step: {} Loss: {:.4f}".format(epoch,
+                    "Epoch: {} Step: {} Loss: {:.4f}".format(epoch + 1,
                                                              step + 1,
                                                              loss.item()), refresh=False)
 
@@ -130,7 +130,7 @@ def main():
                          n_tasks=1310)
 
     if args.input_model_file is not None:
-        model.load_state_dict(torch.load(args.input_model_file))
+        model.gnn.load_state_dict(torch.load(args.input_model_file))
     model.to(device)
 
     if args.dataset == 'chembl_filtered':
