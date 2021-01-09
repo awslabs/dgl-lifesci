@@ -102,7 +102,7 @@ def main(args, dataset, device):
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0)
     criterion = nn.BCEWithLogitsLoss(reduction='none')
-    stopper = EarlyStopping()
+    stopper = EarlyStopping(filename=args.output_model_file)
 
     for epoch in range(0, args.num_epochs):
         train(args, epoch, model, train_loader, criterion, optimizer, device)
@@ -126,11 +126,6 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--dataset', choices=['MUV', 'BACE', 'BBBP', 'ClinTox', 'SIDER',
                                                     'ToxCast', 'HIV', 'PCBA', 'Tox21'],
                         help='Dataset to use')
-    parser.add_argument('-mo', '--model', choices=['gin_supervised_masking'],
-                        help='Model to use (only support `gin_supervised_masking` currently)')
-    parser.add_argument('-p', '--pretrain', action='store_true',
-                        help='Whether to skip the training and evaluate the pre-trained model '
-                             'on the test set (default: False)')
     parser.add_argument('-s', '--split', choices=['scaffold', 'random'], default='scaffold',
                         help='Dataset splitting method (default: scaffold)')
     parser.add_argument('-sr', '--split-ratio', default='0.8,0.1,0.1', type=str,
@@ -148,7 +143,11 @@ if __name__ == '__main__':
     parser.add_argument('-pe', '--print-every', type=int, default=20,
                         help='Print the training progress every X mini-batches')
     parser.add_argument('--input_model_file', type=str, default='pretrain_supervised.pth',
-                        help='filename to input the pre-trained model if there is any. (default: pretrain_supervised.pth)')
+                        help='filename to input the pre-trained model if there is any.'
+                             ' (default: pretrain_supervised.pth)')
+    parser.add_argument('--output_model_file', type=str, default='pretrain_fine_tuning.pth',
+                        help='filename to output the pre-trained downstream task model.'
+                             ' (default: pretrain_fine_tuning.pth)')
     args = parser.parse_args()
     print(args)
 
