@@ -18,7 +18,7 @@ from dgllife.utils import smiles_to_bigraph
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 
 from dgllife.model.gnn.gin import GIN
-from utils import *
+from utils import PretrainDataset, mask_edges
 
 
 def compute_accuracy(pred, target):
@@ -54,7 +54,7 @@ def collate_masking(graphs, args):
         masked_edges_labels = edge_feats[0][masked_edges_indices]
         # mask these edges labels
         edge_feats[0][masked_edges_indices] = 5
-        masked_edge_pairs = bg.find_edges(masked_edges_indices)
+        masked_edge_pairs = bg.find_edges(masked_edges_indices.int())
     else:
         # if no edge masking
         masked_edges_indices = 0
@@ -101,7 +101,8 @@ def train(args, model_list, train_dataloader, optimizer, criterion, device):
                 if args.mask_edge:
                     pred_edge = edge_linear(logits)
                     # for every edge, add two corresponding node feature.
-                    masked_edges_logits = pred_edge[masked_edge_pairs[0]] + pred_edge[masked_edge_pairs[1]]
+                    masked_edges_logits = \
+                        pred_edge[masked_edge_pairs[0].long()] + pred_edge[masked_edge_pairs[1].long()]
                     loss_edge = criterion(masked_edges_logits, masked_edges_labels)
                     edge_acc = compute_accuracy(masked_edges_logits, masked_edges_labels)
                     loss = loss_node + loss_edge

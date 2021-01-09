@@ -8,8 +8,8 @@ def find_neighbor_edges(g, node_id):
     """Given a node with its graph, return all the edges connected to that node."""
     predecessors = g.predecessors(node_id)
     successors = g.successors(node_id)
-    predecessors_edges = g.edge_ids(predecessors, torch.full(predecessors.shape, node_id, dtype=torch.long))
-    successors_edges = g.edge_ids(torch.full(successors.shape, node_id, dtype=torch.long), successors)
+    predecessors_edges = g.edge_ids(predecessors, torch.full(predecessors.shape, node_id, dtype=torch.int))
+    successors_edges = g.edge_ids(torch.full(successors.shape, node_id, dtype=torch.int), successors)
     return torch.cat((predecessors_edges, successors_edges))
 
 
@@ -17,7 +17,7 @@ def mask_edges(g, masked_nodes_indices):
     """Given a graph and masked nodes, mask all edges that connected to the masked nodes and return these edge indices."""
     masked_edges_indices = []
     for masked_nodes_index in masked_nodes_indices:
-        masked_edges_indices.extend(find_neighbor_edges(g, masked_nodes_index))
+        masked_edges_indices.extend(find_neighbor_edges(g, masked_nodes_index.int()))
     return torch.LongTensor(masked_edges_indices)
 
 
