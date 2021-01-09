@@ -17,13 +17,16 @@ __all__ = ['GINPredictor']
 # pylint: disable=W0221
 class GINPredictor(nn.Module):
     """GIN-based model for regression and classification on graphs.
+
     GIN was first introduced in `How Powerful Are Graph Neural Networks
     <https://arxiv.org/abs/1810.00826>`__ for general graph property
     prediction problems. It was further extended in `Strategies for
     Pre-training Graph Neural Networks <https://arxiv.org/abs/1905.12265>`__
     for pre-training and semi-supervised learning on large-scale datasets.
+
     For classification tasks, the output will be logits, i.e. values before
     sigmoid or softmax.
+
     Parameters
     ----------
     num_node_emb_list : list of int
@@ -46,6 +49,7 @@ class GINPredictor(nn.Module):
         how we are going to combine the all-layer node representations for the final output.
         There can be four options for this argument, ``'concat'``, ``'last'``, ``'max'`` and
         ``'sum'``. Default to 'last'.
+
         * ``'concat'``: concatenate the output node representations from all GIN layers
         * ``'last'``: use the node representations from the last GIN layer
         * ``'max'``: apply max pooling to the node representations across all GIN layers
@@ -97,6 +101,7 @@ class GINPredictor(nn.Module):
 
     def forward(self, g, categorical_node_feats, categorical_edge_feats):
         """Graph-level regression/soft classification.
+
         Parameters
         ----------
         g : DGLGraph
@@ -110,6 +115,7 @@ class GINPredictor(nn.Module):
             * len(categorical_edge_feats) should be the same as
               len(num_edge_emb_list) in the arguments
             * E is the total number of edges in the batch of graphs
+
         Returns
         -------
         FloatTensor of shape (B, n_tasks)
