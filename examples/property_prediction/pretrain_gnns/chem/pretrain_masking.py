@@ -136,9 +136,9 @@ def main():
     parser.add_argument('--emb_dim', type=int, default=300,
                         help='embedding dimensions. (default: 300)')
     parser.add_argument('--dropout_ratio', type=float, default=0,
-                        help='ratio of masking nodes (atoms). (default: 0)')
+                        help='dropout ratio. (default: 0)')
     parser.add_argument('--mask_rate', type=float, default=0.15,
-                        help='dropout ratio (default: 0.15)')
+                        help='ratio of masking nodes (atoms). (default: 0.15)')
     parser.add_argument('--mask_edge', action='store_true',
                         help='whether to mask all edges connected to masked nodes (atoms). (default: False)')
     parser.add_argument('--JK', type=str, default="last",

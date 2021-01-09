@@ -21,58 +21,6 @@ def mask_edges(g, masked_nodes_indices):
     return torch.LongTensor(masked_edges_indices)
 
 
-class PretrainMaskingMoleculeCSVDataset(object):
-    """
-    adapted from https://lifesci.dgl.ai/_modules/dgllife/data/csv_dataset.html#MoleculeCSVDataset
-    Used for pretrain_masking task.
-    """
-
-    def __init__(self, df, smiles_to_graph, node_featurizer, edge_featurizer,
-                 smiles_column):
-        self.df = df
-        self.smiles = self.df[smiles_column].tolist()
-        self.smiles_to_graph = smiles_to_graph
-        self.node_featurizer = node_featurizer
-        self.edge_featurizer = edge_featurizer
-
-    def __getitem__(self, item):
-        s = self.smiles[item]
-        return self.smiles_to_graph(s,
-                                    node_featurizer=self.node_featurizer,
-                                    edge_featurizer=self.edge_featurizer)
-
-    def __len__(self):
-        return len(self.smiles)
-
-
-class PretrainSupervisedMoleculeCSVDataset(object):
-    """
-    adapted from https://lifesci.dgl.ai/_modules/dgllife/data/csv_dataset.html#MoleculeCSVDataset
-    Used for pretrain_supervised task.
-    """
-
-    def __init__(self, data, smiles_to_graph, node_featurizer, edge_featurizer):
-        self.data = data
-        self.smiles_to_graph = smiles_to_graph
-        self.node_featurizer = node_featurizer
-        self.edge_featurizer = edge_featurizer
-        self._pre_process()
-
-    def __getitem__(self, item):
-        s = self.smiles[item]
-        graph = self.smiles_to_graph(s,
-                                     node_featurizer=self.node_featurizer,
-                                     edge_featurizer=self.edge_featurizer)
-        label = self.labels[item]
-        return graph, label
-
-    def _pre_process(self):
-        self.smiles, self.labels = zip(*self.data)
-
-    def __len__(self):
-        return len(self.smiles)
-
-
 class PretrainDataset(object):
     """
     adapted from https://lifesci.dgl.ai/_modules/dgllife/data/csv_dataset.html#MoleculeCSVDataset

@@ -9,6 +9,7 @@ This is a DGL implementation of the following paper based on PyTorch.
 - For node-level self-supervised pre-training, 2 million unlabeled molecules sampled from the ZINC15 database are used. Custom datasets are supported.
 - For graph-level multi-task supervised pre-training, a preprocessed ChEMBL dataset is used, which contains 456K molecules with 1310 kinds of diverse and extensive biochemical assays. Custom datasets are supported.
 - For fine-tuning downstream tasks, BBBP, Tox21, ToxCast, SIDER, MUV, HIV and BACE dataset are supported.
+
 ## Usage
 **1. Self-supervised pre-training**
 
@@ -19,12 +20,14 @@ python pretrain_masking.py  --output_model_file OUTPUT_MODEL_FILE
 ```
 The self-supervised pre-training model will be found in `OUTPUT_MODEL_FILE` after training (default filename: pretrain_masking.pth).
 
-If a custom dataset is specified, the path need to be provided with `--dataset`. The custom dataset is supposed to be a text file, where every line is a molecule SMILES. 
+If a custom dataset is specified, the path needs to be provided with `--dataset`. The custom dataset is supposed to be a text file, where every line is a molecule SMILES except that the first is 'smiles'.
 
 **2. Supervised pre-training**
 ``` bash
 python pretrain_supervised.py --input_model_file INPUT_MODEL_FILE --output_model_file OUTPUT_MODEL_FILE
 ```
+The self-supervised pre-trained model can be loaded from `INPUT_MODEL_FILE`.
+
 The supervised pre-training model will be found in `OUTPUT_MODEL_FILE` after training (default filename: pretrain_supervised.pth).
 
 If a custom dataset is specified, the path needs to be provided with `--dataset`. The custom dataset is supposed to be a `.pkl` file, which is pickled from "a list of tuples". The first element in every `tuple` should be a molecule SMILES in class `str`, and the second element should be its corresponding label in class `torch.Tensor`. Possible values are {-1, 0, 1} in labels. "1" means positive, and "-1" means negative. "0" indicates the molecule is invalid.
@@ -33,6 +36,9 @@ If a custom dataset is specified, the path needs to be provided with `--dataset`
 ``` bash
 python classification.py --input_model_file INPUT_MODEL_FILE --output_model_file OUTPUT_MODEL_FILE --dataset DOWNSTREAM_DATASET
 ```
+
+The supervised pre-trained model can be loaded from `INPUT_MODEL_FILE`.
+
 The fine-tuned model will be found in `OUTPUT_MODEL_FILE` after training (default filename: pretrain_fine_tuning.pth).
 
 ## Experiment Results
