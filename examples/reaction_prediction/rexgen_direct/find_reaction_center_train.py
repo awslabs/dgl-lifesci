@@ -109,8 +109,10 @@ def main(rank, dev_id, args):
             if total_iter % args['decay_every'] == 0 and rank == 0:
                 if epoch >= 1:
                     dur.append(time.time() - t0)
-                    print('Training time per {:d} iterations: {:.4f}'.format(
-                        rank_iter, np.mean(dur)))
+                    mean_dur = np.mean(dur)
+                    print('Training time per {:d} iterations: {:.4f} | '
+                          'Estimated training time per epoch: {:.4f}'.format(
+                        rank_iter, mean_dur, mean_dur / rank_iter * len(train_loader)))
                 total_samples = total_iter * args['batch_size']
                 prediction_summary = 'total samples {:d}, (epoch {:d}/{:d}, iter {:d}/{:d}) '.format(
                     total_samples, epoch + 1, args['num_epochs'], batch_id + 1, len(train_loader)) + \
