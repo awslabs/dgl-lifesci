@@ -429,6 +429,7 @@ class WLNCenterDataset(object):
         self.atom_pair_labels = []
         # Map number of nodes to a corresponding complete graph
         self.complete_graphs = dict()
+        self.cache = cache
 
         path_to_reaction_file = raw_file_path + '.proc'
         built_in = kwargs.get('built_in', False)
@@ -491,7 +492,6 @@ class WLNCenterDataset(object):
 
         self.atom_pair_features.extend([None for _ in range(len(self.mols))])
         self.atom_pair_labels.extend([None for _ in range(len(self.mols))])
-        self.cache = cache
 
     def load_reaction_data(self, file_path, num_processes):
         """Load reaction data from the raw file.
