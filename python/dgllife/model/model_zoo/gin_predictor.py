@@ -17,16 +17,13 @@ __all__ = ['GINPredictor']
 # pylint: disable=W0221
 class GINPredictor(nn.Module):
     """GIN-based model for regression and classification on graphs.
-
     GIN was first introduced in `How Powerful Are Graph Neural Networks
     <https://arxiv.org/abs/1810.00826>`__ for general graph property
     prediction problems. It was further extended in `Strategies for
     Pre-training Graph Neural Networks <https://arxiv.org/abs/1905.12265>`__
     for pre-training and semi-supervised learning on large-scale datasets.
-
     For classification tasks, the output will be logits, i.e. values before
     sigmoid or softmax.
-
     Parameters
     ----------
     num_node_emb_list : list of int
@@ -49,7 +46,6 @@ class GINPredictor(nn.Module):
         how we are going to combine the all-layer node representations for the final output.
         There can be four options for this argument, ``'concat'``, ``'last'``, ``'max'`` and
         ``'sum'``. Default to 'last'.
-
         * ``'concat'``: concatenate the output node representations from all GIN layers
         * ``'last'``: use the node representations from the last GIN layer
         * ``'max'``: apply max pooling to the node representations across all GIN layers
@@ -58,9 +54,9 @@ class GINPredictor(nn.Module):
         Dropout to apply to the output of each GIN layer. Default to 0.5.
     readout : str
         Readout for computing graph representations out of node representations, which
-        can be ``'sum'``, ``'mean'``, ``'max'``, ``'attention'``, or ``'skip'``. Default to 'mean'.
+        can be ``'sum'``, ``'mean'``, ``'max'``, or ``'attention'``. Default to 'mean'.
     n_tasks : int
-        Number of tasks, which is also the output size. Default to 1. (0 indicates skipping)
+        Number of tasks, which is also the output size. Default to 1.
     """
     def __init__(self, num_node_emb_list, num_edge_emb_list, num_layers=5,
                  emb_dim=300, JK='last', dropout=0.5, readout='mean', n_tasks=1):
@@ -90,22 +86,17 @@ class GINPredictor(nn.Module):
             else:
                 self.readout = GlobalAttentionPooling(
                     gate_nn=nn.Linear(emb_dim, 1))
-        elif readout == 'skip':
-            self.readout = 'skip'
         else:
             raise ValueError("Expect readout to be 'sum', 'mean', "
-                             "'max', 'attention' or 'skip', got {}".format(readout))
+                             "'max' or 'attention', got {}".format(readout))
 
-        if n_tasks == 0:
-            self.predict = None
-        elif JK == 'concat':
+        if JK == 'concat':
             self.predict = nn.Linear((num_layers + 1) * emb_dim, n_tasks)
         else:
             self.predict = nn.Linear(emb_dim, n_tasks)
 
     def forward(self, g, categorical_node_feats, categorical_edge_feats):
         """Graph-level regression/soft classification.
-
         Parameters
         ----------
         g : DGLGraph
@@ -119,7 +110,6 @@ class GINPredictor(nn.Module):
             * len(categorical_edge_feats) should be the same as
               len(num_edge_emb_list) in the arguments
             * E is the total number of edges in the batch of graphs
-
         Returns
         -------
         FloatTensor of shape (B, n_tasks)
@@ -127,7 +117,5 @@ class GINPredictor(nn.Module):
             * B for the number of graphs in the batch
         """
         node_feats = self.gnn(g, categorical_node_feats, categorical_edge_feats)
-        if self.readout == 'skip' and self.predict is None:
-            return node_feats
         graph_feats = self.readout(g, node_feats)
         return self.predict(graph_feats)
