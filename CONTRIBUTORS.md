@@ -17,3 +17,4 @@ Contributors
 * [Joshua Meyers](https://github.com/JoshuaMeyers): Fix for load_molecule
 * [Pavol Drotar](https://github.com/padr31): Fix for import
 * [Nanxuan Zhou](https://github.com/xnuohz): Fix for doc
+* [mar-volk](https://github.com/mar-volk): Fix for rexgen_direct
