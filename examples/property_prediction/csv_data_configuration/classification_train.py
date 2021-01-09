@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 
 from copy import deepcopy
-from dgllife.utils import Meter, CanonicalAtomFeaturizer, EarlyStopping
+from dgllife.utils import Meter, EarlyStopping
 from hyperopt import fmin, tpe
 from shutil import copyfile
 from torch.optim import Adam
@@ -169,7 +169,8 @@ if __name__ == '__main__':
                                                    'gin_supervised_contextpred',
                                                    'gin_supervised_infomax',
                                                    'gin_supervised_edgepred',
-                                                   'gin_supervised_masking'],
+                                                   'gin_supervised_masking',
+                                                   'NF'],
                         default='GCN', help='Model to use (default: GCN)')
     parser.add_argument('-a', '--atom-featurizer-type', choices=['canonical', 'attentivefp'],
                         default='canonical',

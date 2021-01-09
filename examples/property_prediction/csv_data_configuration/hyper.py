@@ -58,6 +58,14 @@ gin_pretrained_hyperparameters = {
     'readout': hp.choice('readout', ['sum', 'mean', 'max', 'attention'])
 }
 
+nf_hyperparameters = {
+    'gnn_hidden_feats': hp.choice('gnn_hidden_feats', [32, 64, 128, 256]),
+    'num_gnn_layers': hp.choice('num_gnn_layers', [1, 2, 3, 4, 5]),
+    'batchnorm': hp.choice('batchnorm', [True, False]),
+    'dropout': hp.uniform('dropout', low=0., high=0.6),
+    'predictor_hidden_feats': hp.choice('predictor_hidden_feats', [16, 32, 64, 128, 256, 512, 1024])
+}
+
 def init_hyper_space(model):
     """Initialize the hyperparameter search space
 
@@ -86,6 +94,8 @@ def init_hyper_space(model):
     elif model in ['gin_supervised_contextpred', 'gin_supervised_infomax',
                    'gin_supervised_edgepred', 'gin_supervised_masking']:
         candidate_hypers.update(gin_pretrained_hyperparameters)
+    elif model == 'NF':
+        candidate_hypers.update(nf_hyperparameters)
     else:
         return ValueError('Unexpected model: {}'.format(model))
     return candidate_hypers

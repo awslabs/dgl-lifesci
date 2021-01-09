@@ -27,9 +27,12 @@ where `X` can be `SchNet`, `MPNN`, or `MGCN`.
 ## References
 
 [1] Chen et al. (2019) Alchemy: A Quantum Chemistry Dataset for Benchmarking AI Models.
+
 [2] Schütt et al. (2017) SchNet: A continuous-filter convolutional neural network for modeling quantum interactions. 
 *Advances in Neural Information Processing Systems (NeurIPS)*, 992-1002.
+
 [3] Gilmer et al. (2017) Neural Message Passing for Quantum Chemistry. *Proceedings of the 34th International Conference on 
 Machine Learning*, JMLR. 1263-1272.
+
 [4] Lu et al. (2019) Molecular Property Prediction: A Multilevel Quantum Interactions Modeling Perspective. 
 *The 33rd AAAI Conference on Artificial Intelligence*. 

@@ -24,7 +24,7 @@ def main(args, path_to_candidate_bonds):
             num_processes=args['num_processes'])
     else:
         train_set = WLNRankDataset(
-            path_to_reaction_file=args['train_path'],
+            path_to_reaction_file='train_valid_reactions.proc',
             candidate_bond_path=path_to_candidate_bonds['train'], mode='train',
             max_num_change_combos_per_reaction=args['max_num_change_combos_per_reaction_train'],
             num_processes=args['num_processes'])
@@ -36,7 +36,7 @@ def main(args, path_to_candidate_bonds):
             num_processes=args['num_processes'])
     else:
         val_set = WLNRankDataset(
-            path_to_reaction_file=args['val_path'],
+            path_to_reaction_file='val_valid_reactions.proc',
             candidate_bond_path=path_to_candidate_bonds['val'], mode='val',
             max_num_change_combos_per_reaction=args['max_num_change_combos_per_reaction_eval'],
             num_processes=args['num_processes'])
@@ -132,6 +132,14 @@ def main(args, path_to_candidate_bonds):
                     f.write(prediction_summary)
                 t0 = time.time()
                 model.train()
+
+    # Final results
+    torch.save({'model_state_dict': model.state_dict()},
+               args['result_path'] + '/model_final.pkl')
+    prediction_summary = 'final\n' + candidate_ranking_eval(args, model, val_loader)
+    print(prediction_summary)
+    with open(args['result_path'] + '/val_eval.txt', 'a') as f:
+        f.write(prediction_summary)
 
 if __name__ == '__main__':
     from argparse import ArgumentParser

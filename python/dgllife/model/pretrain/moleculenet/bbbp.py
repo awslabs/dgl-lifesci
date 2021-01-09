@@ -10,7 +10,7 @@
 import torch.nn.functional as F
 
 from ...model_zoo import GCNPredictor, GATPredictor, WeavePredictor, MPNNPredictor, \
-    AttentiveFPPredictor, GINPredictor
+    AttentiveFPPredictor, GINPredictor, NFPredictor
 
 __all__ = ['bbbp_url',
            'create_bbbp_model']
@@ -29,7 +29,8 @@ bbbp_url = {
     'gin_supervised_contextpred_BBBP': 'dgllife/pre_trained/gin_supervised_contextpred_bbbp.pth',
     'gin_supervised_infomax_BBBP': 'dgllife/pre_trained/gin_supervised_infomax_bbbp.pth',
     'gin_supervised_edgepred_BBBP': 'dgllife/pre_trained/gin_supervised_edgepred_bbbp.pth',
-    'gin_supervised_masking_BBBP': 'dgllife/pre_trained/gin_supervised_masking_bbbp.pth'
+    'gin_supervised_masking_BBBP': 'dgllife/pre_trained/gin_supervised_masking_bbbp.pth',
+    'NF_canonical_BBBP': 'dgllife/pre_trained/nf_canonical_bbbp.pth'
 }
 
 def create_bbbp_model(model_name):
@@ -215,6 +216,18 @@ def create_bbbp_model(model_name):
         )
         model.gnn.JK = jk
         return model
+
+    elif model_name == 'NF_canonical_BBBP':
+        num_gnn_layers = 2
+        dropout = 0.1425900250956499
+        return NFPredictor(in_feats=74,
+                           n_tasks=n_tasks,
+                           hidden_feats=[32] * num_gnn_layers,
+                           batchnorm=[False] * num_gnn_layers,
+                           dropout=[dropout] * num_gnn_layers,
+                           predictor_hidden_size=32,
+                           predictor_batchnorm=False,
+                           predictor_dropout=dropout)
 
     else:
         return None
