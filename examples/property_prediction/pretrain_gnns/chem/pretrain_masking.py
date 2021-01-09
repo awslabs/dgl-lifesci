@@ -54,15 +54,17 @@ def collate_masking(graphs, args):
         masked_edges_labels = edge_feats[0][masked_edges_indices]
         # mask these edges labels
         edge_feats[0][masked_edges_indices] = 5
+        masked_edge_pairs = bg.find_edges(masked_edges_indices)
     else:
         # if no edge masking
         masked_edges_indices = 0
         masked_edges_labels = 0
+        masked_edge_pairs = 0
 
     # return batched graph, node features, edge features,
     # masked node indices, masked edge indices, masked nodes labels, masked edges labels
     return bg, node_feats, edge_feats, \
-           (masked_nodes_indices, masked_edges_indices), (masked_nodes_labels, masked_edges_labels)
+           (masked_nodes_indices, masked_edges_indices), masked_edge_pairs, (masked_nodes_labels, masked_edges_labels)
 
 
 def train(args, model_list, train_dataloader, optimizer, criterion, device):
@@ -77,7 +79,8 @@ def train(args, model_list, train_dataloader, optimizer, criterion, device):
         if args.mask_edge:
             edge_linear.train()
         with tqdm.tqdm(train_dataloader) as tq_train:
-            for step, (bg, node_feats, edge_feats, masked_indices, masked_labels) in enumerate(tq_train):
+            for step, (bg, node_feats, edge_feats, masked_indices, masked_edge_pairs, masked_labels) \
+                    in enumerate(tq_train):
                 masked_nodes_indices, masked_edges_indices = masked_indices
                 masked_nodes_labels, masked_edges_labels = masked_labels
 
@@ -98,7 +101,6 @@ def train(args, model_list, train_dataloader, optimizer, criterion, device):
                 if args.mask_edge:
                     pred_edge = edge_linear(logits)
                     # for every edge, add two corresponding node feature.
-                    masked_edge_pairs = bg.find_edges(masked_edges_indices)
                     masked_edges_logits = pred_edge[masked_edge_pairs[0]] + pred_edge[masked_edge_pairs[1]]
                     loss_edge = criterion(masked_edges_logits, masked_edges_labels)
                     edge_acc = compute_accuracy(masked_edges_logits, masked_edges_labels)
