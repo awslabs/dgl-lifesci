@@ -130,7 +130,7 @@ def main():
                          n_tasks=1310)
 
     if args.input_model_file is not None:
-        model.gnn.load_state_dict(torch.load(args.input_model_file))
+        model.load_state_dict(torch.load(args.input_model_file))
     model.to(device)
 
     if args.dataset == 'chembl_filtered':
