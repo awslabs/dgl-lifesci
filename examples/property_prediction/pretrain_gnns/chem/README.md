@@ -33,7 +33,7 @@ If a custom dataset is specified, the path needs to be provided with `--dataset`
 
 With the default parameters, following results are based on Attribute Masking (Node-level) and Supervised (Graph-level) pre-training strategy with GIN.
 
-| Datset  | AUC (%) |  AUC (%)   |
+| Datset  | AUC (%) |  AUC reported (%)   |
 | :-----: | :-----: | :--------: |
 |  BBBP   |  71.75  | 66.5 ± 2.5 |
 |  Tox21  |  72.67  | 77.9 ± 0.4 |

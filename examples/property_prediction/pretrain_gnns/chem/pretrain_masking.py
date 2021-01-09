@@ -17,7 +17,7 @@ from dgllife.utils import PretrainBondFeaturizer
 from dgllife.utils import smiles_to_bigraph
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 
-from dgllife.model.model_zoo.gin_predictor import GINPredictor
+from dgllife.model.gnn.gin import GIN
 from utils import *
 
 
@@ -196,14 +196,12 @@ def main():
 
     # 118 atom number plus 1 masked node type = 119
     # 4 bond type plus self-loop plus 1 masked node type = 6
-    model = GINPredictor(num_node_emb_list=[119, 4],
-                         num_edge_emb_list=[6, 3],
-                         num_layers=args.num_layer,
-                         emb_dim=args.emb_dim,
-                         JK=args.JK,
-                         dropout=args.dropout_ratio,
-                         n_tasks=0,
-                         readout='skip')
+    model = GIN(num_node_emb_list=[119, 4],
+                num_edge_emb_list=[6, 3],
+                num_layers=args.num_layer,
+                emb_dim=args.emb_dim,
+                JK=args.JK,
+                dropout=args.dropout_ratio, )
     node_linear = nn.Linear(args.emb_dim, 119)
     if args.mask_edge:
         edge_linear = nn.Linear(args.emb_dim, 6)
@@ -228,7 +226,7 @@ def main():
     train(args, model_list, train_dataloader, optimizer, criterion, device)
 
     if not args.output_model_file == "":
-        torch.save(model.gnn.state_dict(), args.output_model_file)
+        torch.save(model.state_dict(), args.output_model_file)
 
 
 if __name__ == "__main__":
