@@ -101,8 +101,8 @@ def main():
                              '`sum`: sum the output node representations from all GIN layers')
     parser.add_argument('--dataset', type=str, default='chembl_filtered',
                         help='path of the dataset. For now, only classification (default: chembl_filtered)')
-    parser.add_argument('--input_model_file', type=str, default='pretrain_masking.pth',
-                        help='filename to read the model if there is any. (default: pretrain_masking.pth)')
+    parser.add_argument('--input_model_file', type=str, default=None,
+                        help='filename to read the model if there is any. (default: no model to load.)')
     parser.add_argument('--output_model_file', type=str, default='pretrain_supervised.pth',
                         help='filename to output the pre-trained model. (default: pretrain_supervised.pth)')
     parser.add_argument('--seed', type=int, default=0, help="Random seed.")
@@ -129,7 +129,7 @@ def main():
                          readout=args.graph_pooling,
                          n_tasks=1310)
 
-    if args.input_model_file != "":
+    if args.input_model_file is not None:
         model.gnn.load_state_dict(torch.load(args.input_model_file))
     model.to(device)
 
