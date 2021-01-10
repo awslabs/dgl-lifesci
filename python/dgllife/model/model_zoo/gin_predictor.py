@@ -58,7 +58,8 @@ class GINPredictor(nn.Module):
         Dropout to apply to the output of each GIN layer. Default to 0.5.
     readout : str
         Readout for computing graph representations out of node representations, which
-        can be ``'sum'``, ``'mean'``, ``'max'``, ``'attention'``, or ``'set2set'``. Default to 'mean'.
+        can be ``'sum'``, ``'mean'``, ``'max'``, ``'attention'``, or ``'set2set'``. Default
+        to 'mean'.
     n_tasks : int
         Number of tasks, which is also the output size. Default to 1.
     """
