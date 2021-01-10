@@ -8,12 +8,11 @@
 
 import dgl
 import torch
-import torch.nn as nn
 
 __all__ = ['SumAndMax']
 
 # pylint: disable=W0221
-class SumAndMax(nn.Module):
+class SumAndMax(object):
     r"""Apply sum and max pooling to the node
     representations and concatenate the results.
     """
