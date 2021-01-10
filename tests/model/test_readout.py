@@ -112,7 +112,7 @@ def test_sum_and_max():
     g, node_feats = g.to(device), node_feats.to(device)
     bg, batch_node_feats = test_graph2()
     bg, batch_node_feats = bg.to(device), batch_node_feats.to(device)
-    model = SumAndMax().to(device)
+    model = SumAndMax()
     assert model(g, node_feats).shape == torch.Size([1, 2])
     assert model(bg, batch_node_feats).shape == torch.Size([2, 2])
 

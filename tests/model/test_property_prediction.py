@@ -385,7 +385,7 @@ def test_nf_predictor():
                                activation=[None, None],
                                batchnorm=[False, False],
                                dropout=[0.1, 0.1],
-                               predictor_size=4,
+                               predictor_hidden_size=4,
                                predictor_batchnorm=False,
                                predictor_dropout=0.1,
                                predictor_activation=None).to(device)
