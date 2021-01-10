@@ -161,7 +161,7 @@ if __name__ == '__main__':
     parser.add_argument('--val-path', type=str, default=None,
                         help='Path to a new validation set. '
                              'If None, we will use the default validation set in USPTO.')
-    parser.add_argument('-np', '--num-processes', type=int, default=32,
+    parser.add_argument('-np', '--num-processes', type=int, default=4,
                         help='Number of processes to use for data pre-processing')
     parser.add_argument('--master-ip', type=str, default='127.0.0.1',
                         help='master ip address')
