@@ -50,7 +50,8 @@ def main(rank, dev_id, args):
     train_set, val_set = load_dataset(args)
     get_center_subset(train_set, rank, args['num_devices'])
     train_loader = DataLoader(train_set, batch_size=args['batch_size'],
-                              collate_fn=collate_center, shuffle=True)
+                              collate_fn=collate_center, shuffle=True,
+                              num_workers=args['num_processes'])
     val_loader = DataLoader(val_set, batch_size=args['batch_size'],
                             collate_fn=collate_center, shuffle=False)
 
