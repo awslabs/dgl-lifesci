@@ -90,7 +90,8 @@ def main():
                              '`sum`: apply sum pooling over the nodes in the graph.'
                              '`mean`: apply average pooling over the nodes in the graph.'
                              '`max`: apply max pooling over the nodes in the graph.'
-                             '`attention`: apply Global Attention Pooling over the nodes in the graph.')  # TODO: set2set
+                             '`attention`: apply Global Attention Pooling over the nodes in the graph.'
+                             '`set2set`: apply set2set pooling over the nodes in the graph.')
     parser.add_argument('--JK', type=str, default="last",
                         help='JK for jumping knowledge '
                              'decides how we are going to combine the all-layer node representations for the final output.'
