@@ -406,6 +406,8 @@ class WLNCenterDataset(object):
         ``reaction_validity_result_prefix + _valid_reactions.proc`` and
         invalid ones in ``reaction_validity_result_prefix + _invalid_reactions.proc``.
         Default to ``''``.
+    cache : bool
+        If True, construct and featurize all graphs at once.
     """
     def __init__(self,
                  raw_file_path,
@@ -417,7 +419,8 @@ class WLNCenterDataset(object):
                  load=True,
                  num_processes=1,
                  check_reaction_validity=True,
-                 reaction_validity_result_prefix='', 
+                 reaction_validity_result_prefix='',
+                 cache=True,
                  **kwargs):
         super(WLNCenterDataset, self).__init__()
 
@@ -426,6 +429,7 @@ class WLNCenterDataset(object):
         self.atom_pair_labels = []
         # Map number of nodes to a corresponding complete graph
         self.complete_graphs = dict()
+        self.cache = cache
 
         path_to_reaction_file = raw_file_path + '.proc'
         built_in = kwargs.get('built_in', False)
@@ -455,32 +459,37 @@ class WLNCenterDataset(object):
         t0 = time.time()
         full_mols, full_reactions, full_graph_edits = \
             self.load_reaction_data(path_to_reaction_file, num_processes)
-        print('Time spent', time.time() - t0)
-
-        if load and os.path.isfile(mol_graph_path):
-            print('Loading previously saved graphs...')
-            self.reactant_mol_graphs, _ = load_graphs(mol_graph_path)
-        else:
-            print('Constructing graphs from scratch...')
-            if num_processes == 1:
-                self.reactant_mol_graphs = []
-                for mol in full_mols:
-                    self.reactant_mol_graphs.append(mol_to_graph(
-                        mol, node_featurizer=node_featurizer,
-                        edge_featurizer=edge_featurizer, canonical_atom_order=False))
-            else:
-                torch.multiprocessing.set_sharing_strategy('file_system')
-                with Pool(processes=num_processes) as pool:
-                    self.reactant_mol_graphs = pool.map(
-                        partial(mol_to_graph, node_featurizer=node_featurizer,
-                                edge_featurizer=edge_featurizer, canonical_atom_order=False),
-                        full_mols)
-
-            save_graphs(mol_graph_path, self.reactant_mol_graphs)
-
         self.mols = full_mols
         self.reactions = full_reactions
         self.graph_edits = full_graph_edits
+        print('Time spent', time.time() - t0)
+
+        if self.cache:
+            if load and os.path.isfile(mol_graph_path):
+                print('Loading previously saved graphs...')
+                self.reactant_mol_graphs, _ = load_graphs(mol_graph_path)
+            else:
+                print('Constructing graphs from scratch...')
+                if num_processes == 1:
+                    self.reactant_mol_graphs = []
+                    for mol in full_mols:
+                        self.reactant_mol_graphs.append(mol_to_graph(
+                            mol, node_featurizer=node_featurizer,
+                            edge_featurizer=edge_featurizer, canonical_atom_order=False))
+                else:
+                    torch.multiprocessing.set_sharing_strategy('file_system')
+                    with Pool(processes=num_processes) as pool:
+                        self.reactant_mol_graphs = pool.map(
+                            partial(mol_to_graph, node_featurizer=node_featurizer,
+                                    edge_featurizer=edge_featurizer, canonical_atom_order=False),
+                            full_mols)
+
+                save_graphs(mol_graph_path, self.reactant_mol_graphs)
+        else:
+            self.mol_to_graph = mol_to_graph
+            self.node_featurizer = node_featurizer
+            self.edge_featurizer = edge_featurizer
+
         self.atom_pair_features.extend([None for _ in range(len(self.mols))])
         self.atom_pair_labels.extend([None for _ in range(len(self.mols))])
 
@@ -570,9 +579,15 @@ class WLNCenterDataset(object):
         if self.atom_pair_labels[item] is None:
             self.atom_pair_labels[item] = get_pair_label(mol, self.graph_edits[item])
 
+        if self.cache:
+            mol_graph = self.reactant_mol_graphs[item]
+        else:
+            mol_graph = self.mol_to_graph(mol, node_featurizer=self.node_featurizer,
+                                          edge_featurizer=self.edge_featurizer,
+                                          canonical_atom_order=False)
+
         return self.reactions[item], self.graph_edits[item], \
-               self.reactant_mol_graphs[item], \
-               self.complete_graphs[num_atoms], \
+               mol_graph, self.complete_graphs[num_atoms], \
                self.atom_pair_features[item], \
                self.atom_pair_labels[item]
 
@@ -618,6 +633,8 @@ class USPTOCenter(WLNCenterDataset):
         featurization methods and need to preprocess from scratch. Default to True.
     num_processes : int
         Number of processes to use for data pre-processing. Default to 1.
+    cache : bool
+        If True, construct and featurize all graphs at once.
     """
     def __init__(self,
                  subset,
@@ -626,7 +643,8 @@ class USPTOCenter(WLNCenterDataset):
                  edge_featurizer=default_edge_featurizer_center,
                  atom_pair_featurizer=default_atom_pair_featurizer,
                  load=True,
-                 num_processes=1):
+                 num_processes=1,
+                 cache=False):
         assert subset in ['train', 'val', 'test'], \
             'Expect subset to be "train" or "val" or "test", got {}'.format(subset)
         print('Preparing {} subset of USPTO for reaction center prediction.'.format(subset))
@@ -650,7 +668,8 @@ class USPTOCenter(WLNCenterDataset):
             load=load,
             num_processes=num_processes,
             check_reaction_validity=False,
-            built_in=True)
+            built_in=True,
+            cache=cache)
 
     @property
     def subset(self):

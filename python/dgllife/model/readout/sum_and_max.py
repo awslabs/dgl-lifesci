@@ -8,12 +8,11 @@
 
 import dgl
 import torch
-import torch.nn as nn
 
 __all__ = ['SumAndMax']
 
-# pylint: disable=W0221
-class SumAndMax(nn.Module):
+# pylint: disable=W0221, W0622
+class SumAndMax(object):
     r"""Apply sum and max pooling to the node
     representations and concatenate the results.
     """
@@ -42,3 +41,6 @@ class SumAndMax(nn.Module):
             h_g_max = dgl.max_nodes(bg, 'h')
         h_g = torch.cat([h_g_sum, h_g_max], dim=1)
         return h_g
+
+    def __call__(self, *input, **kwargs):
+        return self.forward(*input, **kwargs)
