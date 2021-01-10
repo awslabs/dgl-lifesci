@@ -420,7 +420,7 @@ class WLNCenterDataset(object):
                  num_processes=1,
                  check_reaction_validity=True,
                  reaction_validity_result_prefix='',
-                 cache=False,
+                 cache=True,
                  **kwargs):
         super(WLNCenterDataset, self).__init__()
 
