@@ -41,3 +41,6 @@ class SumAndMax(object):
             h_g_max = dgl.max_nodes(bg, 'h')
         h_g = torch.cat([h_g_sum, h_g_max], dim=1)
         return h_g
+
+    def __call__(self, *input, **kwargs):
+        return self.forward(*input, **kwargs)
