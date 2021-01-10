@@ -11,7 +11,7 @@ import torch
 
 __all__ = ['SumAndMax']
 
-# pylint: disable=W0221
+# pylint: disable=W0221, W0622
 class SumAndMax(object):
     r"""Apply sum and max pooling to the node
     representations and concatenate the results.
