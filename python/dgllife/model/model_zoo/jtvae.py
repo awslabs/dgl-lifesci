@@ -616,7 +616,8 @@ class JTNNVAE(nn.Module):
         return torch.cat([tree_mean, mol_mean], dim=1)
 
     def forward(self, batch_trees, batch_tree_graphs, batch_mol_graphs, batch_line_mol_graphs,
-                stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs, beta=0):
+                stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs,
+                batch_line_stereo_cand_graphs, beta=0):
         batch_size = batch_tree_graphs.batch_size
         device = batch_tree_graphs.device
         tree_mess, tree_vec, mol_vec = self.encode(
@@ -643,7 +644,8 @@ class JTNNVAE(nn.Module):
 
         if self.use_stereo:
             stereo_loss, stereo_acc = self.stereo(stereo_cand_batch_idx, stereo_cand_labels,
-                                                  batch_stereo_cand_graphs, mol_vec)
+                                                  batch_stereo_cand_graphs,
+                                                  batch_line_stereo_cand_graphs, mol_vec)
         else:
             stereo_loss, stereo_acc = torch.tensor(0.).to(device), 0
 
@@ -721,13 +723,14 @@ class JTNNVAE(nn.Module):
             all_loss = torch.zeros(1).to(device)
         return all_loss, acc * 1.0 / cnt
 
-    def stereo(self, batch_idx, batch_labels, batch_stereo_cand_graphs, mol_vec):
+    def stereo(self, batch_idx, batch_labels, batch_stereo_cand_graphs,
+               batch_line_stereo_cand_graphs, mol_vec):
         device = batch_stereo_cand_graphs.device
 
         if len(batch_labels) == 0:
             return torch.zeros(1).to(device), 1.0
 
-        stereo_cands = self.mpn(batch_stereo_cand_graphs)
+        stereo_cands = self.mpn(batch_stereo_cand_graphs, batch_line_stereo_cand_graphs)
         stereo_cands = self.G_mean(stereo_cands)
         stereo_labels = mol_vec[batch_idx]
         scores = nn.CosineSimilarity()(stereo_cands, stereo_labels)
