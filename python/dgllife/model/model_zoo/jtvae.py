@@ -104,6 +104,7 @@ class JTNNEncoder(nn.Module):
 
         line_tree_graphs = dgl.line_graph(tree_graphs, backtracking=False)
         line_tree_graphs.ndata.update({
+            'src_x': tree_graphs.edata['src_x'],
             'src_x_r': self.W_r(tree_graphs.edata['src_x']),
             # Exploit the fact that the reduce function is a sum of incoming messages,
             # and uncomputed messages are zero vectors.
