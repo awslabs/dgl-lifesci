@@ -536,11 +536,15 @@ class JTMPN(nn.Module):
 
         for a in range(total_atoms):
             for i, b in enumerate(in_bonds[a]):
+                if i == MAX_NB:
+                    break
                 agraph[a, i] = b
 
         for b1 in range(total_bonds):
             x, y = all_bonds[b1]
             for i, b2 in enumerate(in_bonds[x]):  # b2 is offseted by len(all_mess)
+                if i == MAX_NB:
+                    break
                 if b2 < total_mess or all_bonds[b2 - total_mess][0] != y:
                     bgraph[b1, i] = b2
 
