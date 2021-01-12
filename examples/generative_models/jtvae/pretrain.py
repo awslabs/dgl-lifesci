@@ -61,21 +61,17 @@ def main(args):
     for epoch in range(args.max_epoch):
         word_acc, topo_acc, assm_acc, steo_acc = 0, 0, 0, 0
 
-        for it, (batch_trees, batch_tree_graphs, batch_mol_graphs, batch_line_mol_graphs,
-                 stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs,
-                 batch_line_stereo_cand_graphs) \
+        for it, (batch_trees, batch_tree_graphs, batch_mol_graphs,
+                 stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs) \
                 in enumerate(dataloader):
             batch_tree_graphs = batch_tree_graphs.to(device)
             batch_mol_graphs = batch_mol_graphs.to(device)
-            batch_line_mol_graphs = batch_line_mol_graphs.to(device)
             stereo_cand_batch_idx = stereo_cand_batch_idx.to(device)
             batch_stereo_cand_graphs = batch_stereo_cand_graphs.to(device)
-            batch_line_stereo_cand_graphs = batch_line_stereo_cand_graphs.to(device)
 
             loss, kl_div, wacc, tacc, sacc, dacc = model(
-                batch_trees, batch_tree_graphs, batch_mol_graphs, batch_line_mol_graphs,
-                stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs,
-                batch_line_stereo_cand_graphs, beta=0)
+                batch_trees, batch_tree_graphs, batch_mol_graphs, stereo_cand_batch_idx,
+                stereo_cand_labels, batch_stereo_cand_graphs, beta=0)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()

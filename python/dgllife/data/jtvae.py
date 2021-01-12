@@ -284,8 +284,6 @@ class JTVAECollator(object):
         if not self.training:
             return batch_trees, batch_tree_graphs, batch_mol_graphs
 
-        batch_line_mol_graphs = dgl.line_graph(batch_mol_graphs, backtracking=False)
-
         # Set batch node ID
         tot = 0
         for tree in batch_trees:
@@ -299,8 +297,6 @@ class JTVAECollator(object):
                                                  device=batch_mol_graphs.device)
         else:
             batch_stereo_cand_graphs = dgl.batch(batch_stereo_cand_graphs)
-        batch_line_stereo_cand_graphs = dgl.line_graph(batch_stereo_cand_graphs,
-                                                       backtracking=False)
 
         stereo_cand_batch_idx = []
         stereo_cand_labels = []
@@ -318,6 +314,5 @@ class JTVAECollator(object):
         else:
             stereo_cand_batch_idx = torch.LongTensor(stereo_cand_batch_idx)
 
-        return batch_trees, batch_tree_graphs, batch_mol_graphs, batch_line_mol_graphs, \
-               stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs, \
-               batch_line_stereo_cand_graphs
+        return batch_trees, batch_tree_graphs, batch_mol_graphs, stereo_cand_batch_idx, \
+               stereo_cand_labels, batch_stereo_cand_graphs
