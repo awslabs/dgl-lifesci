@@ -414,11 +414,10 @@ class MPN(nn.Module):
         )
         self.depth = depth
 
-    def forward(self, mol_graph):
+    def forward(self, mol_graph, line_mol_graph):
         mol_graph = mol_graph.local_var()
-        line_mol_graph = dgl.line_graph(mol_graph, backtracking=False, shared=True)
 
-        line_input = self.W_i(line_mol_graph.ndata['x'])
+        line_input = self.W_i(mol_graph.edata['x'])
         line_mol_graph.ndata['msg_input'] = line_input
         line_mol_graph.ndata['msg'] = F.relu(line_input)
 
@@ -601,9 +600,9 @@ class JTNNVAE(nn.Module):
             else:
                 nn.init.xavier_normal_(param.data)
 
-    def encode(self, batch_tree_graphs, batch_mol_graphs):
+    def encode(self, batch_tree_graphs, batch_mol_graphs, batch_line_mol_graphs):
         tree_mess, tree_vec = self.jtnn(batch_tree_graphs)
-        mol_vec = self.mpn(batch_mol_graphs)
+        mol_vec = self.mpn(batch_mol_graphs, batch_line_mol_graphs)
         return tree_mess, tree_vec, mol_vec
 
     def encode_latent_mean(self, smiles_list):
@@ -616,11 +615,12 @@ class JTNNVAE(nn.Module):
         mol_mean = self.G_mean(mol_vec)
         return torch.cat([tree_mean, mol_mean], dim=1)
 
-    def forward(self, batch_trees, batch_tree_graphs, batch_mol_graphs, stereo_cand_batch_idx,
-                stereo_cand_labels, batch_stereo_cand_graphs, beta=0):
+    def forward(self, batch_trees, batch_tree_graphs, batch_mol_graphs, batch_line_mol_graphs,
+                stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs, beta=0):
         batch_size = batch_tree_graphs.batch_size
         device = batch_tree_graphs.device
-        tree_mess, tree_vec, mol_vec = self.encode(batch_tree_graphs, batch_mol_graphs)
+        tree_mess, tree_vec, mol_vec = self.encode(
+            batch_tree_graphs, batch_mol_graphs, batch_line_mol_graphs)
 
         tree_mean = self.T_mean(tree_vec)
         tree_log_var = -torch.abs(self.T_var(tree_vec))  # Following Mueller et al.

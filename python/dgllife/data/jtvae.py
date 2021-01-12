@@ -129,7 +129,6 @@ class JTVAEDataset(Dataset):
         if cache:
             self.trees = [None for _ in range(len(self))]
             self.mol_graphs = [None for _ in range(len(self))]
-            self.cand_graphs = [None for _ in range(len(self))]
             self.stereo_cand_graphs = [None for _ in range(len(self))]
 
         self.training = training
@@ -196,7 +195,7 @@ class JTVAEDataset(Dataset):
         if not self.training:
             return mol_tree, mol_graph
 
-        if self.cache and self.cand_graphs[idx] is not None:
+        if self.cache and self.stereo_cand_graphs[idx] is not None:
             stereo_cand_graphs = self.stereo_cand_graphs[idx]
         else:
             stereo_cand_graphs = []
@@ -285,6 +284,8 @@ class JTVAECollator(object):
         if not self.training:
             return batch_trees, batch_tree_graphs, batch_mol_graphs
 
+        batch_line_mol_graphs = dgl.line_graph(batch_mol_graphs, backtracking=False)
+
         # Set batch node ID
         tot = 0
         for tree in batch_trees:
@@ -315,5 +316,5 @@ class JTVAECollator(object):
         else:
             stereo_cand_batch_idx = torch.LongTensor(stereo_cand_batch_idx)
 
-        return batch_trees, batch_tree_graphs, batch_mol_graphs, stereo_cand_batch_idx, \
-               stereo_cand_labels, batch_stereo_cand_graphs
+        return batch_trees, batch_tree_graphs, batch_mol_graphs, batch_line_mol_graphs, \
+               stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs

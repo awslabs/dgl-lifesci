@@ -61,17 +61,18 @@ def main(args):
     for epoch in range(args.max_epoch):
         word_acc, topo_acc, assm_acc, steo_acc = 0, 0, 0, 0
 
-        for it, (batch_trees, batch_tree_graphs, batch_mol_graphs, stereo_cand_batch_idx,
-                 stereo_cand_labels, batch_stereo_cand_graphs) \
+        for it, (batch_trees, batch_tree_graphs, batch_mol_graphs, batch_line_mol_graphs,
+                 stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs) \
                 in enumerate(dataloader):
             batch_tree_graphs = batch_tree_graphs.to(device)
             batch_mol_graphs = batch_mol_graphs.to(device)
+            batch_line_mol_graphs = batch_line_mol_graphs.to(device)
             stereo_cand_batch_idx = stereo_cand_batch_idx.to(device)
             batch_stereo_cand_graphs = batch_stereo_cand_graphs.to(device)
 
             loss, kl_div, wacc, tacc, sacc, dacc = model(
-                batch_trees, batch_tree_graphs, batch_mol_graphs, stereo_cand_batch_idx,
-                stereo_cand_labels, batch_stereo_cand_graphs, beta=0)
+                batch_trees, batch_tree_graphs, batch_mol_graphs, batch_line_mol_graphs,
+                stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs, beta=0)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -91,7 +92,7 @@ def main(args):
                 print('Epoch {:d}/{:d} | Iter {:d}/{:d} | KL: {:.1f}, Word: {:.2f}, '
                       'Topo: {:.2f}, Assm: {:.2f}, Steo: {:.2f} | '
                       'Estimated time per epoch: {:.4f}'.format(
-                    epoch + 1, args.max_epoch, it + 1, len(dataloader), kl_div, word_acc, 
+                    epoch + 1, args.max_epoch, it + 1, len(dataloader), kl_div, word_acc,
                     topo_acc, assm_acc, steo_acc, np.mean(dur) / args.print_iter * len(dataloader)))
                 word_acc, topo_acc, assm_acc, steo_acc = 0, 0, 0, 0
                 sys.stdout.flush()
@@ -123,7 +124,7 @@ if __name__ == '__main__':
                         help='Multiplicative factor for learning rate decay')
     parser.add_argument('-me', '--max-epoch', type=int, default=3,
                         help='Maximum number of epochs for training')
-    parser.add_argument('-nw', '--num-workers', type=int, default=0,
+    parser.add_argument('-nw', '--num-workers', type=int, default=4,
                         help='Number of subprocesses for data loading')
     parser.add_argument('-pi', '--print-iter', type=int, default=20,
                         help='Frequency for printing evaluation metrics')
