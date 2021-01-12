@@ -8,7 +8,9 @@
 # Pre-trained an AE
 
 import rdkit
+import numpy as np
 import sys
+import time
 import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
@@ -54,6 +56,8 @@ def main(args):
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     scheduler = lr_scheduler.ExponentialLR(optimizer, args.gamma)
 
+    dur = []
+    t0 = time.time()
     for epoch in range(args.max_epoch):
         word_acc, topo_acc, assm_acc, steo_acc = 0, 0, 0, 0
 
@@ -78,15 +82,20 @@ def main(args):
             steo_acc += dacc
 
             if (it + 1) % args.print_iter == 0:
+                dur.append(time.time() - t0)
                 word_acc = word_acc / args.print_iter * 100
                 topo_acc = topo_acc / args.print_iter * 100
                 assm_acc = assm_acc / args.print_iter * 100
                 steo_acc = steo_acc / args.print_iter * 100
 
-                print('KL: {:.1f}, Word: {:.2f}, Topo: {:.2f}, Assm: {:.2f}, Steo: {:.2f}'.format(
-                    kl_div, word_acc, topo_acc, assm_acc, steo_acc))
+                print('Epoch {:d}/{:d} | Iter {:d}/{:d} | KL: {:.1f}, Word: {:.2f}, '
+                      'Topo: {:.2f}, Assm: {:.2f}, Steo: {:.2f} | '
+                      'Estimated time per epoch: {:.4f}'.format(
+                    epoch + 1, args.max_epoch, it + 1, len(dataloader), kl_div, word_acc, 
+                    topo_acc, assm_acc, steo_acc, np.mean(dur) / args.print_iter * len(dataloader)))
                 word_acc, topo_acc, assm_acc, steo_acc = 0, 0, 0, 0
                 sys.stdout.flush()
+                t0 = time.time()
 
         scheduler.step()
         print("learning rate: {:.6f}".format(scheduler.get_lr()[0]))
