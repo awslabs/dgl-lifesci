@@ -98,9 +98,9 @@ class JTNNEncoder(nn.Module):
 
     def forward(self, tree_graphs):
         device = tree_graphs.device
-        tree_graphs = tree_graphs.local_var()
         tree_graphs.ndata['x'] = self.embedding(tree_graphs.ndata['wid'])
         tree_graphs.apply_edges(fn.copy_u('x', 'src_x'))
+        tree_graphs = tree_graphs.local_var()
 
         line_tree_graphs = dgl.line_graph(tree_graphs, backtracking=False)
         line_tree_graphs.ndata.update({
@@ -209,12 +209,14 @@ class JTNNDecoder(nn.Module):
     def forward(self, tree_graphs, tree_vec):
         device = tree_vec.device
         batch_size = tree_graphs.batch_size
-        tree_graphs = tree_graphs.local_var()
 
         root_ids = get_root_ids(tree_graphs)
 
-        tree_graphs.ndata['x'] = self.embedding(tree_graphs.ndata['wid'])
-        tree_graphs.apply_edges(fn.copy_u('x', 'src_x'))
+        if 'x' not in tree_graphs.ndata:
+            tree_graphs.ndata['x'] = self.embedding(tree_graphs.ndata['wid'])
+        if 'src_x' not in tree_graphs.edata:
+            tree_graphs.apply_edges(fn.copy_u('x', 'src_x'))
+        tree_graphs = tree_graphs.local_var()
         tree_graphs.apply_edges(func=lambda edges: {'dst_wid': edges.dst['wid']})
 
         line_tree_graphs = dgl.line_graph(tree_graphs, backtracking=False, shared=True)
@@ -345,7 +347,7 @@ class JTNNDecoder(nn.Module):
             # Predict stop
             cur_h = cur_h_nei.sum(dim=1)
             stop_hidden = torch.cat([cur_x, cur_h, mol_vec], dim=1)
-            stop_hidden = nn.ReLU()(self.U(stop_hidden))
+            stop_hidden = F.relu(self.U(stop_hidden))
             stop_score = nn.Sigmoid()(self.U_s(stop_hidden) * 20).squeeze()
 
             if prob_decode:
