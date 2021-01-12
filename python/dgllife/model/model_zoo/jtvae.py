@@ -16,7 +16,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from dgl.traversal import bfs_edges_generator, dfs_labeled_edges_generator
+from functools import partial
 
+from ...utils.featurizers import ConcatFeaturizer, atom_type_one_hot, atom_degree_one_hot,\
+    atom_formal_charge_one_hot, atom_is_aromatic, bond_type_one_hot, bond_is_in_ring
 from ...utils.jtvae.chemutils import enum_assemble, set_atommap, copy_edit_mol, attach_mols, \
     decode_stereo
 from ...utils.jtvae.mol_tree import MolTree
@@ -439,6 +442,13 @@ class MPN(nn.Module):
 
         return mol_vecs
 
+def index_select_ND(source, dim, index):
+    index_size = index.size()
+    suffix_dim = source.size()[1:]
+    final_size = index_size + suffix_dim
+    target = source.index_select(dim, index.view(-1))
+    return target.view(final_size)
+
 class JTMPN(nn.Module):
 
     def __init__(self, hidden_size, depth, in_node_feats=35, in_edge_feats=40):
@@ -449,37 +459,111 @@ class JTMPN(nn.Module):
         self.W_i = nn.Linear(in_edge_feats, hidden_size, bias=False)
         self.W_h = nn.Linear(hidden_size, hidden_size, bias=False)
         self.W_o = nn.Linear(in_node_feats + hidden_size, hidden_size)
+        self.atom_featurizer = ConcatFeaturizer([
+            partial(atom_type_one_hot,
+                    allowable_set=['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na',
+                                   'Ca', 'Fe', 'Al', 'I', 'B', 'K', 'Se', 'Zn', 'H', 'Cu', 'Mn'],
+                    encode_unknown=True),
+            partial(atom_degree_one_hot, allowable_set=[0, 1, 2, 3, 4], encode_unknown=True),
+            partial(atom_formal_charge_one_hot, allowable_set=[-1, -2, 1, 2],
+                    encode_unknown=True),
+            atom_is_aromatic
+        ])
+        self.bond_featurizer = ConcatFeaturizer([bond_type_one_hot, bond_is_in_ring])
 
-    def forward(self, cand_graphs, tree_graphs, tree_mess,
-                tree_mess_source_edges, tree_mess_target_edges):
-        cand_graphs = cand_graphs.local_var()
-        binput = self.W_i(cand_graphs.edata['x'])
-        cand_graphs.edata['g_m'] = F.relu(binput)
+    def forward(self, cand_batch, tree_mess, device='cpu'):
+        fatoms, fbonds = [], []
+        in_bonds, all_bonds = [], []
+        # Ensure index 0 is vec(0)
+        mess_dict, all_mess = {}, [torch.zeros(self.hidden_size).to(device)]
+        total_atoms = 0
+        scope = []
 
-        if tree_mess_source_edges.shape[0] > 0:
-            src_u, src_v = tree_mess_source_edges.unbind(1)
-            tgt_u, tgt_v = tree_mess_target_edges.unbind(1)
-            eid = tree_graphs.edge_ids(src_u, src_v).long()
-            cand_graphs.edges[tgt_u, tgt_v].data['t_m'] = tree_mess[eid]
+        for e, vec in tree_mess.items():
+            mess_dict[e] = len(all_mess)
+            all_mess.append(vec)
 
-        line_cand_graphs = dgl.line_graph(cand_graphs, backtracking=False, shared=True)
+        for mol, all_nodes, ctr_node in cand_batch:
+            n_atoms = mol.GetNumAtoms()
+
+            for atom in mol.GetAtoms():
+                fatoms.append(torch.Tensor(self.atom_featurizer(atom)))
+                in_bonds.append([])
+
+            for bond in mol.GetBonds():
+                a1 = bond.GetBeginAtom()
+                a2 = bond.GetEndAtom()
+                x = a1.GetIdx() + total_atoms
+                y = a2.GetIdx() + total_atoms
+                # Here x_nid,y_nid could be 0
+                x_nid, y_nid = a1.GetAtomMapNum(), a2.GetAtomMapNum()
+                x_bid = all_nodes[x_nid - 1]['idx'] if x_nid > 0 else -1
+                y_bid = all_nodes[y_nid - 1]['idx'] if y_nid > 0 else -1
+
+                bfeature = torch.Tensor(self.bond_featurizer(bond))
+
+                b = len(all_mess) + len(all_bonds)  # bond idx offseted by len(all_mess)
+                all_bonds.append((x, y))
+                fbonds.append(torch.cat([fatoms[x], bfeature], 0))
+                in_bonds[y].append(b)
+
+                b = len(all_mess) + len(all_bonds)
+                all_bonds.append((y, x))
+                fbonds.append(torch.cat([fatoms[y], bfeature], 0))
+                in_bonds[x].append(b)
+
+                if x_bid >= 0 and y_bid >= 0 and x_bid != y_bid:
+                    if (x_bid, y_bid) in mess_dict:
+                        mess_idx = mess_dict[(x_bid, y_bid)]
+                        in_bonds[y].append(mess_idx)
+                    if (y_bid, x_bid) in mess_dict:
+                        mess_idx = mess_dict[(y_bid, x_bid)]
+                        in_bonds[x].append(mess_idx)
+
+            scope.append((total_atoms, n_atoms))
+            total_atoms += n_atoms
+
+        total_bonds = len(all_bonds)
+        total_mess = len(all_mess)
+        fatoms = torch.stack(fatoms, 0).to(device)
+        fbonds = torch.stack(fbonds, 0).to(device)
+        agraph = torch.zeros(total_atoms, MAX_NB).long().to(device)
+        bgraph = torch.zeros(total_bonds, MAX_NB).long().to(device)
+        tree_message = torch.stack(all_mess, dim=0)
+
+        for a in range(total_atoms):
+            for i, b in enumerate(in_bonds[a]):
+                agraph[a, i] = b
+
+        for b1 in range(total_bonds):
+            x, y = all_bonds[b1]
+            for i, b2 in enumerate(in_bonds[x]):  # b2 is offseted by len(all_mess)
+                if b2 < total_mess or all_bonds[b2 - total_mess][0] != y:
+                    bgraph[b1, i] = b2
+
+        binput = self.W_i(fbonds)
+        graph_message = F.relu(binput)
 
         for i in range(self.depth - 1):
-            line_cand_graphs.update_all(message_func=fn.copy_u('g_m', 'm'),
-                                        reduce_func=fn.sum('m', 'g_m'))
-            line_cand_graphs.update_all(message_func=fn.copy_u('t_m', 'm'),
-                                        reduce_func=fn.sum('m', 'g_m_2'))
-            nei_message = line_cand_graphs.ndata['g_m'] + line_cand_graphs.ndata['g_m_2']
-            line_cand_graphs.ndata['g_m'] = F.relu(binput + self.W_h(nei_message))
+            message = torch.cat([tree_message, graph_message], dim=0)
+            nei_message = index_select_ND(message, 0, bgraph)
+            nei_message = nei_message.sum(dim=1)
+            nei_message = self.W_h(nei_message)
+            graph_message = F.relu(binput + nei_message)
 
-        cand_graphs.edata['g_m'] = line_cand_graphs.ndata['g_m']
-        cand_graphs.update_all(fn.copy_e('g_m', 'm'), fn.sum('m', 'nei1'))
-        cand_graphs.update_all(fn.copy_e('t_m', 'm'), fn.sum('m', 'nei2'))
-        nei_message = cand_graphs.ndata['nei1'] + cand_graphs.ndata['nei2']
-        ainput = torch.cat([cand_graphs.ndata['x'], nei_message], dim=1)
-        cand_graphs.ndata['atom_hiddens'] = F.relu(self.W_o(ainput))
+        message = torch.cat([tree_message, graph_message], dim=0)
+        nei_message = index_select_ND(message, 0, agraph)
+        nei_message = nei_message.sum(dim=1)
+        ainput = torch.cat([fatoms, nei_message], dim=1)
+        atom_hiddens = F.relu(self.W_o(ainput))
 
-        return dgl.mean_nodes(cand_graphs, 'atom_hiddens')
+        mol_vecs = []
+        for st, le in scope:
+            mol_vec = atom_hiddens.narrow(0, st, le).sum(dim=0) / le
+            mol_vecs.append(mol_vec)
+
+        mol_vecs = torch.stack(mol_vecs, dim=0)
+        return mol_vecs
 
 class JTNNVAE(nn.Module):
     # TODO
@@ -532,9 +616,8 @@ class JTNNVAE(nn.Module):
         mol_mean = self.G_mean(mol_vec)
         return torch.cat([tree_mean, mol_mean], dim=1)
 
-    def forward(self, batch_trees, batch_tree_graphs, batch_mol_graphs, cand_batch_idx,
-                batch_cand_graphs, tree_mess_source_edges, tree_mess_target_edges,
-                stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs, beta=0):
+    def forward(self, batch_trees, batch_tree_graphs, batch_mol_graphs, stereo_cand_batch_idx,
+                stereo_cand_labels, batch_stereo_cand_graphs, beta=0):
         batch_size = batch_tree_graphs.batch_size
         device = batch_tree_graphs.device
         tree_mess, tree_vec, mol_vec = self.encode(batch_tree_graphs, batch_mol_graphs)
@@ -556,9 +639,7 @@ class JTNNVAE(nn.Module):
         mol_vec = mol_mean + torch.exp(mol_log_var / 2) * epsilon
 
         word_loss, topo_loss, word_acc, topo_acc = self.decoder(batch_tree_graphs, tree_vec)
-        assm_loss, assm_acc = self.assm(batch_trees, cand_batch_idx, batch_cand_graphs,
-                                        batch_tree_graphs, tree_mess_source_edges,
-                                        tree_mess_target_edges, mol_vec, tree_mess)
+        assm_loss, assm_acc = self.assm(batch_trees, batch_tree_graphs, mol_vec, tree_mess)
 
         if self.use_stereo:
             stereo_loss, stereo_acc = self.stereo(stereo_cand_batch_idx, stereo_cand_labels,
@@ -582,12 +663,32 @@ class JTNNVAE(nn.Module):
 
         return loss, kl_loss.item(), word_acc, topo_acc, assm_acc, stereo_acc
 
-    def assm(self, batch_trees, cand_batch_idx, cand_graphs, tree_graphs, tree_mess_source_edges,
-             tree_mess_target_edges, mol_vec, tree_mess):
-        device = cand_graphs.device
-        cand_vec = self.jtmpn(cand_graphs, tree_graphs, tree_mess,
-                              tree_mess_source_edges, tree_mess_target_edges)
+    def assm(self, batch_trees, tree_graphs, mol_vec, tree_mess):
+        device = tree_graphs.device
+
+        cands = []
+        cand_batch_idx = []
+        for i, tree in enumerate(batch_trees):
+            for node_id, node in tree.nodes_dict.items():
+                # Leaf node's attachment is determined by neighboring node's attachment
+                if node['is_leaf'] or len(node['cands']) == 1:
+                    continue
+                cands.extend([(cand, tree.nodes_dict, node) for cand in node['cand_mols']])
+                cand_batch_idx.extend([i] * len(node['cands']))
+
+        tree_mess_ = dict()
+        src, dst = tree_graphs.edges()
+        for i, edge in enumerate(tuple(zip(src.tolist(), dst.tolist()))):
+            tree_mess_[edge] = tree_mess[i]
+        tree_mess = tree_mess_
+
+        cand_vec = self.jtmpn(cands, tree_mess, device)
         cand_vec = self.G_mean(cand_vec)
+
+        if len(cand_batch_idx) == 0:
+            cand_batch_idx = torch.zeros(0).long().to(device)
+        else:
+            cand_batch_idx = torch.LongTensor(cand_batch_idx).to(device)
 
         mol_vec = mol_vec[cand_batch_idx]
 

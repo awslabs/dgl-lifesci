@@ -197,22 +197,8 @@ class JTVAEDataset(Dataset):
             return mol_tree, mol_graph
 
         if self.cache and self.cand_graphs[idx] is not None:
-            cand_graphs = self.cand_graphs[idx]
             stereo_cand_graphs = self.stereo_cand_graphs[idx]
         else:
-            cand_graphs = []
-            for node_id, node in mol_tree.nodes_dict.items():
-                # Leaf node's attachment is determined by neighboring node's attachment
-                if node['is_leaf'] or len(node['cands']) == 1:
-                    continue
-                for cand in node['cand_mols']:
-                    cg = mol_to_bigraph(cand, node_featurizer=self.atom_featurizer_dec,
-                                        edge_featurizer=self.bond_featurizer_dec,
-                                        canonical_atom_order=False)
-                    cg.apply_edges(fn.copy_u('x', 'src'))
-                    cg.edata['x'] = torch.cat([cg.edata.pop('src'), cg.edata['x']], dim=1)
-                    cand_graphs.append(cg)
-
             stereo_cand_graphs = []
             stereo_cands = mol_tree.stereo_cands
             if len(stereo_cands) != 1:
@@ -229,10 +215,9 @@ class JTVAEDataset(Dataset):
                     stereo_cand_graphs.append(cg)
 
             if self.cache:
-                self.cand_graphs[idx] = cand_graphs
                 self.stereo_cand_graphs[idx] = stereo_cand_graphs
 
-        return mol_tree, mol_graph, cand_graphs, stereo_cand_graphs
+        return mol_tree, mol_graph, stereo_cand_graphs
 
 class JTVAEZINC(JTVAEDataset):
     """A ZINC subset used in JTVAE
@@ -290,8 +275,7 @@ class JTVAECollator(object):
             Batched graph for the molecular graphs.
         """
         if self.training:
-            batch_trees, batch_mol_graphs, batch_cand_graphs, batch_stereo_cand_graphs = \
-                map(list, zip(*data))
+            batch_trees, batch_mol_graphs, batch_stereo_cand_graphs = map(list, zip(*data))
         else:
             batch_trees, batch_mol_graphs = map(list, zip(*data))
 
@@ -308,58 +292,12 @@ class JTVAECollator(object):
                 tree.nodes_dict[node_id]['idx'] = tot
                 tot += 1
 
-        cand_batch_idx = []
-        # Tensors for copying representations from the junction tree to the candidate graphs
-        tree_mess_source_edges = []
-        tree_mess_target_edges = []
-        n_nodes = 0
-        for i, tree in enumerate(batch_trees):
-            for node_id, node in tree.nodes_dict.items():
-                if node['is_leaf'] or len(node['cands']) == 1:
-                    continue
-
-                for mol in node['cand_mols']:
-                    for i, bond in enumerate(mol.GetBonds()):
-                        a1, a2 = bond.GetBeginAtom(), bond.GetEndAtom()
-                        begin_idx, end_idx = a1.GetIdx(), a2.GetIdx()
-                        x_nid, y_nid = a1.GetAtomMapNum(), a2.GetAtomMapNum()
-                        x_bid = tree.nodes_dict[x_nid - 1]['idx'] if x_nid > 0 else -1
-                        y_bid = tree.nodes_dict[y_nid - 1]['idx'] if y_nid > 0 else -1
-
-                        if x_bid >= 0 and y_bid >= 0 and x_bid != y_bid:
-                            if batch_tree_graphs.has_edges_between(x_bid, y_bid):
-                                tree_mess_source_edges.append((x_bid, y_bid))
-                                tree_mess_target_edges.append((begin_idx + n_nodes,
-                                                               end_idx + n_nodes))
-                            elif batch_tree_graphs.has_edges_between(y_bid, x_bid):
-                                tree_mess_source_edges.append((y_bid, x_bid))
-                                tree_mess_target_edges.append((end_idx + n_nodes,
-                                                               begin_idx + n_nodes))
-
-                    n_nodes += mol.GetNumAtoms()
-
-                cand_batch_idx.extend([i] * len(node['cands']))
-
-        batch_cand_graphs = list(itertools.chain.from_iterable(batch_cand_graphs))
-        batch_cand_graphs = dgl.batch(batch_cand_graphs)
         batch_stereo_cand_graphs = list(itertools.chain.from_iterable(batch_stereo_cand_graphs))
         if len(batch_stereo_cand_graphs) == 0:
-            batch_stereo_cand_graphs = dgl.graph(([], []), idtype=batch_cand_graphs.idtype,
-                                                 device=batch_cand_graphs.device)
+            batch_stereo_cand_graphs = dgl.graph(([], []), idtype=batch_mol_graphs.idtype,
+                                                 device=batch_mol_graphs.device)
         else:
             batch_stereo_cand_graphs = dgl.batch(batch_stereo_cand_graphs)
-
-        if len(tree_mess_source_edges) == 0:
-            tree_mess_source_edges = torch.zeros(0, 2).int()
-            tree_mess_target_edges = torch.zeros(0, 2).int()
-        else:
-            tree_mess_source_edges = torch.IntTensor(tree_mess_source_edges)
-            tree_mess_target_edges = torch.IntTensor(tree_mess_target_edges)
-
-        if len(cand_batch_idx) == 0:
-            cand_batch_idx = torch.zeros(0).long()
-        else:
-            cand_batch_idx = torch.LongTensor(cand_batch_idx)
 
         stereo_cand_batch_idx = []
         stereo_cand_labels = []
@@ -377,6 +315,5 @@ class JTVAECollator(object):
         else:
             stereo_cand_batch_idx = torch.LongTensor(stereo_cand_batch_idx)
 
-        return batch_trees, batch_tree_graphs, batch_mol_graphs, cand_batch_idx, \
-               batch_cand_graphs, tree_mess_source_edges, tree_mess_target_edges, \
-               stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs
+        return batch_trees, batch_tree_graphs, batch_mol_graphs, stereo_cand_batch_idx, \
+               stereo_cand_labels, batch_stereo_cand_graphs
