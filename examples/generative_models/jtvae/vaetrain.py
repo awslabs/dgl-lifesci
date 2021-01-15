@@ -1,26 +1,17 @@
-# -*- coding: utf-8 -*-
-#
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
-#
-# pylint: disable= no-member, arguments-differ, invalid-name
-#
-# Pre-trained an AE
-
-import rdkit
 import numpy as np
+import rdkit
 import sys
 import time
 import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
-# TODO
-from torch.utils.tensorboard import SummaryWriter
 
 from dgllife.data import JTVAEZINC, JTVAEDataset, JTVAECollator
-from dgllife.model import JTNNVAE
 from dgllife.utils import JTVAEVocab
+from dgllife.model import JTNNVAE
 from torch.utils.data import DataLoader
+# TODO
+from torch.utils.tensorboard import SummaryWriter
 
 from utils import mkdir_p
 
@@ -47,10 +38,12 @@ def main(args):
                             collate_fn=JTVAECollator(training=True),
                             drop_last=True)
 
-    # TODO
     writer = SummaryWriter()
     model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth, writer).to(device)
-    model.reset_parameters()
+    if args.model_path is not None:
+        model.load_state_dict(torch.load(args.model_path))
+    else:
+        model.reset_parameters()
     print("Model #Params: {:d}K".format(sum([x.nelement() for x in model.parameters()]) // 1000))
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
@@ -60,7 +53,6 @@ def main(args):
     t0 = time.time()
     for epoch in range(args.max_epoch):
         word_acc, topo_acc, assm_acc, steo_acc = 0, 0, 0, 0
-
         for it, (batch_trees, batch_tree_graphs, batch_mol_graphs,
                  stereo_cand_batch_idx, stereo_cand_labels, batch_stereo_cand_graphs) \
                 in enumerate(dataloader):
@@ -71,7 +63,7 @@ def main(args):
 
             loss, kl_div, wacc, tacc, sacc, dacc = model(
                 batch_trees, batch_tree_graphs, batch_mol_graphs, stereo_cand_batch_idx,
-                stereo_cand_labels, batch_stereo_cand_graphs, beta=0)
+                stereo_cand_labels, batch_stereo_cand_graphs, beta=args.beta)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -97,8 +89,13 @@ def main(args):
                 sys.stdout.flush()
                 t0 = time.time()
 
+            if (it + 1) % 15000 == 0:
+                scheduler.step()
+
+            if (it + 1) % 1000 == 0:
+                torch.save(model.state_dict(), args.save_path + "/model.iter-{:d}-{:d}".format(epoch, it + 1))
+
         scheduler.step()
-        print("learning rate: {:.6f}".format(scheduler.get_lr()[0]))
         torch.save(model.state_dict(), args.save_path + "/model.iter-" + str(epoch))
 
 if __name__ == '__main__':
@@ -107,8 +104,10 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('-t', '--train-path', type=str,
                         help='Path to the training molecules, with one SMILES string a line')
-    parser.add_argument('-s', '--save-path', type=str, default='pre_model',
+    parser.add_argument('-s', '--save-path', type=str,
                         help='Directory to save model checkpoints')
+    parser.add_argument('-m', '--model-path', type=str,
+                        help='Path to pre-trained model checkpoint')
     parser.add_argument('-b', '--batch-size', type=int, default=40,
                         help='Batch size')
     parser.add_argument('-w', '--hidden-size', type=int, default=450,
@@ -117,11 +116,13 @@ if __name__ == '__main__':
                         help='Latent size')
     parser.add_argument('-d', '--depth', type=int, default=3,
                         help='Number of GNN layers')
-    parser.add_argument('-lr', '--lr', type=float, default=1e-3,
+    parser.add_argument('-z', '--beta', type=float, default=0.005,
+                        help='Weight for KL loss term')
+    parser.add_argument('-lr', '--lr', type=float, default=0.0007,
                         help='Learning rate')
     parser.add_argument('-g', '--gamma', type=float, default=0.9,
                         help='Multiplicative factor for learning rate decay')
-    parser.add_argument('-me', '--max-epoch', type=int, default=3,
+    parser.add_argument('-me', '--max-epoch', type=int, default=7,
                         help='Maximum number of epochs for training')
     parser.add_argument('-nw', '--num-workers', type=int, default=4,
                         help='Number of subprocesses for data loading')
