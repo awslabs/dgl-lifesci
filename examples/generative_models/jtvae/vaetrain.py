@@ -104,7 +104,7 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('-t', '--train-path', type=str,
                         help='Path to the training molecules, with one SMILES string a line')
-    parser.add_argument('-s', '--save-path', type=str,
+    parser.add_argument('-s', '--save-path', type=str, default='vae_model',
                         help='Directory to save model checkpoints')
     parser.add_argument('-m', '--model-path', type=str,
                         help='Path to pre-trained model checkpoint')
