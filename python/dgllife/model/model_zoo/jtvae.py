@@ -385,7 +385,7 @@ class JTNNDecoder(nn.Module):
                                        self.gru_message.U_r, self.gru_update.W_h)
                 pred_hidden = torch.cat([new_h, mol_vec], dim=1)
                 pred_hidden = F.relu(self.W(pred_hidden))
-                pred_score = torch.softmax(self.W_o(pred_hidden) * 20)
+                pred_score = torch.softmax(self.W_o(pred_hidden) * 20, dim=1)
                 if prob_decode:
                     sort_wid = torch.multinomial(pred_score.data.squeeze(), 5)
                 else:
