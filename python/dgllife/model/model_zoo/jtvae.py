@@ -381,7 +381,8 @@ class JTNNDecoder(nn.Module):
                 backtrack = (stop_score.item() < 0.5)
 
             if not backtrack:  # Forward: Predict next clique
-                new_h = gru_functional(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h)
+                new_h = gru_functional(cur_x, cur_h_nei, self.gru_update.W_z, self.W_r,
+                                       self.gru_message.U_r, self.gru_update.W_h)
                 pred_hidden = torch.cat([new_h, mol_vec], dim=1)
                 pred_hidden = F.relu(self.W(pred_hidden))
                 pred_score = torch.softmax(self.W_o(pred_hidden) * 20)
@@ -421,7 +422,8 @@ class JTNNDecoder(nn.Module):
                 else:
                     cur_h_nei = zero_pad
 
-                new_h = gru_functional(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h)
+                new_h = gru_functional(cur_x, cur_h_nei, self.gru_update.W_z, self.W_r,
+                                       self.gru_message.U_r, self.gru_update.W_h)
                 h[(node_x['idx'], node_fa['idx'])] = new_h[0]
                 node_fa['neighbors'].append(node_x)
                 stack.pop()
