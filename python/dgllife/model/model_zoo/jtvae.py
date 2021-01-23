@@ -366,7 +366,7 @@ class JTNNDecoder(nn.Module):
             else:
                 cur_h_nei = zero_pad
 
-            cur_x = torch.LongTensor([node_x['wid']])
+            cur_x = torch.LongTensor([node_x['wid']]).to(device)
             cur_x = self.embedding(cur_x)
 
             # Predict stop
