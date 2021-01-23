@@ -883,8 +883,8 @@ class JTNNVAE(nn.Module):
         stereo_cand_graphs = []
         for cand in stereo_cands:
             cand = get_mol(cand)
-            cg = mol_to_bigraph(cand, node_featurizer=self.atom_featurizer_enc,
-                                edge_featurizer=self.bond_featurizer_enc,
+            cg = mol_to_bigraph(cand, node_featurizer=self.atom_featurizer,
+                                edge_featurizer=self.bond_featurizer,
                                 canonical_atom_order=False)
             cg.apply_edges(fn.copy_u('x', 'src'))
             cg.edata['x'] = torch.cat([cg.edata.pop('src'), cg.edata['x']], dim=1)
