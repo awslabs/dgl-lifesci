@@ -889,7 +889,7 @@ class JTNNVAE(nn.Module):
             cg.apply_edges(fn.copy_u('x', 'src'))
             cg.edata['x'] = torch.cat([cg.edata.pop('src'), cg.edata['x']], dim=1)
             stereo_cand_graphs.append(cg)
-        stereo_cand_graphs = dgl.batch(stereo_cand_graphs)
+        stereo_cand_graphs = dgl.batch(stereo_cand_graphs).to(device)
 
         stereo_vecs = self.mpn(stereo_cand_graphs)
         stereo_vecs = self.G_mean(stereo_vecs)
