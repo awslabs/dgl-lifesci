@@ -266,10 +266,10 @@ class JTVAEZINC(JTVAEDataset):
         extract_archive(zip_file_path, '{}/jtvae'.format(dir))
 
         if subset == 'train':
-            super(JTVAEZINC, self).__init__(data_file='{}/jtvae/train.txt',
+            super(JTVAEZINC, self).__init__(data_file='{}/jtvae/train.txt'.format(dir),
                                             vocab=vocab, cache=cache)
         elif subset == 'test':
-            super(JTVAEZINC, self).__init__(data_file='{}/jtvae/test.txt',
+            super(JTVAEZINC, self).__init__(data_file='{}/jtvae/test.txt'.format(dir),
                                             vocab=vocab, cache=cache, training=False)
         else:
             raise ValueError("Expect subset to be 'train' or 'test', got {}".format(subset))
