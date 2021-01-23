@@ -853,6 +853,8 @@ class JTNNVAE(nn.Module):
                 src.extend([cur_id, nbr_id])
                 dst.extend([nbr_id, cur_id])
         tree_graph = dgl.graph((src, dst), idtype=torch.int32, device=device)
+        tree_graph.ndata['wid'] = torch.LongTensor([
+            node['wid'] for node in pred_nodes]).to(device)
         tree_mess = self.jtnn(tree_graph)[0]
         tree_mess = self.edata_to_dict(tree_graph, tree_mess)
 
