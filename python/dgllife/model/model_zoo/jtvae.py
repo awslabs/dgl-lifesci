@@ -916,7 +916,7 @@ class JTNNVAE(nn.Module):
 
         cands = [(candmol, all_nodes, cur_node) for candmol in cand_mols]
 
-        cand_vecs = self.jtmpn(cands, tree_mess, tree_mess.device)
+        cand_vecs = self.jtmpn(cands, tree_mess, mol_vec.device)
         cand_vecs = self.G_mean(cand_vecs)
         mol_vec = mol_vec.squeeze()
         scores = torch.mv(cand_vecs, mol_vec) * 20
