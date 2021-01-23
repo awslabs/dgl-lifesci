@@ -39,11 +39,12 @@ def main(args):
                             drop_last=True)
 
     writer = SummaryWriter()
-    model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth, writer).to(device)
+    model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth, writer)
     if args.model_path is not None:
-        model.load_state_dict(torch.load(args.model_path))
+        model.load_state_dict(torch.load(args.model_path, map_location='cpu'))
     else:
         model.reset_parameters()
+    model = model.to(device)
     print("Model #Params: {:d}K".format(sum([x.nelement() for x in model.parameters()]) // 1000))
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
@@ -102,7 +103,7 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument('-t', '--train-path', type=str,
+    parser.add_argument('-tr', '--train-path', type=str,
                         help='Path to the training molecules, with one SMILES string a line')
     parser.add_argument('-s', '--save-path', type=str, default='vae_model',
                         help='Directory to save model checkpoints')

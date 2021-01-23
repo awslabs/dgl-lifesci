@@ -105,7 +105,7 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument('-t', '--train-path', type=str,
+    parser.add_argument('-tr', '--train-path', type=str,
                         help='Path to the training molecules, with one SMILES string a line')
     parser.add_argument('-s', '--save-path', type=str, default='pre_model',
                         help='Directory to save model checkpoints')

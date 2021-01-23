@@ -367,7 +367,7 @@ def enum_assemble(node, neighbors, prev_nodes=None, prev_amap=None, max_ncand=20
 
     Parameters
     ----------
-    node : MolTree
+    node : dict
         The information of the central molecule.
     neighbors : list of dict
         Each element contains the information of a neighboring cluster.

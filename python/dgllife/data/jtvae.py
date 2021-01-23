@@ -134,8 +134,6 @@ class JTVAEDataset(Dataset):
         self.training = training
         self.atom_featurizer_enc = get_atom_featurizer_enc()
         self.bond_featurizer_enc = get_bond_featurizer_enc()
-        self.atom_featurizer_dec = get_atom_featurizer_dec()
-        self.bond_featurizer_dec = get_bond_featurizer_dec()
 
     def __len__(self):
         """Get the size of the dataset
@@ -147,22 +145,11 @@ class JTVAEDataset(Dataset):
         """
         return len(self.data)
 
-    def __getitem__(self, idx):
-        """Get a datapoint corresponding to the index.
-
-        Parameters
-        ----------
-        idx : int
-            ID for the datapoint.
-
-        Returns
-        -------
-        MolTree
-            MolTree corresponding to the datapoint.
-        """
+    def getitem_train(self, idx):
         if self.cache and self.trees[idx] is not None:
             mol_tree = self.trees[idx]
             mol_graph = self.mol_graphs[idx]
+            stereo_cand_graphs = self.stereo_cand_graphs[idx]
         else:
             smiles = self.data[idx]
             mol_tree = MolTree(smiles)
@@ -188,16 +175,6 @@ class JTVAEDataset(Dataset):
             mol_graph.edata['x'] = torch.cat(
                 [mol_graph.edata.pop('src'), mol_graph.edata['x']], dim=1)
 
-            if self.cache:
-                self.trees[idx] = mol_tree
-                self.mol_graphs[idx] = mol_graph
-
-        if not self.training:
-            return mol_tree, mol_graph
-
-        if self.cache and self.stereo_cand_graphs[idx] is not None:
-            stereo_cand_graphs = self.stereo_cand_graphs[idx]
-        else:
             stereo_cand_graphs = []
             stereo_cands = mol_tree.stereo_cands
             if len(stereo_cands) != 1:
@@ -214,9 +191,60 @@ class JTVAEDataset(Dataset):
                     stereo_cand_graphs.append(cg)
 
             if self.cache:
+                self.trees[idx] = mol_tree
+                self.mol_graphs[idx] = mol_graph
                 self.stereo_cand_graphs[idx] = stereo_cand_graphs
 
         return mol_tree, mol_graph, stereo_cand_graphs
+
+    def getitem_non_train(self, idx):
+        if self.cache and self.trees[idx] is not None:
+            mol_tree = self.trees[idx]
+            mol_graph = self.mol_graphs[idx]
+        else:
+            smiles = self.data[idx]
+            mol = Chem.MolFromSmiles(smiles)
+            smiles = Chem.MolToSmiles(mol, isomericSmiles=True)
+            mol_tree = MolTree(smiles)
+            mol_tree.recover()
+
+            wid = [self.vocab.get_index(mol_tree.nodes_dict[i]['smiles'])
+                   for i in mol_tree.nodes_dict]
+            mol_tree.graph.ndata['wid'] = torch.LongTensor(wid)
+
+            # Construct molecular graphs
+            mol = get_mol(smiles)
+            mol_graph = mol_to_bigraph(mol,
+                                       node_featurizer=self.atom_featurizer_enc,
+                                       edge_featurizer=self.bond_featurizer_enc,
+                                       canonical_atom_order=False)
+            mol_graph.apply_edges(fn.copy_u('x', 'src'))
+            mol_graph.edata['x'] = torch.cat(
+                [mol_graph.edata.pop('src'), mol_graph.edata['x']], dim=1)
+
+            if self.cache:
+                self.trees[idx] = mol_tree
+                self.mol_graphs[idx] = mol_graph
+
+        return mol_tree, mol_graph
+
+    def __getitem__(self, idx):
+        """Get a datapoint corresponding to the index.
+
+        Parameters
+        ----------
+        idx : int
+            ID for the datapoint.
+
+        Returns
+        -------
+        MolTree
+            MolTree corresponding to the datapoint.
+        """
+        if self.training:
+            return self.getitem_train(idx)
+        else:
+            return self.getitem_non_train(idx)
 
 class JTVAEZINC(JTVAEDataset):
     """A ZINC subset used in JTVAE
@@ -224,15 +252,13 @@ class JTVAEZINC(JTVAEDataset):
     Parameters
     ----------
     subset : train
-        TODO: check
-        The subset to use, which can be one of 'train', 'val', and 'test'.
+        The subset to use, which can be one of 'train' and 'test'.
     vocab : JTVAEVocab
         Vocabulary for JTVAE.
     cache : bool
         Whether to cache the trees to speed up data loading or always construct trees on the fly.
     """
     def __init__(self, subset, vocab, cache=False):
-        # TODO: check subset
         dir = get_download_dir()
         _url = _get_dgl_url('dataset/jtvae.zip')
         zip_file_path = '{}/jtvae.zip'.format(dir)
@@ -240,10 +266,13 @@ class JTVAEZINC(JTVAEDataset):
         extract_archive(zip_file_path, '{}/jtvae'.format(dir))
 
         if subset == 'train':
-            super(JTVAEZINC, self).__init__(data_file = '{}/jtvae/{}.txt'.format(dir, subset),
+            super(JTVAEZINC, self).__init__(data_file='{}/jtvae/train.txt',
                                             vocab=vocab, cache=cache)
+        elif subset == 'test':
+            super(JTVAEZINC, self).__init__(data_file='{}/jtvae/test.txt',
+                                            vocab=vocab, cache=cache, training=False)
         else:
-            raise NotImplementedError('Unexpected subset: {}'.format(subset))
+            raise ValueError("Expect subset to be 'train' or 'test', got {}".format(subset))
 
 class JTVAECollator(object):
     """Collate function for JTVAE.
@@ -256,33 +285,11 @@ class JTVAECollator(object):
     def __init__(self, training=True):
         self.training = training
 
-    def __call__(self, data):
-        """Batch multiple datapoints
-
-        Parameters
-        ----------
-        data : list of tuples
-            Multiple datapoints.
-
-        Returns
-        -------
-        list of MolTree
-            Junction trees for a batch of datapoints.
-        DGLGraph
-            Batched graph for the junction trees.
-        DGLGraph
-            Batched graph for the molecular graphs.
-        """
-        if self.training:
-            batch_trees, batch_mol_graphs, batch_stereo_cand_graphs = map(list, zip(*data))
-        else:
-            batch_trees, batch_mol_graphs = map(list, zip(*data))
+    def collate_train(self, data):
+        batch_trees, batch_mol_graphs, batch_stereo_cand_graphs = map(list, zip(*data))
 
         batch_tree_graphs = dgl.batch([tree.graph for tree in batch_trees])
         batch_mol_graphs = dgl.batch(batch_mol_graphs)
-
-        if not self.training:
-            return batch_trees, batch_tree_graphs, batch_mol_graphs
 
         # Set batch node ID
         tot = 0
@@ -316,3 +323,46 @@ class JTVAECollator(object):
 
         return batch_trees, batch_tree_graphs, batch_mol_graphs, stereo_cand_batch_idx, \
                stereo_cand_labels, batch_stereo_cand_graphs
+
+    def collate_non_train(self, data):
+        batch_trees, batch_mol_graphs = map(list, zip(*data))
+        if len(batch_mol_graphs) == 1:
+            batch_tree_graphs = batch_trees[0].graph
+            batch_mol_graphs = batch_mol_graphs[0]
+        else:
+            batch_tree_graphs = dgl.batch([tree.graph for tree in batch_trees])
+            batch_mol_graphs = dgl.batch(batch_mol_graphs)
+
+        # Set batch node ID
+        tot = 0
+        for tree in batch_trees:
+            for node_id in tree.nodes_dict:
+                tree.nodes_dict[node_id]['idx'] = tot
+                tot += 1
+
+        if len(batch_trees) == 1:
+            batch_trees = batch_trees[0]
+
+        return batch_trees, batch_tree_graphs, batch_mol_graphs
+
+    def __call__(self, data):
+        """Batch multiple datapoints
+
+        Parameters
+        ----------
+        data : list of tuples
+            Multiple datapoints.
+
+        Returns
+        -------
+        list of MolTree
+            Junction trees for a batch of datapoints.
+        DGLGraph
+            Batched graph for the junction trees.
+        DGLGraph
+            Batched graph for the molecular graphs.
+        """
+        if self.training:
+            return self.collate_train(data)
+        else:
+            return self.collate_non_train(data)

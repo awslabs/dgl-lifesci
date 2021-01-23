@@ -18,11 +18,13 @@ import torch.nn.functional as F
 from dgl.traversal import bfs_edges_generator, dfs_labeled_edges_generator
 from functools import partial
 
+from ...data.jtvae import get_atom_featurizer_enc, get_bond_featurizer_enc
 from ...utils.featurizers import ConcatFeaturizer, atom_type_one_hot, atom_degree_one_hot,\
     atom_formal_charge_one_hot, atom_is_aromatic, bond_type_one_hot, bond_is_in_ring
 from ...utils.jtvae.chemutils import enum_assemble, set_atommap, copy_edit_mol, attach_mols, \
-    decode_stereo
+    decode_stereo, get_mol
 from ...utils.jtvae.mol_tree import MolTree
+from ...utils.mol_to_graph import mol_to_bigraph
 
 __all__ = ['JTNNVAE']
 
@@ -142,16 +144,17 @@ def have_slots(fa_slots, ch_slots):
     if len(fa_slots) > 2 and len(ch_slots) > 2:
         return True
     matches = []
-    for i,s1 in enumerate(fa_slots):
-        a1,c1,h1 = s1
-        for j,s2 in enumerate(ch_slots):
-            a2,c2,h2 = s2
+    for i, s1 in enumerate(fa_slots):
+        a1, c1, h1 = s1
+        for j, s2 in enumerate(ch_slots):
+            a2, c2, h2 = s2
             if a1 == a2 and c1 == c2 and (a1 != "C" or h1 + h2 >= 4):
-                matches.append( (i,j) )
+                matches.append((i, j))
 
-    if len(matches) == 0: return False
+    if len(matches) == 0:
+        return False
 
-    fa_match,ch_match = zip(*matches)
+    fa_match, ch_match = zip(*matches)
     if len(set(fa_match)) == 1 and 1 < len(fa_slots) <= 2: #never remove atom from ring
         fa_slots.pop(fa_match[0])
     if len(set(ch_match)) == 1 and 1 < len(ch_slots) <= 2: #never remove atom from ring
@@ -160,13 +163,13 @@ def have_slots(fa_slots, ch_slots):
     return True
 
 def can_assemble(node_x, node_y):
-    neis = node_x.neighbors + [node_y]
-    for i,nei in enumerate(neis):
-        nei.nid = i
+    neis = node_x['neighbors'] + [node_y]
+    for i, nei in enumerate(neis):
+        nei['nid'] = i
 
-    neighbors = [nei for nei in neis if nei.mol.GetNumAtoms() > 1]
-    neighbors = sorted(neighbors, key=lambda x:x.mol.GetNumAtoms(), reverse=True)
-    singletons = [nei for nei in neis if nei.mol.GetNumAtoms() == 1]
+    neighbors = [nei for nei in neis if nei['mol'].GetNumAtoms() > 1]
+    neighbors = sorted(neighbors, key=lambda x:x['mol'].GetNumAtoms(), reverse=True)
+    singletons = [nei for nei in neis if nei['mol'].GetNumAtoms() == 1]
     neighbors = singletons + neighbors
     cands = enum_assemble(node_x, neighbors)
     return len(cands) > 0
@@ -177,6 +180,28 @@ def dfs_order(forest, roots):
         # Exploit the fact that the reverse edge ID equals to 1 xor forward
         # edge ID. Normally, this should be done using find_edges().
         yield e ^ l, l
+
+def mol_tree_node(smiles, wid=None, idx=None, nbrs=None):
+    if nbrs is None:
+        nbrs = []
+    return {'smiles': smiles, 'mol': get_mol(smiles), 'wid': wid, 'idx': idx, 'neighbors': nbrs}
+
+def gru_functional(x, h_nei, wz, wr, ur, wh):
+    hidden_size = x.size()[-1]
+    sum_h = h_nei.sum(dim=1)
+    z_input = torch.cat([x, sum_h], dim=1)
+    z = torch.sigmoid(wz(z_input))
+
+    r_1 = wr(x).view(-1, 1, hidden_size)
+    r_2 = ur(h_nei)
+    r = torch.sigmoid(r_1 + r_2)
+
+    gated_h = r * h_nei
+    sum_gated_h = gated_h.sum(dim=1)
+    h_input = torch.cat([x, sum_gated_h], dim=1)
+    pre_h = torch.tanh(wh(h_input))
+    new_h = (1.0 - z) * sum_h + z * pre_h
+    return new_h
 
 class JTNNDecoder(nn.Module):
     def __init__(self, vocab, hidden_size, latent_size, embedding=None):
@@ -316,40 +341,39 @@ class JTNNDecoder(nn.Module):
         return pred_loss, stop_loss, pred_acc.item(), stop_acc.item()
 
     def decode(self, mol_vec, prob_decode):
+        device = mol_vec.device
         stack, trace = [], []
-        init_hidden = torch.zeros(1, self.hidden_size)
-        zero_pad = torch.zeros(1, 1, self.hidden_size)
+        init_hidden = torch.zeros(1, self.hidden_size).to(device)
+        zero_pad = torch.zeros(1, 1, self.hidden_size).to(device)
 
         # Root Prediction
         root_hidden = torch.cat([init_hidden, mol_vec], dim=1)
-        root_hidden = nn.ReLU()(self.W(root_hidden))
+        root_hidden = F.relu(self.W(root_hidden))
         root_score = self.W_o(root_hidden)
         _, root_wid = torch.max(root_score, dim=1)
         root_wid = root_wid.item()
 
-        root = MolTreeNode(self.vocab.get_smiles(root_wid))
-        root.wid = root_wid
-        root.idx = 0
-        stack.append((root, self.vocab.get_slots(root.wid)))
+        root = mol_tree_node(smiles=self.vocab.get_smiles(root_wid), wid=root_wid, idx=0)
+        stack.append((root, self.vocab.get_slots(root['wid'])))
 
         all_nodes = [root]
         h = {}
         for step in range(MAX_DECODE_LEN):
             node_x, fa_slot = stack[-1]
-            cur_h_nei = [h[(node_y.idx, node_x.idx)] for node_y in node_x.neighbors]
+            cur_h_nei = [h[(node_y['idx'], node_x['idx'])] for node_y in node_x['neighbors']]
             if len(cur_h_nei) > 0:
                 cur_h_nei = torch.stack(cur_h_nei, dim=0).view(1, -1, self.hidden_size)
             else:
                 cur_h_nei = zero_pad
 
-            cur_x = torch.LongTensor([node_x.wid])
+            cur_x = torch.LongTensor([node_x['wid']])
             cur_x = self.embedding(cur_x)
 
             # Predict stop
             cur_h = cur_h_nei.sum(dim=1)
             stop_hidden = torch.cat([cur_x, cur_h, mol_vec], dim=1)
             stop_hidden = F.relu(self.U(stop_hidden))
-            stop_score = nn.Sigmoid()(self.U_s(stop_hidden) * 20).squeeze()
+            stop_score = torch.sigmoid(self.U_s(stop_hidden) * 20).squeeze()
 
             if prob_decode:
                 backtrack = (torch.bernoulli(1.0 - stop_score.data)[0] == 1)
@@ -357,10 +381,10 @@ class JTNNDecoder(nn.Module):
                 backtrack = (stop_score.item() < 0.5)
 
             if not backtrack:  # Forward: Predict next clique
-                new_h = GRU(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h)
+                new_h = gru_functional(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h)
                 pred_hidden = torch.cat([new_h, mol_vec], dim=1)
-                pred_hidden = nn.ReLU()(self.W(pred_hidden))
-                pred_score = nn.Softmax()(self.W_o(pred_hidden) * 20)
+                pred_hidden = F.relu(self.W(pred_hidden))
+                pred_score = torch.softmax(self.W_o(pred_hidden) * 20)
                 if prob_decode:
                     sort_wid = torch.multinomial(pred_score.data.squeeze(), 5)
                 else:
@@ -370,7 +394,7 @@ class JTNNDecoder(nn.Module):
                 next_wid = None
                 for wid in sort_wid[:5]:
                     slots = self.vocab.get_slots(wid)
-                    node_y = MolTreeNode(self.vocab.get_smiles(wid))
+                    node_y = mol_tree_node(smiles=self.vocab.get_smiles(wid))
                     if have_slots(fa_slot, slots) and can_assemble(node_x, node_y):
                         next_wid = wid
                         next_slots = slots
@@ -379,11 +403,9 @@ class JTNNDecoder(nn.Module):
                 if next_wid is None:
                     backtrack = True  # No more children can be added
                 else:
-                    node_y = MolTreeNode(self.vocab.get_smiles(next_wid))
-                    node_y.wid = next_wid
-                    node_y.idx = step + 1
-                    node_y.neighbors.append(node_x)
-                    h[(node_x.idx, node_y.idx)] = new_h[0]
+                    node_y = mol_tree_node(smiles=self.vocab.get_smiles(next_wid),
+                                           wid=next_wid, idx=step + 1, nbrs=[node_x])
+                    h[(node_x['idx'], node_y['idx'])] = new_h[0]
                     stack.append((node_y, next_slots))
                     all_nodes.append(node_y)
 
@@ -392,15 +414,16 @@ class JTNNDecoder(nn.Module):
                     break  # At root, terminate
 
                 node_fa, _ = stack[-2]
-                cur_h_nei = [h[(node_y.idx, node_x.idx)] for node_y in node_x.neighbors if node_y.idx != node_fa.idx]
+                cur_h_nei = [h[(node_y['idx'], node_x['idx'])] for node_y in node_x['neighbors']
+                             if node_y['idx'] != node_fa['idx']]
                 if len(cur_h_nei) > 0:
                     cur_h_nei = torch.stack(cur_h_nei, dim=0).view(1, -1, self.hidden_size)
                 else:
                     cur_h_nei = zero_pad
 
-                new_h = GRU(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h)
-                h[(node_x.idx, node_fa.idx)] = new_h[0]
-                node_fa.neighbors.append(node_x)
+                new_h = gru_functional(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h)
+                h[(node_x['idx'], node_fa['idx'])] = new_h[0]
+                node_fa['neighbors'].append(node_x)
                 stack.pop()
 
         return root, all_nodes
@@ -597,6 +620,9 @@ class JTNNVAE(nn.Module):
         if stereo:
             self.stereo_loss = nn.CrossEntropyLoss(reduction='sum')
 
+        self.atom_featurizer = get_atom_featurizer_enc()
+        self.bond_featurizer = get_bond_featurizer_enc()
+
         # TODO
         self.writer = writer
         self.step_count = 0
@@ -670,6 +696,14 @@ class JTNNVAE(nn.Module):
 
         return loss, kl_loss.item(), word_acc, topo_acc, assm_acc, stereo_acc
 
+    def edata_to_dict(self, g, tree_mess):
+        tree_mess_ = dict()
+        src, dst = g.edges()
+        for i, edge in enumerate(tuple(zip(src.tolist(), dst.tolist()))):
+            tree_mess_[edge] = tree_mess[i]
+
+        return tree_mess_
+
     def assm(self, batch_trees, tree_graphs, mol_vec, tree_mess):
         device = tree_graphs.device
 
@@ -683,12 +717,7 @@ class JTNNVAE(nn.Module):
                 cands.extend([(cand, tree.nodes_dict, node) for cand in node['cand_mols']])
                 cand_batch_idx.extend([i] * len(node['cands']))
 
-        tree_mess_ = dict()
-        src, dst = tree_graphs.edges()
-        for i, edge in enumerate(tuple(zip(src.tolist(), dst.tolist()))):
-            tree_mess_[edge] = tree_mess[i]
-        tree_mess = tree_mess_
-
+        tree_mess = self.edata(tree_graphs, tree_mess)
         cand_vec = self.jtmpn(cands, tree_mess, device)
         cand_vec = self.G_mean(cand_vec)
 
@@ -752,19 +781,18 @@ class JTNNVAE(nn.Module):
         all_loss = sum(all_loss) / len(batch_labels)
         return all_loss, acc * 1.0 / len(batch_labels)
 
-    def reconstruct(self, smiles, prob_decode=False):
-        mol_tree = MolTree(smiles)
-        mol_tree.recover()
-        _, tree_vec, mol_vec = self.encode([mol_tree])
+    def reconstruct(self, tree_graph, mol_graph, prob_decode=False):
+        device = tree_graph.device
+        _, tree_vec, mol_vec = self.encode(tree_graph, mol_graph)
 
         tree_mean = self.T_mean(tree_vec)
         tree_log_var = -torch.abs(self.T_var(tree_vec))  # Following Mueller et al.
         mol_mean = self.G_mean(mol_vec)
         mol_log_var = -torch.abs(self.G_var(mol_vec))  # Following Mueller et al.
 
-        epsilon = torch.randn(1, self.latent_size // 2)
+        epsilon = torch.randn(1, self.latent_size // 2).to(device)
         tree_vec = tree_mean + torch.exp(tree_log_var / 2) * epsilon
-        epsilon = torch.randn(1, self.latent_size // 2)
+        epsilon = torch.randn(1, self.latent_size // 2).to(device)
         mol_vec = mol_mean + torch.exp(mol_log_var / 2) * epsilon
         return self.decode(tree_vec, mol_vec, prob_decode)
 
@@ -804,18 +832,29 @@ class JTNNVAE(nn.Module):
         return all_smiles
 
     def decode(self, tree_vec, mol_vec, prob_decode):
+        device = tree_vec.device
         pred_root, pred_nodes = self.decoder.decode(tree_vec, prob_decode)
 
         # Mark nid & is_leaf & atommap
         for i, node in enumerate(pred_nodes):
-            node.nid = i + 1
-            node.is_leaf = (len(node.neighbors) == 1)
-            if len(node.neighbors) > 1:
-                set_atommap(node.mol, node.nid)
+            node['nid'] = i + 1
+            node['is_leaf'] = (len(node['neighbors']) == 1)
+            if len(node['neighbors']) > 1:
+                set_atommap(node['mol'], node['nid'])
 
-        tree_mess = self.jtnn([pred_root])[0]
+        src = []
+        dst = []
+        for node in pred_nodes:
+            cur_id = node['nid'] - 1
+            for nbr in node['neighbors']:
+                nbr_id = nbr['nid'] - 1
+                src.extend([cur_id, nbr_id])
+                dst.extend([nbr_id, cur_id])
+        tree_graph = dgl.graph((src, dst), idtype=torch.int32, device=device)
+        tree_mess = self.jtnn(tree_graph)[0]
+        tree_mess = self.edata_to_dict(tree_graph, tree_mess)
 
-        cur_mol = copy_edit_mol(pred_root.mol)
+        cur_mol = copy_edit_mol(pred_root['mol'])
         global_amap = [{}] + [{} for _ in pred_nodes]
         global_amap[1] = {atom.GetIdx(): atom.GetIdx() for atom in cur_mol.GetAtoms()}
 
@@ -827,7 +866,8 @@ class JTNNVAE(nn.Module):
         cur_mol = cur_mol.GetMol()
         set_atommap(cur_mol)
         cur_mol = Chem.MolFromSmiles(Chem.MolToSmiles(cur_mol))
-        if cur_mol is None: return None
+        if cur_mol is None:
+            return None
         if self.use_stereo == False:
             return Chem.MolToSmiles(cur_mol)
 
@@ -835,24 +875,36 @@ class JTNNVAE(nn.Module):
         stereo_cands = decode_stereo(smiles2D)
         if len(stereo_cands) == 1:
             return stereo_cands[0]
-        stereo_vecs = self.mpn(mol2graph(stereo_cands))
+
+        stereo_cand_graphs = []
+        for cand in stereo_cands:
+            cand = get_mol(cand)
+            cg = mol_to_bigraph(cand, node_featurizer=self.atom_featurizer_enc,
+                                edge_featurizer=self.bond_featurizer_enc,
+                                canonical_atom_order=False)
+            cg.apply_edges(fn.copy_u('x', 'src'))
+            cg.edata['x'] = torch.cat([cg.edata.pop('src'), cg.edata['x']], dim=1)
+            stereo_cand_graphs.append(cg)
+        stereo_cand_graphs = dgl.batch(stereo_cand_graphs)
+
+        stereo_vecs = self.mpn(stereo_cand_graphs)
         stereo_vecs = self.G_mean(stereo_vecs)
         scores = nn.CosineSimilarity()(stereo_vecs, mol_vec)
         _, max_id = scores.max(dim=0)
-        return stereo_cands[max_id.data[0]]
+        return stereo_cands[max_id.item()[0]]
 
-    def dfs_assemble(self, tree_mess, mol_vec, all_nodes, cur_mol, global_amap, fa_amap, cur_node, fa_node,
-                     prob_decode):
-        fa_nid = fa_node.nid if fa_node is not None else -1
+    def dfs_assemble(self, tree_mess, mol_vec, all_nodes, cur_mol, global_amap, fa_amap,
+                     cur_node, fa_node, prob_decode):
+        fa_nid = fa_node['nid'] if fa_node is not None else -1
         prev_nodes = [fa_node] if fa_node is not None else []
 
-        children = [nei for nei in cur_node.neighbors if nei.nid != fa_nid]
-        neighbors = [nei for nei in children if nei.mol.GetNumAtoms() > 1]
-        neighbors = sorted(neighbors, key=lambda x: x.mol.GetNumAtoms(), reverse=True)
-        singletons = [nei for nei in children if nei.mol.GetNumAtoms() == 1]
+        children = [nei for nei in cur_node['neighbors'] if nei['nid'] != fa_nid]
+        neighbors = [nei for nei in children if nei['mol'].GetNumAtoms() > 1]
+        neighbors = sorted(neighbors, key=lambda x: x['mol'].GetNumAtoms(), reverse=True)
+        singletons = [nei for nei in children if nei['mol'].GetNumAtoms() == 1]
         neighbors = singletons + neighbors
 
-        cur_amap = [(fa_nid, a2, a1) for nid, a1, a2 in fa_amap if nid == cur_node.nid]
+        cur_amap = [(fa_nid, a2, a1) for nid, a1, a2 in fa_amap if nid == cur_node['nid']]
         cands = enum_assemble(cur_node, neighbors, prev_nodes, cur_amap)
         if len(cands) == 0:
             return None
@@ -860,13 +912,13 @@ class JTNNVAE(nn.Module):
 
         cands = [(candmol, all_nodes, cur_node) for candmol in cand_mols]
 
-        cand_vecs = self.jtmpn(cands, tree_mess)
+        cand_vecs = self.jtmpn(cands, tree_mess, tree_mess.device)
         cand_vecs = self.G_mean(cand_vecs)
         mol_vec = mol_vec.squeeze()
         scores = torch.mv(cand_vecs, mol_vec) * 20
 
         if prob_decode:
-            probs = nn.Softmax()(scores.view(1, -1)).squeeze() + 1e-5  # prevent prob = 0
+            probs = torch.softmax(scores.view(1, -1)).squeeze() + 1e-5  # prevent prob = 0
             cand_idx = torch.multinomial(probs, probs.numel())
         else:
             _, cand_idx = torch.sort(scores, descending=True)
@@ -880,22 +932,27 @@ class JTNNVAE(nn.Module):
             for nei_id, ctr_atom, nei_atom in pred_amap:
                 if nei_id == fa_nid:
                     continue
-                new_global_amap[nei_id][nei_atom] = new_global_amap[cur_node.nid][ctr_atom]
+                new_global_amap[nei_id][nei_atom] = new_global_amap[cur_node['nid']][ctr_atom]
 
-            cur_mol = attach_mols(cur_mol, children, [], new_global_amap)  # father is already attached
+            # father is already attached
+            cur_mol = attach_mols(cur_mol, children, [], new_global_amap)
             new_mol = cur_mol.GetMol()
             new_mol = Chem.MolFromSmiles(Chem.MolToSmiles(new_mol))
 
-            if new_mol is None: continue
+            if new_mol is None:
+                continue
 
             result = True
             for nei_node in children:
-                if nei_node.is_leaf: continue
-                cur_mol = self.dfs_assemble(tree_mess, mol_vec, all_nodes, cur_mol, new_global_amap, pred_amap,
-                                            nei_node, cur_node, prob_decode)
+                if nei_node['is_leaf']:
+                    continue
+                cur_mol = self.dfs_assemble(tree_mess, mol_vec, all_nodes, cur_mol,
+                                            new_global_amap, pred_amap, nei_node,
+                                            cur_node, prob_decode)
                 if cur_mol is None:
                     result = False
                     break
-            if result: return cur_mol
+            if result:
+                return cur_mol
 
         return None
