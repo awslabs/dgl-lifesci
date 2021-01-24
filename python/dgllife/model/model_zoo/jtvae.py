@@ -100,7 +100,8 @@ class JTNNEncoder(nn.Module):
 
     def forward(self, tree_graphs):
         device = tree_graphs.device
-        tree_graphs.ndata['x'] = self.embedding(tree_graphs.ndata['wid'])
+        if 'x' not in tree_graphs.ndata:
+            tree_graphs.ndata['x'] = self.embedding(tree_graphs.ndata['wid'])
         tree_graphs.apply_edges(fn.copy_u('x', 'src_x'))
         tree_graphs = tree_graphs.local_var()
 
@@ -847,14 +848,17 @@ class JTNNVAE(nn.Module):
         src = []
         dst = []
         for node in pred_nodes:
-            cur_id = node['nid'] - 1
+            cur_id = node['idx']
             for nbr in node['neighbors']:
-                nbr_id = nbr['nid'] - 1
+                nbr_id = nbr['idx']
                 src.extend([cur_id, nbr_id])
                 dst.extend([nbr_id, cur_id])
         tree_graph = dgl.graph((src, dst), idtype=torch.int32, device=device)
-        tree_graph.ndata['wid'] = torch.LongTensor([
-            node['wid'] for node in pred_nodes]).to(device)
+        node_ids = torch.LongTensor([node['idx'] for node in pred_nodes]).to(device)
+        node_wid = torch.LongTensor([node['wid'] for node in pred_nodes]).to(device)
+        tree_graph_x = torch.zeros(tree_graph.num_nodes(), self.hidden_size).to(device)
+        tree_graph_x[node_ids] = self.embedding(node_wid)
+        tree_graph.ndata['x'] = tree_graph_x
         tree_mess = self.jtnn(tree_graph)[0]
         tree_mess = self.edata_to_dict(tree_graph, tree_mess)
 
