@@ -851,8 +851,8 @@ class JTNNVAE(nn.Module):
             cur_id = node['idx']
             for nbr in node['neighbors']:
                 nbr_id = nbr['idx']
-                src.extend([cur_id, nbr_id])
-                dst.extend([nbr_id, cur_id])
+                src.extend([cur_id])
+                dst.extend([nbr_id])
         tree_graph = dgl.graph((src, dst), idtype=torch.int32, device=device)
         node_ids = torch.LongTensor([node['idx'] for node in pred_nodes]).to(device)
         node_wid = torch.LongTensor([node['wid'] for node in pred_nodes]).to(device)
