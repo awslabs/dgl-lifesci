@@ -720,7 +720,7 @@ class JTNNVAE(nn.Module):
                 cands.extend([(cand, tree.nodes_dict, node) for cand in node['cand_mols']])
                 cand_batch_idx.extend([i] * len(node['cands']))
 
-        tree_mess = self.edata(tree_graphs, tree_mess)
+        tree_mess = self.edata_to_dict(tree_graphs, tree_mess)
         cand_vec = self.jtmpn(cands, tree_mess, device)
         cand_vec = self.G_mean(cand_vec)
 
@@ -853,7 +853,8 @@ class JTNNVAE(nn.Module):
                 nbr_id = nbr['idx']
                 src.extend([cur_id])
                 dst.extend([nbr_id])
-        tree_graph = dgl.graph((src, dst), idtype=torch.int32, device=device)
+        tree_graph = dgl.graph((src, dst), idtype=torch.int32, device=device,
+                               num_nodes=len(pred_nodes))
         node_ids = torch.LongTensor([node['idx'] for node in pred_nodes]).to(device)
         node_wid = torch.LongTensor([node['wid'] for node in pred_nodes]).to(device)
         tree_graph_x = torch.zeros(tree_graph.num_nodes(), self.hidden_size).to(device)
