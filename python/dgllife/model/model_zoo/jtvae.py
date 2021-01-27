@@ -853,8 +853,11 @@ class JTNNVAE(nn.Module):
                 nbr_id = nbr['idx']
                 src.extend([cur_id])
                 dst.extend([nbr_id])
-        tree_graph = dgl.graph((src, dst), idtype=torch.int32, device=device,
-                               num_nodes=len(pred_nodes))
+        if len(src) == 0:
+            tree_graph = dgl.graph((src, dst), idtype=torch.int32, device=device,
+                                   num_nodes=max([node['idx'] + 1 for node in pred_nodes]))
+        else:
+            tree_graph = dgl.graph((src, dst), idtype=torch.int32, device=device)
         node_ids = torch.LongTensor([node['idx'] for node in pred_nodes]).to(device)
         node_wid = torch.LongTensor([node['wid'] for node in pred_nodes]).to(device)
         tree_graph_x = torch.zeros(tree_graph.num_nodes(), self.hidden_size).to(device)
