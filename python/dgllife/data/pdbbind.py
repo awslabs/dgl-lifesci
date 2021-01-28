@@ -78,19 +78,22 @@ class PDBBind(object):
     num_processes : int or None
         Number of worker processes to use. If None,
         then we will use the number of CPUs in the system. Default None.
+    remove_coreset_from_refinedset: bool
+        Whether to remove core set from refined set when train with refined set and test with core set. 
+        Default to True.
     """
-    def __init__(self, subset, pdb_version, load_binding_pocket=True, sanitize=False, calc_charges=False,
-                 remove_hs=False, use_conformation=True,
+    def __init__(self, subset, pdb_version, load_binding_pocket=True, remove_coreset_from_refinedset=True, sanitize=False, 
+                 calc_charges=False, remove_hs=False, use_conformation=True,
                  construct_graph_and_featurize=ACNN_graph_construction_and_featurization,
-                 zero_padding=True, num_processes=None):
+                 zero_padding=True, num_processes=None, **kwargs):
         self.task_names = ['-logKd/Ki']
         self.n_tasks = len(self.task_names)
-        self._read_data_files(pdb_version, subset, load_binding_pocket)
+        self._read_data_files(pdb_version, subset, load_binding_pocket,remove_coreset_from_refinedset)
         self._preprocess(load_binding_pocket,
                          sanitize, calc_charges, remove_hs, use_conformation,
                          construct_graph_and_featurize, zero_padding, num_processes)
 
-    def _read_data_files(self, pdb_version, subset, load_binding_pocket):
+    def _read_data_files(self, pdb_version, subset, load_binding_pocket, remove_coreset_from_refinedset):
         """Download and extract pdbbind data files specified by the version"""
         root_dir_path = get_download_dir()
         if pdb_version == 'v2015':
@@ -151,8 +154,23 @@ class PDBBind(object):
             self.df = pd.DataFrame(contents, columns=(
                 'PDB_code', 'resolution', 'release_year',
                 '-logKd/Ki', 'Kd/Ki', 'cluster_ID'))
-
+        
+        ##remove core set from refine set
         pdbs = self.df['PDB_code'].tolist()
+        if remove_coreset_from_refinedset:
+            if pdb_version == 'v2015':
+                with open(extracted_data_path + '/v2015/INDEX_core_data.2013','r') as f:
+                    for line in f:
+                        line = line.strip().split()
+                        if line[0] != "#" and line[0] in pdbs:
+                            pdbs.remove(line[0])
+
+            if pdb_version == 'v2007':
+                with open (extracted_data_path + '/2007/INDEX.2017.core.data','r') as f:
+                    for line in f:
+                        line = line.strip().split()
+                        if line[0] != "#" and line[0] in pdbs:
+                            pdbs.remove(line[0])      
 
         self.ligand_files = [os.path.join(
             extracted_data_path, pdb_version, pdb, '{}_ligand.sdf'.format(pdb)) for pdb in pdbs]

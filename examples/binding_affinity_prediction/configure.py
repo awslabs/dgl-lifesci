@@ -27,7 +27,7 @@ PotentialNet_PDBBind_core_pocket_random = {
     'n_spatial_conv_steps':1,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 2,
+    'num_epochs': 100,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'random'
@@ -91,6 +91,7 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'dataset': 'PDBBind',
     'subset': 'refined',
     'load_binding_pocket': True,
+    'remove_coreset_from_refinedset': True,
     'random_seed': 123,
     'frac_train': 0.8,
     'frac_val': 0.2,
@@ -108,7 +109,7 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'n_spatial_conv_steps':2,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 2,
+    'num_epochs': 300,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'random'
