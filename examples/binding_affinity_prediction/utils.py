@@ -64,8 +64,8 @@ def load_dataset(args):
         if args['model'] == 'PotentialNet': 
             from functools import partial
             from dgllife.utils import potentialNet_graph_construction_featurization
-            dataset = PDBBind(subset=args['subset'], pdb_version=args['version'],
-                    load_binding_pocket=args['load_binding_pocket'], 
+            dataset = PDBBind(subset=args['subset'], pdb_version=args['version'], remove_coreset_from_refinedset=args['remove_coreset_from_refinedset'],
+                    load_binding_pocket=args['load_binding_pocket'],
                     construct_graph_and_featurize = partial(potentialNet_graph_construction_featurization, 
                         distance_bins=args['distance_bins'],
                         max_num_neighbors=args['max_num_neighbors'])
