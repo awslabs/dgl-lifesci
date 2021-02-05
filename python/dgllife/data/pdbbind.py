@@ -88,7 +88,7 @@ class PDBBind(object):
                  zero_padding=True, num_processes=None, **kwargs):
         self.task_names = ['-logKd/Ki']
         self.n_tasks = len(self.task_names)
-        self._read_data_files(pdb_version, subset, load_binding_pocket,remove_coreset_from_refinedset)
+        self._read_data_files(pdb_version, subset, load_binding_pocket, remove_coreset_from_refinedset)
         self._preprocess(load_binding_pocket,
                          sanitize, calc_charges, remove_hs, use_conformation,
                          construct_graph_and_featurize, zero_padding, num_processes)
