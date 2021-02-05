@@ -161,9 +161,9 @@ class PDBBind(object):
             if pdb_version == 'v2015':
                 with open(extracted_data_path + '/v2015/INDEX_core_data.2013','r') as f:
                     for line in f:
-                        line = line.strip().split()
-                        if line[0] != "#" and line[0] in pdbs:
-                            pdbs.remove(line[0])
+                        fields = line.strip().split()
+                        if line[0] != "#" and fields[0] in pdbs:
+                            pdbs.remove(fields[0])
 
             if pdb_version == 'v2007':
                 with open (extracted_data_path + '/2007/INDEX.2017.core.data','r') as f:
