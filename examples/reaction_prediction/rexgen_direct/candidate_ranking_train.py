@@ -77,9 +77,15 @@ def main(args, path_to_candidate_bonds):
             batch_combo_scores = batch_combo_scores.to(args['device'])
             batch_labels = batch_labels.to(args['device'])
             reactant_node_feats = batch_reactant_graphs.ndata.pop('hv').to(args['device'])
-            reactant_edge_feats = batch_reactant_graphs.edata.pop('he').to(args['device'])
             product_node_feats = batch_product_graphs.ndata.pop('hv').to(args['device'])
-            product_edge_feats = batch_product_graphs.edata.pop('he').to(args['device'])
+            if batch_reactant_graphs.num_edges() > 0:
+                reactant_edge_feats = batch_reactant_graphs.edata.pop('he').to(args['device'])
+            else:
+                reactant_edge_feats = torch.zeros((0, 5), device=args["device"])
+            if batch_product_graphs.num_edges() > 0:
+                product_edge_feats = batch_product_graphs.edata.pop('he').to(args['device'])
+            else:
+                product_edge_feats = torch.zeros((0, 5), device=args["device"])
 
             pred = model(reactant_graph=batch_reactant_graphs,
                          reactant_node_feats=reactant_node_feats,

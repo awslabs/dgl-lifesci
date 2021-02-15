@@ -1313,11 +1313,12 @@ def construct_graphs_rank(info, edge_featurizer):
             feats = torch.tensor(feats).float()
             combo_edge_feats.extend([feats, feats.clone()])
 
-        combo_edge_feats = torch.stack(combo_edge_feats, dim=0)
         combo_graph = dgl.graph(([], []))
         combo_graph.add_nodes(reactant_graph.num_nodes())
-        combo_graph.add_edges(combo_src_list, combo_dst_list)
-        combo_graph.edata['he'] = combo_edge_feats
+        if len(combo_edge_feats) > 0:
+            combo_edge_feats = torch.stack(combo_edge_feats, dim=0)
+            combo_graph.add_edges(combo_src_list, combo_dst_list)
+            combo_graph.edata['he'] = combo_edge_feats
         reaction_graphs.append(combo_graph)
 
     return reaction_graphs
