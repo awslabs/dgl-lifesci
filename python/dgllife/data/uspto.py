@@ -1319,6 +1319,8 @@ def construct_graphs_rank(info, edge_featurizer):
             combo_edge_feats = torch.stack(combo_edge_feats, dim=0)
             combo_graph.add_edges(combo_src_list, combo_dst_list)
             combo_graph.edata['he'] = combo_edge_feats
+        else:
+            combo_graph.edata['he'] = torch.zeros((0, 5))
         reaction_graphs.append(combo_graph)
 
     return reaction_graphs
