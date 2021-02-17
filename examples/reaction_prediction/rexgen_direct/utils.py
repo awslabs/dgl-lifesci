@@ -301,7 +301,10 @@ def reaction_center_prediction(device, model, mol_graphs, complete_graphs):
     mol_graphs = mol_graphs.to(device)
     complete_graphs = complete_graphs.to(device)
     node_feats = mol_graphs.ndata.pop('hv').to(device)
-    edge_feats = mol_graphs.edata.pop('he').to(device)
+    if mol_graphs.num_edges() > 0:
+        edge_feats = mol_graphs.edata.pop('he').to(device)
+    else:
+        edge_feats = torch.zeros((0, model.gnn.project_edge_messages.in_feats), device=device)
     node_pair_feats = complete_graphs.edata.pop('feats').to(device)
 
     return model(mol_graphs, complete_graphs, node_feats, edge_feats, node_pair_feats)
@@ -359,6 +362,8 @@ def get_candidate_bonds(reaction, preds, num_nodes, max_k, easy, include_scores=
                 reaction_bonds[bond] = True
 
     candidate_bonds = []
+    if len(preds)<max_k:
+        max_k = len(preds)
     topk_values, topk_indices = torch.topk(preds, max_k)
     for j in range(max_k):
         preds_j = topk_indices[j].cpu().item()
@@ -1161,9 +1166,15 @@ def candidate_ranking_eval(args, model, data_loader):
         batch_product_graphs = batch_product_graphs.to(args['device'])
         batch_combo_scores = batch_combo_scores.to(args['device'])
         reactant_node_feats = batch_reactant_graphs.ndata.pop('hv').to(args['device'])
-        reactant_edge_feats = batch_reactant_graphs.edata.pop('he').to(args['device'])
         product_node_feats = batch_product_graphs.ndata.pop('hv').to(args['device'])
-        product_edge_feats = batch_product_graphs.edata.pop('he').to(args['device'])
+        if batch_reactant_graphs.num_edges() > 0:
+            reactant_edge_feats = batch_reactant_graphs.edata.pop('he').to(args['device'])
+        else:
+            reactant_edge_feats = torch.zeros((0, 5), device=args["device"])
+        if batch_product_graphs.num_edges() > 0:
+            product_edge_feats = batch_product_graphs.edata.pop('he').to(args['device'])
+        else:
+            product_edge_feats = torch.zeros((0, 5), device=args["device"])
 
         # Get candidate products with top-k ranking
         with torch.no_grad():
