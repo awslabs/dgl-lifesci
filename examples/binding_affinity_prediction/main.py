@@ -125,16 +125,17 @@ def main(args):
             print('')
         # save model r2 at each epoch
         if args['save_r2']:
-            save_path = args['save_r2'] + "/{}_{}_{}_{}_trial{}.npz".format(args['model'], args['version'], args['subset'], args['split'], trial)
+            save_path = args['save_r2'] + "/{}_{}_{}_{}_trial{}.npz".format(args['model'], args['version'], args['subset'], args['split'], trial+1)
             np.savez(save_path, train_r2=train_r2, val_r2=val_r2, test_r2=test_r2)
 
         # save results on the epoch with best test r2
-        best_epoch = np.argmax(test_r2) + 1
+        best_epoch = np.argmax(test_r2)
         trial_train_r2[trial] = train_r2[best_epoch]
         trial_val_r2[trial] = val_r2[best_epoch]
         trial_test_r2[trial] = test_r2[best_epoch]
+        print('Best test epoch: ', best_epoch + 1)
 
-    print('Best test epoch: ', best_epoch)
+    print(f'\n Finished {n_trials} trials.')
     print('Best train R2 mean: ', trial_train_r2.mean(), ', standard deviation: ', trial_train_r2.std())
     print('Best validation R2 mean: ', trial_val_r2.mean(), ', standard deviation: ', trial_val_r2.std())
     print('Best test R2 mean: ', trial_test_r2.mean(), ', standard deviation: ', trial_test_r2.std())
