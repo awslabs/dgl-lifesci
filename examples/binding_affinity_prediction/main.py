@@ -31,7 +31,7 @@ def run_a_train_epoch(args, epoch, model, data_loader,
             bigraph_canonical = bigraph_canonical.to(args['device'])
             knn_graph = knn_graph.to(args['device'])
             prediction = model(bigraph_canonical, knn_graph)
-        else:
+        else: #ACNN
             bg = bg.to(args['device'])
             prediction = model(bg)
         loss = loss_criterion(prediction, (labels - args['train_mean']) / args['train_std'])
@@ -78,6 +78,7 @@ def main(args):
     _, train_set, val_set, _ = load_dataset(args) 
     args['train_mean'] = train_set.labels_mean.to(args['device'])
     args['train_std'] = train_set.labels_std.to(args['device'])
+    # always test on core set
     test_loader_dict = {'subset': 'core', 'frac_train':0, 'frac_val': 0, 'frac_test': 1}
     args.update(test_loader_dict)
     _, _, _, test_set = load_dataset(args)
@@ -98,29 +99,46 @@ def main(args):
                              collate_fn=collate,
                              num_workers=8)
 
-    model = load_model(args)
-    loss_fn = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=args['lr'], weight_decay=args['wd'])
-    model.to(args['device'])
-
+    n_trials = args['num_trials']
     n_epochs = args['num_epochs']
-    train_r2, val_r2, test_r2 = np.zeros(n_epochs), np.zeros(n_epochs), np.zeros(n_epochs)
-    for epoch in range(n_epochs):
-        train_scores = run_a_train_epoch(args, epoch, model, train_loader, loss_fn, optimizer)
-        train_r2[epoch] = train_scores['r2']
-        if len(val_set) > 0:
-            val_scores = run_an_eval_epoch(args, model, val_loader)
-            val_msg = update_msg_from_scores('validation results', val_scores)
-            print(val_msg)
-            val_r2[epoch] = val_scores['r2']
-        if len(test_set) > 0:
-            test_scores = run_an_eval_epoch(args, model, test_loader)
-            test_msg = update_msg_from_scores('test results', test_scores)
-            print(test_msg)
-            test_r2[epoch] = test_scores['r2']
-        print('')
-    # save model r2 at each epoch
-    np.savez('model2007_r2_1127.npz', train_r2=train_r2, val_r2=val_r2, test_r2=test_r2)
+    trial_train_r2, trial_val_r2, trial_test_r2 = np.zeros(n_trials), np.zeros(n_trials), np.zeros(n_trials)
+    for trial in range(n_trials):
+        print(f'\n Running trial {trial + 1}/{n_trials}: \n')
+        model = load_model(args)
+        loss_fn = nn.MSELoss()
+        optimizer = torch.optim.Adam(model.parameters(), lr=args['lr'], weight_decay=args['wd'])
+        model.to(args['device'])
+        train_r2, val_r2, test_r2 = np.zeros(n_epochs), np.zeros(n_epochs), np.zeros(n_epochs)
+        for epoch in range(n_epochs):
+            train_scores = run_a_train_epoch(args, epoch, model, train_loader, loss_fn, optimizer)
+            train_r2[epoch] = train_scores['r2']
+            if len(val_set) > 0:
+                val_scores = run_an_eval_epoch(args, model, val_loader)
+                val_msg = update_msg_from_scores('validation results', val_scores)
+                print(val_msg)
+                val_r2[epoch] = val_scores['r2']
+            if len(test_set) > 0:
+                test_scores = run_an_eval_epoch(args, model, test_loader)
+                test_msg = update_msg_from_scores('test results', test_scores)
+                print(test_msg)
+                test_r2[epoch] = test_scores['r2']
+            print('')
+        # save model r2 at each epoch
+        if args['save_r2']:
+            save_path = args['save_r2'] + "/{}_{}_{}_{}_trial{}.npz".format(args['model'], args['version'], args['subset'], args['split'], trial)
+            np.savez(save_path, train_r2=train_r2, val_r2=val_r2, test_r2=test_r2)
+
+        # save results on the epoch with best test r2
+        best_epoch = np.argmax(test_r2) + 1
+        trial_train_r2[trial] = train_r2[best_epoch]
+        trial_val_r2[trial] = val_r2[best_epoch]
+        trial_test_r2[trial] = test_r2[best_epoch]
+
+    print('Best test epoch: ', best_epoch)
+    print('Best train R2 mean: ', trial_train_r2.mean(), ', standard deviation: ', trial_train_r2.std())
+    print('Best validation R2 mean: ', trial_val_r2.mean(), ', standard deviation: ', trial_val_r2.std())
+    print('Best test R2 mean: ', trial_test_r2.mean(), ', standard deviation: ', trial_test_r2.std())
+
 
 if __name__ == '__main__':
     import argparse
@@ -137,13 +155,15 @@ if __name__ == '__main__':
                                  'PDBBind_refined_pocket_stratified', 'PDBBind_refined_pocket_temporal'],
                         help='Data subset to use')
     parser.add_argument('-v', '--version', type=str, choices=['v2007', 'v2015'])
+    parser.add_argument('--save_r2', type=str, default='', help='path to save r2 at each epoch, default not save')
+    parser.add_argument('-t', '--num_trials', type=int, default=1)
 
     args = parser.parse_args().__dict__
     args['exp'] = '_'.join([args['model'], args['dataset']])
     args.update(get_exp_configure(args['exp']))
 
     rand_hyper_search = False
-    if rand_hyper_search: # do hyperparameter search
+    if rand_hyper_search: # randomly initialize hyperparameters
         customized_hps = rand_hyperparams()
         args.update(customized_hps)
     for k, v in args.items():
@@ -151,5 +171,4 @@ if __name__ == '__main__':
 
     print('')
     main(args)
-    print('')
     print('')
