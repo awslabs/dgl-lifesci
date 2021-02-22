@@ -75,13 +75,14 @@ def main(args):
     args['device'] = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     set_random_seed(args['random_seed'])
 
-    _, train_set, val_set, _ = load_dataset(args) 
+    _, train_set, val_set, test_set = load_dataset(args) 
     args['train_mean'] = train_set.labels_mean.to(args['device'])
     args['train_std'] = train_set.labels_std.to(args['device'])
-    # always test on core set
-    test_loader_dict = {'subset': 'core', 'frac_train':0, 'frac_val': 0, 'frac_test': 1}
-    args.update(test_loader_dict)
-    _, _, _, test_set = load_dataset(args)
+
+    if args['test_on_core']:   # always test on core set
+        test_loader_dict = {'subset': 'core', 'frac_train':0, 'frac_val': 0, 'frac_test': 1}
+        args.update(test_loader_dict)
+        _, _, _, test_set = load_dataset(args)
 
     train_loader = DataLoader(dataset=train_set,
                               batch_size=args['batch_size'],
@@ -153,15 +154,22 @@ if __name__ == '__main__':
                         choices=['PDBBind_core_pocket_random', 'PDBBind_core_pocket_scaffold',
                                  'PDBBind_core_pocket_stratified', 'PDBBind_core_pocket_temporal',
                                  'PDBBind_refined_pocket_random', 'PDBBind_refined_pocket_scaffold',
-                                 'PDBBind_refined_pocket_stratified', 'PDBBind_refined_pocket_temporal'],
+                                 'PDBBind_refined_pocket_stratified', 'PDBBind_refined_pocket_temporal',
+                                 'PDBBind_refined_pocket_structure', 'PDBBind_refined_pocket_sequence'],
                         help='Data subset to use')
     parser.add_argument('-v', '--version', type=str, choices=['v2007', 'v2015'])
     parser.add_argument('--save_r2', type=str, default='', help='path to save r2 at each epoch, default not save')
     parser.add_argument('-t', '--num_trials', type=int, default=1)
+    parser.add_argument('--test_on_core', type=bool, default=True, 
+        help='whether to use the whole core set as test set, default True')
 
     args = parser.parse_args().__dict__
     args['exp'] = '_'.join([args['model'], args['dataset']])
     args.update(get_exp_configure(args['exp']))
+
+    if args['split']=='sequence' or args['split']=='structure':
+        args['version'] = 'v2007' 
+        args['test_on_core'] = False
 
     rand_hyper_search = False
     if rand_hyper_search: # randomly initialize hyperparameters

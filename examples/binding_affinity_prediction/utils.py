@@ -75,7 +75,12 @@ def load_dataset(args):
                           load_binding_pocket=args['load_binding_pocket'],
                           )
 
-        if args['split'] == 'random':
+        if args['split'] == 'sequence':
+            train_set, val_set, test_set = [Subset(dataset, indices) for indices in dataset.agg_sequence_split]
+        elif args['split'] =='structure':
+            train_set, val_set, test_set = [Subset(dataset, indices) for indices in dataset.agg_structure_split]
+
+        elif args['split'] == 'random':
             train_set, val_set, test_set = RandomSplitter.train_val_test_split(
                 dataset,
                 frac_train=args['frac_train'],

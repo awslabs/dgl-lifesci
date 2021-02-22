@@ -110,11 +110,24 @@ class PDBBind(object):
                 'core or refined, got {}'.format(subset))
 
         if pdb_version == 'v2007':
-            download_url = 'http://www.pdbbind.org.cn/download/pdbbind_v2007.tar.gz' 
+            # download from pddbind official website
+        #     download_url = 'http://www.pdbbind.org.cn/download/pdbbind_v2007.tar.gz' 
+        #     data_path = root_dir_path + '/pdbbind_v2007.tar.gz'
+        #     extracted_data_path = root_dir_path + '/pdbbind_v2007'
+        #     download(download_url, path=data_path, overwrite=False)
+        #     extract_archive(data_path, extracted_data_path)
+
+            self._url = 'dataset/pdbbind_v2007.tar.gz'
             data_path = root_dir_path + '/pdbbind_v2007.tar.gz'
             extracted_data_path = root_dir_path + '/pdbbind_v2007'
-            download(download_url, path=data_path, overwrite=False)
-            extract_archive(data_path, extracted_data_path)
+            download(_get_dgl_url(self._url), path=data_path, overwrite=False)
+            extract_archive(data_path, extracted_data_path, overwrite=False)
+            extracted_data_path += '/home/ubuntu' # extra layer 
+
+            # DataFrame containing the pdbbind_2007_agglomerative_split.txt
+            self.agg_split = pd.read_csv(extracted_data_path + '/v2007/pdbbind_2007_agglomerative_split.txt')
+            self.agg_split.rename(columns={'PDB ID':'PDB_code', 'Sequence-based assignment':'sequence', 'Structure-based assignment':'structure'}, inplace=True)
+            self.agg_split.loc[self.agg_split['PDB_code']=='1.00E+66', 'PDB_code'] = '1e66' # fix typo
 
             if subset == 'core':
                 index_label_file = extracted_data_path + '/v2007/INDEX.2007.core.data'
@@ -265,7 +278,14 @@ class PDBBind(object):
         self.df = self.df.iloc[self.indices]
         self.labels = F.zerocopy_from_numpy(self.df[self.task_names].values.astype(np.float32))
         print('Finished cleaning the dataset, '
-              'got {:d}/{:d} valid pairs'.format(len(self), len(self.df)))
+              'got {:d}/{:d} valid pairs'.format(len(self), len(self.ligand_files))) # account for the ones use_conformation failed
+
+        # Prepare for Refined, Agglomerative Sequence Split and Agglomerative Structure Split
+        merged_df = self.df.merge(self.agg_split, on='PDB_code')
+        self.agg_sequence_split = [list(merged_df.loc[merged_df['sequence']==target_set, 'PDB_code'].index) 
+            for target_set in ['train', 'valid', 'test']]
+        self.agg_structure_split = [list(merged_df.loc[merged_df['structure']==target_set, 'PDB_code'].index) 
+            for target_set in ['train', 'valid', 'test']]
 
         # Prepare zero padding
         if zero_padding:

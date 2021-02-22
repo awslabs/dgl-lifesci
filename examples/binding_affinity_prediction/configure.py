@@ -114,6 +114,60 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'split': 'random'
 }
 
+PotentialNet_PDBBind_refined_pocket_sequence = { 
+    'dataset': 'PDBBind',
+    'subset': 'refined',
+    'load_binding_pocket': True,
+    'random_seed': 123,
+    'frac_train': 0.8,
+    'frac_val': 0.2,
+    'frac_test': 0.,
+    'batch_size': 40,
+    'shuffle': False,
+    'max_num_neighbors': 5, ##
+    'distance_bins': [1.5, 2.5, 3.5, 4.5],
+    'f_in': 40,
+    'f_bond': 73, # has to be larger than f_in
+    'f_gather':90,
+    'f_spatial': 90, # better to the same as f_gather
+    'n_rows_fc':[32],
+    'n_bond_conv_steps':2,
+    'n_spatial_conv_steps':2,
+    'dropouts': [0.25, 0.25, 0.25],
+    'lr': 0.001,
+    'num_epochs': 2,
+    'wd': 1e-07,
+    'metrics': ['r2', 'mae'],
+    'split': 'sequence'
+}
+
+PotentialNet_PDBBind_refined_pocket_structure = { 
+    'dataset': 'PDBBind',
+    'subset': 'refined',
+    'load_binding_pocket': True,
+    'random_seed': 123,
+    'frac_train': 0.8,
+    'frac_val': 0.2,
+    'frac_test': 0.,
+    'batch_size': 40,
+    'shuffle': False,
+    'max_num_neighbors': 5, ##
+    'distance_bins': [1.5, 2.5, 3.5, 4.5],
+    'f_in': 40,
+    'f_bond': 73, # has to be larger than f_in
+    'f_gather':90,
+    'f_spatial': 90, # better to the same as f_gather
+    'n_rows_fc':[32],
+    'n_bond_conv_steps':2,
+    'n_spatial_conv_steps':2,
+    'dropouts': [0.25, 0.25, 0.25],
+    'lr': 0.001,
+    'num_epochs': 2,
+    'wd': 1e-07,
+    'metrics': ['r2', 'mae'],
+    'split': 'structure'
+}
+
 PotentialNet_PDBBind_refined_pocket_scaffold = { 
     'dataset': 'PDBBind',
     'subset': 'refined',
@@ -374,6 +428,8 @@ experiment_configures = {
     'PotentialNet_PDBBind_core_pocket_scaffold': PotentialNet_PDBBind_core_pocket_scaffold,
     'PotentialNet_PDBBind_core_pocket_stratified' : PotentialNet_PDBBind_core_pocket_stratified,
     'PotentialNet_PDBBind_refined_pocket_random' : PotentialNet_PDBBind_refined_pocket_random,
+    'PotentialNet_PDBBind_refined_pocket_structure': PotentialNet_PDBBind_refined_pocket_structure,
+    'PotentialNet_PDBBind_refined_pocket_sequence': PotentialNet_PDBBind_refined_pocket_sequence,
     'PotentialNet_PDBBind_refined_pocket_scaffold': PotentialNet_PDBBind_refined_pocket_scaffold,
     'PotentialNet_PDBBind_refined_pocket_stratified': PotentialNet_PDBBind_refined_pocket_stratified,
 }
