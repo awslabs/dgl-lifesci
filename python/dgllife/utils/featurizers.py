@@ -51,6 +51,7 @@ __all__ = ['one_hot_encoding',
            'WeaveAtomFeaturizer',
            'PretrainAtomFeaturizer',
            'AttentiveFPAtomFeaturizer',
+           'PAGTN_AtomFeaturizer',
            'bond_type_one_hot',
            'bond_is_conjugated_one_hot',
            'bond_is_conjugated',
@@ -62,7 +63,8 @@ __all__ = ['one_hot_encoding',
            'CanonicalBondFeaturizer',
            'WeaveEdgeFeaturizer',
            'PretrainBondFeaturizer',
-           'AttentiveFPBondFeaturizer']
+           'AttentiveFPBondFeaturizer',
+           'PAGTN_EdgeFeaturizer']
 
 def one_hot_encoding(x, allowable_set, encode_unknown=False):
     """One-hot encoding.
@@ -1369,6 +1371,78 @@ class AttentiveFPAtomFeaturizer(BaseAtomFeaturizer):
                  atom_chirality_type_one_hot]
             )})
 
+class PAGTN_AtomFeaturizer(BaseAtomFeaturizer):
+    """The Atom featurizer used in PAGTN
+
+    PAGTN is introduced in
+    `Path-Augmented Graph Transformer Network. <https://arxiv.org/abs/1905.12712>`
+
+    The atom features include:
+
+    * **One hot encoding of the atom type**.
+    * **One hot encoding of Formal charge of the atom**.
+    * **One hot encoding of the atom degree**
+    * **One hot encoding of explicit valence of an atom**. The supported possibilities
+      include ``0 - 6``.
+    * **One hot encoding of implicit valence of an atom**. The supported possibilities
+      include ``0 - 5``.
+    * **Whether the atom is aromatic**.
+
+    Parameters
+    ----------
+    atom_data_field : str
+        Name for storing atom features in DGLGraphs, default to 'h'.
+
+    Examples
+    --------
+
+    >>> from rdkit import Chem
+    >>> from dgllife.utils import PAGTN_AtomFeaturizer
+
+    >>> mol = Chem.MolFromSmiles('C')
+    >>> atom_featurizer = PAGTN_AtomFeaturizer(atom_data_field='feat')
+    >>> atom_featurizer(mol)
+    {'feat': tensor([[1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                      0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                      0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                      0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 1., 0., 0.,
+                      0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                      0., 1., 0., 0.]])}
+    >>> # Get feature size for nodes
+    >>> print(atom_featurizer.feat_size())
+    94
+
+    See Also
+    --------
+    BaseAtomFeaturizer
+    CanonicalAtomFeaturizer
+    PretrainAtomFeaturizer
+    AttentiveFPAtomFeaturizer
+    """
+    def __init__(self, atom_data_field='h'):
+        SYMBOLS = ['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg',
+                   'Na', 'Ca', 'Fe', 'As', 'Al', 'I', 'B', 'V', 'K', 'Tl',
+                   'Yb', 'Sb', 'Sn', 'Ag', 'Pd', 'Co', 'Se', 'Ti', 'Zn',
+                   'H', 'Li', 'Ge', 'Cu', 'Au', 'Ni', 'Cd', 'In', 'Mn',
+                   'Zr', 'Cr', 'Pt', 'Hg', 'Pb', 'W', 'Ru', 'Nb', 'Re',
+                   'Te', 'Rh', 'Tc', 'Ba', 'Bi', 'Hf', 'Mo', 'U', 'Sm',
+                   'Os', 'Ir', 'Ce', 'Gd', 'Ga', 'Cs', '*', 'UNK']
+
+        super(PAGTN_AtomFeaturizer, self).__init__(
+            featurizer_funcs={
+                atom_data_field: ConcatFeaturizer([partial(atom_type_one_hot,
+                                                           allowable_set=SYMBOLS,
+                                                           encode_unknown=False),
+                                                   atom_formal_charge_one_hot,
+                                                   atom_degree_one_hot,
+                                                   partial(atom_explicit_valence_one_hot,
+                                                           allowable_set=list(range(7)),
+                                                           encode_unknown=False),
+                                                   partial(atom_implicit_valence_one_hot,
+                                                           allowable_set=list(range(6)),
+                                                           encode_unknown=False),
+                                                   atom_is_aromatic])})
+
 def bond_type_one_hot(bond, allowable_set=None, encode_unknown=False):
     """One hot encoding for the type of a bond.
 
@@ -2081,3 +2155,171 @@ class AttentiveFPBondFeaturizer(BaseBondFeaturizer):
                                                              Chem.rdchem.BondStereo.STEREOZ,
                                                              Chem.rdchem.BondStereo.STEREOE])]
             )}, self_loop=self_loop)
+
+class PAGTN_EdgeFeaturizer(object):
+    """The bond featurizer used in PAGTN
+
+    PAGTN is introduced in
+    `Path-Augmented Graph Transformer Network. <https://arxiv.org/abs/1905.12712>`
+
+    We build a complete graph and The Edge features include:
+    * **Shortest path between two nodes in terms of bonds**. Each bond is a One hot 
+        encoding of bond type, conjugacy, ring membership
+    * **One hot encoding of family of rings**.
+    * **One hot encoding of the distance between the nodes**.
+
+    **We assume the resulting DGLGraph will be created with :func:`smiles_to_complete_graph` with
+    self loops.**
+
+    Parameters
+    ----------
+    bond_data_field : str
+        Name for storing bond features in DGLGraphs, default to ``'e'``.
+    max_length : int
+        Maximum distance upto to which shortest paths must be considered.
+        Paths shorter than max_length will be padded and longer will be
+        truncated, default to ``5``.
+
+    Examples
+    --------
+
+    >>> from dgllife.utils import PAGTN_EdgeFeaturizer
+    >>> from rdkit import Chem
+    >>> mol = Chem.MolFromSmiles('CCO')
+    >>> bond_featurizer = PAGTN_EdgeFeaturizer(max_length= 1)
+    >>> bond_featurizer(mol)
+    {'e': tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                  [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+                  [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+                  [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+                  [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                  [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+                  [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+                  [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+                  [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]])}
+    >>> # Get feature size
+    >>> bond_featurizer.feat_size()
+    14
+
+    See Also
+    --------
+    BaseBondFeaturizer
+    CanonicalBondFeaturizer
+    WeaveEdgeFeaturizer
+    PretrainBondFeaturizer
+    """
+    def __init__(self, bond_data_field='e', max_length=5):
+        self.bond_data_field = bond_data_field
+        self.RING_TYPES = [(5, False), (5, True), (6, False), (6, True)]
+        self.ordered_pair = lambda a, b: (a, b) if a < b else (b, a)
+        self.bond_featurizer = ConcatFeaturizer([bond_type_one_hot,
+                                                bond_is_conjugated,
+                                                bond_is_in_ring])
+        self.max_length = max_length
+
+    def feat_size(self):
+        """Get the feature size.
+
+        Returns
+        -------
+        int
+            Feature size.
+        """
+        mol = Chem.MolFromSmiles('C')
+        feats = self(mol)[self.bond_data_field]
+
+        return feats.shape[-1]
+
+    def bond_features(self, mol, path_atoms, ring_info):
+        """Computes the edge features for a given pair of nodes.
+
+        Parameters
+        ----------
+        mol : rdkit.Chem.rdchem.Mol
+            RDKit molecule instance.
+        path_atoms: list
+            Shortest path between the given pair of nodes.
+        ring_info: list
+            Diffrent rings by which they are connected
+        """
+        features = []
+        path_bonds = []
+        path_length = len(path_atoms)
+        for path_idx in range(len(path_atoms) - 1):
+            bond = mol.GetBondBetweenAtoms(path_atoms[path_idx], path_atoms[path_idx + 1])
+            assert bond is not None
+            path_bonds.append(bond)
+
+        for path_idx in range(self.max_length):
+            if path_idx < len(path_bonds):
+                features.append(self.bond_featurizer(path_bonds[path_idx]))
+            else:
+                features.append([0, 0, 0, 0, 0, 0])
+
+        if path_length + 1 > self.max_length:
+            path_length = self.max_length + 1
+        position_feature = np.zeros(self.max_length + 2)
+        position_feature[path_length] = 1
+        features.append(position_feature)
+        if ring_info:
+            rfeat = [one_hot_encoding(r, allowable_set=self.RING_TYPES) for r in ring_info]
+            rfeat = [True] + np.any(rfeat, axis= 0).tolist()
+            features.append(rfeat)
+        else:
+            # This will return a with all entries False
+            features.append([False] + one_hot_encoding(ring_info, allowable_set=self.RING_TYPES))
+        return np.concatenate(features, axis=0)
+
+    def __call__(self, mol):
+        """Featurizes the input molecule.
+
+        Parameters
+        ----------
+        mol : rdkit.Chem.rdchem.Mol
+            RDKit molecule instance.
+
+        Returns
+        -------
+        dict
+            Mapping self._edge_data_field to a float32 tensor of shape (N, M), where
+            N is the number of atom pairs and M is the feature size depending on max_length.
+        """
+
+        n_atoms = mol.GetNumAtoms()
+        # To get the shortest paths between two nodes.
+        paths_dict = {
+            (i, j): Chem.rdmolops.GetShortestPath(mol, i, j)
+            for i in range(n_atoms)
+            for j in range(n_atoms)
+            if i != j
+            }
+        # To get info if two nodes belong to the same ring.
+        rings_dict = {}
+        ssr = [list(x) for x in Chem.GetSymmSSSR(mol)]
+        for ring in ssr:
+            ring_sz = len(ring)
+            is_aromatic = True
+            for atom_idx in ring:
+                if not mol.GetAtoms()[atom_idx].GetIsAromatic():
+                    is_aromatic = False
+                    break
+            for ring_idx, atom_idx in enumerate(ring):
+                for other_idx in ring[ring_idx:]:
+                    atom_pair = self.ordered_pair(atom_idx, other_idx)
+                    if atom_pair not in rings_dict:
+                        rings_dict[atom_pair] = [(ring_sz, is_aromatic)]
+                    else:
+                        if (ring_sz, is_aromatic) not in rings_dict[atom_pair]:
+                            rings_dict[atom_pair].append((ring_sz, is_aromatic))
+        # Featurizer
+        feats = []
+        for i in range(n_atoms):
+            for j in range(n_atoms):
+
+                if (i, j) not in paths_dict:
+                    feats.append(np.zeros(7*self.max_length + 7))
+                    continue
+                ring_info = rings_dict.get(self.ordered_pair(i, j), [])
+                feats.append(self.bond_features(mol, paths_dict[(i, j)], ring_info))
+
+        return {self.bond_data_field: torch.tensor(feats).float()}

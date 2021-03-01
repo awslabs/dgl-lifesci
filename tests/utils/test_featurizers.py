@@ -278,6 +278,33 @@ def test_attentivefp_atom_featurizer():
                                          0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0.,
                                          0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.]]), rtol=1e-3)
 
+def test_PAGTN_atom_featurizer():
+    featurizer = PAGTN_AtomFeaturizer()
+    assert featurizer.feat_size() == 94
+    mol = test_mol1()
+    feats = featurizer(mol)
+    assert list(feats.keys()) == ['h']
+    assert torch.allclose(feats['h'],
+                          torch.tensor([[1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         1., 0., 0., 0.],                                        
+                                        [1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1.,
+                                         0., 0., 0., 0.],
+                                        [0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0.,
+                                         0., 0., 0., 0.]]), rtol=1e-3)
+
+
 def test_bond_type_one_hot():
     mol = test_mol1()
     assert bond_type_one_hot(mol.GetBondWithIdx(0)) == [1, 0, 0, 0]
@@ -468,6 +495,33 @@ def test_attentivefp_bond_featurizer():
     assert torch.allclose(feats['e'],
                           torch.tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.]]))
 
+def test_PAGTN_bond_featurizer():
+    mol = test_mol1()
+
+    test_featurizer = PAGTN_EdgeFeaturizer(max_length=1)
+    assert test_featurizer.feat_size() == 14
+    feats = test_featurizer(mol)
+    assert torch.allclose(feats['e'], torch.tensor([
+        [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+        [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+        [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+        [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+        [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+        [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+        [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+        [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
+        [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]]))
+    test_featurizer2 = PAGTN_EdgeFeaturizer(max_length=2)
+    assert test_featurizer2.feat_size() == 21
+    # Test graphs without edges
+    mol = test_mol5()
+    feats = test_featurizer2(mol)
+    assert torch.allclose(feats['e'],
+                          torch.tensor([[0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 0., 0., 0.,
+                                         0., 0., 0., 0., 0., 0., 0.]]))
+
+
 if __name__ == '__main__':
     test_one_hot_encoding()
     test_atom_type_one_hot()
@@ -501,6 +555,7 @@ if __name__ == '__main__':
     test_weave_atom_featurizer()
     test_pretrain_atom_featurizer()
     test_attentivefp_atom_featurizer()
+    test_PAGTN_atom_featurizer()
     test_bond_type_one_hot()
     test_bond_is_conjugated_one_hot()
     test_bond_is_conjugated()
@@ -513,3 +568,4 @@ if __name__ == '__main__':
     test_weave_edge_featurizer()
     test_pretrain_bond_featurizer()
     test_attentivefp_bond_featurizer()
+    test_PAGTN_bond_featurizer()
