@@ -2163,7 +2163,7 @@ class PAGTN_EdgeFeaturizer(object):
     `Path-Augmented Graph Transformer Network. <https://arxiv.org/abs/1905.12712>`
 
     We build a complete graph and The Edge features include:
-    * **Shortest path between two nodes in terms of bonds**. Each bond is a One hot 
+    * **Shortest path between two nodes in terms of bonds**. Each bond is a One hot
         encoding of bond type, conjugacy, ring membership
     * **One hot encoding of family of rings**.
     * **One hot encoding of the distance between the nodes**.
@@ -2213,8 +2213,8 @@ class PAGTN_EdgeFeaturizer(object):
         self.RING_TYPES = [(5, False), (5, True), (6, False), (6, True)]
         self.ordered_pair = lambda a, b: (a, b) if a < b else (b, a)
         self.bond_featurizer = ConcatFeaturizer([bond_type_one_hot,
-                                                bond_is_conjugated,
-                                                bond_is_in_ring])
+                                                 bond_is_conjugated,
+                                                 bond_is_in_ring])
         self.max_length = max_length
 
     def feat_size(self):
@@ -2263,7 +2263,7 @@ class PAGTN_EdgeFeaturizer(object):
         features.append(position_feature)
         if ring_info:
             rfeat = [one_hot_encoding(r, allowable_set=self.RING_TYPES) for r in ring_info]
-            rfeat = [True] + np.any(rfeat, axis= 0).tolist()
+            rfeat = [True] + np.any(rfeat, axis=0).tolist()
             features.append(rfeat)
         else:
             # This will return a with all entries False
