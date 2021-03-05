@@ -2221,7 +2221,7 @@ class PAGTNEdgeFeaturizer(object):
     """
     def __init__(self, bond_data_field='e', max_length=5):
         self.bond_data_field = bond_data_field
-        # Any two given nodes can belong to the same ring and here only 
+        # Any two given nodes can belong to the same ring and here only
         # ring sizes of 5 and 6 are used. True & False indicate if it's Aromatic or not.
         self.RING_TYPES = [(5, False), (5, True), (6, False), (6, True)]
         self.ordered_pair = lambda a, b: (a, b) if a < b else (b, a)
