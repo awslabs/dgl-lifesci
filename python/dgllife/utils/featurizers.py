@@ -2173,8 +2173,8 @@ class PAGTNEdgeFeaturizer(object):
     `Path-Augmented Graph Transformer Network. <https://arxiv.org/abs/1905.12712>`__
 
     We build a complete graph and the edge features include:
-    * **Shortest path between two nodes in terms of bonds**. Each bond is a One hot
-        encoding of bond type, conjugacy, ring membership
+    * **Shortest path between two nodes in terms of bonds**. Each bond is a concatenation
+        of One oh hot encoding bond type, conjugacy, ring membership
     * **One hot encoding of type of rings based on size and aromaticity**.
     * **One hot encoding of the distance between the nodes**.
 
