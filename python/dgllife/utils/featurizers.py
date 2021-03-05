@@ -51,7 +51,7 @@ __all__ = ['one_hot_encoding',
            'WeaveAtomFeaturizer',
            'PretrainAtomFeaturizer',
            'AttentiveFPAtomFeaturizer',
-           'PAGTN_AtomFeaturizer',
+           'PAGTNAtomFeaturizer',
            'bond_type_one_hot',
            'bond_is_conjugated_one_hot',
            'bond_is_conjugated',
@@ -64,7 +64,7 @@ __all__ = ['one_hot_encoding',
            'WeaveEdgeFeaturizer',
            'PretrainBondFeaturizer',
            'AttentiveFPBondFeaturizer',
-           'PAGTN_EdgeFeaturizer']
+           'PAGTNEdgeFeaturizer']
 
 def one_hot_encoding(x, allowable_set, encode_unknown=False):
     """One-hot encoding.
@@ -871,6 +871,7 @@ class BaseAtomFeaturizer(object):
     WeaveAtomFeaturizer
     PretrainAtomFeaturizer
     AttentiveFPAtomFeaturizer
+    PAGTNAtomFeaturizer
     """
     def __init__(self, featurizer_funcs, feat_sizes=None):
         self.featurizer_funcs = featurizer_funcs
@@ -1005,6 +1006,7 @@ class CanonicalAtomFeaturizer(BaseAtomFeaturizer):
     WeaveAtomFeaturizer
     PretrainAtomFeaturizer
     AttentiveFPAtomFeaturizer
+    PAGTNAtomFeaturizer
     """
     def __init__(self, atom_data_field='h'):
         super(CanonicalAtomFeaturizer, self).__init__(
@@ -1084,6 +1086,7 @@ class WeaveAtomFeaturizer(object):
     CanonicalAtomFeaturizer
     PretrainAtomFeaturizer
     AttentiveFPAtomFeaturizer
+    PAGTNAtomFeaturizer
     """
     def __init__(self, atom_data_field='h', atom_types=None, chiral_types=None,
                  hybridization_types=None):
@@ -1248,6 +1251,7 @@ class PretrainAtomFeaturizer(object):
     CanonicalAtomFeaturizer
     WeaveAtomFeaturizer
     AttentiveFPAtomFeaturizer
+    PAGTNAtomFeaturizer
     """
     def __init__(self, atomic_number_types=None, chiral_types=None):
         if atomic_number_types is None:
@@ -1354,6 +1358,7 @@ class AttentiveFPAtomFeaturizer(BaseAtomFeaturizer):
     CanonicalAtomFeaturizer
     WeaveAtomFeaturizer
     PretrainAtomFeaturizer
+    PAGTNAtomFeaturizer
     """
     def __init__(self, atom_data_field='h'):
         super(AttentiveFPAtomFeaturizer, self).__init__(
@@ -1371,16 +1376,16 @@ class AttentiveFPAtomFeaturizer(BaseAtomFeaturizer):
                  atom_chirality_type_one_hot]
             )})
 
-class PAGTN_AtomFeaturizer(BaseAtomFeaturizer):
-    """The Atom featurizer used in PAGTN
+class PAGTNAtomFeaturizer(BaseAtomFeaturizer):
+    """The atom featurizer used in PAGTN
 
     PAGTN is introduced in
-    `Path-Augmented Graph Transformer Network. <https://arxiv.org/abs/1905.12712>`
+    `Path-Augmented Graph Transformer Network. <https://arxiv.org/abs/1905.12712>`__
 
     The atom features include:
 
     * **One hot encoding of the atom type**.
-    * **One hot encoding of Formal charge of the atom**.
+    * **One hot encoding of formal charge of the atom**.
     * **One hot encoding of the atom degree**
     * **One hot encoding of explicit valence of an atom**. The supported possibilities
       include ``0 - 6``.
@@ -1397,10 +1402,10 @@ class PAGTN_AtomFeaturizer(BaseAtomFeaturizer):
     --------
 
     >>> from rdkit import Chem
-    >>> from dgllife.utils import PAGTN_AtomFeaturizer
+    >>> from dgllife.utils import PAGTNAtomFeaturizer
 
     >>> mol = Chem.MolFromSmiles('C')
-    >>> atom_featurizer = PAGTN_AtomFeaturizer(atom_data_field='feat')
+    >>> atom_featurizer = PAGTNAtomFeaturizer(atom_data_field='feat')
     >>> atom_featurizer(mol)
     {'feat': tensor([[1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
                       0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
@@ -1417,6 +1422,7 @@ class PAGTN_AtomFeaturizer(BaseAtomFeaturizer):
     BaseAtomFeaturizer
     CanonicalAtomFeaturizer
     PretrainAtomFeaturizer
+    WeaveAtomFeaturizer
     AttentiveFPAtomFeaturizer
     """
     def __init__(self, atom_data_field='h'):
@@ -1428,7 +1434,7 @@ class PAGTN_AtomFeaturizer(BaseAtomFeaturizer):
                    'Te', 'Rh', 'Tc', 'Ba', 'Bi', 'Hf', 'Mo', 'U', 'Sm',
                    'Os', 'Ir', 'Ce', 'Gd', 'Ga', 'Cs', '*', 'UNK']
 
-        super(PAGTN_AtomFeaturizer, self).__init__(
+        super(PAGTNAtomFeaturizer, self).__init__(
             featurizer_funcs={
                 atom_data_field: ConcatFeaturizer([partial(atom_type_one_hot,
                                                            allowable_set=SYMBOLS,
@@ -1704,6 +1710,7 @@ class BaseBondFeaturizer(object):
     WeaveEdgeFeaturizer
     PretrainBondFeaturizer
     AttentiveFPBondFeaturizer
+    PAGTNEdgeFeaturizer
     """
     def __init__(self, featurizer_funcs, feat_sizes=None, self_loop=False):
         self.featurizer_funcs = featurizer_funcs
@@ -1855,6 +1862,7 @@ class CanonicalBondFeaturizer(BaseBondFeaturizer):
     WeaveEdgeFeaturizer
     PretrainBondFeaturizer
     AttentiveFPBondFeaturizer
+    PAGTNEdgeFeaturizer
     """
     def __init__(self, bond_data_field='e', self_loop=False):
         super(CanonicalBondFeaturizer, self).__init__(
@@ -1912,6 +1920,7 @@ class WeaveEdgeFeaturizer(object):
     CanonicalBondFeaturizer
     PretrainBondFeaturizer
     AttentiveFPBondFeaturizer
+    PAGTNEdgeFeaturizer
     """
     def __init__(self, edge_data_field='e', max_distance=7, bond_types=None):
         super(WeaveEdgeFeaturizer, self).__init__()
@@ -2143,6 +2152,7 @@ class AttentiveFPBondFeaturizer(BaseBondFeaturizer):
     CanonicalBondFeaturizer
     WeaveEdgeFeaturizer
     PretrainBondFeaturizer
+    PAGTNEdgeFeaturizer
     """
     def __init__(self, bond_data_field='e', self_loop=False):
         super(AttentiveFPBondFeaturizer, self).__init__(
@@ -2156,16 +2166,16 @@ class AttentiveFPBondFeaturizer(BaseBondFeaturizer):
                                                              Chem.rdchem.BondStereo.STEREOE])]
             )}, self_loop=self_loop)
 
-class PAGTN_EdgeFeaturizer(object):
-    """The bond featurizer used in PAGTN
+class PAGTNEdgeFeaturizer(object):
+    """The edge featurizer used in PAGTN
 
     PAGTN is introduced in
-    `Path-Augmented Graph Transformer Network. <https://arxiv.org/abs/1905.12712>`
+    `Path-Augmented Graph Transformer Network. <https://arxiv.org/abs/1905.12712>`__
 
-    We build a complete graph and The Edge features include:
+    We build a complete graph and the edge features include:
     * **Shortest path between two nodes in terms of bonds**. Each bond is a One hot
         encoding of bond type, conjugacy, ring membership
-    * **One hot encoding of family of rings**.
+    * **One hot encoding of type of rings based on size and aromaticity**.
     * **One hot encoding of the distance between the nodes**.
 
     **We assume the resulting DGLGraph will be created with :func:`smiles_to_complete_graph` with
@@ -2176,17 +2186,17 @@ class PAGTN_EdgeFeaturizer(object):
     bond_data_field : str
         Name for storing bond features in DGLGraphs, default to ``'e'``.
     max_length : int
-        Maximum distance upto to which shortest paths must be considered.
+        Maximum distance up to which shortest paths must be considered.
         Paths shorter than max_length will be padded and longer will be
         truncated, default to ``5``.
 
     Examples
     --------
 
-    >>> from dgllife.utils import PAGTN_EdgeFeaturizer
+    >>> from dgllife.utils import PAGTNEdgeFeaturizer
     >>> from rdkit import Chem
     >>> mol = Chem.MolFromSmiles('CCO')
-    >>> bond_featurizer = PAGTN_EdgeFeaturizer(max_length= 1)
+    >>> bond_featurizer = PAGTNEdgeFeaturizer(max_length=1)
     >>> bond_featurizer(mol)
     {'e': tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
                   [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
@@ -2207,9 +2217,12 @@ class PAGTN_EdgeFeaturizer(object):
     CanonicalBondFeaturizer
     WeaveEdgeFeaturizer
     PretrainBondFeaturizer
+    AttentiveFPBondFeaturizer
     """
     def __init__(self, bond_data_field='e', max_length=5):
         self.bond_data_field = bond_data_field
+        # Any two given nodes can belong to the same ring and here only 
+        # ring sizes of 5 and 6 are used. True & False indicate if it's Aromatic or not.
         self.RING_TYPES = [(5, False), (5, True), (6, False), (6, True)]
         self.ordered_pair = lambda a, b: (a, b) if a < b else (b, a)
         self.bond_featurizer = ConcatFeaturizer([bond_type_one_hot,
@@ -2237,17 +2250,19 @@ class PAGTN_EdgeFeaturizer(object):
         ----------
         mol : rdkit.Chem.rdchem.Mol
             RDKit molecule instance.
-        path_atoms: list
+        path_atoms: tuple
             Shortest path between the given pair of nodes.
         ring_info: list
-            Diffrent rings by which they are connected
+            Different rings that contain the pair of atoms
         """
         features = []
         path_bonds = []
         path_length = len(path_atoms)
-        for path_idx in range(len(path_atoms) - 1):
+        for path_idx in range(path_length - 1):
             bond = mol.GetBondBetweenAtoms(path_atoms[path_idx], path_atoms[path_idx + 1])
-            assert bond is not None
+            if bond is None:
+                import warnings
+                warnings.warn('Valid idx of bonds must be passed')
             path_bonds.append(bond)
 
         for path_idx in range(self.max_length):
@@ -2266,7 +2281,7 @@ class PAGTN_EdgeFeaturizer(object):
             rfeat = [True] + np.any(rfeat, axis=0).tolist()
             features.append(rfeat)
         else:
-            # This will return a with all entries False
+            # This will return a boolean vector with all entries False
             features.append([False] + one_hot_encoding(ring_info, allowable_set=self.RING_TYPES))
         return np.concatenate(features, axis=0)
 

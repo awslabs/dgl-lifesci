@@ -279,7 +279,7 @@ def test_attentivefp_atom_featurizer():
                                          0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.]]), rtol=1e-3)
 
 def test_PAGTN_atom_featurizer():
-    featurizer = PAGTN_AtomFeaturizer()
+    featurizer = PAGTNAtomFeaturizer()
     assert featurizer.feat_size() == 94
     mol = test_mol1()
     feats = featurizer(mol)
@@ -498,7 +498,7 @@ def test_attentivefp_bond_featurizer():
 def test_PAGTN_bond_featurizer():
     mol = test_mol1()
 
-    test_featurizer = PAGTN_EdgeFeaturizer(max_length=1)
+    test_featurizer = PAGTNEdgeFeaturizer(max_length=1)
     assert test_featurizer.feat_size() == 14
     feats = test_featurizer(mol)
     assert torch.allclose(feats['e'], torch.tensor([
@@ -511,7 +511,7 @@ def test_PAGTN_bond_featurizer():
         [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
         [1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.],
         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]]))
-    test_featurizer2 = PAGTN_EdgeFeaturizer(max_length=2)
+    test_featurizer2 = PAGTNEdgeFeaturizer(max_length=2)
     assert test_featurizer2.feat_size() == 21
     # Test graphs without edges
     mol = test_mol5()
