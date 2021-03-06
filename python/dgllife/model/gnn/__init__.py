@@ -17,3 +17,4 @@ from .mpnn import *
 from .schnet import *
 from .weave import *
 from .wln import *
+from .pagtn import *
