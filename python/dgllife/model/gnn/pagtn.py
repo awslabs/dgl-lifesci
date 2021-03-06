@@ -39,7 +39,7 @@ class PAGTNLayer(nn.Module):
         self.msg_src = nn.Linear(node_in_feats, node_out_feats)
         self.msg_dst = nn.Linear(node_in_feats, node_out_feats)
         self.msg_edg = nn.Linear(edge_feat_size, node_out_feats)
-        self.W_n = nn.Linear(node_in_feats, node_out_feats)
+        self.wgt_n = nn.Linear(node_in_feats, node_out_feats)
         self.dropout = nn.Dropout(dropout)
         self.act = activation
         self.reset_parameters()
@@ -54,7 +54,7 @@ class PAGTNLayer(nn.Module):
         nn.init.xavier_normal_(self.msg_src.weight, gain=gain)
         nn.init.xavier_normal_(self.msg_dst.weight, gain=gain)
         nn.init.xavier_normal_(self.msg_edg.weight, gain=gain)
-        nn.init.xavier_normal_(self.W_n.weight, gain=gain)
+        nn.init.xavier_normal_(self.wgt_n.weight, gain=gain)
 
     def forward(self, g, node_feats, edge_feats):
         """Update node representations.
@@ -93,11 +93,11 @@ class PAGTNLayer(nn.Module):
         atn_inp = self.act(atn_inp)
         g.edata['msg'] = atn_scores * atn_inp
         g.update_all(fn.copy_edge('msg', 'm'), fn.sum('m', 'feat'))
-        h = g.ndata.pop('feat')+self.W_n(node_feats)
-        return self.act(h)
+        out = g.ndata.pop('feat')+self.wgt_n(node_feats)
+        return self.act(out)
 
 
-class gnnPAGTN(nn.Module):
+class PAGTNgnn(nn.Module):
     """MultiLayer PAGTN model for updating node representations.
     PAGTN is introduced in `Path-Augmented Graph Transformer Network
     <https://arxiv.org/abs/1905.12712>`__.
@@ -131,7 +131,7 @@ class gnnPAGTN(nn.Module):
                  nheads=1,
                  dropout=0.1,
                  activation=nn.LeakyReLU(0.2)):
-        super(gnnPAGTN, self).__init__()
+        super(PAGTNgnn, self).__init__()
         self.depth = depth
         self.nheads = nheads
         self.node_hid_feats = node_hid_feats

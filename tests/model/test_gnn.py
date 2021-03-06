@@ -443,7 +443,7 @@ def test_pagtn():
     bg, batch_node_feats, batch_edge_feats = test_graph4()
     bg, batch_node_feats, batch_edge_feats = bg.to(device), batch_node_feats.to(device), \
                                              batch_edge_feats.to(device)
-    gnn = gnnPAGTN(node_in_feats = 1,
+    gnn = PAGTNgnn(node_in_feats = 1,
                  node_out_feats = 2,
                  node_hid_feats = 20,
                  edge_feat_size= 2).to(device)

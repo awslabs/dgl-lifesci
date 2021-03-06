@@ -1,7 +1,7 @@
-from ..gnn import gnnPAGTN
-from ..readout import MLPNodeReadout
 import torch
 import torch.nn as nn
+from ..gnn import PAGTNgnn
+from ..readout import MLPNodeReadout
 
 
 class PAGTNPredictor(nn.Module):
@@ -46,13 +46,13 @@ class PAGTNPredictor(nn.Module):
                  n_tasks=1,
                  mode='sum'):
         super(PAGTNPredictor, self).__init__()
-        self.model = gnnPAGTN(node_in_feats, node_out_feats,
+        self.model = PAGTNgnn(node_in_feats, node_out_feats,
                               node_hid_feats, edge_feat_size,
                               depth, nheads, dropout, activation)
         self.readout = MLPNodeReadout(node_out_feats + node_in_feats,
                                       node_out_feats,
                                       n_tasks,
-                                      mode = mode)
+                                      mode=mode)
 
     def forward(self, g, node_feats, edge_feats):
         """Graph-level regression/soft classification.
