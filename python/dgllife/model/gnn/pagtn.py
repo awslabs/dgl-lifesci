@@ -26,8 +26,8 @@ class PAGTNLayer(nn.Module):
     node_in_feats : int
         Size for the input node features.
     node_out_feats : int
-        Size for the input edge features.
-    edge_feat_size : int
+        Size for the output edge features.
+    edge_feats : int
         Size for the input edge features.
     dropout : float
         The probability for performing dropout. Default to 0.1
@@ -37,17 +37,17 @@ class PAGTNLayer(nn.Module):
     def __init__(self,
                  node_in_feats,
                  node_out_feats,
-                 edge_feat_size,
+                 edge_feats,
                  dropout=0.1,
                  activation=nn.LeakyReLU(0.2)):
         super(PAGTNLayer, self).__init__()
         self.attn_src = nn.Linear(node_in_feats, node_in_feats)
         self.attn_dst = nn.Linear(node_in_feats, node_in_feats)
-        self.attn_edg = nn.Linear(edge_feat_size, node_in_feats)
+        self.attn_edg = nn.Linear(edge_feats, node_in_feats)
         self.attn_dot = nn.Linear(node_in_feats, 1)
         self.msg_src = nn.Linear(node_in_feats, node_out_feats)
         self.msg_dst = nn.Linear(node_in_feats, node_out_feats)
-        self.msg_edg = nn.Linear(edge_feat_size, node_out_feats)
+        self.msg_edg = nn.Linear(edge_feats, node_out_feats)
         self.wgt_n = nn.Linear(node_in_feats, node_out_feats)
         self.dropout = nn.Dropout(dropout)
         self.act = activation
@@ -67,6 +67,7 @@ class PAGTNLayer(nn.Module):
 
     def forward(self, g, node_feats, edge_feats):
         """Update node representations.
+
         Parameters
         ----------
         g : DGLGraph
@@ -85,7 +86,7 @@ class PAGTNLayer(nn.Module):
         g = g.local_var()
         # In the paper node_src, node_dst, edge feats are concatenated
         # and multiplied with the matrix. We have optimized this step
-        # by having three seperate matrix multiplication.
+        # by having three separate matrix multiplication.
         g.ndata['src'] = self.dropout(self.attn_src(node_feats))
         g.ndata['dst'] = self.dropout(self.attn_dst(node_feats))
         edg_atn = self.dropout(self.attn_edg(edge_feats)).unsqueeze(-2)
@@ -101,8 +102,8 @@ class PAGTNLayer(nn.Module):
         atn_inp = g.edata.pop('e') + self.msg_edg(edge_feats).unsqueeze(-2)
         atn_inp = self.act(atn_inp)
         g.edata['msg'] = atn_scores * atn_inp
-        g.update_all(fn.copy_edge('msg', 'm'), fn.sum('m', 'feat'))
-        out = g.ndata.pop('feat')+self.wgt_n(node_feats)
+        g.update_all(fn.copy_e('msg', 'm'), fn.sum('m', 'feat'))
+        out = g.ndata.pop('feat') + self.wgt_n(node_feats)
         return self.act(out)
 
 
@@ -119,7 +120,7 @@ class PAGTNGNN(nn.Module):
         Size for the output edge features.
     node_hid_feats : int
         Size for the hidden node features.
-    edge_feat_size : int
+    edge_feats : int
         Size for the input edge features.
     depth : int
         Number of PAGTN layers to be applied
@@ -135,7 +136,7 @@ class PAGTNGNN(nn.Module):
                  node_in_feats,
                  node_out_feats,
                  node_hid_feats,
-                 edge_feat_size,
+                 edge_feats,
                  depth=5,
                  nheads=1,
                  dropout=0.1,
@@ -146,7 +147,7 @@ class PAGTNGNN(nn.Module):
         self.node_hid_feats = node_hid_feats
         self.atom_inp = nn.Linear(node_in_feats, node_hid_feats * nheads)
         self.model = nn.ModuleList([PAGTNLayer(node_hid_feats, node_hid_feats,
-                                               edge_feat_size, dropout,
+                                               edge_feats, dropout,
                                                activation)
                                     for _ in range(depth)])
         self.atom_out = nn.Linear(node_in_feats + node_hid_feats * nheads, node_out_feats)
@@ -160,6 +161,7 @@ class PAGTNGNN(nn.Module):
 
     def forward(self, g, node_feats, edge_feats):
         """Update node representations.
+
         Parameters
         ----------
         g : DGLGraph
