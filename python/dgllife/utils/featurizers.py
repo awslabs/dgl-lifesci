@@ -2173,8 +2173,10 @@ class PAGTNEdgeFeaturizer(object):
     `Path-Augmented Graph Transformer Network. <https://arxiv.org/abs/1905.12712>`__
 
     We build a complete graph and the edge features include:
-    * **Shortest path between two nodes in terms of bonds**. Each bond is a concatenation
-        of One oh hot encoding bond type, conjugacy, ring membership
+    * **Shortest path between two nodes in terms of bonds**. Shortest path between two nodes.
+        To encode the path, we encode each bond on the path and concatenate their encodings.
+        The encoding of a bond contains information about the bond type, whether the bond is
+        conjugated and whether the bond is in a ring.
     * **One hot encoding of type of rings based on size and aromaticity**.
     * **One hot encoding of the distance between the nodes**.
 
@@ -2222,7 +2224,7 @@ class PAGTNEdgeFeaturizer(object):
     def __init__(self, bond_data_field='e', max_length=5):
         self.bond_data_field = bond_data_field
         # Any two given nodes can belong to the same ring and here only
-        # ring sizes of 5 and 6 are used. True & False indicate if it's Aromatic or not.
+        # ring sizes of 5 and 6 are used. True & False indicate if it's aromatic or not.
         self.RING_TYPES = [(5, False), (5, True), (6, False), (6, True)]
         self.ordered_pair = lambda a, b: (a, b) if a < b else (b, a)
         self.bond_featurizer = ConcatFeaturizer([bond_type_one_hot,
