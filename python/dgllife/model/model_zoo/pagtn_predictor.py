@@ -1,6 +1,14 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Path-Augmented Graph Transformer Network
+# pylint: disable= no-member, arguments-differ, invalid-name
+
 import torch
 import torch.nn as nn
-from ..gnn import PAGTNgnn
+from ..gnn import PAGTNGNN
 from ..readout import MLPNodeReadout
 
 
@@ -46,7 +54,7 @@ class PAGTNPredictor(nn.Module):
                  n_tasks=1,
                  mode='sum'):
         super(PAGTNPredictor, self).__init__()
-        self.model = PAGTNgnn(node_in_feats, node_out_feats,
+        self.model = PAGTNGNN(node_in_feats, node_out_feats,
                               node_hid_feats, edge_feat_size,
                               depth, nheads, dropout, activation)
         self.readout = MLPNodeReadout(node_out_feats + node_in_feats,

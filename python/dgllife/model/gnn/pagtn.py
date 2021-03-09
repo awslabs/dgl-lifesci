@@ -1,8 +1,17 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Path-Augmented Graph Transformer Network
+# pylint: disable= no-member, arguments-differ, invalid-name
+
 import torch
 import torch.nn as nn
 from dgl.nn.functional import edge_softmax
 import dgl.function as fn
 
+__all__ = ['PAGTNGNN']
 
 class PAGTNLayer(nn.Module):
     """
@@ -97,7 +106,7 @@ class PAGTNLayer(nn.Module):
         return self.act(out)
 
 
-class PAGTNgnn(nn.Module):
+class PAGTNGNN(nn.Module):
     """MultiLayer PAGTN model for updating node representations.
     PAGTN is introduced in `Path-Augmented Graph Transformer Network
     <https://arxiv.org/abs/1905.12712>`__.
@@ -131,7 +140,7 @@ class PAGTNgnn(nn.Module):
                  nheads=1,
                  dropout=0.1,
                  activation=nn.LeakyReLU(0.2)):
-        super(PAGTNgnn, self).__init__()
+        super(PAGTNGNN, self).__init__()
         self.depth = depth
         self.nheads = nheads
         self.node_hid_feats = node_hid_feats
