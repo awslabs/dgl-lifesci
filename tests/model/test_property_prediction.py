@@ -409,7 +409,7 @@ def test_pagtn_predictor():
     pagtn_predictor = PAGTNPredictor(node_in_feats = 1,
                                      node_out_feats = 2,
                                      node_hid_feats = 20,
-                                     edge_feat_size = 2).to(device)
+                                     edge_feats = 2).to(device)
     assert pagtn_predictor(bg, batch_node_feats, batch_edge_feats).shape == \
            torch.Size([2, 1])
 

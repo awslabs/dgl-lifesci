@@ -23,15 +23,15 @@ class PAGTNPredictor(nn.Module):
     node_in_feats : int
         Size for the input node features.
     node_out_feats : int
-        Size for the output edge features in PAGTN layers.
+        Size for the output node features in PAGTN layers.
     node_hid_feats : int
         Size for the hidden node features in PAGTN layers.
-    edge_feat_size : int
+    edge_feats : int
         Size for the input edge features.
     depth : int
-        Number of PAGTN layers to be applied
+        Number of PAGTN layers to be applied.
     nheads : int
-        Number of attention heads
+        Number of attention heads.
     dropout : float
         The probability for performing dropout. Default to 0.1
     activation : callable
@@ -46,7 +46,7 @@ class PAGTNPredictor(nn.Module):
                  node_in_feats,
                  node_out_feats,
                  node_hid_feats,
-                 edge_feat_size,
+                 edge_feats,
                  depth=5,
                  nheads=1,
                  dropout=0.1,
@@ -55,7 +55,7 @@ class PAGTNPredictor(nn.Module):
                  mode='sum'):
         super(PAGTNPredictor, self).__init__()
         self.model = PAGTNGNN(node_in_feats, node_out_feats,
-                              node_hid_feats, edge_feat_size,
+                              node_hid_feats, edge_feats,
                               depth, nheads, dropout, activation)
         self.readout = MLPNodeReadout(node_out_feats + node_in_feats,
                                       node_out_feats,
@@ -64,6 +64,7 @@ class PAGTNPredictor(nn.Module):
 
     def forward(self, g, node_feats, edge_feats):
         """Graph-level regression/soft classification.
+        
         Parameters
         ----------
         g : DGLGraph

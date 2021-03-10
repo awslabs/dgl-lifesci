@@ -444,9 +444,9 @@ def test_pagtn():
     bg, batch_node_feats, batch_edge_feats = bg.to(device), batch_node_feats.to(device), \
                                              batch_edge_feats.to(device)
     gnn = PAGTNGNN(node_in_feats = 1,
-                 node_out_feats = 2,
-                 node_hid_feats = 20,
-                 edge_feat_size= 2).to(device)
+                   node_out_feats = 2,
+                   node_hid_feats = 20,
+                   edge_feats = 2).to(device)
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 2])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 2])
 

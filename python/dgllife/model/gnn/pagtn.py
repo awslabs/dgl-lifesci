@@ -108,7 +108,7 @@ class PAGTNLayer(nn.Module):
 
 
 class PAGTNGNN(nn.Module):
-    """MultiLayer PAGTN model for updating node representations.
+    """Multilayer PAGTN model for updating node representations.
     PAGTN is introduced in `Path-Augmented Graph Transformer Network
     <https://arxiv.org/abs/1905.12712>`__.
 
@@ -117,15 +117,15 @@ class PAGTNGNN(nn.Module):
     node_in_feats : int
         Size for the input node features.
     node_out_feats : int
-        Size for the output edge features.
+        Size for the output node features.
     node_hid_feats : int
         Size for the hidden node features.
     edge_feats : int
         Size for the input edge features.
     depth : int
-        Number of PAGTN layers to be applied
+        Number of PAGTN layers to be applied.
     nheads : int
-        Number of attention heads
+        Number of attention heads.
     dropout : float
         The probability for performing dropout. Default to 0.1
     activation : callable
@@ -158,6 +158,7 @@ class PAGTNGNN(nn.Module):
         gain = nn.init.calculate_gain('relu')
         nn.init.xavier_normal_(self.atom_inp.weight, gain=gain)
         nn.init.xavier_normal_(self.atom_out.weight, gain=gain)
+        self.model.reset_parameters()
 
     def forward(self, g, node_feats, edge_feats):
         """Update node representations.
@@ -182,9 +183,9 @@ class PAGTNGNN(nn.Module):
         atom_h = atom_input
         for i in range(self.depth):
             attn_h = self.model[i](g, atom_h, edge_feats)
-            atom_h = nn.ReLU()(attn_h + atom_input)
+            atom_h = torch.nn.functional.relu(attn_h + atom_input)
 
         atom_h = atom_h.view(-1, self.nheads*self.node_hid_feats)
         atom_output = torch.cat([node_feats, atom_h], dim=1)
-        atom_h = nn.ReLU()(self.atom_out(atom_output))
+        atom_h = torch.nn.functional.relu(self.atom_out(atom_output))
         return atom_h
