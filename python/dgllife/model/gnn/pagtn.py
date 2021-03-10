@@ -26,7 +26,7 @@ class PAGTNLayer(nn.Module):
     node_in_feats : int
         Size for the input node features.
     node_out_feats : int
-        Size for the output edge features.
+        Size for the output node features.
     edge_feats : int
         Size for the input edge features.
     dropout : float

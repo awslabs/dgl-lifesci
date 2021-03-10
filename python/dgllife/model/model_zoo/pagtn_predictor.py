@@ -64,7 +64,7 @@ class PAGTNPredictor(nn.Module):
 
     def forward(self, g, node_feats, edge_feats):
         """Graph-level regression/soft classification.
-        
+    
         Parameters
         ----------
         g : DGLGraph
