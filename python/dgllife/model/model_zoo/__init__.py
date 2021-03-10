@@ -17,6 +17,7 @@ from .mpnn_predictor import *
 from .schnet_predictor import *
 from .weave_predictor import *
 from .gnn_ogb_predictor import *
+from .pagtn_predictor import *
 
 # Generative models
 try:

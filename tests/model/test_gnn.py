@@ -432,6 +432,24 @@ def test_nf():
     assert gnn(g, node_feats).shape == torch.Size([3, 2])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 2])
 
+def test_pagtn():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats, edge_feats = test_graph3()
+    g, node_feats, edge_feats = g.to(device), node_feats.to(device), edge_feats.to(device)
+    bg, batch_node_feats, batch_edge_feats = test_graph4()
+    bg, batch_node_feats, batch_edge_feats = bg.to(device), batch_node_feats.to(device), \
+                                             batch_edge_feats.to(device)
+    gnn = PAGTNGNN(node_in_feats = 1,
+                   node_out_feats = 2,
+                   node_hid_feats = 20,
+                   edge_feats = 2).to(device)
+    assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 2])
+    assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 2])
+
 if __name__ == '__main__':
     test_attentivefp()
     test_gat()
@@ -445,3 +463,4 @@ if __name__ == '__main__':
     test_gnn_ogb()
     test_graphsage()
     test_nf()
+    test_pagtn()
