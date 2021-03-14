@@ -11,9 +11,9 @@ PotentialNet_PDBBind_core_pocket_random = {
     'subset': 'core',
     'load_binding_pocket': True,
     'random_seed': 123,
-    'frac_train': 0.8,
+    'frac_train': 0.6,
     'frac_val': 0.2,
-    'frac_test': 0.,
+    'frac_test': 0.2,
     'batch_size': 40,
     'shuffle': False,
     'max_num_neighbors': 5, ##
@@ -27,7 +27,7 @@ PotentialNet_PDBBind_core_pocket_random = {
     'n_spatial_conv_steps':1,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 5,
+    'num_epochs': 100,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'random'
@@ -38,9 +38,9 @@ PotentialNet_PDBBind_core_pocket_scaffold = {
     'subset': 'core',
     'load_binding_pocket': True,
     'random_seed': 123,
-    'frac_train': 0.8,
+    'frac_train': 0.6,
     'frac_val': 0.2,
-    'frac_test': 0.,
+    'frac_test': 0.2,
     'batch_size': 40,
     'shuffle': False,
     'max_num_neighbors': 5, ##
@@ -54,7 +54,7 @@ PotentialNet_PDBBind_core_pocket_scaffold = {
     'n_spatial_conv_steps':1,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 2,
+    'num_epochs': 100,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'scaffold'
@@ -65,9 +65,9 @@ PotentialNet_PDBBind_core_pocket_stratified = {
     'subset': 'core',
     'load_binding_pocket': True,
     'random_seed': 123,
-    'frac_train': 0.8,
+    'frac_train': 0.6,
     'frac_val': 0.2,
-    'frac_test': 0.,
+    'frac_test': 0.2,
     'batch_size': 40,
     'shuffle': False,
     'max_num_neighbors': 5, ##
@@ -81,7 +81,7 @@ PotentialNet_PDBBind_core_pocket_stratified = {
     'n_spatial_conv_steps':1,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 2,
+    'num_epochs': 100,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'stratified'
@@ -109,7 +109,7 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'n_spatial_conv_steps':2,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 2,
+    'num_epochs': 200,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'random'
@@ -136,7 +136,7 @@ PotentialNet_PDBBind_refined_pocket_sequence = {
     'n_spatial_conv_steps':2,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 2,
+    'num_epochs': 200,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'sequence'
@@ -163,7 +163,7 @@ PotentialNet_PDBBind_refined_pocket_structure = {
     'n_spatial_conv_steps':2,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 2,
+    'num_epochs': 200,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'structure'
@@ -191,7 +191,7 @@ PotentialNet_PDBBind_refined_pocket_scaffold = {
     'n_spatial_conv_steps':2,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 2,
+    'num_epochs': 200,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'scaffold'
@@ -219,7 +219,7 @@ PotentialNet_PDBBind_refined_pocket_stratified = {
     'n_spatial_conv_steps':2,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.001,
-    'num_epochs': 3,
+    'num_epochs': 200,
     'wd': 1e-07,
     'metrics': ['r2', 'mae'],
     'split': 'stratified'

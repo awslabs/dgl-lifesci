@@ -92,6 +92,13 @@ class PDBBind(object):
         self._preprocess(load_binding_pocket,
                          sanitize, calc_charges, remove_hs, use_conformation,
                          construct_graph_and_featurize, zero_padding, num_processes)
+        # Prepare for Refined, Agglomerative Sequence Split and Agglomerative Structure Split
+        if pdb_version == 'v2007':
+            merged_df = self.df.merge(self.agg_split, on='PDB_code')
+            self.agg_sequence_split = [list(merged_df.loc[merged_df['sequence']==target_set, 'PDB_code'].index) 
+                for target_set in ['train', 'valid', 'test']]
+            self.agg_structure_split = [list(merged_df.loc[merged_df['structure']==target_set, 'PDB_code'].index) 
+                for target_set in ['train', 'valid', 'test']]
 
     def _read_data_files(self, pdb_version, subset, load_binding_pocket, remove_coreset_from_refinedset):
         """Download and extract pdbbind data files specified by the version"""
@@ -168,22 +175,27 @@ class PDBBind(object):
                 'PDB_code', 'resolution', 'release_year',
                 '-logKd/Ki', 'Kd/Ki', 'cluster_ID'))
         
-        ##remove core set from refine set
         pdbs = self.df['PDB_code'].tolist()
-        if remove_coreset_from_refinedset:
-            if pdb_version == 'v2015':
-                with open(extracted_data_path + '/v2015/INDEX_core_data.2013','r') as f:
-                    for line in f:
-                        fields = line.strip().split()
-                        if fields[0] != "#" and fields[0] in pdbs:
-                            pdbs.remove(fields[0])
 
+        ## remove core set from refine set if using refined
+        if remove_coreset_from_refinedset and subset == 'refined':
+            if pdb_version == 'v2015':
+                core_path = extracted_data_path + '/v2015/INDEX_core_data.2013'
             if pdb_version == 'v2007':
-                with open (extracted_data_path + '/2007/INDEX.2007.core.data','r') as f:
-                    for line in f:
-                        fields = line.strip().split()
-                        if fields[0] != "#" and fields[0] in pdbs:
-                            pdbs.remove(fields[0])      
+                core_path = extracted_data_path + '/v2007/INDEX.2007.core.data'
+
+            with open(core_path,'r') as f:
+                for line in f:
+                    fields = line.strip().split()
+                    if fields[0] != "#" and fields[0] in pdbs:
+                        pdbs.remove(fields[0])
+
+            # if pdb_version == 'v2007':
+            #     with open (extracted_data_path + '/2007/INDEX.2007.core.data','r') as f:
+            #         for line in f:
+            #             fields = line.strip().split()
+            #             if fields[0] != "#" and fields[0] in pdbs:
+            #                 pdbs.remove(fields[0])      
 
         self.ligand_files = [os.path.join(
             extracted_data_path, pdb_version, pdb, '{}_ligand.sdf'.format(pdb)) for pdb in pdbs]
@@ -297,13 +309,6 @@ class PDBBind(object):
         self.labels = F.zerocopy_from_numpy(self.df[self.task_names].values.astype(np.float32))
         print('Finished cleaning the dataset, '
               'got {:d}/{:d} valid pairs'.format(len(self), len(self.ligand_files))) # account for the ones use_conformation failed
-
-        # Prepare for Refined, Agglomerative Sequence Split and Agglomerative Structure Split
-        merged_df = self.df.merge(self.agg_split, on='PDB_code')
-        self.agg_sequence_split = [list(merged_df.loc[merged_df['sequence']==target_set, 'PDB_code'].index) 
-            for target_set in ['train', 'valid', 'test']]
-        self.agg_structure_split = [list(merged_df.loc[merged_df['structure']==target_set, 'PDB_code'].index) 
-            for target_set in ['train', 'valid', 'test']]
 
         # Prepare zero padding
         if zero_padding:

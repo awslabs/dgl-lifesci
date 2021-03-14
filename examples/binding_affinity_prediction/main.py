@@ -156,11 +156,11 @@ if __name__ == '__main__':
                                  'PDBBind_refined_pocket_stratified', 'PDBBind_refined_pocket_temporal',
                                  'PDBBind_refined_pocket_structure', 'PDBBind_refined_pocket_sequence'],
                         help='Data subset to use')
-    parser.add_argument('-v', '--version', type=str, choices=['v2007', 'v2015'])
+    parser.add_argument('-v', '--version', type=str, choices=['v2007', 'v2015'], default='v2015')
     parser.add_argument('--save_r2', type=str, default='', help='path to save r2 at each epoch, default not save')
     parser.add_argument('-t', '--num_trials', type=int, default=1)
     parser.add_argument('--test_on_core', type=bool, default=True, 
-        help='whether to use the whole core set as test set, default True')
+        help='whether to use the whole core set as test set when training on refined set, default True')
 
     args = parser.parse_args().__dict__
     args['exp'] = '_'.join([args['model'], args['dataset']])
@@ -168,6 +168,11 @@ if __name__ == '__main__':
 
     if args['split']=='sequence' or args['split']=='structure':
         args['version'] = 'v2007' 
+        args['test_on_core'] = False
+        args['remove_coreset_from_refinedset'] = False
+
+    if args['subset']=='core':
+        args['remove_coreset_from_refinedset'] = False
         args['test_on_core'] = False
 
     rand_hyper_search = False
