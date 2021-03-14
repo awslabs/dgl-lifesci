@@ -17,6 +17,9 @@ from itertools import accumulate
 
 
 def rand_hyperparams():
+    """ Randomly generate a set of hyperparameters.
+    Returns a dictionary of randomized hyperparameters.
+    """
     hyper_params = {}
     hyper_params['f_bond'] = nrd.randint(70,120)
     hyper_params['f_gather'] = nrd.randint(80,129)

@@ -10,7 +10,9 @@ from torch.nn import init
 __all__ = ['PotentialNet']
 
 def sum_ligand_features(h, batch_num_nodes):
-    """Computes the sum of ligand features h from batch_num_nodes"""
+    """
+    Computes the sum of only ligand features `h` according to the batch information `batch_num_nodes`.
+    """
     node_nums = th.cumsum(batch_num_nodes, dim=0)
     B = int(len(batch_num_nodes)/2) # actual batch size
     ligand_idx = [list(range(node_nums[0]))] # first ligand
@@ -20,6 +22,36 @@ def sum_ligand_features(h, batch_num_nodes):
 
 
 class PotentialNet(nn.Module):
+    """
+    Protein-ligand binding affnity prediction using a 'staged gated graph neural network'
+    introduced in `PotentialNet for Molecular Property Prediction <http://dx.doi.org/10.1021/acscentsci.8b00507>`__.
+
+    Parameters
+    ----------
+    f_in: int
+        The dimension size of input features to GatedGraphConv, 
+        equivalent to the dimension size of atomic features in the molecule graph.
+    f_bond: int
+        The dimension size of the output from GatedGraphConv in stage 1,
+        equivalent to the dimension size of input to the linear layer at the end of stage 1.
+    f_spatial: int
+        The dimension size of the output from GatedGraphConv in stage 2,
+        equivalent to the dimension size of input to the linear layer at the end of stage 2.
+    f_gather: int
+        The dimension size of the output from stage 1 & 2,
+        equivalent to the dimension size of output from the linear layer at the end of stage 1 & 2.
+    n_etypes: int
+        The number of heterogeneous edge types for stage 2.
+        Currently implemented as 5(the number of covalent bond types in stage 1) + the number of distance bins in stage 2.
+    n_bond_conv_steps: int
+        The number of bond convolution layers(steps) of GatedGraphConv in stage 1.
+    n_spatial_conv_steps: int
+        The number of spatial convolution layers(steps) of GatedGraphConv in stage 2.
+    n_rows_fc: list of int
+        The widths of the fully connected neural networks at each layer in stage 3.
+    dropouts; list of 3 floats,
+        The amount of dropout applied at the end of each stage.
+    """
     def __init__(self,
                  n_etypes,
                  f_in,
@@ -58,36 +90,11 @@ class PotentialNet(nn.Module):
         x = self.stage_3_model(batch_num_nodes=batch_num_nodes, features=h) 
         return x
 
-
-class StagedGGNN(nn.Module):
-    def __init__(self,
-                 f_gru_in,
-                 f_gru_out,
-                 f_gather,
-                 n_etypes,
-                 n_gconv_steps,
-                 dropout):
-        super(StagedGGNN, self).__init__()
-        self.dropout = nn.Dropout(p=dropout)
-        self.ggc = GatedGraphConv(in_feats=f_gru_in, 
-                                      out_feats=f_gru_out,
-                                      n_steps=n_gconv_steps,
-                                      n_etypes=n_etypes,
-                                      bias=True
-                                      )
-        self.i_nn = nn.Linear(in_features=(f_gru_out + f_gru_in), out_features=f_gather)
-        self.j_nn = nn.Linear(in_features=f_gru_out, out_features=f_gather)
-
-    def forward(self, graph, features, etypes):
-        # h = features
-        h = self.ggc(graph, features, etypes)
-        h = self.dropout(h) # my guess
-        h = th.mul(
-                   th.sigmoid(self.i_nn(th.cat((h, features),dim=1))), 
-                   self.j_nn(h))
-        return h
-
 class StagedFCNN(nn.Module):
+    """
+    The implementation of PotentialNet stage 3.
+    A graph gather is performed solely on the ligand atoms followed a multi-layer fully connected neural networks.
+    """
     def __init__(self,
                  f_in,
                  n_row,
@@ -110,8 +117,30 @@ class StagedFCNN(nn.Module):
         x = self.out_layer(x)
         return x
 
-
 class Customized_GatedGraphConv(nn.Module):
+    """
+    Adapted from `dgl.nn.pytorch.conv.GatedGraphConv`
+    Customized the implementation for applying edges for better performance.
+    Added a linear layer at the end as described in PotentialNet stage 1 & 2.
+
+    Parameters
+    ----------
+    in_feats : int
+        Input feature size; i.e, the number of dimensions of :math:`x_i`.
+    out_feats : int
+        Output feature size from GatedGraphConv; i.e., the number of dimensions of :math:`h_i^{(t+1)}`,
+        equivalent to the input feature size to the linear layer,
+    f_gather: int
+        Output feature size from the linear layer,
+    n_steps : int
+        Number of recurrent steps; i.e, the :math:`t` in the above formula.
+    n_etypes : int
+        Number of edge types.
+    dropout: float
+        Amount of dropout applied after GatedGraphConv and before the linear layer.
+    bias : bool
+        If True, adds a learnable bias to the output. Default: ``True``.
+    """
     def __init__(self,
                 in_feats,
                 out_feats,

@@ -12,7 +12,6 @@ from torch.utils.data import DataLoader
 
 from utils import set_random_seed, load_dataset, collate, load_model, rand_hyperparams
 
-
 def update_msg_from_scores(msg, scores):
     for metric, score in scores.items():
         msg += ', {} {:.4f}'.format(metric, score)
@@ -180,4 +179,3 @@ if __name__ == '__main__':
 
     print('')
     main(args)
-    print('')

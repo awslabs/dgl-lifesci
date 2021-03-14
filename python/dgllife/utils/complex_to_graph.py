@@ -97,10 +97,13 @@ def potentialNet_graph_construction_featurization(ligand_mol,
         Maximum number of atoms in proteins for zero padding, which should be no smaller than
         protein_mol.GetNumAtoms() if not None. If None, no zero padding will be performed.
         Default to None.
-    distance_bins : list
+    distance_bins : list of float
         Sequence of distance edges to determine the edge types.
+        The first edge type is connected between atoms of distance less than `distance_bins[0]`.
+        The length matches the number of edge types to be constructed.
+        Default `[1.5, 2.5, 3.5, 4.5]`.
     max_num_neighbors : int
-        Maximum number of neighbors allowed for each atom. Default to 12.
+        Maximum number of neighbors allowed for each atom when constucting KNN graph. Default to 4.
     strip_hydrogens : bool
         Whether to exclude hydrogen atoms. Default to False.
 
