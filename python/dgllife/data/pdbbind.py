@@ -85,7 +85,7 @@ class PDBBind(object):
     def __init__(self, subset, pdb_version, load_binding_pocket=True, remove_coreset_from_refinedset=True, sanitize=False, 
                  calc_charges=False, remove_hs=False, use_conformation=True,
                  construct_graph_and_featurize=ACNN_graph_construction_and_featurization,
-                 zero_padding=True, num_processes=None, **kwargs):
+                 zero_padding=True, num_processes=None):
         self.task_names = ['-logKd/Ki']
         self.n_tasks = len(self.task_names)
         self._read_data_files(pdb_version, subset, load_binding_pocket, remove_coreset_from_refinedset)
@@ -166,10 +166,10 @@ class PDBBind(object):
                             pdbs.remove(fields[0])
 
             if pdb_version == 'v2007':
-                with open (extracted_data_path + '/2007/INDEX.2017.core.data','r') as f:
+                with open (extracted_data_path + '/2007/INDEX.2007.core.data','r') as f:
                     for line in f:
                         fields = line.strip().split()
-                        if fields[0] != "#" and fielsd[0] in pdbs:
+                        if fields[0] != "#" and fields[0] in pdbs:
                             pdbs.remove(fields[0])      
 
         self.ligand_files = [os.path.join(
