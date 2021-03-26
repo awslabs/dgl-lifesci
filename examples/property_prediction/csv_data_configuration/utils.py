@@ -149,9 +149,14 @@ def split_dataset(args, dataset):
         Test subset
     """
     train_ratio, val_ratio, test_ratio = map(float, args['split_ratio'].split(','))
-    if args['split'] == 'scaffold':
+    if args['split'] == 'scaffold_decompose':
         train_set, val_set, test_set = ScaffoldSplitter.train_val_test_split(
-            dataset, frac_train=train_ratio, frac_val=val_ratio, frac_test=test_ratio)
+            dataset, frac_train=train_ratio, frac_val=val_ratio, frac_test=test_ratio,
+            scaffold_func='decompose')
+    elif args['split'] == 'scaffold_smiles':
+        train_set, val_set, test_set = ScaffoldSplitter.train_val_test_split(
+            dataset, frac_train=train_ratio, frac_val=val_ratio, frac_test=test_ratio,
+            scaffold_func='smiles')
     elif args['split'] == 'random':
         train_set, val_set, test_set = RandomSplitter.train_val_test_split(
             dataset, frac_train=train_ratio, frac_val=val_ratio, frac_test=test_ratio)
@@ -297,10 +302,22 @@ def load_model(exp_configure):
         )
         model.gnn = load_pretrained(exp_configure['model'])
         model.gnn.JK = exp_configure['jk']
+    elif exp_configure['model'] == 'NF':
+        from dgllife.model import NFPredictor
+        model = NFPredictor(
+            in_feats=exp_configure['in_node_feats'],
+            n_tasks=exp_configure['n_tasks'],
+            hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
+            batchnorm=[exp_configure['batchnorm']] * exp_configure['num_gnn_layers'],
+            dropout=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
+            predictor_hidden_size=exp_configure['predictor_hidden_feats'],
+            predictor_batchnorm=exp_configure['batchnorm'],
+            predictor_dropout=exp_configure['dropout']
+        )
     else:
         return ValueError("Expect model to be from ['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP', "
                           "'gin_supervised_contextpred', 'gin_supervised_infomax', "
-                          "'gin_supervised_edgepred', 'gin_supervised_masking'], "
+                          "'gin_supervised_edgepred', 'gin_supervised_masking', 'NF'], "
                           "got {}".format(exp_configure['model']))
 
     return model

@@ -1,0 +1,11 @@
+{
+  "batch_size": 256,
+  "edge_hidden_feats": 64,
+  "lr": 0.019972837535528663,
+  "node_out_feats": 64,
+  "num_layer_set2set": 1,
+  "num_step_message_passing": 1,
+  "num_step_set2set": 2,
+  "patience": 30,
+  "weight_decay": 0.0007471791755792163
+}

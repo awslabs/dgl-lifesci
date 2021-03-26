@@ -43,6 +43,8 @@ We provide various examples across 3 applications -- property prediction, genera
 - Pushing the Boundaries of Molecular Representation for Drug Discovery with the Graph Attention Mechanism (AttentiveFP) [[paper]](https://pubs.acs.org/doi/abs/10.1021/acs.jmedchem.9b00959)
     - [AttentiveFP with DGL](../python/dgllife/model/model_zoo/attentivefp_predictor.py)
     - [Example for Molecule Regression](property_prediction/pubchem_aromaticity/main.py)
+- Convolutional Networks on Graphs for Learning Molecular Fingerprints [[paper]](https://arxiv.org/abs/1509.09292)
+    - [Neural Fingerprint with DGL](../python/dgllife/model/model_zoo/nf_predictor.py)
 
 ## Molecule Embeddings
 
@@ -57,7 +59,7 @@ We provide various examples across 3 applications -- property prediction, genera
     - [Example Training Script](generative_models/dgmg)
 - Junction Tree Variational Autoencoder for Molecular Graph Generation (JTNN) [[paper]](https://arxiv.org/abs/1802.04364)
     - [JTNN with DGL](../python/dgllife/model/model_zoo/jtnn)
-    - [Example Training Script](generative_models/jtnn)
+    - [Example Training Script](generative_models/jtvae)
 
 ## Binding Affinity Prediction
 

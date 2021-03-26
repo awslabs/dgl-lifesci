@@ -24,7 +24,7 @@ def main(args, path_to_candidate_bonds):
             num_processes=args['num_processes'])
     else:
         train_set = WLNRankDataset(
-            path_to_reaction_file=args['train_path'],
+            path_to_reaction_file='train_valid_reactions.proc',
             candidate_bond_path=path_to_candidate_bonds['train'], mode='train',
             max_num_change_combos_per_reaction=args['max_num_change_combos_per_reaction_train'],
             num_processes=args['num_processes'])
@@ -36,7 +36,7 @@ def main(args, path_to_candidate_bonds):
             num_processes=args['num_processes'])
     else:
         val_set = WLNRankDataset(
-            path_to_reaction_file=args['val_path'],
+            path_to_reaction_file='val_valid_reactions.proc',
             candidate_bond_path=path_to_candidate_bonds['val'], mode='val',
             max_num_change_combos_per_reaction=args['max_num_change_combos_per_reaction_eval'],
             num_processes=args['num_processes'])
@@ -77,9 +77,15 @@ def main(args, path_to_candidate_bonds):
             batch_combo_scores = batch_combo_scores.to(args['device'])
             batch_labels = batch_labels.to(args['device'])
             reactant_node_feats = batch_reactant_graphs.ndata.pop('hv').to(args['device'])
-            reactant_edge_feats = batch_reactant_graphs.edata.pop('he').to(args['device'])
             product_node_feats = batch_product_graphs.ndata.pop('hv').to(args['device'])
-            product_edge_feats = batch_product_graphs.edata.pop('he').to(args['device'])
+            if batch_reactant_graphs.num_edges() > 0:
+                reactant_edge_feats = batch_reactant_graphs.edata.pop('he').to(args['device'])
+            else:
+                reactant_edge_feats = torch.zeros((0, 5), device=args["device"])
+            if batch_product_graphs.num_edges() > 0:
+                product_edge_feats = batch_product_graphs.edata.pop('he').to(args['device'])
+            else:
+                product_edge_feats = torch.zeros((0, 5), device=args["device"])
 
             pred = model(reactant_graph=batch_reactant_graphs,
                          reactant_node_feats=reactant_node_feats,
@@ -132,6 +138,14 @@ def main(args, path_to_candidate_bonds):
                     f.write(prediction_summary)
                 t0 = time.time()
                 model.train()
+
+    # Final results
+    torch.save({'model_state_dict': model.state_dict()},
+               args['result_path'] + '/model_final.pkl')
+    prediction_summary = 'final\n' + candidate_ranking_eval(args, model, val_loader)
+    print(prediction_summary)
+    with open(args['result_path'] + '/val_eval.txt', 'a') as f:
+        f.write(prediction_summary)
 
 if __name__ == '__main__':
     from argparse import ArgumentParser

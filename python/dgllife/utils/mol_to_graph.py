@@ -48,7 +48,8 @@ def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
         Whether to use a canonical order of atoms returned by RDKit. Setting it
         to true might change the order of atoms in the graph constructed.
     explicit_hydrogens : bool
-        Whether to explicitly represent hydrogens as nodes in the graph.
+        Whether to explicitly represent hydrogens as nodes in the graph. If True,
+        it will call rdkit.Chem.AddHs(mol).
     num_virtual_nodes : int
         The number of virtual nodes to add. The virtual nodes will be connected to
         all real nodes with virtual edges. If the returned graph has any node/edge
@@ -74,8 +75,6 @@ def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
     # Whether to have hydrogen atoms as explicit nodes
     if explicit_hydrogens:
         mol = Chem.AddHs(mol)
-    elif explicit_hydrogens is False:
-        mol = Chem.RemoveHs(mol)
 
     if canonical_atom_order:
         new_order = rdmolfiles.CanonicalRankAtoms(mol)
@@ -194,7 +193,8 @@ def mol_to_bigraph(mol, add_self_loop=False,
         to true might change the order of atoms in the graph constructed. Default
         to True.
     explicit_hydrogens : bool
-        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+        Whether to explicitly represent hydrogens as nodes in the graph. If True,
+        it will call rdkit.Chem.AddHs(mol). Default to False.
     num_virtual_nodes : int
         The number of virtual nodes to add. The virtual nodes will be connected to
         all real nodes with virtual edges. If the returned graph has any node/edge
@@ -295,7 +295,8 @@ def smiles_to_bigraph(smiles, add_self_loop=False,
         to true might change the order of atoms in the graph constructed. Default
         to True.
     explicit_hydrogens : bool
-        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+        Whether to explicitly represent hydrogens as nodes in the graph. If True,
+        it will call rdkit.Chem.AddHs(mol). Default to False.
     num_virtual_nodes : int
         The number of virtual nodes to add. The virtual nodes will be connected to
         all real nodes with virtual edges. If the returned graph has any node/edge
@@ -426,7 +427,8 @@ def mol_to_complete_graph(mol, add_self_loop=False,
         to true might change the order of atoms in the graph constructed. Default
         to True.
     explicit_hydrogens : bool
-        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+        Whether to explicitly represent hydrogens as nodes in the graph. If True,
+        it will call rdkit.Chem.AddHs(mol). Default to False.
     num_virtual_nodes : int
         The number of virtual nodes to add. The virtual nodes will be connected to
         all real nodes with virtual edges. If the returned graph has any node/edge
@@ -537,7 +539,8 @@ def smiles_to_complete_graph(smiles, add_self_loop=False,
         to true might change the order of atoms in the graph constructed. Default
         to True.
     explicit_hydrogens : bool
-        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+        Whether to explicitly represent hydrogens as nodes in the graph. If True,
+        it will call rdkit.Chem.AddHs(mol). Default to False.
     num_virtual_nodes : int
         The number of virtual nodes to add. The virtual nodes will be connected to
         all real nodes with virtual edges. If the returned graph has any node/edge
@@ -762,7 +765,8 @@ def mol_to_nearest_neighbor_graph(mol,
         Field for storing distance between neighboring atoms in ``edata``. This comes
         into effect only when ``keep_dists=True``. Default to ``'dist'``.
     explicit_hydrogens : bool
-        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+        Whether to explicitly represent hydrogens as nodes in the graph. If True,
+        it will call rdkit.Chem.AddHs(mol). Default to False.
     num_virtual_nodes : int
         The number of virtual nodes to add. The virtual nodes will be connected to
         all real nodes with virtual edges. If the returned graph has any node/edge
@@ -829,8 +833,6 @@ def mol_to_nearest_neighbor_graph(mol,
 
     if explicit_hydrogens:
         mol = Chem.AddHs(mol)
-    else:
-        mol = Chem.RemoveHs(mol)
 
     num_atoms = mol.GetNumAtoms()
     num_coords = coordinates.shape[0]
@@ -951,7 +953,8 @@ def smiles_to_nearest_neighbor_graph(smiles,
         Field for storing distance between neighboring atoms in ``edata``. This comes
         into effect only when ``keep_dists=True``. Default to ``'dist'``.
     explicit_hydrogens : bool
-        Whether to explicitly represent hydrogens as nodes in the graph. Default to False.
+        Whether to explicitly represent hydrogens as nodes in the graph. If True,
+        it will call rdkit.Chem.AddHs(mol). Default to False.
     num_virtual_nodes : int
         The number of virtual nodes to add. The virtual nodes will be connected to
         all real nodes with virtual edges. If the returned graph has any node/edge

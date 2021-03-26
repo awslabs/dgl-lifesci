@@ -15,10 +15,10 @@ def main(args):
     set_seed()
     if torch.cuda.is_available():
         args['device'] = torch.device('cuda:0')
+        # Set current device
+        torch.cuda.set_device(args['device'])
     else:
         args['device'] = torch.device('cpu')
-    # Set current device
-    torch.cuda.set_device(args['device'])
 
     if args['test_path'] is None:
         test_set = USPTOCenter('test', num_processes=args['num_processes'], load=args['load'])

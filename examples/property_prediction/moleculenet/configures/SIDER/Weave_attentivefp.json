@@ -1,0 +1,10 @@
+{
+  "batch_size": 512,
+  "gaussian_expand": true,
+  "gnn_hidden_feats": 64,
+  "graph_feats": 64,
+  "lr": 0.0016560263410790033,
+  "num_gnn_layers": 3,
+  "patience": 30,
+  "weight_decay": 0.0023729738302695866
+}

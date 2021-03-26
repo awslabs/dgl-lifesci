@@ -153,7 +153,6 @@ In addition, atom mapping information is provided.
 
 **Notice**
 
-
 The atom mapping numbers in the rxn should be consecutive integers starting from 1, or it will report [the molAtomMapNumber issue](https://github.com/awslabs/dgl-lifesci/issues/33).
 To avoid the problem, you could convert the raw rxn smiles with explicit hydrgogen atoms to the rxn smiles without hydrogen atoms by RDKit befor adding map ids for the rxn smiles.
 
@@ -210,7 +209,8 @@ Then, add map for the rxn smiles.
 ```
 the oxygen atom will be labelled as 15.
 
-
+Lastly, if you use the scripts for multiple different datasets, you need to delete local cached files with `. clean.sh` 
+before working on a new dataset.
 
 You can then train a model on new datasets with 
 
@@ -218,12 +218,12 @@ You can then train a model on new datasets with
 python find_reaction_center_train.py --train-path X --val-path Y
 ```
 
-where `X`, `Y` are paths to the new training/validation as described above.
+where `X`, `Y` are paths to the new training/validation dataset as described above.
 
 For evaluation,
 
 ```bash
-python find_reaction_center_eval.py --eval-path Z
+python find_reaction_center_eval.py --test-path Z
 ```
 
 where `Z` is the path to the new test set as described above.
@@ -334,14 +334,22 @@ python candidate_ranking_eval.py
 You can train a model on new datasets with
 
 ```bash
-python candidate_ranking_train.py --train-path train_valid_reactions.proc --val-path val_valid_reactions.proc
+python candidate_ranking_train.py --train-path X --val-path Y -cmp Z
 ```
+
+where `X`, `Y` are paths to the new training/validation dataset as in reaction center prediction. `Z` is
+the path to a trained model for reaction center prediction. You can use our pre-trained model by not specifying `-cmp`.
 
 For evaluation,
 
 ```bash
-python candidate_ranking_train.py --eval-path test_valid_reactions.proc
+python candidate_ranking_eval.py --model-path X -cmp Y --test-path Z
 ```
+
+where `X` is the path to a trained model for candidate ranking, `Y` is the path to a trained model 
+for reaction center prediction, and `Z` is the path to the new test dataset as in reaction center prediction.
+You can use the pre-trained model for reaction center prediction by not specifying `-cmp` and use the pre-trained
+model for candidate ranking by not specifying `--model-path`.
 
 ### Common Issues
 

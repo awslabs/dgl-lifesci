@@ -11,15 +11,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import dgl.function as DGLF
+import dgl.function as fn
 from dgl import batch, dfs_labeled_edges_generator
 
-from .chemutils import enum_assemble_nx, get_mol
-from .mol_tree_nx import DGLMolTree
-from .nnutils import GRUUpdate, cuda
-
-MAX_NB = 8
-MAX_DECODE_LEN = 100
+from .nnutils import GRUUpdate
+from ....data.jtvae import get_mol, enum_assemble_nx, DGLMolTree
 
 def dfs_order(forest, roots):
     edges = dfs_labeled_edges_generator(forest, roots, has_reverse_edge=True)
@@ -29,16 +25,16 @@ def dfs_order(forest, roots):
         # using find_edges().
         yield e ^ l, l
 
-dec_tree_node_msg = DGLF.copy_edge(edge='m', out='m')
-dec_tree_node_reduce = DGLF.sum(msg='m', out='h')
+dec_tree_node_msg = fn.copy_edge(edge='m', out='m')
+dec_tree_node_reduce = fn.sum(msg='m', out='h')
 
 def dec_tree_node_update(nodes):
     return {'new': nodes.data['new'].clone().zero_()}
 
-dec_tree_edge_msg = [DGLF.copy_src(
-    src='m', out='m'), DGLF.copy_src(src='rm', out='rm')]
-dec_tree_edge_reduce = [
-    DGLF.sum(msg='m', out='s'), DGLF.sum(msg='rm', out='accum_rm')]
+dec_tree_edge_msg1 = fn.copy_src(src='m', out='m')
+dec_tree_edge_msg2 = fn.copy_src(src='rm', out='rm')
+dec_tree_edge_reduce1 = fn.sum(msg='m', out='s')
+dec_tree_edge_reduce2 = fn.sum(msg='rm', out='accum_rm')
 
 def have_slots(fa_slots, ch_slots):
     if len(fa_slots) > 2 and len(ch_slots) > 2:
@@ -64,7 +60,7 @@ def have_slots(fa_slots, ch_slots):
 
 def can_assemble(mol_tree, u, v_node_dict):
     u_node_dict = mol_tree.nodes_dict[u]
-    u_neighbors = mol_tree.successors(u)
+    u_neighbors = mol_tree.g.successors(u)
     u_neighbors_node_dict = [
         mol_tree.nodes_dict[_u]
         for _u in u_neighbors
@@ -92,18 +88,14 @@ def create_node_dict(smiles, clique=None):
     )
 
 class DGLJTNNDecoder(nn.Module):
-    def __init__(self, vocab, hidden_size, latent_size, embedding=None):
+    def __init__(self, vocab, hidden_size, latent_size, embedding):
         nn.Module.__init__(self)
 
         self.hidden_size = hidden_size
         self.vocab_size = vocab.size()
         self.vocab = vocab
 
-        if embedding is None:
-            self.embedding = nn.Embedding(self.vocab_size, hidden_size)
-        else:
-            self.embedding = embedding
-
+        self.embedding = embedding
         self.dec_tree_edge_update = GRUUpdate(hidden_size)
 
         self.W = nn.Linear(latent_size + hidden_size, hidden_size)
@@ -127,32 +119,35 @@ class DGLJTNNDecoder(nn.Module):
         '''
         mol_tree_batch = batch(mol_trees)
         mol_tree_batch_lg = dgl.line_graph(mol_tree_batch, backtracking=False, shared=True)
+        mol_tree_batch_lg._node_frames = mol_tree_batch._edge_frames
         n_trees = len(mol_trees)
 
         return self.run(mol_tree_batch, mol_tree_batch_lg, n_trees, tree_vec)
 
     def run(self, mol_tree_batch, mol_tree_batch_lg, n_trees, tree_vec):
+        device = tree_vec.device
+
         node_offset = np.cumsum([0] + mol_tree_batch.batch_num_nodes)
         root_ids = node_offset[:-1]
-        n_nodes = mol_tree_batch.number_of_nodes()
-        n_edges = mol_tree_batch.number_of_edges()
+        n_nodes = mol_tree_batch.num_nodes()
+        n_edges = mol_tree_batch.num_edges()
 
         mol_tree_batch.ndata.update({
             'x': self.embedding(mol_tree_batch.ndata['wid']),
-            'h': cuda(torch.zeros(n_nodes, self.hidden_size)),
+            'h': torch.zeros(n_nodes, self.hidden_size).to(device),
             # whether it's newly generated node
-            'new': cuda(torch.ones(n_nodes).bool()),
+            'new': torch.ones(n_nodes).bool().to(device),
         })
 
         mol_tree_batch.edata.update({
-            's': cuda(torch.zeros(n_edges, self.hidden_size)),
-            'm': cuda(torch.zeros(n_edges, self.hidden_size)),
-            'r': cuda(torch.zeros(n_edges, self.hidden_size)),
-            'z': cuda(torch.zeros(n_edges, self.hidden_size)),
-            'src_x': cuda(torch.zeros(n_edges, self.hidden_size)),
-            'dst_x': cuda(torch.zeros(n_edges, self.hidden_size)),
-            'rm': cuda(torch.zeros(n_edges, self.hidden_size)),
-            'accum_rm': cuda(torch.zeros(n_edges, self.hidden_size)),
+            's': torch.zeros(n_edges, self.hidden_size).to(device),
+            'm': torch.zeros(n_edges, self.hidden_size).to(device),
+            'r': torch.zeros(n_edges, self.hidden_size).to(device),
+            'z': torch.zeros(n_edges, self.hidden_size).to(device),
+            'src_x': torch.zeros(n_edges, self.hidden_size).to(device),
+            'dst_x': torch.zeros(n_edges, self.hidden_size).to(device),
+            'rm': torch.zeros(n_edges, self.hidden_size).to(device),
+            'accum_rm': torch.zeros(n_edges, self.hidden_size).to(device),
         })
 
         mol_tree_batch.apply_edges(
@@ -197,10 +192,16 @@ class DGLJTNNDecoder(nn.Module):
 
             mol_tree_batch_lg.pull(
                 eid,
-                dec_tree_edge_msg,
-                dec_tree_edge_reduce,
-                self.dec_tree_edge_update,
+                dec_tree_edge_msg1,
+                dec_tree_edge_reduce1
             )
+            mol_tree_batch_lg.pull(
+                eid,
+                dec_tree_edge_msg2,
+                dec_tree_edge_reduce2,
+                self.dec_tree_edge_update
+            )
+
             is_new = mol_tree_batch.nodes[v].data['new']
             mol_tree_batch.pull(
                 v,
@@ -227,7 +228,7 @@ class DGLJTNNDecoder(nn.Module):
 
         # Batch compute the stop/label prediction losses
         p_inputs = torch.cat(p_inputs, 0)
-        p_targets = cuda(torch.cat(p_targets, 0))
+        p_targets = torch.cat(p_targets, 0).to(device)
         q_inputs = torch.cat(q_inputs, 0)
         q_targets = torch.cat(q_targets, 0)
 
@@ -251,12 +252,14 @@ class DGLJTNNDecoder(nn.Module):
 
         return q_loss, p_loss, q_acc, p_acc
 
-    def decode(self, mol_vec):
+    def decode(self, mol_vec, max_decode_len=100):
         assert mol_vec.shape[0] == 1
+        device = mol_vec.device
 
         mol_tree = DGLMolTree(None)
+        mol_tree.g = mol_tree.g.to(device)
 
-        init_hidden = cuda(torch.zeros(1, self.hidden_size))
+        init_hidden = torch.zeros(1, self.hidden_size).to(device)
 
         root_hidden = torch.cat([init_hidden, mol_vec], 1)
         root_hidden = F.relu(self.W(root_hidden))
@@ -264,11 +267,11 @@ class DGLJTNNDecoder(nn.Module):
         _, root_wid = torch.max(root_score, 1)
         root_wid = root_wid.view(1)
 
-        mol_tree.add_nodes(1)   # root
-        mol_tree.nodes[0].data['wid'] = root_wid
-        mol_tree.nodes[0].data['x'] = self.embedding(root_wid)
-        mol_tree.nodes[0].data['h'] = init_hidden
-        mol_tree.nodes[0].data['fail'] = cuda(torch.tensor([0]))
+        mol_tree.g.add_nodes(1)   # root
+        mol_tree.g.nodes[0].data['wid'] = root_wid
+        mol_tree.g.nodes[0].data['x'] = self.embedding(root_wid)
+        mol_tree.g.nodes[0].data['h'] = init_hidden
+        mol_tree.g.nodes[0].data['fail'] = torch.tensor([0]).to(device)
         mol_tree.nodes_dict[0] = root_node_dict = create_node_dict(
             self.vocab.get_smiles(root_wid))
 
@@ -280,9 +283,9 @@ class DGLJTNNDecoder(nn.Module):
         new_node_id = 0
         new_edge_id = 0
 
-        for step in range(MAX_DECODE_LEN):
+        for step in range(max_decode_len):
             u, u_slots = stack[-1]
-            udata = mol_tree.nodes[u].data
+            udata = mol_tree.g.nodes[u].data
             x = udata['x']
             h = udata['h']
 
@@ -294,45 +297,51 @@ class DGLJTNNDecoder(nn.Module):
             if not backtrack:
                 # Predict next clique.  Note that the prediction may fail due
                 # to lack of assemblable components
-                mol_tree.add_nodes(1)
+                mol_tree.g.add_nodes(1)
                 new_node_id += 1
                 v = new_node_id
-                mol_tree.add_edges(u, v)
+                mol_tree.g.add_edges(u, v)
                 uv = new_edge_id
                 new_edge_id += 1
 
                 if first:
-                    mol_tree.edata.update({
-                        's': cuda(torch.zeros(1, self.hidden_size)),
-                        'm': cuda(torch.zeros(1, self.hidden_size)),
-                        'r': cuda(torch.zeros(1, self.hidden_size)),
-                        'z': cuda(torch.zeros(1, self.hidden_size)),
-                        'src_x': cuda(torch.zeros(1, self.hidden_size)),
-                        'dst_x': cuda(torch.zeros(1, self.hidden_size)),
-                        'rm': cuda(torch.zeros(1, self.hidden_size)),
-                        'accum_rm': cuda(torch.zeros(1, self.hidden_size)),
+                    mol_tree.g.edata.update({
+                        's': torch.zeros(1, self.hidden_size).to(device),
+                        'm': torch.zeros(1, self.hidden_size).to(device),
+                        'r': torch.zeros(1, self.hidden_size).to(device),
+                        'z': torch.zeros(1, self.hidden_size).to(device),
+                        'src_x': torch.zeros(1, self.hidden_size).to(device),
+                        'dst_x': torch.zeros(1, self.hidden_size).to(device),
+                        'rm': torch.zeros(1, self.hidden_size).to(device),
+                        'accum_rm': torch.zeros(1, self.hidden_size).to(device),
                     })
                     first = False
 
-                mol_tree.edges[uv].data['src_x'] = mol_tree.nodes[u].data['x']
+                mol_tree.g.edges[uv].data['src_x'] = mol_tree.g.nodes[u].data['x']
                 # keeping dst_x 0 is fine as h on new edge doesn't depend on that.
 
                 # DGL doesn't dynamically maintain a line graph.
-                mol_tree_lg = dgl.line_graph(mol_tree, backtracking=False, shared=True)
+                mol_tree_lg = dgl.line_graph(mol_tree.g, backtracking=False, shared=True)
+                mol_tree_lg._node_frames = mol_tree.g._edge_frames
 
                 mol_tree_lg.pull(
                     uv,
-                    dec_tree_edge_msg,
-                    dec_tree_edge_reduce,
-                    self.dec_tree_edge_update.update_zm,
+                    dec_tree_edge_msg1,
+                    dec_tree_edge_reduce1
                 )
-                mol_tree.pull(
+                mol_tree_lg.pull(
+                    uv,
+                    dec_tree_edge_msg2,
+                    dec_tree_edge_reduce2,
+                    self.dec_tree_edge_update.update_zm
+                )
+                mol_tree.g.pull(
                     v,
                     dec_tree_node_msg,
                     dec_tree_node_reduce,
                 )
 
-                vdata = mol_tree.nodes[v].data
+                vdata = mol_tree.g.nodes[v].data
                 h_v = vdata['h']
                 q_input = torch.cat([h_v, mol_vec], 1)
                 q_score = torch.softmax(
@@ -354,24 +363,25 @@ class DGLJTNNDecoder(nn.Module):
                 if next_wid is None:
                     # Failed adding an actual children; v is a spurious node
                     # and we mark it.
-                    vdata['fail'] = cuda(torch.tensor([1]))
+                    vdata['fail'] = torch.tensor([1]).to(device)
                     backtrack = True
                 else:
-                    next_wid = cuda(torch.tensor([next_wid]))
+                    next_wid = torch.tensor([next_wid]).to(device)
                     vdata['wid'] = next_wid
                     vdata['x'] = self.embedding(next_wid)
                     mol_tree.nodes_dict[v] = next_node_dict
                     all_nodes[v] = next_node_dict
                     stack.append((v, next_slots))
-                    mol_tree.add_edge(v, u)
+                    mol_tree.g.add_edges(v, u)
                     vu = new_edge_id
                     new_edge_id += 1
-                    mol_tree.edges[uv].data['dst_x'] = mol_tree.nodes[v].data['x']
-                    mol_tree.edges[vu].data['src_x'] = mol_tree.nodes[v].data['x']
-                    mol_tree.edges[vu].data['dst_x'] = mol_tree.nodes[u].data['x']
+                    mol_tree.g.edges[uv].data['dst_x'] = mol_tree.g.nodes[v].data['x']
+                    mol_tree.g.edges[vu].data['src_x'] = mol_tree.g.nodes[v].data['x']
+                    mol_tree.g.edges[vu].data['dst_x'] = mol_tree.g.nodes[u].data['x']
 
                     # DGL doesn't dynamically maintain a line graph.
-                    mol_tree_lg = dgl.line_graph(mol_tree, backtracking=False, shared=True)
+                    mol_tree_lg = dgl.line_graph(mol_tree.g, backtracking=False, shared=True)
+                    mol_tree_lg._node_frames = mol_tree.g._edge_frames
                     mol_tree_lg.apply_nodes(
                         self.dec_tree_edge_update.update_r,
                         uv
@@ -382,22 +392,27 @@ class DGLJTNNDecoder(nn.Module):
                     break   # At root, terminate
 
                 pu, _ = stack[-2]
-                u_pu = mol_tree.edge_id(u, pu)
+                u_pu = mol_tree.g.edge_ids(u, pu)
 
                 mol_tree_lg.pull(
                     u_pu,
-                    dec_tree_edge_msg,
-                    dec_tree_edge_reduce,
-                    self.dec_tree_edge_update,
+                    dec_tree_edge_msg1,
+                    dec_tree_edge_reduce1
                 )
-                mol_tree.pull(
+                mol_tree_lg.pull(
+                    u_pu,
+                    dec_tree_edge_msg2,
+                    dec_tree_edge_reduce2,
+                    self.dec_tree_edge_update
+                )
+                mol_tree.g.pull(
                     pu,
                     dec_tree_node_msg,
                     dec_tree_node_reduce,
                 )
                 stack.pop()
 
-        effective_nodes = mol_tree.filter_nodes(
+        effective_nodes = mol_tree.g.filter_nodes(
             lambda nodes: nodes.data['fail'] != 1)
         effective_nodes, _ = torch.sort(effective_nodes)
         return mol_tree, all_nodes, effective_nodes

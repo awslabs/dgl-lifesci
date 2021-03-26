@@ -159,9 +159,92 @@ def test_attentivefp_aromaticity():
 
     remove_file('AttentiveFP_Aromaticity_pre_trained.pth')
 
+def test_moleculenet():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    for dataset in ['BACE', 'BBBP', 'ClinTox', 'FreeSolv', 'HIV', 'MUV', 'SIDER', 'ToxCast',
+                    'PCBA', 'ESOL', 'Lipophilicity', 'Tox21']:
+        for featurizer_type in ['canonical', 'attentivefp']:
+            if featurizer_type == 'canonical':
+                node_featurizer = CanonicalAtomFeaturizer(atom_data_field='hv')
+                edge_featurizer = CanonicalBondFeaturizer(bond_data_field='he', self_loop=True)
+            else:
+                node_featurizer = AttentiveFPAtomFeaturizer(atom_data_field='hv')
+                edge_featurizer = AttentiveFPBondFeaturizer(bond_data_field='he', self_loop=True)
+
+            for model_type in ['GCN', 'GAT']:
+                g1 = smiles_to_bigraph('CO', node_featurizer=node_featurizer)
+                g2 = smiles_to_bigraph('CCO', node_featurizer=node_featurizer)
+                bg = dgl.batch([g1, g2])
+
+                model = load_pretrained('{}_{}_{}'.format(
+                    model_type, featurizer_type, dataset)).to(device)
+                with torch.no_grad():
+                    model(bg.to(device), bg.ndata.pop('hv').to(device))
+                    model.eval()
+                    model(g1.to(device), g1.ndata.pop('hv').to(device))
+                remove_file('{}_{}_{}_pre_trained.pth'.format(
+                    model_type.lower(), featurizer_type, dataset))
+
+            for model_type in ['Weave', 'MPNN', 'AttentiveFP']:
+                g1 = smiles_to_bigraph('CO', add_self_loop=True, node_featurizer=node_featurizer,
+                                       edge_featurizer=edge_featurizer)
+                g2 = smiles_to_bigraph('CCO', add_self_loop=True, node_featurizer=node_featurizer,
+                                       edge_featurizer=edge_featurizer)
+                bg = dgl.batch([g1, g2])
+
+                model = load_pretrained('{}_{}_{}'.format(
+                    model_type, featurizer_type, dataset)).to(device)
+                with torch.no_grad():
+                    model(bg.to(device), bg.ndata.pop('hv').to(device), bg.edata.pop('he').to(device))
+                    model.eval()
+                    model(g1.to(device), g1.ndata.pop('hv').to(device), g1.edata.pop('he').to(device))
+                remove_file('{}_{}_{}_pre_trained.pth'.format(
+                    model_type.lower(), featurizer_type, dataset))
+
+        if dataset == 'ClinTox':
+            continue
+
+        node_featurizer = PretrainAtomFeaturizer()
+        edge_featurizer = PretrainBondFeaturizer()
+        for model_type in ['gin_supervised_contextpred', 'gin_supervised_infomax',
+                           'gin_supervised_edgepred', 'gin_supervised_masking']:
+            g1 = smiles_to_bigraph('CO', add_self_loop=True, node_featurizer=node_featurizer,
+                                   edge_featurizer=edge_featurizer)
+            g2 = smiles_to_bigraph('CCO', add_self_loop=True, node_featurizer=node_featurizer,
+                                   edge_featurizer=edge_featurizer)
+            bg = dgl.batch([g1, g2])
+
+            model = load_pretrained('{}_{}'.format(model_type, dataset)).to(device)
+            with torch.no_grad():
+                node_feats = [
+                    bg.ndata.pop('atomic_number').to(device),
+                    bg.ndata.pop('chirality_type').to(device)
+                ]
+                edge_feats = [
+                    bg.edata.pop('bond_type').to(device),
+                    bg.edata.pop('bond_direction_type').to(device)
+                ]
+                model(bg.to(device), node_feats, edge_feats)
+                model.eval()
+                node_feats = [
+                    g1.ndata.pop('atomic_number').to(device),
+                    g1.ndata.pop('chirality_type').to(device)
+                ]
+                edge_feats = [
+                    g1.edata.pop('bond_type').to(device),
+                    g1.edata.pop('bond_direction_type').to(device)
+                ]
+                model(g1.to(device), node_feats, edge_feats)
+            remove_file('{}_{}_pre_trained.pth'.format(model_type.lower(), dataset))
+
 if __name__ == '__main__':
-    test_dgmg()
-    test_jtnn()
-    test_gcn_tox21()
-    test_gat_tox21()
-    test_attentivefp_aromaticity()
+    # test_dgmg()
+    # test_jtnn()
+    # test_gcn_tox21()
+    # test_gat_tox21()
+    # test_attentivefp_aromaticity()
+    test_moleculenet()

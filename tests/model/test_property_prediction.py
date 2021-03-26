@@ -12,7 +12,7 @@ from dgllife.model.model_zoo import *
 def test_graph1():
     """Graph with node features."""
     g = dgl.graph(([0, 0, 1, 0, 1, 2], [1, 2, 2, 0, 1, 2]), idtype=torch.int32)
-    return g, torch.arange(g.number_of_nodes()).float().reshape(-1, 1)
+    return g, torch.arange(g.num_nodes()).float().reshape(-1, 1)
 
 def test_graph2():
     """Batched graph with node features."""
@@ -20,21 +20,21 @@ def test_graph2():
     g2 = dgl.graph(([0, 1, 1, 1, 0, 1, 2, 3, 4],
                     [1, 2, 3, 4, 0, 1, 2, 3, 4]), idtype=torch.int32)
     bg = dgl.batch([g1, g2])
-    return bg, torch.arange(bg.number_of_nodes()).float().reshape(-1, 1)
+    return bg, torch.arange(bg.num_nodes()).float().reshape(-1, 1)
 
 def test_graph3():
     """Graph with node features and edge features."""
     g = dgl.graph(([0, 0, 1], [1, 2, 2]), idtype=torch.int32)
-    return g, torch.arange(g.number_of_nodes()).float().reshape(-1, 1), \
-           torch.arange(2 * g.number_of_edges()).float().reshape(-1, 2)
+    return g, torch.arange(g.num_nodes()).float().reshape(-1, 1), \
+           torch.arange(2 * g.num_edges()).float().reshape(-1, 2)
 
 def test_graph4():
     """Batched graph with node features and edge features."""
     g1 = dgl.graph(([0, 0, 1], [1, 2, 2]), idtype=torch.int32)
     g2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]), idtype=torch.int32)
     bg = dgl.batch([g1, g2])
-    return bg, torch.arange(bg.number_of_nodes()).float().reshape(-1, 1), \
-           torch.arange(2 * bg.number_of_edges()).float().reshape(-1, 2)
+    return bg, torch.arange(bg.num_nodes()).float().reshape(-1, 1), \
+           torch.arange(2 * bg.num_edges()).float().reshape(-1, 2)
 
 def test_graph5():
     """Graph with node types and edge distances."""
@@ -69,8 +69,8 @@ def test_graph9():
     g1 = dgl.graph(([0, 0, 1], [1, 2, 2]))
     g2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]))
     bg = dgl.batch([g1, g2])
-    return bg, torch.zeros(bg.number_of_nodes()).long(), \
-           torch.randn(bg.number_of_edges(), 2).float()
+    return bg, torch.zeros(bg.num_nodes()).long(), \
+           torch.randn(bg.num_edges(), 2).float()
 
 def test_attentivefp_predictor():
     if torch.cuda.is_available():
@@ -359,6 +359,60 @@ def test_gnn_ogb_predictor():
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
            torch.Size([bg.batch_size, 2])
 
+def test_nf_predictor():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats = test_graph1()
+    g, node_feats = g.to(device), node_feats.to(device)
+    bg, batch_node_feats = test_graph2()
+    bg, batch_node_feats = bg.to(device), batch_node_feats.to(device)
+
+    # Test default setting
+    nf_predictor = NFPredictor(in_feats=1).to(device)
+    nf_predictor.eval()
+    assert nf_predictor(g, node_feats).shape == torch.Size([1, 1])
+    nf_predictor.train()
+    assert nf_predictor(bg, batch_node_feats).shape == torch.Size([2, 1])
+
+    # Test configured setting
+    nf_predictor = NFPredictor(in_feats=1,
+                               n_tasks=2,
+                               hidden_feats=[2, 2],
+                               max_degree=5,
+                               activation=[None, None],
+                               batchnorm=[False, False],
+                               dropout=[0.1, 0.1],
+                               predictor_hidden_size=4,
+                               predictor_batchnorm=False,
+                               predictor_dropout=0.1,
+                               predictor_activation=None).to(device)
+
+    nf_predictor.eval()
+    assert nf_predictor(g, node_feats).shape == torch.Size([1, 2])
+    nf_predictor.train()
+    assert nf_predictor(bg, batch_node_feats).shape == torch.Size([2, 2])
+
+def test_pagtn_predictor():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    bg, batch_node_feats, batch_edge_feats = test_graph4()
+    bg, batch_node_feats, batch_edge_feats = bg.to(device), batch_node_feats.to(device), \
+                                             batch_edge_feats.to(device)
+
+    # Test default setting
+    pagtn_predictor = PAGTNPredictor(node_in_feats = 1,
+                                     node_out_feats = 2,
+                                     node_hid_feats = 20,
+                                     edge_feats = 2).to(device)
+    assert pagtn_predictor(bg, batch_node_feats, batch_edge_feats).shape == \
+           torch.Size([2, 1])
+
 if __name__ == '__main__':
     test_attentivefp_predictor()
     test_mlp_predictor()
@@ -370,3 +424,5 @@ if __name__ == '__main__':
     test_schnet_predictor()
     test_weave_predictor()
     test_gnn_ogb_predictor()
+    test_nf_predictor()
+    test_pagtn_predictor()

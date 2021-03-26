@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Apply weighted sum and max pooling to the node representations and concatenate the results."""
+# Apply weighted sum and max pooling to the node representations and concatenate the results.
 # pylint: disable= no-member, arguments-differ, invalid-name
 
 import dgl

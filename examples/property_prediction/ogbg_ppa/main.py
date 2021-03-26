@@ -89,7 +89,7 @@ def main():
     dataset = DglGraphPropPredDataset(name=args.dataset)
     # initialize node features
     for i in range(len(dataset)):
-        dataset[i][0].ndata['h'] = torch.zeros(dataset[i][0].number_of_nodes()).long()
+        dataset[i][0].ndata['h'] = torch.zeros(dataset[i][0].num_nodes()).long()
     splitted_idx = dataset.get_idx_split()
 
     # automatic evaluator taking dataset name as input

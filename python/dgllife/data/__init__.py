@@ -22,3 +22,4 @@ from .toxcast import *
 from .sider import *
 from .clintox import *
 from .uspto import *
+from .jtvae import *

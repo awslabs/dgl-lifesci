@@ -25,11 +25,11 @@ def test_graph1():
     features for the pairs of nodes.
     """
     mol_graph = dgl.graph(([0, 0, 1], [1, 2, 2]))
-    node_feats = torch.arange(mol_graph.number_of_nodes()).float().reshape(-1, 1)
-    edge_feats = torch.arange(2 * mol_graph.number_of_edges()).float().reshape(-1, 2)
+    node_feats = torch.arange(mol_graph.num_nodes()).float().reshape(-1, 1)
+    edge_feats = torch.arange(2 * mol_graph.num_edges()).float().reshape(-1, 2)
 
-    complete_graph = get_complete_graph(mol_graph.number_of_nodes())
-    atom_pair_feats = torch.arange(complete_graph.number_of_edges()).float().reshape(-1, 1)
+    complete_graph = get_complete_graph(mol_graph.num_nodes())
+    atom_pair_feats = torch.arange(complete_graph.num_edges()).float().reshape(-1, 1)
 
     return mol_graph, node_feats, edge_feats, complete_graph, atom_pair_feats
 
@@ -38,13 +38,13 @@ def test_graph2():
     mol_graph1 = dgl.graph(([0, 0, 1], [1, 2, 2]))
     mol_graph2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]))
     batch_mol_graph = dgl.batch([mol_graph1, mol_graph2])
-    node_feats = torch.arange(batch_mol_graph.number_of_nodes()).float().reshape(-1, 1)
-    edge_feats = torch.arange(2 * batch_mol_graph.number_of_edges()).float().reshape(-1, 2)
+    node_feats = torch.arange(batch_mol_graph.num_nodes()).float().reshape(-1, 1)
+    edge_feats = torch.arange(2 * batch_mol_graph.num_edges()).float().reshape(-1, 2)
 
-    complete_graph1 = get_complete_graph(mol_graph1.number_of_nodes())
-    complete_graph2 = get_complete_graph(mol_graph2.number_of_nodes())
+    complete_graph1 = get_complete_graph(mol_graph1.num_nodes())
+    complete_graph2 = get_complete_graph(mol_graph2.num_nodes())
     batch_complete_graph = dgl.batch([complete_graph1, complete_graph2])
-    atom_pair_feats = torch.arange(batch_complete_graph.number_of_edges()).float().reshape(-1, 1)
+    atom_pair_feats = torch.arange(batch_complete_graph.num_edges()).float().reshape(-1, 1)
 
     return batch_mol_graph, node_feats, edge_feats, batch_complete_graph, atom_pair_feats
 
@@ -72,10 +72,10 @@ def test_wln_reaction_center():
                               edge_in_feats=2,
                               node_pair_in_feats=1).to(device)
     assert model(mol_graph, complete_graph, node_feats, edge_feats, atom_pair_feats)[0].shape == \
-           torch.Size([complete_graph.number_of_edges(), 5])
+           torch.Size([complete_graph.num_edges(), 5])
     assert model(batch_mol_graph, batch_complete_graph, batch_node_feats,
                  batch_edge_feats, batch_atom_pair_feats)[0].shape == \
-           torch.Size([batch_complete_graph.number_of_edges(), 5])
+           torch.Size([batch_complete_graph.num_edges(), 5])
 
     # Test configured setting
     model = WLNReactionCenter(node_in_feats=1,
@@ -85,18 +85,18 @@ def test_wln_reaction_center():
                               n_layers=1,
                               n_tasks=1).to(device)
     assert model(mol_graph, complete_graph, node_feats, edge_feats, atom_pair_feats)[0].shape == \
-           torch.Size([complete_graph.number_of_edges(), 1])
+           torch.Size([complete_graph.num_edges(), 1])
     assert model(batch_mol_graph, batch_complete_graph, batch_node_feats,
                  batch_edge_feats, batch_atom_pair_feats)[0].shape == \
-           torch.Size([batch_complete_graph.number_of_edges(), 1])
+           torch.Size([batch_complete_graph.num_edges(), 1])
 
 def test_reactant_product_graph1():
     edges = (np.array([0, 1, 2]), np.array([1, 2, 2]))
     reactant_g = dgl.graph(edges)
     reactant_node_feats = torch.arange(
-        reactant_g.number_of_nodes()).float().reshape(-1, 1)
+        reactant_g.num_nodes()).float().reshape(-1, 1)
     reactant_edge_feats = torch.arange(
-        reactant_g.number_of_edges()).float().reshape(-1, 1)
+        reactant_g.num_edges()).float().reshape(-1, 1)
 
     product_g = []
     batch_num_candidate_products = []
@@ -107,9 +107,9 @@ def test_reactant_product_graph1():
         batch_num_candidate_products.append(i)
     product_g = dgl.batch(product_g)
     product_node_feats = torch.arange(
-        product_g.number_of_nodes()).float().reshape(-1, 1)
+        product_g.num_nodes()).float().reshape(-1, 1)
     product_edge_feats = torch.arange(
-        product_g.number_of_edges()).float().reshape(-1, 1)
+        product_g.num_edges()).float().reshape(-1, 1)
     product_scores = torch.randn(sum(batch_num_candidate_products), 1)
 
     return reactant_g, reactant_node_feats, reactant_edge_feats, product_g, product_node_feats, \
@@ -123,9 +123,9 @@ def test_reactant_product_graph2():
         reactant_g.append(dgl.graph(edges))
     reactant_g = dgl.batch(reactant_g)
     reactant_node_feats = torch.arange(
-        reactant_g.number_of_nodes()).float().reshape(-1, 1)
+        reactant_g.num_nodes()).float().reshape(-1, 1)
     reactant_edge_feats = torch.arange(
-        reactant_g.number_of_edges()).float().reshape(-1, 1)
+        reactant_g.num_edges()).float().reshape(-1, 1)
 
     product_g = []
     batch_num_candidate_products = []
@@ -136,9 +136,9 @@ def test_reactant_product_graph2():
         batch_num_candidate_products.append(i)
     product_g = dgl.batch(product_g)
     product_node_feats = torch.arange(
-        product_g.number_of_nodes()).float().reshape(-1, 1)
+        product_g.num_nodes()).float().reshape(-1, 1)
     product_edge_feats = torch.arange(
-        product_g.number_of_edges()).float().reshape(-1, 1)
+        product_g.num_edges()).float().reshape(-1, 1)
     product_scores = torch.randn(sum(batch_num_candidate_products), 1)
 
     return reactant_g, reactant_node_feats, reactant_edge_feats, product_g, product_node_feats, \

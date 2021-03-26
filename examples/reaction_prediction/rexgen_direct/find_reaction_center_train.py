@@ -22,14 +22,14 @@ def load_dataset(args):
         train_set = USPTOCenter('train', num_processes=args['num_processes'])
     else:
         train_set = WLNCenterDataset(raw_file_path=args['train_path'],
-                                     mol_graph_path='train.bin',
+                                     mol_graph_path='./train.bin',
                                      num_processes=args['num_processes'],
                                      reaction_validity_result_prefix='train')
     if args['val_path'] is None:
         val_set = USPTOCenter('val', num_processes=args['num_processes'])
     else:
         val_set = WLNCenterDataset(raw_file_path=args['val_path'],
-                                   mol_graph_path='val.bin',
+                                   mol_graph_path='./val.bin',
                                    num_processes=args['num_processes'],
                                    reaction_validity_result_prefix='val')
 
@@ -50,7 +50,8 @@ def main(rank, dev_id, args):
     train_set, val_set = load_dataset(args)
     get_center_subset(train_set, rank, args['num_devices'])
     train_loader = DataLoader(train_set, batch_size=args['batch_size'],
-                              collate_fn=collate_center, shuffle=True)
+                              collate_fn=collate_center, shuffle=True,
+                              num_workers=args['num_processes'])
     val_loader = DataLoader(val_set, batch_size=args['batch_size'],
                             collate_fn=collate_center, shuffle=False)
 
@@ -107,10 +108,9 @@ def main(rank, dev_id, args):
             if total_iter % args['decay_every'] == 0:
                 optimizer.decay_lr(args['lr_decay_factor'])
             if total_iter % args['decay_every'] == 0 and rank == 0:
-                if epoch >= 1:
-                    dur.append(time.time() - t0)
-                    print('Training time per {:d} iterations: {:.4f}'.format(
-                        rank_iter, np.mean(dur)))
+                dur.append(time.time() - t0)
+                print('Estimated training time per epoch: {:.4f}'.format(
+                    np.mean(dur) / args['decay_every'] * len(train_loader)))
                 total_samples = total_iter * args['batch_size']
                 prediction_summary = 'total samples {:d}, (epoch {:d}/{:d}, iter {:d}/{:d}) '.format(
                     total_samples, epoch + 1, args['num_epochs'], batch_id + 1, len(train_loader)) + \
@@ -123,6 +123,16 @@ def main(rank, dev_id, args):
                 t0 = time.time()
                 model.train()
         synchronize(args['num_devices'])
+
+    # Final results
+    if rank == 0:
+        prediction_summary = 'final result ' + \
+                             reaction_center_final_eval(args, args['top_ks_val'], model, val_loader, easy=True)
+        print(prediction_summary)
+        with open(args['result_path'] + '/val_eval.txt', 'a') as f:
+            f.write(prediction_summary)
+        torch.save({'model_state_dict': model.state_dict()},
+                   args['result_path'] + '/model_final.pkl')
 
 def run(rank, dev_id, args):
     dist_init_method = 'tcp://{master_ip}:{master_port}'.format(
@@ -151,7 +161,7 @@ if __name__ == '__main__':
     parser.add_argument('--val-path', type=str, default=None,
                         help='Path to a new validation set. '
                              'If None, we will use the default validation set in USPTO.')
-    parser.add_argument('-np', '--num-processes', type=int, default=32,
+    parser.add_argument('-np', '--num-processes', type=int, default=4,
                         help='Number of processes to use for data pre-processing')
     parser.add_argument('--master-ip', type=str, default='127.0.0.1',
                         help='master ip address')

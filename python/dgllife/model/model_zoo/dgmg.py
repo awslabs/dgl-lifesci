@@ -115,7 +115,7 @@ class MoleculeEnv(object):
         -------
         int
         """
-        return self.dgl_graph.number_of_nodes()
+        return self.dgl_graph.num_nodes()
 
     def add_atom(self, type):
         """Add an atom of the specified type.
@@ -198,7 +198,7 @@ class GraphEmbed(nn.Module):
         tensor of dtype float32 and shape (1, self.graph_hidden_size)
             Computed representation for the current molecule graph
         """
-        if g.number_of_nodes() == 0:
+        if g.num_nodes() == 0:
             # Use a zero tensor for an empty molecule.
             return torch.zeros(1, self.graph_hidden_size)
         else:
@@ -295,7 +295,7 @@ class GraphProp(nn.Module):
         ----------
         g : DGLGraph
         """
-        if g.number_of_edges() == 0:
+        if g.num_edges() == 0:
             return
         else:
             for t in range(self.num_prop_rounds):
@@ -353,7 +353,7 @@ class AddNode(nn.Module):
         graph_embed : tensor of dtype float32
             Molecule representation
         """
-        num_nodes = g.number_of_nodes()
+        num_nodes = g.num_nodes()
         hv_init = torch.cat([
             self.node_type_embed(torch.LongTensor([node_type])),
             graph_embed], dim=1)
@@ -470,7 +470,7 @@ class AddEdge(nn.Module):
         g = self.env.dgl_graph
 
         graph_embed = self.graph_op['embed'](g)
-        src_embed = g.nodes[g.number_of_nodes() - 1].data['hv']
+        src_embed = g.nodes[g.num_nodes() - 1].data['hv']
 
         logits = self.add_edge(
             torch.cat([graph_embed, src_embed], dim=1))
@@ -556,7 +556,7 @@ class ChooseDestAndUpdate(nn.Module):
         """
         g = self.env.dgl_graph
 
-        src = g.number_of_nodes() - 1
+        src = g.num_nodes() - 1
         possible_dests = range(src)
 
         src_embed_expand = g.nodes[src].data['hv'].expand(src, -1)

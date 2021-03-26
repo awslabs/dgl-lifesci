@@ -76,10 +76,10 @@ class EarlyStopping(object):
                 dt.date(), dt.hour, dt.minute, dt.second)
 
         if metric is not None:
-            assert metric in ['r2', 'mae', 'rmse', 'roc_auc_score'], \
+            assert metric in ['r2', 'mae', 'rmse', 'roc_auc_score', 'pr_auc_score'], \
                 "Expect metric to be 'r2' or 'mae' or " \
                 "'rmse' or 'roc_auc_score', got {}".format(metric)
-            if metric in ['r2', 'roc_auc_score']:
+            if metric in ['r2', 'roc_auc_score', 'pr_auc_score']:
                 print('For metric {}, the higher the better'.format(metric))
                 mode = 'higher'
             if metric in ['mae', 'rmse']:
@@ -95,6 +95,7 @@ class EarlyStopping(object):
 
         self.patience = patience
         self.counter = 0
+        self.timestep = 0
         self.filename = filename
         self.best_score = None
         self.early_stop = False
@@ -151,6 +152,7 @@ class EarlyStopping(object):
         bool
             Whether an early stop should be performed.
         """
+        self.timestep += 1
         if self.best_score is None:
             self.best_score = score
             self.save_checkpoint(model)
@@ -174,7 +176,8 @@ class EarlyStopping(object):
         model : nn.Module
             Model instance.
         '''
-        torch.save({'model_state_dict': model.state_dict()}, self.filename)
+        torch.save({'model_state_dict': model.state_dict(),
+                    'timestep': self.timestep}, self.filename)
 
     def load_checkpoint(self, model):
         '''Load the latest checkpoint

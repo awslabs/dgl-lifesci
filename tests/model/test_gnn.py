@@ -13,7 +13,7 @@ def test_graph1():
     """Graph with node features."""
     g = dgl.graph(([0, 0, 1, 0, 1, 2],
                    [1, 2, 2, 0, 1, 2]), idtype=torch.int32)
-    return g, torch.arange(g.number_of_nodes()).float().reshape(-1, 1)
+    return g, torch.arange(g.num_nodes()).float().reshape(-1, 1)
 
 def test_graph2():
     """Batched graph with node features."""
@@ -22,21 +22,21 @@ def test_graph2():
     g2 = dgl.graph(([0, 1, 1, 1, 0, 1, 2, 3, 4],
                     [1, 2, 3, 4, 0, 1, 2, 3, 4]), idtype=torch.int32)
     bg = dgl.batch([g1, g2])
-    return bg, torch.arange(bg.number_of_nodes()).float().reshape(-1, 1)
+    return bg, torch.arange(bg.num_nodes()).float().reshape(-1, 1)
 
 def test_graph3():
     """Graph with node and edge features."""
     g = dgl.graph(([0, 0, 1, 0, 1, 2], [1, 2, 2, 0, 1, 2]), idtype=torch.int32)
-    return g, torch.arange(g.number_of_nodes()).float().reshape(-1, 1), \
-           torch.arange(2 * g.number_of_edges()).float().reshape(-1, 2)
+    return g, torch.arange(g.num_nodes()).float().reshape(-1, 1), \
+           torch.arange(2 * g.num_edges()).float().reshape(-1, 2)
 
 def test_graph4():
     """Batched graph with node and edge features."""
     g1 = dgl.graph(([0, 0, 1], [1, 2, 2]), idtype=torch.int32)
     g2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]), idtype=torch.int32)
     bg = dgl.batch([g1, g2])
-    return bg, torch.arange(bg.number_of_nodes()).float().reshape(-1, 1), \
-           torch.arange(2 * bg.number_of_edges()).float().reshape(-1, 2)
+    return bg, torch.arange(bg.num_nodes()).float().reshape(-1, 1), \
+           torch.arange(2 * bg.num_edges()).float().reshape(-1, 2)
 
 def test_graph5():
     """Graph with node types and edge distances."""
@@ -71,8 +71,14 @@ def test_graph9():
     g1 = dgl.graph(([0, 0, 1], [1, 2, 2]), idtype=torch.int32)
     g2 = dgl.graph(([0, 1, 1, 1], [1, 2, 3, 4]), idtype=torch.int32)
     bg = dgl.batch([g1, g2])
-    return bg, torch.zeros(bg.number_of_nodes()).long(), \
-           torch.randn(bg.number_of_edges(), 2).float()
+    return bg, torch.zeros(bg.num_nodes()).long(), \
+           torch.randn(bg.num_edges(), 2).float()
+
+def test_graph10():
+    """Graph with node and edge features, but no edges."""
+    g = dgl.graph(([], []), num_nodes=3, idtype=torch.int32)
+    return g, torch.arange(g.num_nodes()).float().reshape(-1, 1), \
+           torch.arange(2 * g.num_edges()).float().reshape(-1, 2)
 
 def test_attentivefp():
     if torch.cuda.is_available():
@@ -315,6 +321,8 @@ def test_wln():
 
     g, node_feats, edge_feats = test_graph3()
     g, node_feats, edge_feats = g.to(device), node_feats.to(device), edge_feats.to(device)
+    g_ne, node_feats_ne, edge_feats_ne = test_graph10()
+    g_ne, node_feats_ne, edge_feats_ne = g_ne.to(device), node_feats_ne.to(device), edge_feats_ne.to(device)
     bg, batch_node_feats, batch_edge_feats = test_graph4()
     bg, batch_node_feats, batch_edge_feats = bg.to(device), batch_node_feats.to(device), \
                                              batch_edge_feats.to(device)
@@ -324,6 +332,7 @@ def test_wln():
               edge_in_feats=2).to(device)
     gnn.reset_parameters()
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 300])
+    assert gnn(g_ne, node_feats_ne, edge_feats_ne).shape == torch.Size([3, 300])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 300])
 
     # Test configured setting
@@ -332,6 +341,7 @@ def test_wln():
               node_out_feats=3,
               n_layers=1).to(device)
     assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 3])
+    assert gnn(g_ne, node_feats_ne, edge_feats_ne).shape == torch.Size([3, 3])
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 3])
 
 def test_graphsage():
@@ -376,7 +386,7 @@ def test_gnn_ogb():
                  hidden_feats=2).to(device)
     gnn.reset_parameters()
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
-           torch.Size([bg.number_of_nodes(), 2])
+           torch.Size([bg.num_nodes(), 2])
 
     # Test configured setting
     gnn = GNNOGB(in_edge_feats=batch_edge_feats.shape[-1],
@@ -392,7 +402,53 @@ def test_gnn_ogb():
                  jk=True).to(device)
     gnn.reset_parameters()
     assert gnn(bg, batch_node_feats, batch_edge_feats).shape == \
-           torch.Size([bg.number_of_nodes(), 2])
+           torch.Size([bg.num_nodes(), 2])
+
+def test_nf():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats = test_graph1()
+    g, node_feats = g.to(device), node_feats.to(device)
+    bg, batch_node_feats = test_graph2()
+    bg, batch_node_feats = bg.to(device), batch_node_feats.to(device)
+
+    # Test default setting
+    gnn = NFGNN(in_feats=1).to(device)
+    gnn.reset_parameters()
+    assert gnn(g, node_feats).shape == torch.Size([3, 64])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 64])
+
+    # Test configured setting
+    gnn = NFGNN(in_feats=1,
+                hidden_feats=[2, 2, 2],
+                max_degree=5,
+                activation=[None, None, None],
+                batchnorm=[False, False, False],
+                dropout=[0.5, 0.5, 0.5]).to(device)
+    gnn.reset_parameters()
+    assert gnn(g, node_feats).shape == torch.Size([3, 2])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 2])
+
+def test_pagtn():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats, edge_feats = test_graph3()
+    g, node_feats, edge_feats = g.to(device), node_feats.to(device), edge_feats.to(device)
+    bg, batch_node_feats, batch_edge_feats = test_graph4()
+    bg, batch_node_feats, batch_edge_feats = bg.to(device), batch_node_feats.to(device), \
+                                             batch_edge_feats.to(device)
+    gnn = PAGTNGNN(node_in_feats = 1,
+                   node_out_feats = 2,
+                   node_hid_feats = 20,
+                   edge_feats = 2).to(device)
+    assert gnn(g, node_feats, edge_feats).shape == torch.Size([3, 2])
+    assert gnn(bg, batch_node_feats, batch_edge_feats).shape == torch.Size([8, 2])
 
 if __name__ == '__main__':
     test_attentivefp()
@@ -406,3 +462,5 @@ if __name__ == '__main__':
     test_wln()
     test_gnn_ogb()
     test_graphsage()
+    test_nf()
+    test_pagtn()

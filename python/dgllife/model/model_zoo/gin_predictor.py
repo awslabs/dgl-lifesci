@@ -8,7 +8,7 @@
 
 import torch.nn as nn
 
-from dgl.nn.pytorch.glob import GlobalAttentionPooling, SumPooling, AvgPooling, MaxPooling
+from dgl.nn.pytorch.glob import GlobalAttentionPooling, SumPooling, AvgPooling, MaxPooling, Set2Set
 
 from ..gnn.gin import GIN
 
@@ -58,7 +58,8 @@ class GINPredictor(nn.Module):
         Dropout to apply to the output of each GIN layer. Default to 0.5.
     readout : str
         Readout for computing graph representations out of node representations, which
-        can be ``'sum'``, ``'mean'``, ``'max'``, or ``'attention'``. Default to 'mean'.
+        can be ``'sum'``, ``'mean'``, ``'max'``, ``'attention'``, or ``'set2set'``. Default
+        to 'mean'.
     n_tasks : int
         Number of tasks, which is also the output size. Default to 1.
     """
@@ -90,9 +91,11 @@ class GINPredictor(nn.Module):
             else:
                 self.readout = GlobalAttentionPooling(
                     gate_nn=nn.Linear(emb_dim, 1))
+        elif readout == 'set2set':
+            self.readout = Set2Set()
         else:
             raise ValueError("Expect readout to be 'sum', 'mean', "
-                             "'max' or 'attention', got {}".format(readout))
+                             "'max', 'attention' or 'set2set', got {}".format(readout))
 
         if JK == 'concat':
             self.predict = nn.Linear((num_layers + 1) * emb_dim, n_tasks)
