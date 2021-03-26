@@ -26,7 +26,7 @@ __all__ = ['mol_to_graph',
 
 # pylint: disable=I1101
 def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
-                 canonical_atom_order, explicit_hydrogens=None, num_virtual_nodes=0):
+                 canonical_atom_order, explicit_hydrogens=False, num_virtual_nodes=0):
     """Convert an RDKit molecule object into a DGLGraph and featurize for it.
 
     This function can be used to construct any arbitrary ``DGLGraph`` from an
@@ -49,7 +49,8 @@ def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
         to true might change the order of atoms in the graph constructed.
     explicit_hydrogens : bool
         Whether to explicitly represent hydrogens as nodes in the graph. If True,
-        it will call rdkit.Chem.AddHs(mol).
+        it will call rdkit.Chem.AddHs(mol). If False, it will not remove or change hydrogens.
+        Default to False.
     num_virtual_nodes : int
         The number of virtual nodes to add. The virtual nodes will be connected to
         all real nodes with virtual edges. If the returned graph has any node/edge
