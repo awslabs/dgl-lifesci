@@ -13,7 +13,7 @@ processed for data artifacts, as additional benchmarking targets.
 - **Atomic Convolutional Networks (ACNN)** [5]: Constructs nearest neighbor graphs separately for the ligand, protein and complex 
 based on the 3D coordinates of the atoms and predicts the binding free energy.
 
-- **PotentialNet** [6]: A 3-stage model that combines graph convolutional neural network (GCNN) with bigraph construction and k-nearest-neighbor graph construction and fully connected neural network (FCNN). The model consists of three main steps: (1) covalent-only propagation, (2) dual noncovalent and covalent propagation, and (3) ligand-based graph gather (see Figure 2).
+- **PotentialNet** [6]: A 3-stage model that combines graph convolutional neural network (GCNN) with bigraph construction and k-nearest-neighbor graph construction and fully connected neural network (FCNN). The model consists of three main steps: (1) covalent-only propagation, (2) dual noncovalent and covalent propagation, and (3) ligand-based graph gather.
     1. Stage 1. Both ligand and protein graphs are constructed and featurized based on covalent information using `dgllife.utils.CanonicalAtomFeaturizer` and `dgllife.utils.CanonicalBondFeaturizer` so that only chemically boned atoms are connected in the graph. The feature propagation is passed onto a multi-step gated recurrent unit (GRU) followed by a linear layer with sigmoid actiavtion.
     2. Stage 2. A new pair of knn-graphs of ligand and protein is constructed from 3-D coordinates of the molecules. The edge type between atoms is a combination of covalent bond types and their physical distances. The output from stage 1 is used as initial features. The feature propagation is again passed onto a multi-step gated recurrent unit (GRU) followed by a linear layer with sigmoid actiavtion.
     3. Stage 3. Feature gathering is performed only on ligand atoms from the output of stage 2 graphs. The final prediction is computed from feature propagation through a multi-layer fully connected neural network with ReLU activation.
@@ -36,7 +36,7 @@ Use `main.py` with arguments
     PDBBind_refined_pocket_temporal,
     PDBBind_refined_pocket_structure, 
     PDBBind_refined_pocket_sequence}```
-    Note that `structure` refers to "Agglomerative Structure Split" provided by [6], and is only implemented for PDBBind v2007 Refined set; `sequence` refers to "Agglomerative Sequence Split" provided by [6], and is only implemented for PDBBind v2007 Refined set.
+    * Note that `structure` refers to "Agglomerative Structure Split" provided by [6], and is only implemented for PDBBind v2007 Refined set; `sequence` refers to "Agglomerative Sequence Split" provided by [6], and is only implemented for PDBBind v2007 Refined set.
 * `--test_on_core`, bool, whether to use the whole core set as test set when training on refined set, default True.
 * `--save_r2`, path to save r2 at each epoch, default not save. It will not create new directory.
 * `-t`, int, number of trials to run, default to 1.
@@ -45,28 +45,28 @@ Use `main.py` with arguments
 
 #### PotentialNet Model Parameters
 
-* `f_in`: int
+* `f_in`: int. 
     The dimension size of input features to GatedGraphConv, 
     equivalent to the dimension size of atomic features in the molecule graph.
-* `f_bond`: int
+* `f_bond`: int. 
     The dimension size of the output from GatedGraphConv in stage 1,
     equivalent to the dimension size of input to the linear layer at the end of stage 1.
-* `f_spatial`: int
+* `f_spatial`: int. 
     The dimension size of the output from GatedGraphConv in stage 2,
     equivalent to the dimension size of input to the linear layer at the end of stage 2.
-* `f_gather`: int
+* `f_gather`: int. 
     The dimension size of the output from stage 1 & 2,
     equivalent to the dimension size of output from the linear layer at the end of stage 1 & 2.
-* `n_etypes`: int
+* `n_etypes`: int. 
     The number of heterogeneous edge types for stage 2.
     Currently implemented as 5(the number of covalent bond types in stage 1) + the number of distance bins in stage 2.
-* `n_bond_conv_steps`: int
+* `n_bond_conv_steps`: int. 
     The number of bond convolution layers(steps) of GatedGraphConv in stage 1.
-* `n_spatial_conv_steps`: int
+* `n_spatial_conv_steps`: int. 
     The number of spatial convolution layers(steps) of GatedGraphConv in stage 2.
-* `n_rows_fc`: list of int
+* `n_rows_fc`: list of int. 
     The widths of the fully connected neural networks at each layer in stage 3.
-* `dropouts`; list of 3 floats,
+* `dropouts`; list of 3 floats. 
     The amount of dropout applied at the end of each stage.
 
 ## Performance

@@ -49,7 +49,7 @@ class PotentialNet(nn.Module):
         The number of spatial convolution layers(steps) of GatedGraphConv in stage 2.
     n_rows_fc: list of int
         The widths of the fully connected neural networks at each layer in stage 3.
-    dropouts; list of 3 floats,
+    dropouts; list of 3 floats
         The amount of dropout applied at the end of each stage.
     """
     def __init__(self,
