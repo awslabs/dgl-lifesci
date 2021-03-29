@@ -25,12 +25,12 @@ def run_a_train_epoch(args, epoch, model, data_loader,
     for batch_id, batch_data in enumerate(data_loader):
         indices, ligand_mols, protein_mols, bg, labels = batch_data
         labels = labels.to(args['device'])
-        if type(bg) == tuple: # for the case of PotentialNet
-            bigraph_canonical, knn_graph = bg # unpack
+        if args['model'] == 'PotentialNet': 
+            bigraph_canonical, knn_graph = bg # unpack stage1_graph, stage2_graph
             bigraph_canonical = bigraph_canonical.to(args['device'])
             knn_graph = knn_graph.to(args['device'])
             prediction = model(bigraph_canonical, knn_graph)
-        else: #ACNN
+        elif args['model'] == 'ACNN':
             bg = bg.to(args['device'])
             prediction = model(bg)
         loss = loss_criterion(prediction, (labels - args['train_mean']) / args['train_std'])
@@ -56,12 +56,12 @@ def run_an_eval_epoch(args, model, data_loader):
         for batch_id, batch_data in enumerate(data_loader):
             indices, ligand_mols, protein_mols, bg, labels = batch_data
             labels = labels.to(args['device'])
-            if type(bg) == tuple: # for the case of PotentialNet
+            if args['model'] == 'PotentialNet':
                 bigraph_canonical, knn_graph = bg # unpack
                 bigraph_canonical = bigraph_canonical.to(args['device'])
                 knn_graph = knn_graph.to(args['device'])
                 prediction = model(bigraph_canonical, knn_graph)
-            else:
+            elif args['model'] == 'ACNN':
                 bg = bg.to(args['device'])
                 prediction = model(bg)
             eval_meter.update(prediction, labels)
@@ -70,7 +70,7 @@ def run_an_eval_epoch(args, model, data_loader):
     return total_scores
 
 def main(args):
-    torch.multiprocessing.set_sharing_strategy('file_system') # test
+    torch.multiprocessing.set_sharing_strategy('file_system')
     args['device'] = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     set_random_seed(args['random_seed'])
 
@@ -87,16 +87,19 @@ def main(args):
                               batch_size=args['batch_size'],
                               shuffle=args['shuffle'],
                               collate_fn=collate,
+                              pin_memory= True,
                               num_workers=8)
     test_loader = DataLoader(dataset=test_set,
                              batch_size=args['batch_size'],
                              shuffle=args['shuffle'],
                              collate_fn=collate,
+                             pin_memory= True,
                              num_workers=8)
     val_loader = DataLoader(dataset=val_set,
                              batch_size=args['batch_size'],
                              shuffle=args['shuffle'],
                              collate_fn=collate,
+                             pin_memory=True,
                              num_workers=8)
 
     n_trials = args['num_trials']
@@ -157,7 +160,7 @@ if __name__ == '__main__':
                                  'PDBBind_refined_pocket_structure', 'PDBBind_refined_pocket_sequence'],
                         help='Data subset to use')
     parser.add_argument('-v', '--version', type=str, choices=['v2007', 'v2015'], default='v2015')
-    parser.add_argument('--save_r2', type=str, default='', help='path to save r2 at each epoch, default not save')
+    parser.add_argument('--save_r2', type=str, default='', help='path (need to be existing directory) to save r2 at each epoch, default not save')
     parser.add_argument('-t', '--num_trials', type=int, default=1)
     parser.add_argument('--test_on_core', type=bool, default=True, 
         help='whether to use the whole core set as test set when training on refined set, default True')

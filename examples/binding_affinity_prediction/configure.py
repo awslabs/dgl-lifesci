@@ -14,7 +14,7 @@ PotentialNet_PDBBind_core_pocket_random = {
     'frac_train': 0.6,
     'frac_val': 0.2,
     'frac_test': 0.2,
-    'batch_size': 40,
+    'batch_size': 200,
     'shuffle': False,
     'max_num_neighbors': 5, ##
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
@@ -41,7 +41,7 @@ PotentialNet_PDBBind_core_pocket_scaffold = {
     'frac_train': 0.6,
     'frac_val': 0.2,
     'frac_test': 0.2,
-    'batch_size': 40,
+    'batch_size': 200,
     'shuffle': False,
     'max_num_neighbors': 5, ##
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
@@ -68,7 +68,7 @@ PotentialNet_PDBBind_core_pocket_stratified = {
     'frac_train': 0.6,
     'frac_val': 0.2,
     'frac_test': 0.2,
-    'batch_size': 40,
+    'batch_size': 200,
     'shuffle': False,
     'max_num_neighbors': 5, ##
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
@@ -96,7 +96,7 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'frac_train': 0.8,
     'frac_val': 0.2,
     'frac_test': 0.,
-    'batch_size': 40,
+    'batch_size': 200,
     'shuffle': False,
     'max_num_neighbors': 5, ##
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
@@ -123,7 +123,7 @@ PotentialNet_PDBBind_refined_pocket_sequence = {
     'frac_train': 0.8,
     'frac_val': 0.2,
     'frac_test': 0.,
-    'batch_size': 40,
+    'batch_size': 200,
     'shuffle': False,
     'max_num_neighbors': 5, ##
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
@@ -135,9 +135,9 @@ PotentialNet_PDBBind_refined_pocket_sequence = {
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':2,
     'dropouts': [0.25, 0.25, 0.25],
-    'lr': 0.001,
+    'lr': 0.05,
     'num_epochs': 200,
-    'wd': 1e-07,
+    'wd': 1e-05,
     'metrics': ['r2', 'mae'],
     'split': 'sequence'
 }
@@ -150,7 +150,7 @@ PotentialNet_PDBBind_refined_pocket_structure = {
     'frac_train': 0.8,
     'frac_val': 0.2,
     'frac_test': 0.,
-    'batch_size': 40,
+    'batch_size': 200,
     'shuffle': False,
     'max_num_neighbors': 5, ##
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
@@ -178,7 +178,7 @@ PotentialNet_PDBBind_refined_pocket_scaffold = {
     'frac_train': 0.8,
     'frac_val': 0.2,
     'frac_test': 0.,
-    'batch_size': 40,
+    'batch_size': 200,
     'shuffle': False,
     'max_num_neighbors': 5, ##
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
@@ -206,7 +206,7 @@ PotentialNet_PDBBind_refined_pocket_stratified = {
     'frac_train': 0.8,
     'frac_val': 0.2,
     'frac_test': 0.,
-    'batch_size': 40,
+    'batch_size': 200,
     'shuffle': False,
     'max_num_neighbors': 5, ##
     'distance_bins': [1.5, 2.5, 3.5, 4.5],

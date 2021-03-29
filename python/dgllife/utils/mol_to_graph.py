@@ -49,7 +49,7 @@ def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
         to true might change the order of atoms in the graph constructed.
     explicit_hydrogens : bool
         Whether to explicitly represent hydrogens as nodes in the graph. If True,
-        it will call rdkit.Chem.AddHs(mol). If False, it will not remove or change hydrogens.
+        it will call rdkit.Chem.AddHs(mol). If False, it will do nothing.
         Default to False.
     num_virtual_nodes : int
         The number of virtual nodes to add. The virtual nodes will be connected to
