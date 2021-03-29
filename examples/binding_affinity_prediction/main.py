@@ -131,8 +131,8 @@ def main(args):
             save_path = args['save_r2'] + "/{}_{}_{}_{}_trial{}.npz".format(args['model'], args['version'], args['subset'], args['split'], trial+1)
             np.savez(save_path, train_r2=train_r2, val_r2=val_r2, test_r2=test_r2)
 
-        # save results on the epoch with best test r2
-        best_epoch = np.argmax(test_r2)
+        # save results on the epoch with best validation r2
+        best_epoch = np.argmax(val_r2)
         trial_train_r2[trial] = train_r2[best_epoch]
         trial_val_r2[trial] = val_r2[best_epoch]
         trial_test_r2[trial] = test_r2[best_epoch]

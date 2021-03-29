@@ -13,10 +13,10 @@ processed for data artifacts, as additional benchmarking targets.
 - **Atomic Convolutional Networks (ACNN)** [5]: Constructs nearest neighbor graphs separately for the ligand, protein and complex 
 based on the 3D coordinates of the atoms and predicts the binding free energy.
 
-- **PotentialNet** [6]: A 3-stage model that combines graph convolutional neural network (GCNN) with bigraph construction and k-nearest-neighbor graph construction and fully connected neural network (FCNN). The model consists of three main steps: (1) covalent-only propagation, (2) dual noncovalent and covalent propagation, and (3) ligand-based graph gather.
-    1. Stage 1. Both ligand and protein graphs are constructed and featurized based on covalent information using `dgllife.utils.CanonicalAtomFeaturizer` and `dgllife.utils.CanonicalBondFeaturizer` so that only chemically boned atoms are connected in the graph. The feature propagation is passed onto a multi-step gated recurrent unit (GRU) followed by a linear layer with sigmoid actiavtion.
-    2. Stage 2. A new pair of knn-graphs of ligand and protein is constructed from 3-D coordinates of the molecules. The edge type between atoms is a combination of covalent bond types and their physical distances. The output from stage 1 is used as initial features. The feature propagation is again passed onto a multi-step gated recurrent unit (GRU) followed by a linear layer with sigmoid actiavtion.
-    3. Stage 3. Feature gathering is performed only on ligand atoms from the output of stage 2 graphs. The final prediction is computed from feature propagation through a multi-layer fully connected neural network with ReLU activation.
+- **PotentialNet** [6]: A 3-stage model that combines graph convolutional neural network (GCNN) with molecular graphs and KNN graphs and fully connected neural network (FCNN). The model consists of three main steps: (1) covalent-only propagation, (2) dual noncovalent and covalent propagation, and (3) ligand-based graph gather.
+    1. Stage 1. Both ligand and protein graphs are constructed and featurized based on covalent information using `dgllife.utils.CanonicalAtomFeaturizer` and `dgllife.utils.CanonicalBondFeaturizer` so that only chemically bonded atoms are connected in the graph. The feature propagation is passed onto a multi-step gated recurrent unit (GRU) followed by a linear layer with sigmoid activation.
+    2. Stage 2. A new pair of knn-graphs of ligand and protein is constructed from 3-D coordinates of the molecules. The edge type between atoms is a combination of covalent bond types and their physical distances. The output from stage 1 is used as initial features. The feature propagation is again passed onto a multi-step gated recurrent unit (GRU) followed by a linear layer with sigmoid activation.
+    3. Stage 3. Feature gathering is performed only on ligand atoms on graphs from stage 2. The final prediction is computed from feature propagation through a multi-layer fully connected neural network with ReLU activation.
 
 
 ## Usage
@@ -47,7 +47,7 @@ Use `main.py` with arguments
 
 * `f_in`: int. 
     The dimension size of input features to GatedGraphConv, 
-    equivalent to the dimension size of atomic features in the molecule graph.
+    equivalent to the dimension size of atomic features in the molecular graph.
 * `f_bond`: int. 
     The dimension size of the output from GatedGraphConv in stage 1,
     equivalent to the dimension size of input to the linear layer at the end of stage 1.
@@ -66,7 +66,7 @@ Use `main.py` with arguments
     The number of spatial convolution layers(steps) of GatedGraphConv in stage 2.
 * `n_rows_fc`: list of int. 
     The widths of the fully connected neural networks at each layer in stage 3.
-* `dropouts`; list of 3 floats. 
+* `dropouts`: list of 3 floats. 
     The amount of dropout applied at the end of each stage.
 
 ## Performance
@@ -88,12 +88,18 @@ Use `main.py` with arguments
 
 #### PotentialNet
 
-| Training Set | Test Set| Splitting Method | PDBBind version | Train R2 (std) | Valication R2 (std) | Test R2 (std) |
+| Training Set | Test Set| Splitting Method | PDBBind version | Train R2 (std) | Validation R2 (std) | Test R2 (std) |
 | ------------ | --------| ---------------- | --------------- | -------------- | ------------------- | ------------- |
 | Refined      | Core    | Random           | v2007           | 0.9305 (0.0106)| 0.4161 (0.0217)     |0.8980 (0.0102)|
 | Refined      | Core    | Random           | v2015           | 0.8934 (0.0112)| 0.4227 (0.0170)     |0.8117 (0.0135)|
 
-The results are computed over 100 trials and R2 from the best epoch is reported. Note that core set is not removed from the refined set.
+The results are computed over 100 trials and R2 from the best epoch is reported. Note that core set is not removed from the refined set. 
+
+##### Reported Performance from PotentialNet paper [6]
+
+| Training Set           | Test Set| PDBBind version | Test R2 (std) |
+| ---------------------- | ------- | --------------- | ------------- |
+| Refined (core removed) | Core    | v2007           | 0.668 (0.043) |
 
 ## Speed
 

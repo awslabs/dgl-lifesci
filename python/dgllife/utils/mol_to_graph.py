@@ -173,7 +173,7 @@ def mol_to_bigraph(mol, add_self_loop=False,
                    node_featurizer=None,
                    edge_featurizer=None,
                    canonical_atom_order=True,
-                   explicit_hydrogens=None,
+                   explicit_hydrogens=False,
                    num_virtual_nodes=0):
     """Convert an RDKit molecule object into a bi-directed DGLGraph and featurize for it.
 

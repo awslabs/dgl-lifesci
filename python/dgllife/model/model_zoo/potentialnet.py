@@ -30,7 +30,7 @@ class PotentialNet(nn.Module):
     ----------
     f_in: int
         The dimension size of input features to GatedGraphConv, 
-        equivalent to the dimension size of atomic features in the molecule graph.
+        equivalent to the dimension size of atomic features in the molecular graph.
     f_bond: int
         The dimension size of the output from GatedGraphConv in stage 1,
         equivalent to the dimension size of input to the linear layer at the end of stage 1.
@@ -49,7 +49,7 @@ class PotentialNet(nn.Module):
         The number of spatial convolution layers(steps) of GatedGraphConv in stage 2.
     n_rows_fc: list of int
         The widths of the fully connected neural networks at each layer in stage 3.
-    dropouts; list of 3 floats
+    dropouts: list of 3 floats
         The amount of dropout applied at the end of each stage.
     """
     def __init__(self,
