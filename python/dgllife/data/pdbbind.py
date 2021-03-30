@@ -9,6 +9,7 @@ import dgl.backend as F
 import numpy as np
 import multiprocessing
 import os
+import glob
 from functools import partial
 import pandas as pd
 
@@ -82,28 +83,32 @@ class PDBBind(object):
         Whether to remove core set from refined set when train with refined set and test with core set. 
         Default to True.
     """
-    def __init__(self, subset, pdb_version, load_binding_pocket=True, remove_coreset_from_refinedset=True, sanitize=False, 
+    def __init__(self, subset, pdb_version='v2015', load_binding_pocket=True, remove_coreset_from_refinedset=True, sanitize=False, 
                  calc_charges=False, remove_hs=False, use_conformation=True,
                  construct_graph_and_featurize=ACNN_graph_construction_and_featurization,
-                 zero_padding=True, num_processes=None):
+                 zero_padding=True, num_processes=None, local_path=None):
         self.task_names = ['-logKd/Ki']
         self.n_tasks = len(self.task_names)
-        self._read_data_files(pdb_version, subset, load_binding_pocket, remove_coreset_from_refinedset)
+        self._read_data_files(pdb_version, subset, load_binding_pocket, remove_coreset_from_refinedset, local_path)
         self._preprocess(load_binding_pocket,
                          sanitize, calc_charges, remove_hs, use_conformation,
                          construct_graph_and_featurize, zero_padding, num_processes)
         # Prepare for Refined, Agglomerative Sequence Split and Agglomerative Structure Split
-        if pdb_version == 'v2007':
+        if pdb_version == 'v2007' and not local_path:
             merged_df = self.df.merge(self.agg_split, on='PDB_code')
             self.agg_sequence_split = [list(merged_df.loc[merged_df['sequence']==target_set, 'PDB_code'].index) 
                 for target_set in ['train', 'valid', 'test']]
             self.agg_structure_split = [list(merged_df.loc[merged_df['structure']==target_set, 'PDB_code'].index) 
                 for target_set in ['train', 'valid', 'test']]
 
-    def _read_data_files(self, pdb_version, subset, load_binding_pocket, remove_coreset_from_refinedset):
+    def _read_data_files(self, pdb_version, subset, load_binding_pocket, remove_coreset_from_refinedset, local_path):
         """Download and extract pdbbind data files specified by the version"""
         root_dir_path = get_download_dir()
-        if pdb_version == 'v2015':
+        if local_path:
+            if local_path[-1]!='/':
+                local_path += '/'
+            index_label_file = glob.glob(local_path + '*' + subset + '*data*')[0]
+        elif pdb_version == 'v2015':
             self._url = 'dataset/pdbbind_v2015.tar.gz'
             data_path = root_dir_path + '/pdbbind_v2015.tar.gz'
             extracted_data_path = root_dir_path + '/pdbbind_v2015'
@@ -118,15 +123,13 @@ class PDBBind(object):
                 raise ValueError(
                     'Expect the subset_choice to be either '
                 'core or refined, got {}'.format(subset))
-
-        if pdb_version == 'v2007':
+        elif pdb_version == 'v2007':
             # download from pddbind official website
         #     download_url = 'http://www.pdbbind.org.cn/download/pdbbind_v2007.tar.gz' 
         #     data_path = root_dir_path + '/pdbbind_v2007.tar.gz'
         #     extracted_data_path = root_dir_path + '/pdbbind_v2007'
         #     download(download_url, path=data_path, overwrite=False)
         #     extract_archive(data_path, extracted_data_path)
-
             self._url = 'dataset/pdbbind_v2007.tar.gz'
             data_path = root_dir_path + '/pdbbind_v2007.tar.gz'
             extracted_data_path = root_dir_path + '/pdbbind_v2007'
@@ -138,7 +141,6 @@ class PDBBind(object):
             self.agg_split = pd.read_csv(extracted_data_path + '/v2007/pdbbind_2007_agglomerative_split.txt')
             self.agg_split.rename(columns={'PDB ID':'PDB_code', 'Sequence-based assignment':'sequence', 'Structure-based assignment':'structure'}, inplace=True)
             self.agg_split.loc[self.agg_split['PDB_code']=='1.00E+66', 'PDB_code'] = '1e66' # fix typo
-
             if subset == 'core':
                 index_label_file = extracted_data_path + '/v2007/INDEX.2007.core.data'
             elif subset == 'refined':
@@ -179,9 +181,11 @@ class PDBBind(object):
 
         ## remove core set from refine set if using refined
         if remove_coreset_from_refinedset and subset == 'refined':
-            if pdb_version == 'v2015':
+            if local_path:
+                core_path = glob.glob(local_path + '*core*data*')[0]
+            elif pdb_version == 'v2015':
                 core_path = extracted_data_path + '/v2015/INDEX_core_data.2013'
-            if pdb_version == 'v2007':
+            elif pdb_version == 'v2007':
                 core_path = extracted_data_path + '/v2007/INDEX.2007.core.data'
 
             with open(core_path,'r') as f:
@@ -189,22 +193,17 @@ class PDBBind(object):
                     fields = line.strip().split()
                     if fields[0] != "#" and fields[0] in pdbs:
                         pdbs.remove(fields[0])
-
-            # if pdb_version == 'v2007':
-            #     with open (extracted_data_path + '/2007/INDEX.2007.core.data','r') as f:
-            #         for line in f:
-            #             fields = line.strip().split()
-            #             if fields[0] != "#" and fields[0] in pdbs:
-            #                 pdbs.remove(fields[0])      
-
-        self.ligand_files = [os.path.join(
-            extracted_data_path, pdb_version, pdb, '{}_ligand.sdf'.format(pdb)) for pdb in pdbs]
-        if load_binding_pocket:
-            self.protein_files = [os.path.join(
-                extracted_data_path, pdb_version, pdb, '{}_pocket.pdb'.format(pdb)) for pdb in pdbs]
+        
+        if local_path:
+            pdb_path = local_path
         else:
-            self.protein_files = [os.path.join(
-                extracted_data_path, pdb_version, pdb, '{}_protein.pdb'.format(pdb)) for pdb in pdbs]
+            pdb_path = os.path.join(extracted_data_path, pdb_version)
+        print('Loading PDBBind data from', pdb_path)
+        self.ligand_files = [os.path.join(pdb_path, pdb, '{}_ligand.sdf'.format(pdb)) for pdb in pdbs]
+        if load_binding_pocket:
+            self.protein_files = [os.path.join(pdb_path, pdb, '{}_pocket.pdb'.format(pdb)) for pdb in pdbs]
+        else:
+            self.protein_files = [os.path.join(pdb_path, pdb, '{}_protein.pdb'.format(pdb)) for pdb in pdbs]
 
     def _filter_out_invalid(self, ligands_loaded, proteins_loaded, use_conformation):
         """Filter out invalid ligand-protein pairs.

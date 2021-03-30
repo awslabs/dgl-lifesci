@@ -39,6 +39,7 @@ Use `main.py` with arguments
     PDBBind_refined_pocket_sequence}
     ```   
     * Note that `structure` refers to "Agglomerative Structure Split" provided by [6], and is only implemented for PDBBind v2007 Refined set; `sequence` refers to "Agglomerative Sequence Split" provided by [6], and is only implemented for PDBBind v2007 Refined set.
+* `--pdb_path`, local path of existing PDBBind dataset. Specify this argument to a local path of **customized dataset**, which should follow the structure and the naming format of PDBBind v2015.
 * `--test_on_core`, bool, whether to use the whole core set as test set when training on refined set, default True.
 * `--save_r2`, path to save r2 at each epoch, default not save.
 * `-t`, int, number of trials to run, default to 1.

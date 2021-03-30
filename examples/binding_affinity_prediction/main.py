@@ -162,7 +162,7 @@ if __name__ == '__main__':
                                  'PDBBind_refined_pocket_structure', 'PDBBind_refined_pocket_sequence'],
                         help='Data subset and split to use')
     parser.add_argument('-v', '--version', type=str, choices=['v2007', 'v2015'], default='v2015')
-    parser.add_argument('--pbd_path', type=str, default='', help='local path of custom ')
+    parser.add_argument('--pdb_path', type=str, default='', help='local path of custom PDBBind dataset')
     parser.add_argument('--save_r2', type=str, default='', help='path to save r2 at each epoch, default not save')
     parser.add_argument('-t', '--num_trials', type=int, default=1)
     parser.add_argument('--test_on_core', type=bool, default=True, 
