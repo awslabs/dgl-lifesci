@@ -3,6 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+import os
 import numpy as np
 import torch
 import torch.nn as nn
@@ -25,7 +26,7 @@ def run_a_train_epoch(args, epoch, model, data_loader,
     for batch_id, batch_data in enumerate(data_loader):
         indices, ligand_mols, protein_mols, bg, labels = batch_data
         labels = labels.to(args['device'])
-        if args['model'] == 'PotentialNet': 
+        if args['model'] == 'PotentialNet':
             bigraph_canonical, knn_graph = bg # unpack stage1_graph, stage2_graph
             bigraph_canonical = bigraph_canonical.to(args['device'])
             knn_graph = knn_graph.to(args['device'])
@@ -74,14 +75,14 @@ def main(args):
     args['device'] = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     set_random_seed(args['random_seed'])
 
-    _, train_set, val_set, test_set = load_dataset(args) 
+    train_set, val_set, test_set = load_dataset(args)
     args['train_mean'] = train_set.labels_mean.to(args['device'])
     args['train_std'] = train_set.labels_std.to(args['device'])
 
     if args['test_on_core']:   # always test on core set
-        test_loader_dict = {'subset': 'core', 'frac_train':0, 'frac_val': 0, 'frac_test': 1}
+        test_loader_dict = {'subset': 'core', 'frac_train': 0, 'frac_val': 0, 'frac_test': 1}
         args.update(test_loader_dict)
-        _, _, _, test_set = load_dataset(args)
+        _, _, test_set = load_dataset(args)
 
     train_loader = DataLoader(dataset=train_set,
                               batch_size=args['batch_size'],
@@ -128,6 +129,7 @@ def main(args):
             print('')
         # save model r2 at each epoch
         if args['save_r2']:
+            os.makedirs(args['save_r2'], exist_ok=True)
             save_path = args['save_r2'] + "/{}_{}_{}_{}_trial{}.npz".format(args['model'], args['version'], args['subset'], args['split'], trial+1)
             np.savez(save_path, train_r2=train_r2, val_r2=val_r2, test_r2=test_r2)
 
@@ -158,23 +160,24 @@ if __name__ == '__main__':
                                  'PDBBind_refined_pocket_random', 'PDBBind_refined_pocket_scaffold',
                                  'PDBBind_refined_pocket_stratified', 'PDBBind_refined_pocket_temporal',
                                  'PDBBind_refined_pocket_structure', 'PDBBind_refined_pocket_sequence'],
-                        help='Data subset to use')
+                        help='Data subset and split to use')
     parser.add_argument('-v', '--version', type=str, choices=['v2007', 'v2015'], default='v2015')
-    parser.add_argument('--save_r2', type=str, default='', help='path (need to be existing directory) to save r2 at each epoch, default not save')
+    parser.add_argument('--pbd_path', type=str, default='', help='local path of custom ')
+    parser.add_argument('--save_r2', type=str, default='', help='path to save r2 at each epoch, default not save')
     parser.add_argument('-t', '--num_trials', type=int, default=1)
     parser.add_argument('--test_on_core', type=bool, default=True, 
-        help='whether to use the whole core set as test set when training on refined set, default True')
+                        help='whether to use the whole core set as test set when training on refined set, default True')
 
     args = parser.parse_args().__dict__
     args['exp'] = '_'.join([args['model'], args['dataset']])
     args.update(get_exp_configure(args['exp']))
 
-    if args['split']=='sequence' or args['split']=='structure':
+    if args['split'] == 'sequence' or args['split'] == 'structure':
         args['version'] = 'v2007' 
         args['test_on_core'] = False
         args['remove_coreset_from_refinedset'] = False
 
-    if args['subset']=='core':
+    if args['subset'] == 'core':
         args['remove_coreset_from_refinedset'] = False
         args['test_on_core'] = False
 

@@ -14,8 +14,7 @@ from ..utils.mol_to_graph import k_nearest_neighbors, mol_to_bigraph
 from ..utils.featurizers import CanonicalAtomFeaturizer, CanonicalBondFeaturizer
 
 __all__ = ['ACNN_graph_construction_and_featurization', 
-           'potentialNet_graph_construction_featurization', 
-           ]
+           'PN_graph_construction_featurization']
 
 def filter_out_hydrogens(mol):
     """Get indices for non-hydrogen atoms.
@@ -67,15 +66,15 @@ def int_2_one_hot(a):
     b[np.arange(n), a] = 1
     return b
 
-def potentialNet_graph_construction_featurization(ligand_mol,
-                                              protein_mol,
-                                              ligand_coordinates,
-                                              protein_coordinates,
-                                              max_num_ligand_atoms=None,
-                                              max_num_protein_atoms=None,
-                                              max_num_neighbors=4,
-                                              distance_bins = [1.5, 2.5, 3.5, 4.5],
-                                              strip_hydrogens=False):
+def PN_graph_construction_featurization(ligand_mol,
+                                        protein_mol,
+                                        ligand_coordinates,
+                                        protein_coordinates,
+                                        max_num_ligand_atoms=None,
+                                        max_num_protein_atoms=None,
+                                        max_num_neighbors=4,
+                                        distance_bins = [1.5, 2.5, 3.5, 4.5],
+                                        strip_hydrogens=False):
     """Graph construction and featurization for `PotentialNet for Molecular Property Prediction
      <https://pubs.acs.org/doi/10.1021/acscentsci.8b00507>`__.
 
@@ -157,14 +156,13 @@ def potentialNet_graph_construction_featurization(ligand_mol,
     node_featurizer = CanonicalAtomFeaturizer(atom_data_field='h')
     edge_featurizer = CanonicalBondFeaturizer(bond_data_field='e')
     ligand_bigraph = mol_to_bigraph(ligand_mol, add_self_loop=False,
-                   node_featurizer=node_featurizer,
-                   edge_featurizer=edge_featurizer,
-                   canonical_atom_order=False, # Keep the original atomic order
-                   )
+                                    node_featurizer=node_featurizer,
+                                    edge_featurizer=edge_featurizer,
+                                    canonical_atom_order=False) # Keep the original atomic order)
     protein_bigraph = mol_to_bigraph(protein_mol, add_self_loop=False,
-                   node_featurizer=node_featurizer,
-                   edge_featurizer=edge_featurizer,
-                   canonical_atom_order=False)
+                                     node_featurizer=node_featurizer,
+                                     edge_featurizer=edge_featurizer,
+                                     canonical_atom_order=False)
 
     complex_bigraph = batch([ligand_bigraph, protein_bigraph])
     # remove features that never appear

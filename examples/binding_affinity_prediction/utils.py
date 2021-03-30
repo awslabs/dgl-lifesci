@@ -55,29 +55,27 @@ def load_dataset(args):
         Input arguments.
     Returns
     -------
-    dataset
-        Full dataset.
     train_set
         Train subset of the dataset.
     val_set
         Validation subset of the dataset.
+    test_set
+        Test subset of the dataset.
     """
     assert args['dataset'] in ['PDBBind'], 'Unexpected dataset {}'.format(args['dataset'])
     if args['dataset'] == 'PDBBind':
         if args['model'] == 'PotentialNet': 
             from functools import partial
-            from dgllife.utils import potentialNet_graph_construction_featurization
+            from dgllife.utils import PN_graph_construction_featurization
             dataset = PDBBind(subset=args['subset'], pdb_version=args['version'], 
-                    remove_coreset_from_refinedset=args['remove_coreset_from_refinedset'],
-                    load_binding_pocket=args['load_binding_pocket'],
-                    construct_graph_and_featurize = partial(potentialNet_graph_construction_featurization, 
-                    distance_bins=args['distance_bins'],
-                    max_num_neighbors=args['max_num_neighbors'])
-                        )
-        elif args['model'] =='ACNN':
+                              remove_coreset_from_refinedset=args['remove_coreset_from_refinedset'],
+                              load_binding_pocket=args['load_binding_pocket'],
+                              construct_graph_and_featurize=partial(PN_graph_construction_featurization, 
+                                                                    distance_bins=args['distance_bins'],
+                                                                    max_num_neighbors=args['max_num_neighbors']))
+        elif args['model'] == 'ACNN':
             dataset = PDBBind(subset=args['subset'], pdb_version=args['version'],
-                          load_binding_pocket=args['load_binding_pocket'],
-                          )
+                              load_binding_pocket=args['load_binding_pocket'])
 
         if args['split'] == 'sequence':
             train_set, val_set, test_set = [Subset(dataset, indices) for indices in dataset.agg_sequence_split]
@@ -130,7 +128,7 @@ def load_dataset(args):
             train_set.labels_mean = train_labels.mean(dim=0)
             train_set.labels_std = train_labels.std(dim=0)
 
-    return dataset, train_set, val_set, test_set
+    return train_set, val_set, test_set
 
 def collate(data):
     indices, ligand_mols, protein_mols, graphs, labels = map(list, zip(*data))

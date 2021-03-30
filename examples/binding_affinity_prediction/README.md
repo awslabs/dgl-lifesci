@@ -16,7 +16,7 @@ based on the 3D coordinates of the atoms and predicts the binding free energy.
 - **PotentialNet** [6]: A 3-stage model that combines graph convolutional neural network (GCNN) with molecular graphs and KNN graphs and fully connected neural network (FCNN). The model consists of three main steps: (1) covalent-only propagation, (2) dual noncovalent and covalent propagation, and (3) ligand-based graph gather.
     1. Stage 1. Both ligand and protein graphs are constructed and featurized based on covalent information using `dgllife.utils.CanonicalAtomFeaturizer` and `dgllife.utils.CanonicalBondFeaturizer` so that only chemically bonded atoms are connected in the graph. The feature propagation is passed onto a multi-step gated recurrent unit (GRU) followed by a linear layer with sigmoid activation.
     2. Stage 2. A new pair of knn-graphs of ligand and protein is constructed from 3-D coordinates of the molecules. The edge type between atoms is a combination of covalent bond types and their physical distances. The output from stage 1 is used as initial features. The feature propagation is again passed onto a multi-step gated recurrent unit (GRU) followed by a linear layer with sigmoid activation.
-    3. Stage 3. Feature gathering is performed only on ligand atoms on graphs from stage 2. The final prediction is computed from feature propagation through a multi-layer fully connected neural network with ReLU activation.
+    3. Stage 3. Feature gathering is performed only on ligand atoms in graphs from stage 2. The final prediction is computed from feature propagation through a multi-layer fully connected neural network with ReLU activation.
 
 
 ## Usage
@@ -40,7 +40,7 @@ Use `main.py` with arguments
     ```   
     * Note that `structure` refers to "Agglomerative Structure Split" provided by [6], and is only implemented for PDBBind v2007 Refined set; `sequence` refers to "Agglomerative Sequence Split" provided by [6], and is only implemented for PDBBind v2007 Refined set.
 * `--test_on_core`, bool, whether to use the whole core set as test set when training on refined set, default True.
-* `--save_r2`, path to save r2 at each epoch, default not save. It will not create new directory.
+* `--save_r2`, path to save r2 at each epoch, default not save.
 * `-t`, int, number of trials to run, default to 1.
 
 ### For access to more hyperparameters, see `./configure.py`.
