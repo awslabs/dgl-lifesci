@@ -14,7 +14,7 @@ from ..utils.mol_to_graph import k_nearest_neighbors, mol_to_bigraph
 from ..utils.featurizers import CanonicalAtomFeaturizer, CanonicalBondFeaturizer
 
 __all__ = ['ACNN_graph_construction_and_featurization', 
-           'PN_graph_construction_featurization']
+           'PN_graph_construction_and_featurization']
 
 def filter_out_hydrogens(mol):
     """Get indices for non-hydrogen atoms.
@@ -66,7 +66,7 @@ def int_2_one_hot(a):
     b[np.arange(n), a] = 1
     return b
 
-def PN_graph_construction_featurization(ligand_mol,
+def PN_graph_construction_and_featurization(ligand_mol,
                                         protein_mol,
                                         ligand_coordinates,
                                         protein_coordinates,

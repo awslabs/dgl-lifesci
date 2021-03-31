@@ -3,17 +3,20 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+import random
+from functools import partial
+from itertools import accumulate
+
 import dgl
 import numpy as np
-import random
-import torch
 import numpy.random as nrd
-
+import torch
 from dgl.data.utils import Subset
 from dgllife.data import PDBBind
 from dgllife.model import ACNN, PotentialNet
-from dgllife.utils import RandomSplitter, ScaffoldSplitter, SingleTaskStratifiedSplitter
-from itertools import accumulate
+from dgllife.utils import (PN_graph_construction_and_featurization,
+                           RandomSplitter, ScaffoldSplitter,
+                           SingleTaskStratifiedSplitter)
 
 
 def rand_hyperparams():
@@ -65,20 +68,18 @@ def load_dataset(args):
     assert args['dataset'] in ['PDBBind'], 'Unexpected dataset {}'.format(args['dataset'])
     if args['dataset'] == 'PDBBind':
         if args['model'] == 'PotentialNet': 
-            from functools import partial
-            from dgllife.utils import PN_graph_construction_featurization
             if args['pdb_path']:
                 dataset = PDBBind(subset=args['subset'], pdb_version=args['version'], local_path=args['pdb_path'],
                                   remove_coreset_from_refinedset=args['remove_coreset_from_refinedset'],
                                   load_binding_pocket=args['load_binding_pocket'],
-                                  construct_graph_and_featurize=partial(PN_graph_construction_featurization, 
+                                  construct_graph_and_featurize=partial(PN_graph_construction_and_featurization, 
                                                                         distance_bins=args['distance_bins'],
                                                                         max_num_neighbors=args['max_num_neighbors']))
             else:
                 dataset = PDBBind(subset=args['subset'], pdb_version=args['version'], 
                                   remove_coreset_from_refinedset=args['remove_coreset_from_refinedset'],
                                   load_binding_pocket=args['load_binding_pocket'],
-                                  construct_graph_and_featurize=partial(PN_graph_construction_featurization, 
+                                  construct_graph_and_featurize=partial(PN_graph_construction_and_featurization, 
                                                                         distance_bins=args['distance_bins'],
                                                                         max_num_neighbors=args['max_num_neighbors']))
         elif args['model'] == 'ACNN':
