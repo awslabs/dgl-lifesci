@@ -338,8 +338,8 @@ class PDBBind(object):
         # construct graphs with multiprocessing
         pool = multiprocessing.Pool(processes=num_processes)
         self.graphs = pool.starmap(construct_graph_and_featurize, 
-                            zip(self.ligand_mols, self.protein_mols,
-                            self.ligand_coordinates, self.protein_coordinates))
+                                   zip(self.ligand_mols, self.protein_mols,
+                                       self.ligand_coordinates, self.protein_coordinates))
         print(f'Done constructing {len(self.graphs)} graphs.')
 
 

@@ -169,8 +169,6 @@ def PN_graph_construction_and_featurization(ligand_mol,
     complex_dists = np.array(complex_dists)
 
     complex_knn_graph = graph((complex_srcs, complex_dsts), num_nodes=len(complex_coordinates))
-    complex_knn_graph.add_nodes(len(complex_coordinates))
-    complex_knn_graph.add_edges(complex_srcs, complex_dsts)
     d_features = np.digitize(complex_dists, bins=distance_bins, right=True)
     d_one_hot = int_2_one_hot(d_features)
     
