@@ -91,7 +91,7 @@ def load_dataset(args):
 
         if args['split'] == 'sequence':
             train_set, val_set, test_set = [Subset(dataset, indices) for indices in dataset.agg_sequence_split]
-        elif args['split'] =='structure':
+        elif args['split'] == 'structure':
             train_set, val_set, test_set = [Subset(dataset, indices) for indices in dataset.agg_structure_split]
 
         elif args['split'] == 'random':
@@ -167,13 +167,13 @@ def load_model(args):
                      features_to_use=args['atomic_numbers_considered'],
                      radial=args['radial'])
     if args['model'] == 'PotentialNet': 
-        model = PotentialNet(n_etypes= (len(args['distance_bins'])+ 5),
-                 f_in=args['f_in'],
-                 f_bond=args['f_bond'],
-                 f_spatial=args['f_spatial'],
-                 f_gather=args['f_gather'],
-                 n_rows_fc=args['n_rows_fc'],
-                 n_bond_conv_steps=args['n_bond_conv_steps'],
-                 n_spatial_conv_steps=args['n_spatial_conv_steps'],
-                 dropouts=args['dropouts'])
+        model = PotentialNet(n_etypes=(len(args['distance_bins'])+ 5),
+                             f_in=args['f_in'],
+                             f_bond=args['f_bond'],
+                             f_spatial=args['f_spatial'],
+                             f_gather=args['f_gather'],
+                             n_rows_fc=args['n_rows_fc'],
+                             n_bond_conv_steps=args['n_bond_conv_steps'],
+                             n_spatial_conv_steps=args['n_spatial_conv_steps'],
+                             dropouts=args['dropouts'])
     return model

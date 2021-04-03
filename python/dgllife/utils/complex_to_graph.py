@@ -59,22 +59,21 @@ def get_atomic_numbers(mol, indices):
     return atomic_numbers
 
 def int_2_one_hot(a):
-    """Convert integer encodings on a vector to a matrix of one-hot-encoding
-    """
+    """Convert integer encodings on a vector to a matrix of one-hot encoding"""
     n = len(a)
     b = np.zeros((n, a.max()+1))
     b[np.arange(n), a] = 1
     return b
 
 def PN_graph_construction_and_featurization(ligand_mol,
-                                        protein_mol,
-                                        ligand_coordinates,
-                                        protein_coordinates,
-                                        max_num_ligand_atoms=None,
-                                        max_num_protein_atoms=None,
-                                        max_num_neighbors=4,
-                                        distance_bins = [1.5, 2.5, 3.5, 4.5],
-                                        strip_hydrogens=False):
+                                            protein_mol,
+                                            ligand_coordinates,
+                                            protein_coordinates,
+                                            max_num_ligand_atoms=None,
+                                            max_num_protein_atoms=None,
+                                            max_num_neighbors=4,
+                                            distance_bins=[1.5, 2.5, 3.5, 4.5],
+                                            strip_hydrogens=False):
     """Graph construction and featurization for `PotentialNet for Molecular Property Prediction
      <https://pubs.acs.org/doi/10.1021/acscentsci.8b00507>`__.
 
@@ -96,27 +95,27 @@ def PN_graph_construction_and_featurization(ligand_mol,
         Maximum number of atoms in proteins for zero padding, which should be no smaller than
         protein_mol.GetNumAtoms() if not None. If None, no zero padding will be performed.
         Default to None.
+    max_num_neighbors : int
+        Maximum number of neighbors allowed for each atom when constructing KNN graph. Default to 4.
     distance_bins : list of float
-        Sequence of distance edges to determine the edge types.
-        The first edge type is connected between atoms of distance less than `distance_bins[0]`.
+        Distance bins to determine the edge types.
+        Edges of the first edge type are added between pairs of atoms whose distances are less than `distance_bins[0]`.
         The length matches the number of edge types to be constructed.
         Default `[1.5, 2.5, 3.5, 4.5]`.
-    max_num_neighbors : int
-        Maximum number of neighbors allowed for each atom when constucting KNN graph. Default to 4.
     strip_hydrogens : bool
         Whether to exclude hydrogen atoms. Default to False.
 
     Returns
     -------
     complex_bigraph : DGLGraph
-        Bigraph with ligand and protein (pocket) combined and canonical features extracted.
+        Bigraph with the ligand and the protein (pocket) combined and canonical features extracted.
         The atom features are stored as DGLGraph.ndata['h'].
         The edge types are stored as DGLGraph.edata['e'].
-        The bigraphs of ligand and protein are batched together as one complex graph.
+        The bigraphs of the ligand and the protein are batched together as one complex graph.
     complex_knn_graph : DGLGraph
-        K-nearest-neighbor graph with ligand and protein (pocket) combined and edge features extracted based on distances.
+        K-nearest-neighbor graph with the ligand and the protein (pocket) combined and edge features extracted based on distances.
         The edge types are stored as DGLGraph.edata['e'].
-        The knn-graphs of ligand and protein are batched together as one complex graph.
+        The knn graphs of the ligand and the protein are batched together as one complex graph.
 
     """
 
@@ -141,17 +140,6 @@ def PN_graph_construction_and_featurization(ligand_mol,
         ligand_atom_indices_left = list(range(ligand_mol.GetNumAtoms()))
         protein_atom_indices_left = list(range(protein_mol.GetNumAtoms()))
 
-    # Compute number of nodes for each type
-    if max_num_ligand_atoms is None:
-        num_ligand_atoms = len(ligand_atom_indices_left)
-    else:
-        num_ligand_atoms = max_num_ligand_atoms
-
-    if max_num_protein_atoms is None:
-        num_protein_atoms = len(protein_atom_indices_left)
-    else:
-        num_protein_atoms = max_num_protein_atoms
-
     # Construct bigraph for stage 1
     node_featurizer = CanonicalAtomFeaturizer(atom_data_field='h')
     edge_featurizer = CanonicalBondFeaturizer(bond_data_field='e')
@@ -172,7 +160,7 @@ def PN_graph_construction_and_featurization(ligand_mol,
     complex_bigraph.edata['e'] = np.delete(complex_bigraph.edata['e'], zero_e_cols, axis=1) # 5 edge types remain
 
 
-    # Construct knn grpah for stage 2
+    # Construct knn graph for stage 2
     complex_coordinates = np.concatenate([ligand_coordinates, protein_coordinates])
     complex_srcs, complex_dsts, complex_dists = k_nearest_neighbors(
             complex_coordinates, distance_bins[-1], max_num_neighbors)
@@ -180,7 +168,7 @@ def PN_graph_construction_and_featurization(ligand_mol,
     complex_dsts = np.array(complex_dsts)
     complex_dists = np.array(complex_dists)
 
-    complex_knn_graph = graph([])
+    complex_knn_graph = graph((complex_srcs, complex_dsts), num_nodes=len(complex_coordinates))
     complex_knn_graph.add_nodes(len(complex_coordinates))
     complex_knn_graph.add_edges(complex_srcs, complex_dsts)
     d_features = np.digitize(complex_dists, bins=distance_bins, right=True)

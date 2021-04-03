@@ -88,20 +88,18 @@ def main(args):
                               batch_size=args['batch_size'],
                               shuffle=args['shuffle'],
                               collate_fn=collate,
-                              pin_memory= True,
-                              num_workers=8)
+                              pin_memory=True,
+                              num_workers=args['num_workers'])
     test_loader = DataLoader(dataset=test_set,
                              batch_size=args['batch_size'],
-                             shuffle=args['shuffle'],
-                             collate_fn=collate,
-                             pin_memory= True,
-                             num_workers=8)
-    val_loader = DataLoader(dataset=val_set,
-                             batch_size=args['batch_size'],
-                             shuffle=args['shuffle'],
                              collate_fn=collate,
                              pin_memory=True,
-                             num_workers=8)
+                             num_workers=args['num_workers'])
+    val_loader = DataLoader(dataset=val_set,
+                            batch_size=args['batch_size'],
+                            collate_fn=collate,
+                            pin_memory=True,
+                            num_workers=args['num_workers'])
 
     n_trials = args['num_trials']
     n_epochs = args['num_epochs']
@@ -163,6 +161,7 @@ if __name__ == '__main__':
                         help='Data subset and split to use')
     parser.add_argument('-v', '--version', type=str, choices=['v2007', 'v2015'], default='v2015')
     parser.add_argument('--pdb_path', type=str, default='', help='local path of custom PDBBind dataset')
+    parser.add_argument('--num_workers', type=int, default=8, help='number of workers for Dataloader, default to 8')
     parser.add_argument('--save_r2', type=str, default='', help='path to save r2 at each epoch, default not save')
     parser.add_argument('-t', '--num_trials', type=int, default=1)
     parser.add_argument('--test_on_core', type=bool, default=True, 

@@ -1,6 +1,3 @@
-import math
-import dgl
-import numpy as np
 import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
@@ -11,19 +8,19 @@ __all__ = ['PotentialNet']
 
 def sum_ligand_features(h, batch_num_nodes):
     """
-    Computes the sum of only ligand features `h` according to the batch information `batch_num_nodes`.
+    Compute the sum of only ligand features `h` according to the batch information `batch_num_nodes`.
     """
     node_nums = th.cumsum(batch_num_nodes, dim=0)
-    B = int(len(batch_num_nodes)/2) # actual batch size
+    B = int(len(batch_num_nodes) / 2) # actual batch size
     ligand_idx = [list(range(node_nums[0]))] # first ligand
-    for i in range(2,len(node_nums),2): # the rest of ligands in the batch
-        ligand_idx.append(list(range(node_nums[i-1],node_nums[i])))
+    for i in range(2,len(node_nums), 2): # the rest of ligands in the batch
+        ligand_idx.append(list(range(node_nums[i-1], node_nums[i])))
     return th.cat([h[i,].sum(0, keepdim=True) for i in ligand_idx]).to(device=h.device) # sum over each ligand
 
 
 class PotentialNet(nn.Module):
     """
-    Protein-ligand binding affnity prediction using a 'staged gated graph neural network'
+    Protein-ligand binding affinity prediction using a 'staged gated graph neural network'
     introduced in `PotentialNet for Molecular Property Prediction <http://dx.doi.org/10.1021/acscentsci.8b00507>`__.
 
     Parameters
@@ -53,37 +50,52 @@ class PotentialNet(nn.Module):
         The amount of dropout applied at the end of each stage.
     """
     def __init__(self,
-                 n_etypes,
                  f_in,
                  f_bond,
                  f_spatial,
                  f_gather,
-                 n_rows_fc,
+                 n_etypes,
                  n_bond_conv_steps,
                  n_spatial_conv_steps,
+                 n_rows_fc,
                  dropouts
                  ):
         super(PotentialNet, self).__init__()
-        self.stage_1_model = Customized_GatedGraphConv(in_feats=f_in,
-                                        out_feats=f_bond,
-                                        f_gather=f_gather,
-                                        n_etypes=5,
-                                        n_steps=n_bond_conv_steps,
-                                        dropout=dropouts[0]
-                                        )
-        self.stage_2_model = Customized_GatedGraphConv(in_feats=f_gather,
-                                        out_feats=f_spatial,
-                                        f_gather=f_gather,
-                                        n_etypes=n_etypes, # num_distance_bins + 5 covalent types
-                                        n_steps=n_spatial_conv_steps,
-                                        dropout=dropouts[1]
-                                        )
+        self.stage_1_model = CustomizedGatedGraphConv(in_feats=f_in,
+                                                      out_feats=f_bond,
+                                                      f_gather=f_gather,
+                                                      n_etypes=5,
+                                                      n_steps=n_bond_conv_steps,
+                                                      dropout=dropouts[0])
+        self.stage_2_model = CustomizedGatedGraphConv(in_feats=f_gather,
+                                                      out_feats=f_spatial,
+                                                      f_gather=f_gather,
+                                                      n_etypes=n_etypes, # num_distance_bins + 5 covalent types
+                                                      n_steps=n_spatial_conv_steps,
+                                                      dropout=dropouts[1])
         self.stage_3_model = StagedFCNN(f_in=f_gather,
                                         n_row=n_rows_fc,
-                                        dropout=dropouts[2]
-        )
+                                        dropout=dropouts[2])
 
     def forward(self, bigraph, knn_graph):
+        """
+        Compute the prediction on graphs using PotentialNet model.
+
+        Parameters
+        ----------
+        bigraph: DGLGraph
+            The molecular graph for stage 1 of PotentialNet, with `bigraph.ndata['h']` being the input node features.
+            and `bigraph.edata['e']` being the one-hot encoding of the edge types.
+        knn_graph: DGLGraph
+            The k-nearest-neighbor graph for stage 2 of PotentialNet, with no initial node features
+            and `knn_graph.edata['e']` being the one-hot encoding of the edge types.
+
+        Returns
+        -------
+        x: torch.Tensor
+            The prediction of based on the input feature and graphs.
+            For the task of binding affinity prediction, the dimension is (1, ).
+        """
         batch_num_nodes = bigraph.batch_num_nodes()
         h = self.stage_1_model(graph=bigraph, feat=bigraph.ndata['h'])
         h = self.stage_2_model(graph=knn_graph, feat=h)
@@ -93,7 +105,17 @@ class PotentialNet(nn.Module):
 class StagedFCNN(nn.Module):
     """
     The implementation of PotentialNet stage 3.
-    A graph gather is performed solely on the ligand atoms followed a multi-layer fully connected neural networks.
+    A graph gather is performed solely on the ligand atoms followed by a multi-layer fully connected neural network.
+
+    Parameters
+    ----------
+    f_in: int
+        The input feature size.
+    n_row: list of int
+        The widths of a sequence of linear layer.
+        The number of layers will be contructed according to the length of the list.
+    dropout: float
+        Dropout to be applied before each layer, except the first.
     """
     def __init__(self,
                  f_in,
@@ -108,6 +130,16 @@ class StagedFCNN(nn.Module):
         self.out_layer = nn.Linear(n_row[-1], 1)
 
     def forward(self, batch_num_nodes, features):
+        """
+        Gather features on ligands and compute fully connected linear layers.
+
+        Parameters
+        ----------
+        batch_num_nodes: torch.Tensor
+            The number of nodes for each graph in the batch as from `DGLGraph.batch_num_nodes()`.
+        features: torch.Tensor
+            Node features from the output of GatedGraphConv.
+        """
         x = sum_ligand_features(features, batch_num_nodes)
         for i, layer in enumerate(self.layers):
             if i !=0:
@@ -117,39 +149,39 @@ class StagedFCNN(nn.Module):
         x = self.out_layer(x)
         return x
 
-class Customized_GatedGraphConv(nn.Module):
+class CustomizedGatedGraphConv(nn.Module):
     """
-    Adapted from `dgl.nn.pytorch.conv.GatedGraphConv`
+    Adapted from `dgl.nn.pytorch.conv.GatedGraphConv`.
     Customized the implementation for applying edges for better performance.
     Added a linear layer at the end as described in PotentialNet stage 1 & 2.
-
+    
     Parameters
     ----------
-    in_feats : int
-        Input feature size; i.e, the number of dimensions of :math:`x_i`.
-    out_feats : int
-        Output feature size from GatedGraphConv; i.e., the number of dimensions of :math:`h_i^{(t+1)}`,
-        equivalent to the input feature size to the linear layer,
+    in_feats: int
+        Input feature size.
+    out_feats: int
+        Output feature size from GatedGraphConv,
+        equivalent to the input feature size to the linear layer.
     f_gather: int
-        Output feature size from the linear layer,
-    n_steps : int
-        Number of recurrent steps; i.e, the :math:`t` in the above formula.
-    n_etypes : int
+        Output feature size from the linear layer.
+    n_steps: int
+        Number of recurrent steps.
+    n_etypes: int
         Number of edge types.
     dropout: float
-        Amount of dropout applied after GatedGraphConv and before the linear layer.
-    bias : bool
-        If True, adds a learnable bias to the output. Default: ``True``.
+        Amount of dropout applied between the GatedGraphConv module and the linear layer.
+    bias: bool
+        If True, adds a learnable bias to the output. Default to True.
     """
     def __init__(self,
-                in_feats,
-                out_feats,
-                f_gather,
-                n_steps,
-                n_etypes,
-                dropout,
-                bias=True):
-        super(Customized_GatedGraphConv, self).__init__()
+                 in_feats,
+                 out_feats,
+                 f_gather,
+                 n_steps,
+                 n_etypes,
+                 dropout,
+                 bias=True):
+        super(CustomizedGatedGraphConv, self).__init__()
         self._in_feats = in_feats
         self._out_feats = out_feats
         self._n_steps = n_steps
@@ -170,29 +202,26 @@ class Customized_GatedGraphConv(nn.Module):
             init.xavier_normal_(linear.weight, gain=gain)
             init.zeros_(linear.bias)
 
-    def set_allow_zero_in_degree(self, set_value):
-        self._allow_zero_in_degree = set_value
 
     def forward(self, graph, feat):
         """
-
         Description
         -----------
         Compute Gated Graph Convolution layer.
 
         Parameters
         ----------
-        graph : DGLGraph
-            The graph, with graph.ndata['h'] being the input feature of shape :math:`(N, D_{in})` where :math:`N`
-            is the number of nodes of the graph and :math:`D_{in}` is the
-            input feature size;
-            And graph.edata['e'] one-hot encodes the edge types
+        graph: DGLGraph
+            The graph to run gated graph convolution,
+            with graph.edata['e'] being the one-hot encodings of the edge types.
+        feat: torch.Tensor
+            The input feature as the node features in `graph`.
+            Dimension: (N, `self._in_feats`), where N is the number of nodes in `graph`.
 
         Returns
         -------
         torch.Tensor
-            The output feature of shape :math:`(N, D_{out})` where :math:`D_{out}`
-            is the output feature size.
+            The output feature of dimension (N, `self._out_feats`).
         """
         with graph.local_scope():
             assert graph.is_homogeneous, \
@@ -216,7 +245,7 @@ class Customized_GatedGraphConv(nn.Module):
                 a = graph.ndata.pop('a') # (N, D)
                 h = self.gru(a, h)
 
-            h = self.dropout(h) # my guess
+            h = self.dropout(h)
             h = th.mul(
                     th.sigmoid(self.i_nn(th.cat((h, feat),dim=1))), 
                     self.j_nn(h))    

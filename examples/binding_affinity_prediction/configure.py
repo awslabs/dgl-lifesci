@@ -16,12 +16,12 @@ PotentialNet_PDBBind_core_pocket_random = {
     'frac_test': 0.2,
     'batch_size': 200,
     'shuffle': False,
-    'max_num_neighbors': 5, ##
+    'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 40,
     'f_bond': 73, # has to be larger than f_in
     'f_gather':128,
-    'f_spatial': 128, # better to the same as f_gather
+    'f_spatial': 128, # better to be the same as f_gather
     'n_rows_fc':[32],
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':1,
@@ -43,12 +43,12 @@ PotentialNet_PDBBind_core_pocket_scaffold = {
     'frac_test': 0.2,
     'batch_size': 200,
     'shuffle': False,
-    'max_num_neighbors': 5, ##
+    'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 40,
     'f_bond': 73, # has to be larger than f_in
     'f_gather':128,
-    'f_spatial': 128, # better to the same as f_gather
+    'f_spatial': 128, # better to be the same as f_gather
     'n_rows_fc':[32],
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':1,
@@ -70,12 +70,12 @@ PotentialNet_PDBBind_core_pocket_stratified = {
     'frac_test': 0.2,
     'batch_size': 200,
     'shuffle': False,
-    'max_num_neighbors': 5, ##
+    'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 40,
     'f_bond': 73, # has to be larger than f_in
     'f_gather':128,
-    'f_spatial': 128, # better to the same as f_gather
+    'f_spatial': 128, # better to be the same as f_gather
     'n_rows_fc':[32],
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':1,
@@ -98,12 +98,12 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'frac_test': 0.,
     'batch_size': 200,
     'shuffle': False,
-    'max_num_neighbors': 5, ##
+    'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 40,
     'f_bond': 73, # has to be larger than f_in
     'f_gather':90,
-    'f_spatial': 90, # better to the same as f_gather
+    'f_spatial': 90, # better to be the same as f_gather
     'n_rows_fc':[32],
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':2,
@@ -125,12 +125,12 @@ PotentialNet_PDBBind_refined_pocket_sequence = {
     'frac_test': 0.,
     'batch_size': 200,
     'shuffle': False,
-    'max_num_neighbors': 5, ##
+    'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 40,
     'f_bond': 73, # has to be larger than f_in
     'f_gather':90,
-    'f_spatial': 90, # better to the same as f_gather
+    'f_spatial': 90, # better to be the same as f_gather
     'n_rows_fc':[32],
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':2,
@@ -152,12 +152,12 @@ PotentialNet_PDBBind_refined_pocket_structure = {
     'frac_test': 0.,
     'batch_size': 200,
     'shuffle': False,
-    'max_num_neighbors': 5, ##
+    'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 40,
     'f_bond': 73, # has to be larger than f_in
     'f_gather':90,
-    'f_spatial': 90, # better to the same as f_gather
+    'f_spatial': 90, # better to be the same as f_gather
     'n_rows_fc':[32],
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':2,
@@ -180,12 +180,12 @@ PotentialNet_PDBBind_refined_pocket_scaffold = {
     'frac_test': 0.,
     'batch_size': 200,
     'shuffle': False,
-    'max_num_neighbors': 5, ##
+    'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 40,
     'f_bond': 73, # has to be larger than f_in
     'f_gather':90,
-    'f_spatial': 90, # better to the same as f_gather
+    'f_spatial': 90, # better to be the same as f_gather
     'n_rows_fc':[32],
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':2,
@@ -208,12 +208,12 @@ PotentialNet_PDBBind_refined_pocket_stratified = {
     'frac_test': 0.,
     'batch_size': 200,
     'shuffle': False,
-    'max_num_neighbors': 5, ##
+    'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 40,
     'f_bond': 73, # has to be larger than f_in
     'f_gather':90,
-    'f_spatial': 90, # better to the same as f_gather
+    'f_spatial': 90, # better to be the same as f_gather
     'n_rows_fc':[32],
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':2,
@@ -243,7 +243,7 @@ ACNN_PDBBind_core_pocket_random = {
         1., 6., 7., 8., 9., 11., 12., 15., 16., 17., 20., 25., 30., 35., 53.]),
     'radial': [[12.0], [0.0, 4.0, 8.0], [4.0]],
     'lr': 0.001,
-    'wd': 1e-07,
+    'wd': 0,
     'num_epochs': 120,
     'metrics': ['r2', 'mae'],
     'split': 'random'
@@ -268,7 +268,7 @@ ACNN_PDBBind_core_pocket_scaffold = {
         1., 6., 7., 8., 9., 11., 12., 15., 16., 17., 20., 25., 30., 35., 53.]),
     'radial': [[12.0], [0.0, 4.0, 8.0], [4.0]],
     'lr': 0.001,
-    'wd': 1e-07,
+    'wd': 0,
     'num_epochs': 170,
     'metrics': ['r2', 'mae'],
     'split': 'scaffold'
@@ -292,7 +292,7 @@ ACNN_PDBBind_core_pocket_stratified = {
         1., 6., 7., 8., 9., 11., 12., 15., 16., 17., 20., 25., 30., 35., 53.]),
     'radial': [[12.0], [0.0, 4.0, 8.0], [4.0]],
     'lr': 0.001,
-    'wd': 1e-07,
+    'wd': 0,
     'num_epochs': 110,
     'metrics': ['r2', 'mae'],
     'split': 'stratified'
@@ -316,7 +316,7 @@ ACNN_PDBBind_core_pocket_temporal = {
         1., 6., 7., 8., 9., 11., 12., 15., 16., 17., 20., 25., 30., 35., 53.]),
     'radial': [[12.0], [0.0, 4.0, 8.0], [4.0]],
     'lr': 0.001,
-    'wd': 1e-07,
+    'wd': 0,
     'num_epochs': 80,
     'metrics': ['r2', 'mae'],
     'split': 'temporal'
@@ -340,7 +340,7 @@ ACNN_PDBBind_refined_pocket_random = {
         29., 30., 34., 35., 38., 48., 53., 55., 80.]),
     'radial': [[12.0], [0.0, 2.0, 4.0, 6.0, 8.0], [4.0]],
     'lr': 0.001,
-    'wd': 1e-07,
+    'wd': 0,
     'num_epochs': 200,
     'metrics': ['r2', 'mae'],
     'split': 'random'
@@ -364,7 +364,7 @@ ACNN_PDBBind_refined_pocket_scaffold = {
         29., 30., 34., 35., 38., 48., 53., 55., 80.]),
     'radial': [[12.0], [0.0, 2.0, 4.0, 6.0, 8.0], [4.0]],
     'lr': 0.001,
-    'wd': 1e-07,
+    'wd': 0,
     'num_epochs': 350,
     'metrics': ['r2', 'mae'],
     'split': 'scaffold'
@@ -388,7 +388,7 @@ ACNN_PDBBind_refined_pocket_stratified = {
         29., 30., 34., 35., 38., 48., 53., 55., 80.]),
     'radial': [[12.0], [0.0, 2.0, 4.0, 6.0, 8.0], [4.0]],
     'lr': 0.001,
-    'wd': 1e-07,
+    'wd': 0,
     'num_epochs': 400,
     'metrics': ['r2', 'mae'],
     'split': 'stratified'
@@ -412,7 +412,7 @@ ACNN_PDBBind_refined_pocket_temporal = {
         29., 30., 34., 35., 38., 48., 53., 55., 80.]),
     'radial': [[12.0], [0.0, 2.0, 4.0, 6.0, 8.0], [4.0]],
     'lr': 0.001,
-    'wd': 1e-07,
+    'wd': 0,
     'num_epochs': 350,
     'metrics': ['r2', 'mae'],
     'split': 'temporal'
