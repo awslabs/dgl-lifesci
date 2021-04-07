@@ -83,6 +83,7 @@ def main(args):
         test_loader_dict = {'subset': 'core', 'frac_train': 0, 'frac_val': 0, 'frac_test': 1}
         args.update(test_loader_dict)
         _, _, test_set = load_dataset(args)
+        args.update({'subset': 'refined'})
 
     train_loader = DataLoader(dataset=train_set,
                               batch_size=args['batch_size'],
@@ -108,7 +109,7 @@ def main(args):
         print(f'\n Running trial {trial + 1}/{n_trials}: \n')
         model = load_model(args)
         loss_fn = nn.MSELoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=args['lr'], weight_decay=args['wd'])
+        optimizer = torch.optim.AdamW(model.parameters(), lr=args['lr'], weight_decay=args['wd'])
         model.to(args['device'])
         train_r2, val_r2, test_r2 = np.zeros(n_epochs), np.zeros(n_epochs), np.zeros(n_epochs)
         for epoch in range(n_epochs):
@@ -161,7 +162,7 @@ if __name__ == '__main__':
                         help='Data subset and split to use')
     parser.add_argument('-v', '--version', type=str, choices=['v2007', 'v2015'], default='v2015')
     parser.add_argument('--pdb_path', type=str, default='', help='local path of custom PDBBind dataset')
-    parser.add_argument('--num_workers', type=int, default=8, help='number of workers for Dataloader, default to 8')
+    parser.add_argument('--num_workers', type=int, default=8, help='n')
     parser.add_argument('--save_r2', type=str, default='', help='path to save r2 at each epoch, default not save')
     parser.add_argument('-t', '--num_trials', type=int, default=1)
     parser.add_argument('--test_on_core', type=bool, default=True, 
