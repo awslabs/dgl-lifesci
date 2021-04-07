@@ -42,6 +42,7 @@ Use `main.py` with arguments
 * `--pdb_path`, local path of existing PDBBind dataset. Specify this argument to a local path of **customized dataset**, which should follow the structure and the naming format of PDBBind v2015.
 * `--test_on_core`, bool, whether to use the whole core set as test set when training on refined set, default True.
 * `--save_r2`, path to save r2 at each epoch, default not save.
+* `--num_workers`, number of workers for Dataloader, default to 8.
 * `-t`, int, number of trials to run, default to 1.
 
 ### For access to more hyperparameters, see `./configure.py`.
@@ -95,8 +96,10 @@ Use `main.py` with arguments
 | ------------ | --------| ---------------- | --------------- | -------------- | ------------------- | ------------- |
 | Refined      | Core    | Random           | v2007           | 0.9305 (0.0106)| 0.4161 (0.0217)     |0.8980 (0.0102)|
 | Refined      | Core    | Random           | v2015           | 0.8934 (0.0112)| 0.4227 (0.0170)     |0.8117 (0.0135)|
+| Refined (core removed)| Core | Random     | v2007           | 0.6801 (0.0359)| 0.4605 (0.0185)     |0.4086 (0.0159)|
 
-The results are computed over 100 trials and R2 from the best epoch is reported. Note that core set is not removed from the refined set. 
+
+The results are computed over 100 trials and R2 from the best epoch is reported. 
 
 ##### Reported Performance from PotentialNet paper [6]
 
