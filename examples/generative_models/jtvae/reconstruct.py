@@ -3,7 +3,7 @@ import torch
 
 from dgllife.data import JTVAEZINC, JTVAEDataset, JTVAECollator
 from dgllife.utils import JTVAEVocab
-from dgllife.model import JTNNVAE
+from dgllife.model import JTNNVAE, load_pretrained
 from torch.utils.data import DataLoader
 
 def main(args):
@@ -24,8 +24,11 @@ def main(args):
                             batch_size=1,
                             collate_fn=JTVAECollator(training=False))
 
-    model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth, None)
-    model.load_state_dict(torch.load(args.model_path, map_location='cpu'))
+    if args.model_path is None:
+        model = load_pretrained('JTVAE_ZINC_no_kl')
+    else:
+        model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth)
+        model.load_state_dict(torch.load(args.model_path, map_location='cpu'))
     model = model.to(device)
 
     acc = 0.0

@@ -77,7 +77,8 @@ def load_pretrained(model_name, log=True):
           with a canonical atom order
         * ``'DGMG_ZINC_random'``: A DGMG model pre-trained on ZINC for molecule generation
           with a random atom order
-        * ``'JTNN_ZINC'``: A JTNN model pre-trained on ZINC for molecule generation
+        * ``'JTVAE_ZINC_no_kl'``: A JTVAE pre-trained on ZINC for molecule generation,
+          without KL regularization
         * ``'wln_center_uspto'``: A WLN model pre-trained on USPTO for reaction prediction
         * ``'wln_rank_uspto'``: A WLN model pre-trained on USPTO for candidate product ranking
         * ``'gin_supervised_contextpred'``: A GIN model pre-trained with supervised learning

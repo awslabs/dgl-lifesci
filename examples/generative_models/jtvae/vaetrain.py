@@ -10,8 +10,6 @@ from dgllife.data import JTVAEZINC, JTVAEDataset, JTVAECollator
 from dgllife.utils import JTVAEVocab
 from dgllife.model import JTNNVAE
 from torch.utils.data import DataLoader
-# TODO
-from torch.utils.tensorboard import SummaryWriter
 
 from utils import mkdir_p
 
@@ -38,8 +36,7 @@ def main(args):
                             collate_fn=JTVAECollator(training=True),
                             drop_last=True)
 
-    writer = SummaryWriter()
-    model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth, writer)
+    model = JTNNVAE(vocab, args.hidden_size, args.latent_size, args.depth)
     if args.model_path is not None:
         model.load_state_dict(torch.load(args.model_path, map_location='cpu'))
     else:

@@ -19,12 +19,15 @@ generative_url = {
     'DGMG_ChEMBL_random': 'pre_trained/dgmg_ChEMBL_random.pth',
     'DGMG_ZINC_canonical': 'pre_trained/dgmg_ZINC_canonical.pth',
     'DGMG_ZINC_random': 'pre_trained/dgmg_ZINC_random.pth',
+    # JTVAE pre-trained on ZINC without KL regularization
+    'JTVAE_ZINC_no_kl': 'pre_trained/jtvae_ZINC_no_kl.pth'
 }
 
 try:
     # Things requiring RDKit
     from rdkit import Chem
-    from ...model import DGMG, DGLJTNNVAE
+    from ...model import DGMG, JTNNVAE
+    from ...utils import JTVAEVocab
 except ImportError:
     pass
 
@@ -54,6 +57,13 @@ def create_generative_model(model_name):
                     node_hidden_size=128,
                     num_prop_rounds=2,
                     dropout=0.2)
+
+    elif model_name.startswith('JTVAE'):
+        vocab = JTVAEVocab()
+        return JTNNVAE(vocab=vocab,
+                       hidden_size=450,
+                       latent_size=56,
+                       depth=3)
 
     else:
         return None
