@@ -117,7 +117,7 @@ if __name__ == '__main__':
                         help='Latent size')
     parser.add_argument('-d', '--depth', type=int, default=3,
                         help='Number of GNN layers')
-    parser.add_argument('-z', '--beta', type=float, default=0.005,
+    parser.add_argument('-z', '--beta', type=float, default=0.001,
                         help='Weight for KL loss term')
     parser.add_argument('-lr', '--lr', type=float, default=0.0007,
                         help='Learning rate')
