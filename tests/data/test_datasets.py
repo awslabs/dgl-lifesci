@@ -9,6 +9,7 @@ import torch
 
 from dgllife.data import *
 from dgllife.data.uspto import get_bond_changes, process_file
+from dgllife.utils import JTVAEVocab
 
 def remove_file(fname):
     if os.path.isfile(fname):
@@ -189,7 +190,8 @@ def test_wln_reaction():
     remove_file('_invalid_reactions.proc')
 
 def test_jtvae():
-    dataset = JTVAEZINC('train')
+    vocab = JTVAEVocab()
+    dataset = JTVAEZINC('train', vocab)
 
 if __name__ == '__main__':
     # test_alchemy()
