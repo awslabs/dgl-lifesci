@@ -20,6 +20,7 @@ __all__ = ['load_pretrained']
 
 url = {**moleculenet_url, **generative_url, **property_url, **reaction_url}
 
+# pylint: disable=W0702
 def download_and_load_checkpoint(model_name, model, model_postfix,
                                  local_pretrained_path='pre_trained.pth', log=True):
     """Download pretrained model checkpoint
@@ -48,7 +49,10 @@ def download_and_load_checkpoint(model_name, model, model_postfix,
     local_pretrained_path = '_'.join([model_name, local_pretrained_path])
     download(url_to_pretrained, path=local_pretrained_path, log=log)
     checkpoint = torch.load(local_pretrained_path, map_location='cpu')
-    model.load_state_dict(checkpoint['model_state_dict'])
+    try:
+        model.load_state_dict(checkpoint['model_state_dict'])
+    except:
+        model.load_state_dict(checkpoint)
 
     if log:
         print('Pretrained model loaded')
@@ -77,7 +81,8 @@ def load_pretrained(model_name, log=True):
           with a canonical atom order
         * ``'DGMG_ZINC_random'``: A DGMG model pre-trained on ZINC for molecule generation
           with a random atom order
-        * ``'JTNN_ZINC'``: A JTNN model pre-trained on ZINC for molecule generation
+        * ``'JTVAE_ZINC_no_kl'``: A JTVAE pre-trained on ZINC for molecule generation,
+          without KL regularization
         * ``'wln_center_uspto'``: A WLN model pre-trained on USPTO for reaction prediction
         * ``'wln_rank_uspto'``: A WLN model pre-trained on USPTO for candidate product ranking
         * ``'gin_supervised_contextpred'``: A GIN model pre-trained with supervised learning
