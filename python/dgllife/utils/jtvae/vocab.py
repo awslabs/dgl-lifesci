@@ -47,8 +47,8 @@ class JTVAEVocab(object):
                 for line in f:
                     smiles = line.split()[0]
                     mol = MolTree(smiles)
-                    for c in mol.nodes:
-                        vocab.add(c.smiles)
+                    for i in mol.nodes_dict:
+                        vocab.add(mol.nodes_dict[i]['smiles'])
             self.vocab = list(vocab)
 
         self.vmap = {x: i for i, x in enumerate(self.vocab)}
