@@ -120,6 +120,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on BACE
         * ``'gin_supervised_masking_BACE'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on BACE
+        * ``'NF_canonical_BACE'``: An NF model trained on BACE with canonical
+          featurization for atoms
         * ``'GCN_canonical_BBBP'``: A GCN model trained on BBBP with canonical
           featurization for atoms
         * ``'GCN_attentivefp_BBBP'``: A GCN model trained on BBBP with attentivefp
@@ -148,6 +150,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on BBBP
         * ``'gin_supervised_masking_BBBP'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on BBBP
+        * ``'NF_canonical_BBBP'``: An NF model pre-trained on BBBP with canonical
+          featurization for atoms
         * ``'GCN_canonical_ClinTox'``: A GCN model trained on ClinTox with canonical
           featurization for atoms
         * ``'GCN_attentivefp_ClinTox'``: A GCN model trained on ClinTox with attentivefp
@@ -252,6 +256,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on HIV
         * ``'gin_supervised_masking_HIV'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on HIV
+        * ``'NF_canonical_HIV'``: An NF model trained on HIV with canonical
+          featurization for atoms
         * ``'GCN_canonical_Lipophilicity'``: A GCN model trained on Lipophilicity with canonical
           featurization for atoms
         * ``'GCN_attentivefp_Lipophilicity'``: A GCN model trained on Lipophilicity with
@@ -356,6 +362,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on SIDER
         * ``'gin_supervised_masking_SIDER'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on SIDER
+        * ``'NF_canonical_SIDER'``: An NF model trained on SIDER with canonical
+          featurization for atoms
         * ``'GCN_canonical_Tox21'``: A GCN model trained on Tox21 with canonical
           featurization for atoms
         * ``'GCN_attentivefp_Tox21'``: A GCN model trained on Tox21 with attentivefp
@@ -384,6 +392,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on Tox21
         * ``'gin_supervised_masking_Tox21'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on Tox21
+        * ``'NF_canonical_Tox21'``: An NF model trained on Tox21 with canonical
+          featurization for atoms
         * ``'GCN_canonical_ToxCast'``: A GCN model trained on ToxCast with canonical
           featurization for atoms
         * ``'GCN_attentivefp_ToxCast'``: A GCN model trained on ToxCast with attentivefp
@@ -412,6 +422,8 @@ def load_pretrained(model_name, log=True):
           and edge prediction, and fine-tuned on ToxCast
         * ``'gin_supervised_masking_ToxCast'``: A GIN model pre-trained with supervised learning
           and masking, and fine-tuned on ToxCast
+        * ``'NF_canonical_ToxCast'``: An NF model trained on ToxCast with canonical
+          featurization for atoms and bonds
 
     log : bool
         Whether to print progress for model loading

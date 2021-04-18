@@ -126,7 +126,11 @@ def get_configure(model, featurizer_type, dataset):
         with open('configures/{}/{}.json'.format(dataset, model), 'r') as f:
             config = json.load(f)
     else:
-        with open('configures/{}/{}_{}.json'.format(dataset, model, featurizer_type), 'r') as f:
+        file_path = 'configures/{}/{}_{}.json'.format(dataset, model, featurizer_type)
+        if not os.path.isfile(file_path):
+            return NotImplementedError('Model {} on dataset {} with featurization {} has not been '
+                                       'supported'.format(model, dataset, featurizer_type))
+        with open(file_path, 'r') as f:
             config = json.load(f)
     return config
 
@@ -247,10 +251,22 @@ def load_model(exp_configure):
         )
         model.gnn = load_pretrained(exp_configure['model'])
         model.gnn.JK = exp_configure['jk']
+    elif exp_configure['model'] == 'NF':
+        from dgllife.model import NFPredictor
+        model = NFPredictor(
+            in_feats=exp_configure['in_node_feats'],
+            n_tasks=exp_configure['n_tasks'],
+            hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
+            batchnorm=[exp_configure['batchnorm']] * exp_configure['num_gnn_layers'],
+            dropout=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
+            predictor_hidden_size=exp_configure['predictor_hidden_feats'],
+            predictor_batchnorm=exp_configure['batchnorm'],
+            predictor_dropout=exp_configure['dropout']
+        )
     else:
         return ValueError("Expect model to be from ['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP', "
                           "'gin_supervised_contextpred', 'gin_supervised_infomax', "
-                          "'gin_supervised_edgepred', 'gin_supervised_masking'], "
+                          "'gin_supervised_edgepred', 'gin_supervised_masking'], 'NF'"
                           "got {}".format(exp_configure['model']))
 
     return model
