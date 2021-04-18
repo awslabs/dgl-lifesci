@@ -60,6 +60,7 @@ class GRUUpdate(nn.Module):
         new_h = (torch.tensor(1.0).to(z.device) - z) * node.data['sum_h'] + z * pre_h
         return {'h': new_h}
 
+# pylint: disable=R1710
 def level_order(forest, roots):
     device = forest.device
     edges = list(bfs_edges_generator(forest, roots))
@@ -169,7 +170,7 @@ def can_assemble(node_x, node_y):
         nei['nid'] = i
 
     neighbors = [nei for nei in neis if nei['mol'].GetNumAtoms() > 1]
-    neighbors = sorted(neighbors, key=lambda x:x['mol'].GetNumAtoms(), reverse=True)
+    neighbors = sorted(neighbors, key=lambda x: x['mol'].GetNumAtoms(), reverse=True)
     singletons = [nei for nei in neis if nei['mol'].GetNumAtoms() == 1]
     neighbors = singletons + neighbors
     cands = enum_assemble(node_x, neighbors)
@@ -343,7 +344,7 @@ class JTNNDecoder(nn.Module):
 
     def decode(self, mol_vec, prob_decode):
         device = mol_vec.device
-        stack, trace = [], []
+        stack = []
         init_hidden = torch.zeros(1, self.hidden_size).to(device)
         zero_pad = torch.zeros(1, 1, self.hidden_size).to(device)
 
@@ -512,7 +513,7 @@ class JTMPN(nn.Module):
             mess_dict[e] = len(all_mess)
             all_mess.append(vec)
 
-        for mol, all_nodes, ctr_node in cand_batch:
+        for mol, all_nodes, _ in cand_batch:
             n_atoms = mol.GetNumAtoms()
 
             for atom in mol.GetAtoms():
@@ -638,16 +639,6 @@ class JTNNVAE(nn.Module):
         mol_vec = self.mpn(batch_mol_graphs)
         return tree_mess, tree_vec, mol_vec
 
-    def encode_latent_mean(self, smiles_list):
-        mol_batch = [MolTree(s) for s in smiles_list]
-        for mol_tree in mol_batch:
-            mol_tree.recover()
-
-        _, tree_vec, mol_vec = self.encode(mol_batch)
-        tree_mean = self.T_mean(tree_vec)
-        mol_mean = self.G_mean(mol_vec)
-        return torch.cat([tree_mean, mol_mean], dim=1)
-
     def forward(self, batch_trees, batch_tree_graphs, batch_mol_graphs, stereo_cand_batch_idx,
                 stereo_cand_labels, batch_stereo_cand_graphs, beta=0):
         batch_size = batch_tree_graphs.batch_size
@@ -697,7 +688,7 @@ class JTNNVAE(nn.Module):
         cands = []
         cand_batch_idx = []
         for i, tree in enumerate(batch_trees):
-            for node_id, node in tree.nodes_dict.items():
+            for _, node in tree.nodes_dict.items():
                 # Leaf node's attachment is determined by neighboring node's attachment
                 if node['is_leaf'] or len(node['cands']) == 1:
                     continue
@@ -721,8 +712,8 @@ class JTNNVAE(nn.Module):
 
         cnt, tot, acc = 0, 0, 0
         all_loss = []
-        for i, tree in enumerate(batch_trees):
-            for i, node in tree.nodes_dict.items():
+        for tree in batch_trees:
+            for _, node in tree.nodes_dict.items():
                 num_cands = len(node['cands'])
                 if node['is_leaf'] or num_cands == 1:
                     continue
@@ -783,27 +774,6 @@ class JTNNVAE(nn.Module):
         mol_vec = mol_mean + torch.exp(mol_log_var / 2) * epsilon
         return self.decode(tree_vec, mol_vec, prob_decode)
 
-    def recon_eval(self, smiles):
-        mol_tree = MolTree(smiles)
-        mol_tree.recover()
-        _, tree_vec, mol_vec = self.encode([mol_tree])
-
-        tree_mean = self.T_mean(tree_vec)
-        tree_log_var = -torch.abs(self.T_var(tree_vec))  # Following Mueller et al.
-        mol_mean = self.G_mean(mol_vec)
-        mol_log_var = -torch.abs(self.G_var(mol_vec))  # Following Mueller et al.
-
-        all_smiles = []
-        for _ in range(10):
-            epsilon = torch.randn(1, self.latent_size // 2)
-            tree_vec = tree_mean + torch.exp(tree_log_var / 2) * epsilon
-            epsilon = torch.randn(1, self.latent_size // 2)
-            mol_vec = mol_mean + torch.exp(mol_log_var / 2) * epsilon
-            for _ in range(10):
-                new_smiles = self.decode(tree_vec, mol_vec, prob_decode=True)
-                all_smiles.append(new_smiles)
-        return all_smiles
-
     def sample_prior(self, prob_decode=False):
         tree_vec = torch.randn(1, self.latent_size // 2)
         mol_vec = torch.randn(1, self.latent_size // 2)
@@ -854,8 +824,8 @@ class JTNNVAE(nn.Module):
         global_amap = [{}] + [{} for _ in pred_nodes]
         global_amap[1] = {atom.GetIdx(): atom.GetIdx() for atom in cur_mol.GetAtoms()}
 
-        cur_mol = self.dfs_assemble(tree_mess, mol_vec, pred_nodes, cur_mol, global_amap, [], pred_root, None,
-                                    prob_decode)
+        cur_mol = self.dfs_assemble(tree_mess, mol_vec, pred_nodes, cur_mol, global_amap, [],
+                                    pred_root, None, prob_decode)
         if cur_mol is None:
             return None
 
