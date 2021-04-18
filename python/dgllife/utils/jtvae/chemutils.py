@@ -77,6 +77,7 @@ def get_smiles(mol):
     """
     return Chem.MolToSmiles(mol, kekuleSmiles=True)
 
+# pylint: disable=W0703
 def sanitize(mol):
     """Sanitize and Kekulize the input molecule.
 
@@ -454,6 +455,7 @@ def set_atommap(mol, num=0):
     for atom in mol.GetAtoms():
         atom.SetAtomMapNum(num)
 
+# pylint: disable=C0200
 def tree_decomp(mol, mst_max_weight=100):
     """Tree decomposition of a molecule for junction tree construction.
 

@@ -7,10 +7,6 @@
 #
 # Pre-trained generative models.
 
-import os
-
-from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
-
 __all__ = ['generative_url',
            'create_generative_model']
 

@@ -20,6 +20,7 @@ __all__ = ['load_pretrained']
 
 url = {**moleculenet_url, **generative_url, **property_url, **reaction_url}
 
+# pylint: disable=W0702
 def download_and_load_checkpoint(model_name, model, model_postfix,
                                  local_pretrained_path='pre_trained.pth', log=True):
     """Download pretrained model checkpoint

@@ -16,7 +16,8 @@ __all__ = ['JTVAEVocab']
 
 def get_slots(smiles):
     mol = Chem.MolFromSmiles(smiles)
-    return [(atom.GetSymbol(), atom.GetFormalCharge(), atom.GetTotalNumHs()) for atom in mol.GetAtoms()]
+    return [(atom.GetSymbol(), atom.GetFormalCharge(),
+             atom.GetTotalNumHs()) for atom in mol.GetAtoms()]
 
 class JTVAEVocab(object):
     """Vocabulary for JTVAE.

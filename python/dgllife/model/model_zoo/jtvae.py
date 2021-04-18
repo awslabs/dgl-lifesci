@@ -7,6 +7,8 @@
 #
 # JTVAE
 
+from functools import partial
+
 import copy
 import dgl
 import dgl.function as fn
@@ -16,14 +18,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from dgl.traversal import bfs_edges_generator, dfs_labeled_edges_generator
-from functools import partial
 
 from ...data.jtvae import get_atom_featurizer_enc, get_bond_featurizer_enc
 from ...utils.featurizers import ConcatFeaturizer, atom_type_one_hot, atom_degree_one_hot,\
     atom_formal_charge_one_hot, atom_is_aromatic, bond_type_one_hot, bond_is_in_ring
 from ...utils.jtvae.chemutils import enum_assemble, set_atommap, copy_edit_mol, attach_mols, \
     decode_stereo, get_mol
-from ...utils.jtvae.mol_tree import MolTree
 from ...utils.mol_to_graph import mol_to_bigraph
 
 __all__ = ['JTNNVAE']
@@ -834,7 +834,7 @@ class JTNNVAE(nn.Module):
         cur_mol = Chem.MolFromSmiles(Chem.MolToSmiles(cur_mol))
         if cur_mol is None:
             return None
-        if self.use_stereo == False:
+        if not self.use_stereo:
             return Chem.MolToSmiles(cur_mol)
 
         smiles2D = Chem.MolToSmiles(cur_mol)
@@ -874,7 +874,7 @@ class JTNNVAE(nn.Module):
         cands = enum_assemble(cur_node, neighbors, prev_nodes, cur_amap)
         if len(cands) == 0:
             return None
-        cand_smiles, cand_mols, cand_amap = zip(*cands)
+        _, cand_mols, cand_amap = zip(*cands)
 
         cands = [(candmol, all_nodes, cur_node) for candmol in cand_mols]
 

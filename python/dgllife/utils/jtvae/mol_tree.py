@@ -66,15 +66,15 @@ class MolTree(object):
         src = np.zeros((len(edges) * 2,), dtype='int')
         dst = np.zeros((len(edges) * 2,), dtype='int')
 
-        def _switch_id(id, root, root_changed):
+        def _switch_id(nid, root, root_changed):
             if not root_changed:
-                return id
-            if id == root:
+                return nid
+            if nid == root:
                 return 0
-            elif id == 0:
+            elif nid == 0:
                 return root
             else:
-                return id
+                return nid
 
         for i, (_x, _y) in enumerate(edges):
             x = _switch_id(_x, root, root_changed)
