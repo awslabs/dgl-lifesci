@@ -48,7 +48,10 @@ def download_and_load_checkpoint(model_name, model, model_postfix,
     local_pretrained_path = '_'.join([model_name, local_pretrained_path])
     download(url_to_pretrained, path=local_pretrained_path, log=log)
     checkpoint = torch.load(local_pretrained_path, map_location='cpu')
-    model.load_state_dict(checkpoint['model_state_dict'])
+    try:
+        model.load_state_dict(checkpoint['model_state_dict'])
+    except:
+        model.load_state_dict(checkpoint)
 
     if log:
         print('Pretrained model loaded')
