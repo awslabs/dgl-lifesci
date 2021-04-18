@@ -3,11 +3,10 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-import torch
-
 from rdkit import Chem
 
-from dgllife.model import DGMG, DGLJTNNVAE
+from dgllife.model import DGMG, JTNNVAE
+from dgllife.utils import JTVAEVocab
 
 def test_dgmg():
     model = DGMG(atom_types=['O', 'Cl', 'C', 'S', 'F', 'Br', 'N'],
@@ -32,6 +31,13 @@ def test_dgmg():
     assert model(rdkit_mol=False) is None
     model.eval()
     assert model(rdkit_mol=True) is not None
+
+def test_jtvae():
+    vocab = JTVAEVocab()
+    model = JTNNVAE(vocab,
+                    hidden_size=1,
+                    latent_size=2,
+                    depth=3)
 
 if __name__ == '__main__':
     test_dgmg()
