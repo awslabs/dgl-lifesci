@@ -70,6 +70,7 @@ Other optional arguments include:
         - `gin_supervised_infomax` for [GIN pre-trained with supervised learning and mutual information maximization](https://arxiv.org/abs/1905.12265)
         - `gin_supervised_edgepred` for [GIN pre-trained with supervised learning and edge prediction](https://arxiv.org/abs/1905.12265)
         - `gin_supervised_masking` for [GIN pre-trained with supervised learning and attribute masking](https://arxiv.org/abs/1905.12265)
+        - `NF` for [Neural Fingerprint](https://arxiv.org/abs/1509.09292)
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Comes into effect only when the model is not a pre-trained GIN
     - Specifies the initial featurization for atoms.
@@ -167,6 +168,7 @@ Other optional arguments include:
         - `gin_supervised_infomax` for [GIN pre-trained with supervised learning and mutual information maximization](https://arxiv.org/abs/1905.12265)
         - `gin_supervised_edgepred` for [GIN pre-trained with supervised learning and edge prediction](https://arxiv.org/abs/1905.12265)
         - `gin_supervised_masking` for [GIN pre-trained with supervised learning and attribute masking](https://arxiv.org/abs/1905.12265)
+        - `NF` for [Neural Fingerprint](https://arxiv.org/abs/1509.09292)
 - **Atom Featurizer Type**: `-a feaurizer` [default=canonical]
     - Comes into effect only when the model is not a pre-trained GIN
     - Specifies the initial featurization for atoms.

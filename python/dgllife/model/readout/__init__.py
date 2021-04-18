@@ -8,5 +8,6 @@
 
 from .attentivefp_readout import *
 from .mlp_readout import *
+from .sum_and_max import *
 from .weave_readout import *
 from .weighted_sum_and_max import *

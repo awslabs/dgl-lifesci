@@ -170,20 +170,38 @@ class WLN(nn.Module):
             node_feats = self.project_node_in_feats(node_feats)
         for _ in range(self.n_layers):
             g = g.local_var()
-            g.ndata['hv'] = node_feats
-            g.apply_edges(fn.copy_src('hv', 'he_src'))
-            concat_edge_feats = torch.cat([g.edata['he_src'], edge_feats], dim=1)
-            g.edata['he'] = self.project_concatenated_messages(concat_edge_feats)
-            g.update_all(fn.copy_edge('he', 'm'), fn.sum('m', 'hv_new'))
-            node_feats = self.get_new_node_feats(
-                torch.cat([node_feats, g.ndata['hv_new']], dim=1))
+            if g.num_edges() > 0:
+                # The following lines do not work for a graph without edges.
+                g.ndata['hv'] = node_feats
+                g.apply_edges(fn.copy_src('hv', 'he_src'))
+                concat_edge_feats = torch.cat([g.edata['he_src'], edge_feats], dim=1)
+                g.edata['he'] = self.project_concatenated_messages(concat_edge_feats)
+                g.update_all(fn.copy_edge('he', 'm'), fn.sum('m', 'hv_new'))
+                node_feats = self.get_new_node_feats(
+                    torch.cat([node_feats, g.ndata['hv_new']], dim=1))
+            else:
+                # If we don't have edges, above formula becomes very simple.
+                # The sum over the neighbors is zero then.
+                # Refer to equations in section S2.2 of
+                # http://www.rsc.org/suppdata/c8/sc/c8sc04228d/c8sc04228d2.pdf
+                node_feats = self.get_new_node_feats(
+                    torch.cat([node_feats, node_feats*0], dim=1))
 
         if not self.set_comparison:
             return node_feats
         else:
-            g = g.local_var()
-            g.ndata['hv'] = self.project_node_messages(node_feats)
-            g.edata['he'] = self.project_edge_messages(edge_feats)
-            g.update_all(fn.u_mul_e('hv', 'he', 'm'), fn.sum('m', 'h_nbr'))
-            h_self = self.project_self(node_feats)  # (V, node_out_feats)
-            return g.ndata['h_nbr'] * h_self
+            if g.num_edges() > 0:
+                # The following lines don't work for a graph without edges
+                g = g.local_var()
+                g.ndata['hv'] = self.project_node_messages(node_feats)
+                g.edata['he'] = self.project_edge_messages(edge_feats)
+                g.update_all(fn.u_mul_e('hv', 'he', 'm'), fn.sum('m', 'h_nbr'))
+                h_self = self.project_self(node_feats)  # (V, node_out_feats)
+                return g.ndata['h_nbr'] * h_self
+            else:
+                # If the graph has no edges, the formula becomes very simple.
+                # The sum over the neighbors is zero then.
+                # Refer to equations in section S2.5 of
+                # http://www.rsc.org/suppdata/c8/sc/c8sc04228d/c8sc04228d2.pdf
+                return torch.zeros((g.num_nodes(), self.project_self.out_feats),
+                                   device=node_feats.device)
