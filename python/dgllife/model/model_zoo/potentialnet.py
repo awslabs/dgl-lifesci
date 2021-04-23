@@ -13,7 +13,7 @@ def sum_ligand_features(h, batch_num_nodes):
     node_nums = th.cumsum(batch_num_nodes, dim=0)
     B = int(len(batch_num_nodes) / 2) # actual batch size
     ligand_idx = [list(range(node_nums[0]))] # first ligand
-    for i in range(2,len(node_nums), 2): # the rest of ligands in the batch
+    for i in range(2, len(node_nums), 2): # the rest of ligands in the batch
         ligand_idx.append(list(range(node_nums[i-1], node_nums[i])))
     return th.cat([h[i,].sum(0, keepdim=True) for i in ligand_idx]).to(device=h.device) # sum over each ligand
 
@@ -93,8 +93,8 @@ class PotentialNet(nn.Module):
         Returns
         -------
         x: torch.Tensor
-            The prediction of based on the input feature and graphs.
-            For the task of binding affinity prediction, the dimension is (1, ).
+            The prediction based on the input features and graphs.
+            For the task of binding affinity prediction, the shape is (B, 1), where B is the batch size.
         """
         batch_num_nodes = bigraph.batch_num_nodes()
         h = self.stage_1_model(graph=bigraph, feat=bigraph.ndata['h'])
@@ -112,8 +112,8 @@ class StagedFCNN(nn.Module):
     f_in: int
         The input feature size.
     n_row: list of int
-        The widths of a sequence of linear layer.
-        The number of layers will be contructed according to the length of the list.
+        The widths of a sequence of linear layers.
+        The number of layers will be the length of the list plus 1.
     dropout: float
         Dropout to be applied before each layer, except the first.
     """
@@ -131,7 +131,7 @@ class StagedFCNN(nn.Module):
 
     def forward(self, batch_num_nodes, features):
         """
-        Gather features on ligands and compute fully connected linear layers.
+        Gather features on ligands and compute with fully connected linear layers.
 
         Parameters
         ----------
@@ -227,7 +227,7 @@ class CustomizedGatedGraphConv(nn.Module):
             assert graph.is_homogeneous, \
                 "not a homogeneous graph; convert it with to_homogeneous " \
                 "and pass in the edge type as argument"
-            assert  graph.edata['e'].shape[1] <= self._n_etypes, \
+            assert graph.edata['e'].shape[1] <= self._n_etypes, \
                 "edge type indices out of range [0, {})".format(self._n_etypes)
             zero_pad = feat.new_zeros((feat.shape[0], self._out_feats - feat.shape[1]))
             h = th.cat([feat, zero_pad], -1)
