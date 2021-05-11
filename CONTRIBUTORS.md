@@ -18,3 +18,5 @@ Contributors
 * [Pavol Drotar](https://github.com/padr31): Fix for import
 * [Nanxuan Zhou](https://github.com/xnuohz): Fix for doc
 * [mar-volk](https://github.com/mar-volk): Fix for rexgen_direct
+* [Wenxuan Fan](https://github.com/wenx00): Strategies for Pre-training Graph Neural Networks
+* [Vignesh Venkataraman](https://github.com/VIGNESHinZONE): PAGTN
