@@ -499,7 +499,7 @@ class ScaffoldSplitter(object):
             try:
                 FastFindRings(mol)
                 if scaffold_func == 'decompose':
-                    mol_scaffold = AllChem.MurckoDecompose(mol)
+                    mol_scaffold = Chem.MolToSmiles(AllChem.MurckoDecompose(mol))
                 if scaffold_func == 'smiles':
                     mol_scaffold = MurckoScaffold.MurckoScaffoldSmiles(
                         mol=mol, includeChirality=False)
