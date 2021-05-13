@@ -65,6 +65,9 @@ class GATPredictor(nn.Module):
         results for the i-th GAT layer. ``len(activations)`` equals the number of GAT layers.
         By default, ELU is applied for intermediate GAT layers and no activation is applied
         for the last GAT layer.
+    biases : list of bool
+        ``biases[i]`` gives whether to add bias for the i-th GAT layer. ``len(activations)``
+        equals the number of GAT layers. By default, bias is added for all GAT layers.
     classifier_hidden_feats : int
         (Deprecated, see ``predictor_hidden_feats``) Size of hidden graph representations
         in the classifier. Default to 128.
@@ -80,7 +83,7 @@ class GATPredictor(nn.Module):
     """
     def __init__(self, in_feats, hidden_feats=None, num_heads=None, feat_drops=None,
                  attn_drops=None, alphas=None, residuals=None, agg_modes=None, activations=None,
-                 classifier_hidden_feats=128, classifier_dropout=0., n_tasks=1,
+                 biases=None, classifier_hidden_feats=128, classifier_dropout=0., n_tasks=1,
                  predictor_hidden_feats=128, predictor_dropout=0.):
         super(GATPredictor, self).__init__()
 
@@ -102,7 +105,8 @@ class GATPredictor(nn.Module):
                        alphas=alphas,
                        residuals=residuals,
                        agg_modes=agg_modes,
-                       activations=activations)
+                       activations=activations,
+                       biases=biases)
 
         if self.gnn.agg_modes[-1] == 'flatten':
             gnn_out_feats = self.gnn.hidden_feats[-1] * self.gnn.num_heads[-1]

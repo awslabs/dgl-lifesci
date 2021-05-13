@@ -88,6 +88,7 @@ def create_lipophilicity_model(model_name):
                             attn_drops=[dropout] * num_gnn_layers,
                             alphas=[0.41300745504829595] * num_gnn_layers,
                             residuals=[False] * num_gnn_layers,
+                            biases=[False] * num_gnn_layers,
                             predictor_hidden_feats=64,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
@@ -101,6 +102,7 @@ def create_lipophilicity_model(model_name):
                             attn_drops=[dropout],
                             alphas=[0.7133648170252214],
                             residuals=[False],
+                            biases=[False],
                             predictor_hidden_feats=64,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)

@@ -41,14 +41,16 @@ class GATLayer(nn.Module):
         all head results.
     activation : activation function or None
         Activation function applied to the aggregated multi-head results, default to None.
+    bias : bool
+        Whether to use bias in the GAT layer.
     """
     def __init__(self, in_feats, out_feats, num_heads, feat_drop, attn_drop,
-                 alpha=0.2, residual=True, agg_mode='flatten', activation=None):
+                 alpha=0.2, residual=True, agg_mode='flatten', activation=None, bias=True):
         super(GATLayer, self).__init__()
 
         self.gat_conv = GATConv(in_feats=in_feats, out_feats=out_feats, num_heads=num_heads,
                                 feat_drop=feat_drop, attn_drop=attn_drop,
-                                negative_slope=alpha, residual=residual, bias=False)
+                                negative_slope=alpha, residual=residual, bias=bias)
         assert agg_mode in ['flatten', 'mean']
         self.agg_mode = agg_mode
         self.activation = activation
@@ -127,9 +129,13 @@ class GAT(nn.Module):
         ``activations[i]`` gives the activation function applied to the aggregated multi-head
         results for the i-th GAT layer. ``len(activations)`` equals the number of GAT layers.
         By default, no activation is applied for each GAT layer.
+    biases : list of bool
+        ``biases[i]`` gives whether to use bias for the i-th GAT layer. ``len(activations)``
+        equals the number of GAT layers. By default, we use bias for all GAT layers.
     """
     def __init__(self, in_feats, hidden_feats=None, num_heads=None, feat_drops=None,
-                 attn_drops=None, alphas=None, residuals=None, agg_modes=None, activations=None):
+                 attn_drops=None, alphas=None, residuals=None, agg_modes=None, activations=None,
+                 biases=None):
         super(GAT, self).__init__()
 
         if hidden_feats is None:
@@ -152,11 +158,13 @@ class GAT(nn.Module):
         if activations is None:
             activations = [F.elu for _ in range(n_layers - 1)]
             activations.append(None)
+        if biases is None:
+            biases = [True for _ in range(n_layers)]
         lengths = [len(hidden_feats), len(num_heads), len(feat_drops), len(attn_drops),
-                   len(alphas), len(residuals), len(agg_modes), len(activations)]
+                   len(alphas), len(residuals), len(agg_modes), len(activations), len(biases)]
         assert len(set(lengths)) == 1, 'Expect the lengths of hidden_feats, num_heads, ' \
                                        'feat_drops, attn_drops, alphas, residuals, ' \
-                                       'agg_modes and activations to be the same, ' \
+                                       'agg_modes, activations, and biases to be the same, ' \
                                        'got {}'.format(lengths)
         self.hidden_feats = hidden_feats
         self.num_heads = num_heads
@@ -165,7 +173,8 @@ class GAT(nn.Module):
         for i in range(n_layers):
             self.gnn_layers.append(GATLayer(in_feats, hidden_feats[i], num_heads[i],
                                             feat_drops[i], attn_drops[i], alphas[i],
-                                            residuals[i], agg_modes[i], activations[i]))
+                                            residuals[i], agg_modes[i], activations[i], 
+                                            biases[i]))
             if agg_modes[i] == 'flatten':
                 in_feats = hidden_feats[i] * num_heads[i]
             else:

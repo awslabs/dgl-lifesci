@@ -83,6 +83,7 @@ def create_bbbp_model(model_name):
                             attn_drops=[dropout] * num_gnn_layers,
                             alphas=[0.6544012585238377] * num_gnn_layers,
                             residuals=[False] * num_gnn_layers,
+                            biases=[False] * num_gnn_layers,
                             predictor_hidden_feats=256,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
@@ -97,6 +98,7 @@ def create_bbbp_model(model_name):
                             attn_drops=[dropout] * num_gnn_layers,
                             alphas=[0.8731920595699334] * num_gnn_layers,
                             residuals=[False] * num_gnn_layers,
+                            biases=[False] * num_gnn_layers,
                             predictor_hidden_feats=256,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
