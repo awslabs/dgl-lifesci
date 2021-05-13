@@ -77,6 +77,7 @@ def create_clintox_model(model_name):
                             attn_drops=[dropout],
                             alphas=[0.4828530106865167],
                             residuals=[False],
+                            biases=[False],
                             predictor_hidden_feats=128,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
@@ -90,6 +91,7 @@ def create_clintox_model(model_name):
                             attn_drops=[dropout],
                             alphas=[0.3794180901463749],
                             residuals=[True],
+                            biases=[False],
                             predictor_hidden_feats=32,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)

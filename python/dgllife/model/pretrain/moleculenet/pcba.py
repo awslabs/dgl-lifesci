@@ -82,6 +82,7 @@ def create_pcba_model(model_name):
                             attn_drops=[dropout] * num_gnn_layers,
                             alphas=[0.0194367227727808] * num_gnn_layers,
                             residuals=[False] * num_gnn_layers,
+                            biases=[False] * num_gnn_layers,
                             predictor_hidden_feats=64,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
@@ -96,6 +97,7 @@ def create_pcba_model(model_name):
                             attn_drops=[dropout] * num_gnn_layers,
                             alphas=[0.25837424873685433] * num_gnn_layers,
                             residuals=[True] * num_gnn_layers,
+                            biases=[False] * num_gnn_layers,
                             predictor_hidden_feats=16,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
