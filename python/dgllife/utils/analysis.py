@@ -11,7 +11,10 @@ from multiprocessing import Pool
 import itertools
 import numpy as np
 
-from rdkit import Chem
+try:
+    from rdkit import Chem
+except ImportError:
+    pass
 
 __all__ = ['analyze_mols']
 
