@@ -125,9 +125,7 @@ class PDBBind(object):
             elif subset == 'refined':
                 index_label_file = extracted_data_path + '/v2015/INDEX_refined_data.2015'
             else:
-                raise ValueError(
-                    'Expect the subset_choice to be either '
-                'core or refined, got {}'.format(subset))
+                raise ValueError('Expect the subset_choice to be either core or refined, got {}'.format(subset))
         elif pdb_version == 'v2007':
             self._url = 'dataset/pdbbind_v2007.tar.gz'
             data_path = root_dir_path + '/pdbbind_v2007.tar.gz'
