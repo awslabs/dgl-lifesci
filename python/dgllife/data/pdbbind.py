@@ -360,8 +360,8 @@ class PDBBind(object):
             RDKit molecule instance for the protein molecule.
         DGLGraph or tuple of DGLGraphs
             Pre-processed DGLGraph with features extracted.
-            For ACNN, a signle DGLGraph;
-            For PotentialNet, a tuple of DGLGraphs that consists of a molecular graph a KNN graph of the complex.
+            For ACNN, a single DGLGraph;
+            For PotentialNet, a tuple of DGLGraphs that consists of a molecular graph and a KNN graph of the complex.
         Float32 tensor
             Label for the datapoint.
         """

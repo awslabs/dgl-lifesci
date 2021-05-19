@@ -38,8 +38,8 @@ class PotentialNet(nn.Module):
         The dimension size of the output from stage 1 & 2,
         equivalent to the dimension size of output from the linear layer at the end of stage 1 & 2.
     n_etypes: int
-        The number of heterogeneous edge types for stage 2.
-        Currently implemented as 5(the number of covalent bond types in stage 1) + the number of distance bins in stage 2.
+        The number of heterogeneous edge types for stage 2. This inclues the number of covalent bond types from stage 1 and the number of spatial edge types based on distances.
+        Default to 9 (5 covalent bond types in stage 1 plus 4 distance bins in stage 2).
     n_bond_conv_steps: int
         The number of bond convolution layers(steps) of GatedGraphConv in stage 1.
     n_spatial_conv_steps: int
