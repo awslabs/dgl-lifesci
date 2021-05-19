@@ -103,7 +103,7 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'f_in': 40,
     'f_bond': 64, # has to be larger than f_in
     'f_gather': 64,
-    'f_spatial': 64, # better to the same as f_gather
+    'f_spatial': 64, # better to be the same as f_gather
     'n_rows_fc': [64, 32],
     'n_bond_conv_steps':2,
     'n_spatial_conv_steps':2,

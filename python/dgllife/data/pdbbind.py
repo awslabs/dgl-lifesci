@@ -52,8 +52,12 @@ class PDBBind(object):
         of the ``'core'`` set is 195 and the size of the ``'refined'`` set is 3706.
     pdb_version : str
         The version of PDBBind dataset. Currently implemented: ``'v2007'``, ``'v2015'``.
+        Default to ``'v2015'``. User should not specify the version if using local PDBBind data.
     load_binding_pocket : bool
         Whether to load binding pockets or full proteins. Default to True.
+    remove_coreset_from_refinedset: bool
+        Whether to remove core set from refined set when training with refined set and test with core set. 
+        Default to True.
     sanitize : bool
         Whether sanitization is performed in initializing RDKit molecule instances. See
         https://www.rdkit.org/docs/RDKit_Book.html for details of the sanitization.
@@ -68,9 +72,9 @@ class PDBBind(object):
         Whether we need to extract molecular conformation from proteins and ligands.
         Default to True.
     construct_graph_and_featurize : callable
-        Construct a DGLHeteroGraph for the use of GNNs. Mapping ``self.ligand_mols[i]``,
+        Construct a DGLGraph for the use of GNNs. Mapping ``self.ligand_mols[i]``,
         ``self.protein_mols[i]``, ``self.ligand_coordinates[i]`` and
-        ``self.protein_coordinates[i]`` to a DGLHeteroGraph.
+        ``self.protein_coordinates[i]`` to a DGLGraph.
         Default to :func:`dgllife.utils.ACNN_graph_construction_and_featurization`.
     zero_padding : bool
         Whether to perform zero padding. While DGL does not necessarily require zero padding,
@@ -79,9 +83,10 @@ class PDBBind(object):
     num_processes : int or None
         Number of worker processes to use. If None,
         then we will use the number of CPUs in the system. Default None.
-    remove_coreset_from_refinedset: bool
-        Whether to remove core set from refined set when train with refined set and test with core set. 
-        Default to True.
+    local_path : str or None
+        Local path of existing PDBBind dataset.
+        Default None, and PDBBind dataset will be downloaded from DGL database.
+        Specify this argument to a local path of customized dataset, which should follow the structure and the naming format of PDBBind v2015.
     """
     def __init__(self, subset, pdb_version='v2015', load_binding_pocket=True, remove_coreset_from_refinedset=True, sanitize=False, 
                  calc_charges=False, remove_hs=False, use_conformation=True,
@@ -97,15 +102,15 @@ class PDBBind(object):
         if pdb_version == 'v2007' and not local_path:
             merged_df = self.df.merge(self.agg_split, on='PDB_code')
             self.agg_sequence_split = [list(merged_df.loc[merged_df['sequence']==target_set, 'PDB_code'].index) 
-                for target_set in ['train', 'valid', 'test']]
+                                       for target_set in ['train', 'valid', 'test']]
             self.agg_structure_split = [list(merged_df.loc[merged_df['structure']==target_set, 'PDB_code'].index) 
-                for target_set in ['train', 'valid', 'test']]
+                                        for target_set in ['train', 'valid', 'test']]
 
     def _read_data_files(self, pdb_version, subset, load_binding_pocket, remove_coreset_from_refinedset, local_path):
         """Download and extract pdbbind data files specified by the version"""
         root_dir_path = get_download_dir()
         if local_path:
-            if local_path[-1]!='/':
+            if local_path[-1] != '/':
                 local_path += '/'
             index_label_file = glob.glob(local_path + '*' + subset + '*data*')[0]
         elif pdb_version == 'v2015':
@@ -124,12 +129,6 @@ class PDBBind(object):
                     'Expect the subset_choice to be either '
                 'core or refined, got {}'.format(subset))
         elif pdb_version == 'v2007':
-            # download from pddbind official website
-        #     download_url = 'http://www.pdbbind.org.cn/download/pdbbind_v2007.tar.gz' 
-        #     data_path = root_dir_path + '/pdbbind_v2007.tar.gz'
-        #     extracted_data_path = root_dir_path + '/pdbbind_v2007'
-        #     download(download_url, path=data_path, overwrite=False)
-        #     extract_archive(data_path, extracted_data_path)
             self._url = 'dataset/pdbbind_v2007.tar.gz'
             data_path = root_dir_path + '/pdbbind_v2007.tar.gz'
             extracted_data_path = root_dir_path + '/pdbbind_v2007'
@@ -146,9 +145,7 @@ class PDBBind(object):
             elif subset == 'refined':
                 index_label_file = extracted_data_path + '/v2007/INDEX.2007.refined.data'
             else:
-                raise ValueError(
-                    'Expect the subset_choice to be either '
-                'core or refined, got {}'.format(subset))
+                raise ValueError('Expect the subset_choice to be either core or refined, got {}'.format(subset))
 
         contents = []
         with open(index_label_file, 'r') as f:
@@ -179,7 +176,7 @@ class PDBBind(object):
         
         pdbs = self.df['PDB_code'].tolist()
 
-        ## remove core set from refine set if using refined
+        # remove core set from refined set if using refined
         if remove_coreset_from_refinedset and subset == 'refined':
             if local_path:
                 core_path = glob.glob(local_path + '*core*data*')[0]
@@ -328,12 +325,6 @@ class PDBBind(object):
 
         print('Start constructing graphs and featurizing them.')
         num_mols = len(self)
-        # self.graphs = []
-        # for i in range(num_mols):
-        #     print('Constructing and featurizing datapoint {:d}/{:d}'.format(i+1, num_mols))
-        #     self.graphs.append(construct_graph_and_featurize(
-        #         self.ligand_mols[i], self.protein_mols[i],
-        #         self.ligand_coordinates[i], self.protein_coordinates[i],))
 
         # construct graphs with multiprocessing
         pool = multiprocessing.Pool(processes=num_processes)
@@ -369,10 +360,10 @@ class PDBBind(object):
             RDKit molecule instance for the ligand molecule.
         rdkit.Chem.rdchem.Mol
             RDKit molecule instance for the protein molecule.
-        DGLHeteroGraph or tuple of DGLGraphs
-            Pre-processed DGLHeteroGraph with features extracted.
-            For ACNN, a signle DGLHeteroGraph;
-            For PotentialNet, a tuple of a bigraph of the complex and a KNN graph of the complex.
+        DGLGraph or tuple of DGLGraphs
+            Pre-processed DGLGraph with features extracted.
+            For ACNN, a signle DGLGraph;
+            For PotentialNet, a tuple of DGLGraphs that consists of a molecular graph a KNN graph of the complex.
         Float32 tensor
             Label for the datapoint.
         """
