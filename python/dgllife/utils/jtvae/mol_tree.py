@@ -11,7 +11,10 @@ import dgl
 import numpy as np
 import torch
 
-from rdkit import Chem
+try:
+    from rdkit import Chem
+except ImportError:
+    pass
 
 from .chemutils import get_mol, decode_stereo, get_clique_mol, get_smiles, enum_assemble, \
     set_atommap, tree_decomp

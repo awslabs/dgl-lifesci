@@ -11,12 +11,16 @@ import os.path as osp
 
 from collections import defaultdict
 from functools import partial
-from rdkit import Chem, RDConfig
-from rdkit.Chem import AllChem, ChemicalFeatures
 
 import numpy as np
 import torch
 import dgl.backend as F
+
+try:
+    from rdkit import Chem, RDConfig
+    from rdkit.Chem import AllChem, ChemicalFeatures
+except ImportError:
+    pass
 
 __all__ = ['one_hot_encoding',
            'atom_type_one_hot',
