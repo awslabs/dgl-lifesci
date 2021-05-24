@@ -7,11 +7,11 @@
 # pylint: disable= no-member, arguments-differ, invalid-name
 import numpy as np
 import dgl.backend as F
-
+from functools import partial
 from dgl import graph, heterograph, batch
 
 from ..utils.mol_to_graph import k_nearest_neighbors, mol_to_bigraph
-from ..utils.featurizers import CanonicalAtomFeaturizer, CanonicalBondFeaturizer
+from ..utils.featurizers import BaseAtomFeaturizer, BaseBondFeaturizer, ConcatFeaturizer, atom_type_one_hot, atom_total_degree_one_hot, atom_formal_charge_one_hot, atom_is_aromatic, atom_implicit_valence_one_hot, atom_explicit_valence_one_hot, bond_type_one_hot, bond_is_in_ring
 
 __all__ = ['ACNN_graph_construction_and_featurization', 
            'PN_graph_construction_and_featurization']
@@ -140,27 +140,36 @@ def PN_graph_construction_and_featurization(ligand_mol,
         ligand_atom_indices_left = list(range(ligand_mol.GetNumAtoms()))
         protein_atom_indices_left = list(range(protein_mol.GetNumAtoms()))
 
-    # Construct bigraph for stage 1
-    node_featurizer = CanonicalAtomFeaturizer(atom_data_field='h')
-    edge_featurizer = CanonicalBondFeaturizer(bond_data_field='e')
+    # Node featurizer for stage 1
+    atoms = ['H','N','O','C','P','S','F','Br','Cl','I','Fe','Zn','Mg','Cs','Na','Mn','Ca','Co','Ni','Se','Cu','Cd','Hg','Sr','K']
+    atom_total_degrees = list(range(9))
+    atom_formal_charges = [-1, 0, 1]
+    atom_implicit_valence = list(range(5))
+    atom_explicit_valence = list(range(8))
+    atom_concat_featurizer = ConcatFeaturizer([partial(atom_type_one_hot, allowable_set=atoms), 
+                                               partial(atom_total_degree_one_hot, allowable_set=atom_total_degrees),
+                                               partial(atom_formal_charge_one_hot, allowable_set=atom_formal_charges),
+                                               atom_is_aromatic,
+                                               partial(atom_implicit_valence_one_hot, allowable_set=atom_implicit_valence),
+                                               partial(atom_explicit_valence_one_hot, allowable_set=atom_explicit_valence)])
+    PN_atom_featurizer = BaseAtomFeaturizer({'h': atom_concat_featurizer})
+
+    # Bond featurizer for stage 1
+    bond_concat_featurizer = ConcatFeaturizer([bond_type_one_hot, bond_is_in_ring])
+    PN_bond_featurizer = BaseBondFeaturizer({'e': bond_concat_featurizer})
+
+    # construct graphs for stage 1
     ligand_bigraph = mol_to_bigraph(ligand_mol, add_self_loop=False,
-                                    node_featurizer=node_featurizer,
-                                    edge_featurizer=edge_featurizer,
+                                    node_featurizer=PN_atom_featurizer,
+                                    edge_featurizer=PN_bond_featurizer,
                                     canonical_atom_order=False) # Keep the original atomic order)
     protein_bigraph = mol_to_bigraph(protein_mol, add_self_loop=False,
-                                     node_featurizer=node_featurizer,
-                                     edge_featurizer=edge_featurizer,
+                                     node_featurizer=PN_atom_featurizer,
+                                     edge_featurizer=PN_bond_featurizer,
                                      canonical_atom_order=False)
-
     complex_bigraph = batch([ligand_bigraph, protein_bigraph])
-    # remove features that never appear
-    zero_h_cols = [5, 13, 14, 16, 17, 19, 20, 21, 22, 23, 24, 27, 30, 31, 33, 36, 38, 39, 40, 42, 50, 51, 52, 53, 58, 59, 60, 62, 63, 64, 65, 66, 67, 73]
-    zero_e_cols = [4,  5,  7,  8,  9, 10, 11]
-    complex_bigraph.ndata['h'] = np.delete(complex_bigraph.ndata['h'], zero_h_cols, axis=1)
-    complex_bigraph.edata['e'] = np.delete(complex_bigraph.edata['e'], zero_e_cols, axis=1) # 5 edge types remain
 
-
-    # Construct knn graph for stage 2
+    # Construct knn graphs for stage 2
     complex_coordinates = np.concatenate([ligand_coordinates, protein_coordinates])
     complex_srcs, complex_dsts, complex_dists = k_nearest_neighbors(
             complex_coordinates, distance_bins[-1], max_num_neighbors)
