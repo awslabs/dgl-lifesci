@@ -68,6 +68,7 @@ def create_tox21_model(model_name):
                             num_heads=[4, 4],
                             agg_modes=['flatten', 'mean'],
                             activations=[F.elu, None],
+                            biases=[False, False],
                             predictor_hidden_feats=64,
                             n_tasks=n_tasks)
 
@@ -114,6 +115,7 @@ def create_tox21_model(model_name):
                             attn_drops=[dropout],
                             alphas=[0.574285650239047],
                             residuals=[True],
+                            biases=[False],
                             predictor_hidden_feats=32,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
@@ -127,6 +129,7 @@ def create_tox21_model(model_name):
                             attn_drops=[dropout],
                             alphas=[0.3471639890634216],
                             residuals=[False],
+                            biases=[False],
                             predictor_hidden_feats=128,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)

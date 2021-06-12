@@ -7,10 +7,6 @@
 #
 # Pre-trained generative models.
 
-import os
-
-from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
-
 __all__ = ['generative_url',
            'create_generative_model']
 
@@ -19,13 +15,15 @@ generative_url = {
     'DGMG_ChEMBL_random': 'pre_trained/dgmg_ChEMBL_random.pth',
     'DGMG_ZINC_canonical': 'pre_trained/dgmg_ZINC_canonical.pth',
     'DGMG_ZINC_random': 'pre_trained/dgmg_ZINC_random.pth',
-    'JTNN_ZINC': 'pre_trained/JTNN_ZINC.pth'
+    # JTVAE pre-trained on ZINC without KL regularization
+    'JTVAE_ZINC_no_kl': 'pre_trained/jtvae_ZINC_no_kl.pth'
 }
 
 try:
     # Things requiring RDKit
     from rdkit import Chem
-    from ...model import DGMG, DGLJTNNVAE
+    from ...model import DGMG, JTNNVAE
+    from ...utils import JTVAEVocab
 except ImportError:
     pass
 
@@ -56,17 +54,12 @@ def create_generative_model(model_name):
                     num_prop_rounds=2,
                     dropout=0.2)
 
-    elif model_name == "JTNN_ZINC":
-        default_dir = get_download_dir()
-        vocab_file = '{}/jtvae/{}.txt'.format(default_dir, 'vocab')
-        if not os.path.exists(vocab_file):
-            zip_file_path = '{}/jtvae.zip'.format(default_dir)
-            download(_get_dgl_url('dataset/jtvae.zip'), path=zip_file_path)
-            extract_archive(zip_file_path, '{}/jtvae'.format(default_dir))
-        return DGLJTNNVAE(vocab_file=vocab_file,
-                          depth=3,
-                          hidden_size=450,
-                          latent_size=56)
+    elif model_name.startswith('JTVAE'):
+        vocab = JTVAEVocab()
+        return JTNNVAE(vocab=vocab,
+                       hidden_size=450,
+                       latent_size=56,
+                       depth=3)
 
     else:
         return None

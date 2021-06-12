@@ -11,9 +11,13 @@ from functools import partial
 import torch
 import dgl
 
-from rdkit import Chem
-from rdkit.Chem import rdmolfiles, rdmolops
 from sklearn.neighbors import NearestNeighbors
+
+try:
+    from rdkit import Chem
+    from rdkit.Chem import rdmolfiles, rdmolops
+except ImportError:
+    pass
 
 __all__ = ['mol_to_graph',
            'smiles_to_bigraph',

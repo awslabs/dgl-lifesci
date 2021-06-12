@@ -77,6 +77,7 @@ def create_muv_model(model_name):
                             attn_drops=[dropout] * num_gnn_layers,
                             alphas=[0.8145285541930105] * num_gnn_layers,
                             residuals=[True] * num_gnn_layers,
+                            biases=[False] * num_gnn_layers,
                             predictor_hidden_feats=128,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
@@ -90,6 +91,7 @@ def create_muv_model(model_name):
                             attn_drops=[dropout],
                             alphas=[0.9101107032743763],
                             residuals=[False],
+                            biases=[False],
                             predictor_hidden_feats=32,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)

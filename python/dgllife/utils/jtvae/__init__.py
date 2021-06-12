@@ -3,6 +3,8 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# JTNN module
+# pylint: disable= no-member, arguments-differ, invalid-name
+#
+# Utils in JTVAE
 
-from .jtnn_vae import DGLJTNNVAE
+from .vocab import *

@@ -79,6 +79,7 @@ def create_esol_model(model_name):
                             attn_drops=[dropout],
                             alphas=[0.4994779445224584],
                             residuals=[True],
+                            biases=[False],
                             predictor_hidden_feats=16,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)
@@ -92,6 +93,7 @@ def create_esol_model(model_name):
                             attn_drops=[dropout],
                             alphas=[0.7197105722372982],
                             residuals=[False],
+                            biases=[False],
                             predictor_hidden_feats=32,
                             predictor_dropout=dropout,
                             n_tasks=n_tasks)

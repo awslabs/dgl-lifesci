@@ -49,13 +49,6 @@ For other installation recipes for RDKit, see the [official documentation](https
 pip install dgllife
 ```
 
-### Conda installation for DGL-LifeSci
-
-```
-pip install hyperopt
-conda install -c dglteam dgllife
-```
-
 ### Installation from source
 
 If you want to try experimental features, you can install from source as follows:
@@ -74,7 +67,7 @@ Once you have installed the package, you can verify the success of installation 
 import dgllife
 
 print(dgllife.__version__)
-# 0.2.6
+# 0.2.8
 ```
 
 If you are new to DGL, the first time you import dgl a message will pop up as below:

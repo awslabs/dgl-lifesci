@@ -12,15 +12,19 @@
 from collections import defaultdict
 from functools import partial
 from itertools import accumulate, chain
-from rdkit import Chem
-from rdkit.Chem import rdMolDescriptors
-from rdkit.Chem.rdmolops import FastFindRings
-from rdkit.Chem import AllChem
-from rdkit.Chem.Scaffolds import MurckoScaffold
 
 import numpy as np
 import dgl.backend as F
 from dgl.data.utils import split_dataset, Subset
+
+try:
+    from rdkit import Chem
+    from rdkit.Chem import rdMolDescriptors
+    from rdkit.Chem.rdmolops import FastFindRings
+    from rdkit.Chem import AllChem
+    from rdkit.Chem.Scaffolds import MurckoScaffold
+except ImportError:
+    pass
 
 __all__ = ['ConsecutiveSplitter',
            'RandomSplitter',
@@ -499,7 +503,7 @@ class ScaffoldSplitter(object):
             try:
                 FastFindRings(mol)
                 if scaffold_func == 'decompose':
-                    mol_scaffold = AllChem.MurckoDecompose(mol)
+                    mol_scaffold = Chem.MolToSmiles(AllChem.MurckoDecompose(mol))
                 if scaffold_func == 'smiles':
                     mol_scaffold = MurckoScaffold.MurckoScaffoldSmiles(
                         mol=mol, includeChirality=False)

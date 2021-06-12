@@ -56,9 +56,7 @@ def test_jtnn():
     else:
         device = torch.device('cpu')
 
-    model = load_pretrained('JTNN_ZINC').to(device)
-
-    remove_file('JTNN_ZINC_pre_trained.pth')
+    model = load_pretrained('JTNN_ZINC_no_kl').to(device)
 
 def test_gcn_tox21():
     if torch.cuda.is_available():
