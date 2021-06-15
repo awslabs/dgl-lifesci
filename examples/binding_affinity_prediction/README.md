@@ -42,7 +42,7 @@ Use `main.py` with arguments
 * `--pdb_path`, local path of existing PDBBind dataset. Specify this argument to a local path of **customized dataset**, which should follow the structure and the naming format of PDBBind v2015.
 * `--test_on_core`, bool, whether to use the whole core set as test set when training on refined set, default True.
 * `--save_r2`, path to save r2 at each epoch, default not save.
-* `--num_workers`, number of workers for Dataloader, default to 8.
+* `--num_workers`, number of workers for loading PDBBind molecules and Dataloader, default to the number of CPUs.
 * `-t`, int, number of trials to run, default to 1.
 
 ### For access to more hyperparameters, see `./configure.py`.

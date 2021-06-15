@@ -3,15 +3,18 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+import multiprocessing
 import os
+
 import numpy as np
 import torch
 import torch.nn as nn
-
 from dgllife.utils.eval import Meter
 from torch.utils.data import DataLoader
 
-from utils import set_random_seed, load_dataset, collate, load_model, rand_hyperparams
+from utils import (collate, load_dataset, load_model, rand_hyperparams,
+                   set_random_seed)
+
 
 def update_msg_from_scores(msg, scores):
     for metric, score in scores.items():
@@ -162,7 +165,7 @@ if __name__ == '__main__':
                         help='Data subset and split to use')
     parser.add_argument('-v', '--version', type=str, choices=['v2007', 'v2015'], default='v2015')
     parser.add_argument('--pdb_path', type=str, default='', help='local path of custom PDBBind dataset')
-    parser.add_argument('--num_workers', type=int, default=8, help='number of processes in data loading')
+    parser.add_argument('--num_workers', type=int, default=0, help='number of processes for loading PDBBind molecules and Dataloader')
     parser.add_argument('--save_r2', type=str, default='', help='path to save r2 at each epoch, default not save')
     parser.add_argument('-t', '--num_trials', type=int, default=1)
     parser.add_argument('--test_on_core', type=bool, default=True, 
@@ -172,6 +175,9 @@ if __name__ == '__main__':
     args['exp'] = '_'.join([args['model'], args['dataset']])
     args.update(get_exp_configure(args['exp']))
 
+    if args['num_workers'] == 0:
+        args['num_workers'] = multiprocessing.cpu_count()
+        
     if args['split'] == 'sequence' or args['split'] == 'structure':
         args['version'] = 'v2007' 
         args['test_on_core'] = False

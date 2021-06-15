@@ -73,6 +73,7 @@ def load_dataset(args):
             dataset = PDBBind(subset=args['subset'], pdb_version=args['version'], local_path=args['pdb_path'],
                                 remove_coreset_from_refinedset=args['remove_coreset_from_refinedset'],
                                 load_binding_pocket=args['load_binding_pocket'],
+                                num_processes=args['num_workers'],
                                 construct_graph_and_featurize=partial(PN_graph_construction_and_featurization, 
                                                                     distance_bins=args['distance_bins'],))
         elif args['model'] == 'ACNN':
