@@ -18,7 +18,7 @@ PotentialNet_PDBBind_core_pocket_random = {
     'shuffle': False,
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
-    'f_in': 51,
+    'f_in': 44,
     'f_bond': 73, # has to be larger than f_in
     'f_gather': 64,
     'f_spatial': 64, # better to be the same as f_gather
@@ -45,7 +45,7 @@ PotentialNet_PDBBind_core_pocket_scaffold = {
     'shuffle': False,
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
-    'f_in': 51,
+    'f_in': 44,
     'f_bond': 73, # has to be larger than f_in
     'f_gather': 64,
     'f_spatial': 64, # better to be the same as f_gather
@@ -72,7 +72,7 @@ PotentialNet_PDBBind_core_pocket_stratified = {
     'shuffle': False,
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
-    'f_in': 51,
+    'f_in': 44,
     'f_bond': 73, # has to be larger than f_in
     'f_gather': 64,
     'f_spatial': 64, # better to be the same as f_gather
@@ -100,7 +100,7 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'shuffle': False,
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
-    'f_in': 51,
+    'f_in': 44,
     'f_bond': 64, # has to be larger than f_in
     'f_gather': 64,
     'f_spatial': 64, # better to be the same as f_gather
@@ -127,7 +127,7 @@ PotentialNet_PDBBind_refined_pocket_sequence = {
     'shuffle': False,
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
-    'f_in': 51,
+    'f_in': 44,
     'f_bond': 73, # has to be larger than f_in
     'f_gather': 64,
     'f_spatial': 64, # better to be the same as f_gather
@@ -154,7 +154,7 @@ PotentialNet_PDBBind_refined_pocket_structure = {
     'shuffle': False,
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
-    'f_in': 51,
+    'f_in': 44,
     'f_bond': 73, # has to be larger than f_in
     'f_gather': 64,
     'f_spatial': 64, # better to be the same as f_gather
@@ -182,7 +182,7 @@ PotentialNet_PDBBind_refined_pocket_scaffold = {
     'shuffle': False,
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
-    'f_in': 51,
+    'f_in': 44,
     'f_bond': 73, # has to be larger than f_in
     'f_gather': 64,
     'f_spatial': 64, # better to be the same as f_gather
@@ -210,7 +210,7 @@ PotentialNet_PDBBind_refined_pocket_stratified = {
     'shuffle': False,
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
-    'f_in': 51,
+    'f_in': 44,
     'f_bond': 73, # has to be larger than f_in
     'f_gather': 64,
     'f_spatial': 64, # better to be the same as f_gather

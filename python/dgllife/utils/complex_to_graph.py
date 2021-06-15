@@ -141,10 +141,10 @@ def PN_graph_construction_and_featurization(ligand_mol,
         protein_atom_indices_left = list(range(protein_mol.GetNumAtoms()))
 
     # Node featurizer for stage 1
-    atoms = ['H','N','O','C','P','S','F','Br','Cl','I','Fe','Zn','Mg','Cs','Na','Mn','Ca','Co','Ni','Se','Cu','Cd','Hg','Sr','K']
-    atom_total_degrees = list(range(9))
+    atoms = ['H','N','O','C','P','S','F','Br','Cl','I','Fe','Zn','Mg','Na','Mn','Ca','Co','Ni','Se','Cu','Cd','Hg','K']
+    atom_total_degrees = list(range(5))
     atom_formal_charges = [-1, 0, 1]
-    atom_implicit_valence = list(range(5))
+    atom_implicit_valence = list(range(4))
     atom_explicit_valence = list(range(8))
     atom_concat_featurizer = ConcatFeaturizer([partial(atom_type_one_hot, allowable_set=atoms), 
                                                partial(atom_total_degree_one_hot, allowable_set=atom_total_degrees),
