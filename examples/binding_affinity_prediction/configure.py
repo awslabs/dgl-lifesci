@@ -19,10 +19,10 @@ PotentialNet_PDBBind_core_pocket_random = {
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 44,
-    'f_bond': 73, # has to be larger than f_in
-    'f_gather': 64,
-    'f_spatial': 64, # better to be the same as f_gather
-    'n_rows_fc': [32],
+    'f_bond': 48, # has to be larger than f_in
+    'f_gather': 48,
+    'f_spatial': 48, # better to be the same as f_gather
+    'n_rows_fc': [48, 24],
     'n_bond_conv_steps': 2,
     'n_spatial_conv_steps': 1,
     'dropouts': [0.25, 0.25, 0.25],
@@ -46,12 +46,12 @@ PotentialNet_PDBBind_core_pocket_scaffold = {
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 44,
-    'f_bond': 73, # has to be larger than f_in
-    'f_gather': 64,
-    'f_spatial': 64, # better to be the same as f_gather
-    'n_rows_fc': [32],
-    'n_bond_conv_steps':2,
-    'n_spatial_conv_steps':1,
+    'f_bond': 48, # has to be larger than f_in
+    'f_gather': 48,
+    'f_spatial': 48, # better to be the same as f_gather
+    'n_rows_fc': [48, 24],
+    'n_bond_conv_steps': 2,
+    'n_spatial_conv_steps': 1,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.01,
     'num_epochs': 100,
@@ -73,12 +73,12 @@ PotentialNet_PDBBind_core_pocket_stratified = {
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 44,
-    'f_bond': 73, # has to be larger than f_in
-    'f_gather': 64,
-    'f_spatial': 64, # better to be the same as f_gather
-    'n_rows_fc': [32],
-    'n_bond_conv_steps':2,
-    'n_spatial_conv_steps':1,
+    'f_bond': 48, # has to be larger than f_in
+    'f_gather': 48,
+    'f_spatial': 48, # better to be the same as f_gather
+    'n_rows_fc': [48, 24],
+    'n_bond_conv_steps': 2,
+    'n_spatial_conv_steps': 1,
     'dropouts': [0.25, 0.25, 0.25],
     'lr': 0.01,
     'num_epochs': 100,
@@ -101,15 +101,15 @@ PotentialNet_PDBBind_refined_pocket_random = {
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 44,
-    'f_bond': 64, # has to be larger than f_in
-    'f_gather': 64,
-    'f_spatial': 64, # better to be the same as f_gather
-    'n_rows_fc': [64, 32],
-    'n_bond_conv_steps':2,
-    'n_spatial_conv_steps':2,
+    'f_bond': 48, # has to be larger than f_in
+    'f_gather': 48,
+    'f_spatial': 48, # better to be the same as f_gather
+    'n_rows_fc': [48, 24],
+    'n_bond_conv_steps': 2,
+    'n_spatial_conv_steps': 1,
     'dropouts': [0.25, 0.25, 0.25],
-    'lr': 0.05,
-    'num_epochs': 200,
+    'lr': 0.01,
+    'num_epochs': 150,
     'wd': 1e-05,
     'metrics': ['r2', 'mae'],
     'split': 'random'
@@ -128,14 +128,14 @@ PotentialNet_PDBBind_refined_pocket_sequence = {
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 44,
-    'f_bond': 73, # has to be larger than f_in
-    'f_gather': 64,
-    'f_spatial': 64, # better to be the same as f_gather
-    'n_rows_fc': [64,32],
-    'n_bond_conv_steps':2,
-    'n_spatial_conv_steps':2,
+    'f_bond': 48, # has to be larger than f_in
+    'f_gather': 48,
+    'f_spatial': 48, # better to be the same as f_gather
+    'n_rows_fc': [48, 24],
+    'n_bond_conv_steps': 2,
+    'n_spatial_conv_steps': 1,
     'dropouts': [0.25, 0.25, 0.25],
-    'lr': 0.05,
+    'lr': 0.01,
     'num_epochs': 200,
     'wd': 1e-05,
     'metrics': ['r2', 'mae'],
@@ -155,14 +155,14 @@ PotentialNet_PDBBind_refined_pocket_structure = {
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 44,
-    'f_bond': 73, # has to be larger than f_in
-    'f_gather': 64,
-    'f_spatial': 64, # better to be the same as f_gather
-    'n_rows_fc': [64, 32],
-    'n_bond_conv_steps':2,
-    'n_spatial_conv_steps':2,
+    'f_bond': 48, # has to be larger than f_in
+    'f_gather': 48,
+    'f_spatial': 48, # better to be the same as f_gather
+    'n_rows_fc': [48, 24],
+    'n_bond_conv_steps': 2,
+    'n_spatial_conv_steps': 1,
     'dropouts': [0.25, 0.25, 0.25],
-    'lr': 0.05,
+    'lr': 0.01,
     'num_epochs': 200,
     'wd': 1e-05,
     'metrics': ['r2', 'mae'],
@@ -183,14 +183,14 @@ PotentialNet_PDBBind_refined_pocket_scaffold = {
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 44,
-    'f_bond': 73, # has to be larger than f_in
-    'f_gather': 64,
-    'f_spatial': 64, # better to be the same as f_gather
-    'n_rows_fc': [64, 32],
+    'f_bond': 48, # has to be larger than f_in
+    'f_gather': 48,
+    'f_spatial': 48, # better to be the same as f_gather
+    'n_rows_fc': [48, 24],
     'n_bond_conv_steps':2,
-    'n_spatial_conv_steps':2,
+    'n_spatial_conv_steps':1,
     'dropouts': [0.25, 0.25, 0.25],
-    'lr': 0.05,
+    'lr': 0.01,
     'num_epochs': 200,
     'wd': 1e-05,
     'metrics': ['r2', 'mae'],
@@ -211,14 +211,14 @@ PotentialNet_PDBBind_refined_pocket_stratified = {
     'max_num_neighbors': 5,
     'distance_bins': [1.5, 2.5, 3.5, 4.5],
     'f_in': 44,
-    'f_bond': 73, # has to be larger than f_in
-    'f_gather': 64,
-    'f_spatial': 64, # better to be the same as f_gather
-    'n_rows_fc': [64, 32],
-    'n_bond_conv_steps':2,
-    'n_spatial_conv_steps':2,
+    'f_bond': 48, # has to be larger than f_in
+    'f_gather': 48,
+    'f_spatial': 48, # better to be the same as f_gather
+    'n_rows_fc': [48, 24],
+    'n_bond_conv_steps': 2,
+    'n_spatial_conv_steps': 1,
     'dropouts': [0.25, 0.25, 0.25],
-    'lr': 0.05,
+    'lr': 0.01,
     'num_epochs': 200,
     'wd': 1e-05,
     'metrics': ['r2', 'mae'],
