@@ -74,7 +74,7 @@ print(dgllife.__version__)
 
 If you use DGL-LifeSci in a scientific publication, we would appreciate citations to the following paper:
 
-```bash
+```
 @article{dgllife,
     title={DGL-LifeSci: An Open-Source Toolkit for Deep Learning on Graphs in Life Science},
     author={Mufei Li, Jinjing Zhou, Jiajing Hu, Wenxuan Fan, Yangkang Zhang, Yaxin Gu, George Karypis},
