@@ -96,10 +96,10 @@ Use `main.py` with arguments
 | ------------ | --------| ---------------- | --------------- | -------------- | ------------------- | ------------- |
 | Refined      | Core    | Random           | v2007           | 0.9305 (0.0106)| 0.4161 (0.0217)     |0.8980 (0.0102)|
 | Refined      | Core    | Random           | v2015           | 0.8934 (0.0112)| 0.4227 (0.0170)     |0.8117 (0.0135)|
-| Refined (core removed)| Core | Random     | v2007           | 0.6801 (0.0359)| 0.4605 (0.0185)     |0.4086 (0.0159)|
+| Refined (core removed)| Core | Random     | v2007          | 0.7382 (0.0757)| 0.5171 (0.0302)     |0.3825 (0.0392)|
+| Refined (core removed)| Core | Random     | v2015          | 0.5480 (0.0441)| 0.4727 (0.0199)     |0.4508 (0.0308)|
 
-
-The results are computed over 100 trials and R2 from the best epoch is reported. 
+The results are computed over 100 trials and R2 from the best validation epoch is reported. 
 
 ##### Reported Performance from PotentialNet paper [6]
 
