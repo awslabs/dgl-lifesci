@@ -94,8 +94,8 @@ Use `main.py` with arguments
 
 | Training Set | Test Set| Splitting Method | PDBBind version | Train R2 (std) | Validation R2 (std) | Test R2 (std) |
 | ------------ | --------| ---------------- | --------------- | -------------- | ------------------- | ------------- |
-| Refined      | Core    | Random           | v2007           | 0.9305 (0.0106)| 0.4161 (0.0217)     |0.8980 (0.0102)|
-| Refined      | Core    | Random           | v2015           | 0.8934 (0.0112)| 0.4227 (0.0170)     |0.8117 (0.0135)|
+| Refined      | Core    | Random           | v2007           | 0.7250 (0.0610)| 0.4239 (0.0290)     |0.7952 (0.0479)|
+| Refined      | Core    | Random           | v2015           | 0.5545 (0.0462)| 0.4294 (0.0143)     |0.5862 (0.0420)|
 | Refined (core removed)| Core | Random     | v2007          | 0.7382 (0.0757)| 0.5171 (0.0302)     |0.3825 (0.0392)|
 | Refined (core removed)| Core | Random     | v2015          | 0.5480 (0.0441)| 0.4727 (0.0199)     |0.4508 (0.0308)|
 
