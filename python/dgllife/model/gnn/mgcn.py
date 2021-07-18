@@ -63,7 +63,7 @@ class EdgeEmbedding(nn.Module):
         node_type2 = edges.dst['type']
         return {
             'type': node_type1 * node_type2 + \
-                    (torch.abs(node_type1 - node_type2) - 1) ** 2 / 4
+                    (torch.abs(node_type1 - node_type2) - 1) ** 2 // 4
         }
 
     def forward(self, g, node_types):
