@@ -14,9 +14,9 @@ def train(model, device, loader, criterion, optimizer):
 
     for step, batch in enumerate(tqdm(loader, desc="Iteration")):
         bg, labels = batch
+        bg, labels = bg.to(device), labels.to(device)
         nfeats = bg.ndata['h']
         efeats = bg.edata['feat']
-        labels, nfeats, efeats = labels.to(device), nfeats.to(device), efeats.to(device)
         # only one node
         if bg.batch_size == 1:
             pass
@@ -34,9 +34,9 @@ def eval(model, device, loader, evaluator):
 
     for step, batch in enumerate(tqdm(loader, desc="Iteration")):
         bg, labels = batch
+        bg, labels = bg.to(device), labels.to(device)
         nfeats = bg.ndata['h']
         efeats = bg.edata['feat']
-        labels, nfeats, efeats = labels.to(device), nfeats.to(device), efeats.to(device)
         # only one node
         if bg.batch_size == 1:
             pass
