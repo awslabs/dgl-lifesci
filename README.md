@@ -28,7 +28,13 @@ DGL-LifeSci should work on
 * macOS X
 * Windows 10
 
-DGL-LifeSci requires python 3.6+, DGL 0.5.2+ and PyTorch 1.5.0+.
+It is recommended to create a conda environment for DGL-LifeSci with for example
+
+```
+conda create -n dgllife python=3.6
+```
+
+DGL-LifeSci requires python 3.6+, DGL 0.7.0+ and PyTorch 1.5.0+.
 
 [Install pytorch](https://pytorch.org/get-started/locally/)
 
