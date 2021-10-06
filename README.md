@@ -85,6 +85,6 @@ If you use DGL-LifeSci in a scientific publication, we would appreciate citation
     title={DGL-LifeSci: An Open-Source Toolkit for Deep Learning on Graphs in Life Science},
     author={Mufei Li and Jinjing Zhou and Jiajing Hu and Wenxuan Fan and Yangkang Zhang and Yaxin Gu and George Karypis},
     year={2021},
-    journal={arXiv preprint arXiv:2106.14232}
+    journal = {ACS Omega}
 }
 ```
