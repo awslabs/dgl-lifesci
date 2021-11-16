@@ -71,7 +71,7 @@ if __name__ == '__main__':
     edge_featurizer = CanonicalBondFeaturizer(bond_data_field='he')
     df = pd.read_csv(args['csv_path'])
     dataset = MoleculeCSVDataset(
-        df, smiles_to_bigraph,
+        df, partial(smiles_to_bigraph, add_self_loop=True),
         node_featurizer=node_featurizer,
         edge_featurizer=edge_featurizer,
         smiles_column=args['smiles_column'],
