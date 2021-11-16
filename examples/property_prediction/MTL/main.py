@@ -53,7 +53,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--smiles-column', type=str, default='smiles',
                         help='CSV column header for the SMIELS strings. (default: smiles)')
     parser.add_argument('-t', '--tasks', default=None, type=str,
-                        help='CSV column headers for the tasks to model. FOr multiple tasks, separate them by '
+                        help='CSV column headers for the tasks to model. For multiple tasks, separate them by '
                              'comma, e.g., task1,task2,task3, ... If None, we will model '
                              'all the columns except for the smiles_column in the CSV file. '
                              '(default: None)')
@@ -74,7 +74,7 @@ if __name__ == '__main__':
         df, smiles_to_bigraph,
         node_featurizer=node_featurizer,
         edge_featurizer=edge_featurizer,
-        smiles_column=args.smiles_column,
+        smiles_column=args['smiles_column'],
         cache_file_path=args['result_path'] + '/graph.bin',
         task_names=args['tasks']
     )
