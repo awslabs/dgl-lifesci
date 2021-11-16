@@ -10,8 +10,9 @@ from torch.utils.data import DataLoader
 from utils import get_label_mean_and_std, collate, load_model
 
 def regress(args, model, bg):
-    node_feats = bg.ndata.pop('hv').to(args['device'])
-    edge_feats = bg.edata.pop('he').to(args['device'])
+    bg = bg.to(args['device'])
+    node_feats = bg.ndata.pop('hv')
+    edge_feats = bg.edata.pop('he')
     return model(bg, node_feats, edge_feats)
 
 def run_a_train_epoch(args, model, data_loader, criterion, optimizer):
