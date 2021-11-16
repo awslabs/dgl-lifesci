@@ -19,12 +19,13 @@ where:
 For demonstration, you can generate a synthetic dataset as follows.
 
 ```python
+import torch
 import pandas as pd
 
 data = {
     'smiles': ['CCO' for _ in range(128)],
-    'logP': [0.5 for _ in range(128)],
-    'logD': [0.3 for _ in range(128)]
+    'logP': torch.randn(128).numpy().tolist(),
+    'logD': torch.randn(128).numpy().tolist()
 }
 df = pd.DataFrame(data)
 df.to_csv('syn_data.csv', index=False)
@@ -35,3 +36,6 @@ After you run an experiment with
 ```
 python main.py -c syn_data.csv -m GCN --mode parallel -p results -s smiles -t logP,logD
 ```
+
+Once the experiment is completed, `results/model.pth` is the trained model checkpoint
+and `results/results.txt` is the evaluation result.
