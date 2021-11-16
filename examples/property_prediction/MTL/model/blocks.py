@@ -46,6 +46,7 @@ class EdgeGraphConv(nn.Module):
         If not None, applies an activation function to the updated node features.
     """
     def __init__(self, in_feats, out_feats, activation=F.relu):
+        super(EdgeGraphConv, self).__init__()
         self.in_feats = in_feats
         self.out_feats = out_feats
         self.linear = nn.Linear(in_feats, out_feats)
