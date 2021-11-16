@@ -89,7 +89,7 @@ def main(args, node_featurizer, edge_featurizer, train_set, val_set, test_set):
     args['train_mean'], args['train_std'] = train_mean, train_std
 
     train_loader = DataLoader(dataset=train_set, batch_size=args['batch_size'],
-                              shuffle=True, collate_fn=collate)
+                              shuffle=True, collate_fn=collate, drop_last=True)
     val_loader = DataLoader(dataset=val_set, batch_size=args['batch_size'],
                             shuffle=False, collate_fn=collate)
     test_loader = DataLoader(dataset=test_set, batch_size=args['batch_size'],
