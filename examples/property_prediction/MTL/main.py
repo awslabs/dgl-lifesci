@@ -68,7 +68,7 @@ if __name__ == '__main__':
     mkdir_p(args['result_path'])
 
     node_featurizer = atom_featurizer
-    edge_featurizer = CanonicalBondFeaturizer(bond_data_field='he')
+    edge_featurizer = CanonicalBondFeaturizer(bond_data_field='he', self_loop=True)
     df = pd.read_csv(args['csv_path'])
     dataset = MoleculeCSVDataset(
         df, partial(smiles_to_bigraph, add_self_loop=True),
