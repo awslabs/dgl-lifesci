@@ -8,7 +8,11 @@
 # Vocab in JTVAE
 
 from copy import  deepcopy
-from rdkit import Chem
+
+try:
+    from rdkit import Chem
+except ImportError:
+    pass
 
 from .mol_tree import MolTree
 

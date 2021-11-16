@@ -12,8 +12,12 @@ import warnings
 from functools import partial
 from multiprocessing import Pool
 from joblib import Parallel, delayed, cpu_count
-from rdkit import Chem
-from rdkit.Chem import AllChem
+
+try:
+    from rdkit import Chem
+    from rdkit.Chem import AllChem
+except ImportError:
+    pass
 
 __all__ = ['get_mol_3d_coordinates',
            'load_molecule',

@@ -13,6 +13,13 @@ docs/build
 docs/source/tutorials
 docs/source/generated
 
+# .DS_Store
+# examples/.DS_Store
+# python/.DS_Store
+# python/dgllife/.DS_Store
+*.DS_Store
+.vscode/
+
 # Installation from source
 python/build/
 python/dist/

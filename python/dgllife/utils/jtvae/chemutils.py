@@ -8,10 +8,14 @@
 # Chemistry utils in JTVAE
 
 from collections import defaultdict
-from rdkit import Chem
-from rdkit.Chem.EnumerateStereoisomers import EnumerateStereoisomers
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import minimum_spanning_tree
+
+try:
+    from rdkit import Chem
+    from rdkit.Chem.EnumerateStereoisomers import EnumerateStereoisomers
+except ImportError:
+    pass
 
 def get_mol(smiles):
     """Construct RDKit molecule object and kekulize it.
