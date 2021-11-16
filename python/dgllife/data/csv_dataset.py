@@ -8,6 +8,7 @@
 import dgl.backend as F
 import numpy as np
 import os
+import pandas as pd
 import torch
 
 from dgl.data.utils import save_graphs, load_graphs
@@ -43,25 +44,28 @@ class MoleculeCSVDataset(object):
         Column name for smiles in ``df``.
     cache_file_path: str
         Path to store the preprocessed DGLGraphs. For example, this can be ``'dglgraph.bin'``.
-    task_names : list of str or None
+    task_names : list of str or None, optional
         Columns in the data frame corresponding to real-valued labels. If None, we assume
         all columns except the smiles_column are labels. Default to None.
-    load : bool
+    load : bool, optional
         Whether to load the previously pre-processed dataset or pre-process from scratch.
         ``load`` should be False when we want to try different graph construction and
         featurization methods and need to preprocess from scratch. Default to False.
-    log_every : bool
+    log_every : bool, optional
         Print a message every time ``log_every`` molecules are processed. It only comes
         into effect when :attr:`n_jobs` is greater than 1. Default to 1000.
-    init_mask : bool
+    init_mask : bool, optional
         Whether to initialize a binary mask indicating the existence of labels. Default to True.
-    n_jobs : int
+    n_jobs : int, optional
         The maximum number of concurrently running jobs for graph construction and featurization,
         using joblib backend. Default to 1.
+    error_log : str, optional
+        Path to a CSV file of molecules that RDKit failed to parse. If not specified,
+        the molecules will not be recorded.
     """
     def __init__(self, df, smiles_to_graph, node_featurizer, edge_featurizer, smiles_column,
                  cache_file_path, task_names=None, load=False, log_every=1000, init_mask=True,
-                 n_jobs=1):
+                 n_jobs=1, error_log=None):
         self.df = df
         self.smiles = self.df[smiles_column].tolist()
         if task_names is None:
@@ -71,13 +75,13 @@ class MoleculeCSVDataset(object):
         self.n_tasks = len(self.task_names)
         self.cache_file_path = cache_file_path
         self._pre_process(smiles_to_graph, node_featurizer, edge_featurizer,
-                          load, log_every, init_mask, n_jobs)
+                          load, log_every, init_mask, n_jobs, error_log)
 
         # Only useful for binary classification tasks
         self._task_pos_weights = None
 
-    def _pre_process(self, smiles_to_graph, node_featurizer,
-                     edge_featurizer, load, log_every, init_mask, n_jobs=1):
+    def _pre_process(self, smiles_to_graph, node_featurizer, edge_featurizer,
+                     load, log_every, init_mask, n_jobs, error_log):
         """Pre-process the dataset
 
         * Convert molecules from smiles format into DGLGraphs
@@ -106,6 +110,9 @@ class MoleculeCSVDataset(object):
             Whether to initialize a binary mask indicating the existence of labels.
         n_jobs : int
             Degree of parallelism for pre processing. Default to 1.
+        error_log : str
+            Path to a CSV file of molecules that RDKit failed to parse. If not specified,
+            the molecules will not be recorded.
         """
         if os.path.exists(self.cache_file_path) and load:
             # DGLGraphs have been constructed before, reload them
@@ -134,10 +141,22 @@ class MoleculeCSVDataset(object):
             # Keep only valid molecules
             self.valid_ids = []
             graphs = []
+            failed_mols = []
             for i, g in enumerate(self.graphs):
                 if g is not None:
                     self.valid_ids.append(i)
                     graphs.append(g)
+                else:
+                    failed_mols.append((i, self.smiles[i]))
+
+            if error_log is not None:
+                if len(failed_mols) > 0:
+                    failed_ids, failed_smis = map(list, zip(*failed_mols))
+                else:
+                    failed_ids, failed_smis = [], []
+                df = pd.DataFrame({'raw_id': failed_ids, 'smiles': failed_smis})
+                df.to_csv(error_log, index=False)
+
             self.graphs = graphs
             _label_values = self.df[self.task_names].values
             # np.nan_to_num will also turn inf into a very large number
