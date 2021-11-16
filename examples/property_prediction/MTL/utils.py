@@ -70,7 +70,7 @@ def get_label_mean_and_std(dataset):
     n_tasks = label.shape[-1]
     task_values = {t: [] for t in range(n_tasks)}
     for i in range(len(dataset)):
-        _, _, _, label, mask = dataset[i]
+        _, _, label, mask = dataset[i]
         for t in range(n_tasks):
             if mask[t].data.item() == 1.:
                 task_values[t].append(label[t].data.item())
