@@ -1,3 +1,4 @@
+import dgl
 import numpy as np
 import time
 import torch
@@ -11,6 +12,7 @@ from utils import get_label_mean_and_std, collate, load_model
 
 def regress(args, model, bg):
     bg = bg.to(args['device'])
+    bg = dgl.add_self_loop(bg)
     node_feats = bg.ndata.pop('hv')
     edge_feats = bg.edata.pop('he')
     return model(bg, node_feats, edge_feats)
