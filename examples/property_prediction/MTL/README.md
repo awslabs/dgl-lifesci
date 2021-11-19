@@ -39,3 +39,28 @@ python main.py -c syn_data.csv -m GCN --mode parallel -p results -s smiles -t lo
 
 Once the experiment is completed, `results/model.pth` is the trained model checkpoint
 and `results/results.txt` is the evaluation result.
+
+## Hyperparameters
+
+The hyperparameters for all experiments are included in `configure.py`:
+
+| Configure    | Multi-task  | Model | Architecture | Dataset |
+| ------------ | ----------- | ----- | ------------ | ------- |
+| GAT_parallel | Yes         | GAT   | Parallel     | All     |
+| GAT_bypass   | Yes         | GAT   | Bypass       | All     |
+| GAT_LogD     | No          | GAT   | Parallel     | LogD    |
+| GAT_HLM      | No          | GAT   | Parallel     | HLM     |
+| GAT_HH       | No          | GAT   | Parallel     | HH      |
+| GAT_KinSol   | No          | GAT   | Parallel     | KinSol  |
+| GCN_LogD     | No          | GCN   | Parallel     | LogD    |
+| GCN_HLM      | No          | GCN   | Parallel     | HLM     |
+| GCN_HH       | No          | GCN   | Parallel     | HH      |
+| GCN_KinSol   | No          | GCN   | Parallel     | KinSol  |
+| MPNN_LogD    | No          | MPNN  | Parallel     | LogD    |
+| MPNN_HLM     | No          | MPNN  | Parallel     | HLM     |
+| MPNN_HH      | No          | MPNN  | Parallel     | HH      |
+| MPNN_KinSol  | No          | MPNN  | Parallel     | KinSol  |
+| AttentiveFP_LogD    | No          | AttentiveFP  | Parallel     | LogD    |
+| AttentiveFP_HLM     | No          | AttentiveFP  | Parallel     | HLM     |
+| AttentiveFP_HH      | No          | AttentiveFP  | Parallel     | HH      |
+| AttentiveFP_KinSol  | No          | AttentiveFP  | Parallel     | KinSol  |
