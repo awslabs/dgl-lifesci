@@ -44,21 +44,23 @@ and `results/results.txt` is the evaluation result.
 
 The hyperparameters for all experiments are included in `configure.py`:
 
-- `GAT_parallel`: Multi-task GAT with parallel architecture
-- `GAT_bypass`: Multi-task GAT with bypass architecture
-- `GAT_LogD`: Single-task GAT for LogD
-- `GAT_HLM`: Single-task GAT for HLM
-- `GAT_HH`: Single-task GAT for HH
-- `GAT_KinSol`: Single-task GAT for KinSol
-- `GCN_logD`: Single-task GCN for LogD
-- `GCN_HLM`: Single-task GCN for HLM
-- `GCN_HH`: Single-task GCN for HH
-- `GCN_KinSol`: Single-task GCN for KinSol
-- `MPNN_logD`: Single-task MPNN for logD
-- `MPNN_HLM`: Single-task MPNN for HLM
-- `MPNN_HH`: Single-task MPNN for HH
-- `MPNN_KinSol`: Single-task MPNN for KinSol
-- `AttentiveFP_logD`: Single-task AttentiveFP for logD
-- `AttentiveFP_HLM`: Single-task AttentiveFP for HLM
-- `AttentiveFP_HH`: Single-task AttentiveFP for HH
-- `AttentiveFP_KinSol`: Single-task AttentiveFP for KinSol
+| Configure    | Multi-task  | Model | Architecture | Dataset |
+| ------------ | ----------- | ----- | ------------ | ------- |
+| GAT_parallel | Yes         | GAT   | Parallel     | All     |
+| GAT_bypass   | Yes         | GAT   | Bypass       | All     |
+| GAT_LogD     | No          | GAT   | Parallel     | LogD    |
+| GAT_HLM      | No          | GAT   | Parallel     | HLM     |
+| GAT_HH       | No          | GAT   | Parallel     | HH      |
+| GAT_KinSol   | No          | GAT   | Parallel     | KinSol  |
+| GCN_LogD     | No          | GCN   | Parallel     | LogD    |
+| GCN_HLM      | No          | GCN   | Parallel     | HLM     |
+| GCN_HH       | No          | GCN   | Parallel     | HH      |
+| GCN_KinSol   | No          | GCN   | Parallel     | KinSol  |
+| MPNN_LogD    | No          | MPNN  | Parallel     | LogD    |
+| MPNN_HLM     | No          | MPNN  | Parallel     | HLM     |
+| MPNN_HH      | No          | MPNN  | Parallel     | HH      |
+| MPNN_KinSol  | No          | MPNN  | Parallel     | KinSol  |
+| AttentiveFP_LogD    | No          | AttentiveFP  | Parallel     | LogD    |
+| AttentiveFP_HLM     | No          | AttentiveFP  | Parallel     | HLM     |
+| AttentiveFP_HH      | No          | AttentiveFP  | Parallel     | HH      |
+| AttentiveFP_KinSol  | No          | AttentiveFP  | Parallel     | KinSol  |
