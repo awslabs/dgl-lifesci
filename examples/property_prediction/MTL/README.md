@@ -39,3 +39,26 @@ python main.py -c syn_data.csv -m GCN --mode parallel -p results -s smiles -t lo
 
 Once the experiment is completed, `results/model.pth` is the trained model checkpoint
 and `results/results.txt` is the evaluation result.
+
+## Hyperparameters
+
+The hyperparameters for all experiments are included in `configure.py`:
+
+- `GAT_parallel`: Multi-task GAT with parallel architecture
+- `GAT_bypass`: Multi-task GAT with bypass architecture
+- `GAT_LogD`: Single-task GAT for LogD
+- `GAT_HLM`: Single-task GAT for HLM
+- `GAT_HH`: Single-task GAT for HH
+- `GAT_KinSol`: Single-task GAT for KinSol
+- `GCN_logD`: Single-task GCN for LogD
+- `GCN_HLM`: Single-task GCN for HLM
+- `GCN_HH`: Single-task GCN for HH
+- `GCN_KinSol`: Single-task GCN for KinSol
+- `MPNN_logD`: Single-task MPNN for logD
+- `MPNN_HLM`: Single-task MPNN for HLM
+- `MPNN_HH`: Single-task MPNN for HH
+- `MPNN_KinSol`: Single-task MPNN for KinSol
+- `AttentiveFP_logD`: Single-task AttentiveFP for logD
+- `AttentiveFP_HLM`: Single-task AttentiveFP for HLM
+- `AttentiveFP_HH`: Single-task AttentiveFP for HH
+- `AttentiveFP_KinSol`: Single-task AttentiveFP for KinSol
