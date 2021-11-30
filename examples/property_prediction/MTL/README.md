@@ -1,5 +1,7 @@
 # Multitask Graph Neural Network for Molecular Property Prediction
 
+[Paper](https://arxiv.org/abs/2111.13964)
+
 ## Usage
 
 ```
@@ -64,3 +66,14 @@ The hyperparameters for all experiments are included in `configure.py`:
 | AttentiveFP_HLM     | No          | AttentiveFP  | Parallel     | HLM     |
 | AttentiveFP_HH      | No          | AttentiveFP  | Parallel     | HH      |
 | AttentiveFP_KinSol  | No          | AttentiveFP  | Parallel     | KinSol  |
+
+## Cite
+
+```
+@article{Broccatelli21,
+    title={Benchmarking Accuracy and Generalizability of Four Graph Neural Networks Using Large In Vitro ADME Datasets from Different Chemical Spaces},
+    author={Fabio Broccatelli and Richard Trager and Michael Reutlinger and George Karypis and Mufei Li},
+    year={2021},
+    journal={arXiv preprint arXiv:2111.13964}
+}
+```
