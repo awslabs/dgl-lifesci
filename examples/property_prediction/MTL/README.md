@@ -70,10 +70,11 @@ The hyperparameters for all experiments are included in `configure.py`:
 ## Cite
 
 ```
-@article{Broccatelli21,
-    title={Benchmarking Accuracy and Generalizability of Four Graph Neural Networks Using Large In Vitro ADME Datasets from Different Chemical Spaces},
-    author={Fabio Broccatelli and Richard Trager and Michael Reutlinger and George Karypis and Mufei Li},
-    year={2021},
-    journal={arXiv preprint arXiv:2111.13964}
+@article{https://doi.org/10.1002/minf.202100321,
+author = {Broccatelli, Fabio and Trager, Richard and Reutlinger, Michael and Karypis, George and Li, Mufei},
+title = {Benchmarking Accuracy and Generalizability of Four Graph Neural Networks Using Large In Vitro ADME Datasets from Different Chemical Spaces},
+journal = {Molecular Informatics},
+doi = {https://doi.org/10.1002/minf.202100321},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/minf.202100321},
 }
 ```
