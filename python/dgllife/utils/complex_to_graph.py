@@ -58,10 +58,10 @@ def get_atomic_numbers(mol, indices):
         atomic_numbers.append(atom.GetAtomicNum())
     return atomic_numbers
 
-def int_2_one_hot(a):
+def int_2_one_hot(a, bins):
     """Convert integer encodings on a vector to a matrix of one-hot encoding"""
     n = len(a)
-    b = np.zeros((n, a.max()+1))
+    b = np.zeros((n, len(bins)))
     b[np.arange(n), a] = 1
     return b
 
@@ -179,7 +179,7 @@ def PN_graph_construction_and_featurization(ligand_mol,
 
     complex_knn_graph = graph((complex_srcs, complex_dsts), num_nodes=len(complex_coordinates))
     d_features = np.digitize(complex_dists, bins=distance_bins, right=True)
-    d_one_hot = int_2_one_hot(d_features)
+    d_one_hot = int_2_one_hot(d_features, distance_bins)
     
     # add bond types and bonds (from bigraph) to stage 2
     u, v = complex_bigraph.edges()    
