@@ -88,7 +88,7 @@ print(dgllife.__version__)
 
 ## Command Line Interface
 
-DGL-LifeSci provides command line interfaces that allow users to perform modeling without any background in programming and deep learning:
+DGL-LifeSci provides command line interfaces that allow users to perform modeling without any background in programming and deep learning. You will need to first clone the github repo.
 
 - [Molecular Property Prediction](examples/property_prediction/csv_data_configuration/)
 - [Reaction Prediction](examples/reaction_prediction/rexgen_direct/)
