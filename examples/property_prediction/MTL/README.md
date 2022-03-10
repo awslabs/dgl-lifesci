@@ -24,9 +24,10 @@ For demonstration, you can generate a synthetic dataset as follows.
 import torch
 import pandas as pd
 
+# 'nan' for missing property labels
 data = {
-    'smiles': ['CCO' for _ in range(128)],
-    'logP': torch.randn(128).numpy().tolist(),
+    'smiles': ['CCO', 'CO', 'C', 'O'] * 32,
+    'logP': torch.randn(127).numpy().tolist() + [float('nan')],
     'logD': torch.randn(128).numpy().tolist()
 }
 df = pd.DataFrame(data)

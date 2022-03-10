@@ -21,3 +21,4 @@ Contributors
 * [Wenxuan Fan](https://github.com/wenx00): Strategies for Pre-training Graph Neural Networks
 * [Vignesh Venkataraman](https://github.com/VIGNESHinZONE): PAGTN
 * [Eric O. Korman](https://github.com/ekorman): Fix for ogbg_ppa
+* [Marcos Leal](https://github.com/marcossilva): Change default number of processes to 1 for rexgen
