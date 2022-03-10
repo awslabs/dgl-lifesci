@@ -13,6 +13,7 @@ We also have a **slack channel** for real-time discussion. If you want to join t
   * [Installation from source](#installation-from-source)
   * [Verifying successful installation](#verifying-successful-installation)
 - [Command Line Interface](#command-line-interface)
+- [Examples](#examples)
 - [Cite](#cite)
 
 ## Introduction
@@ -26,8 +27,6 @@ We provide various functionalities, including but not limited to methods for gra
 featurization, and evaluation, model architectures, training scripts and pre-trained models.
 
 For a list of community contributors, see [here](CONTRIBUTORS.md).
-
-**For a full list of work implemented in DGL-LifeSci, see [here](examples/README.md).**
 
 ## Installation
 
@@ -93,6 +92,10 @@ DGL-LifeSci provides command line interfaces that allow users to perform modelin
 
 - [Molecular Property Prediction](examples/property_prediction/csv_data_configuration/)
 - [Reaction Prediction](examples/reaction_prediction/rexgen_direct/)
+
+## Examples
+
+For a full list of work implemented in DGL-LifeSci, see [here](examples/README.md).
 
 ## Cite
 
