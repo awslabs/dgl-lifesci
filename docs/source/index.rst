@@ -2,25 +2,12 @@ DGL-LifeSci: Bringing Graph Neural Networks to Chemistry and Biology
 ===========================================================================================
 
 DGL-LifeSci is a python package for applying graph neural networks to various tasks in chemistry
-and biology, on top of PyTorch and DGL. It provides:
+and biology, on top of PyTorch, DGL, and RDKit. It covers various applications, including:
 
-* Various utilities for data processing, training and evaluation.
-* Efficient and flexible model implementations.
-* Pre-trained models for use without training from scratch.
-
-We cover various applications in our
-`examples <https://github.com/awslabs/dgl-lifesci/tree/master/examples>`_, including:
-
-* `Molecular property prediction <https://github.com/awslabs/dgl-lifesci/tree/master/examples/property_prediction>`_
-* `Attention visualization <https://github.com/awslabs/dgl-lifesci/tree/master/examples/property_prediction/pubchem_aromaticity>`_
-* `Generative models <https://github.com/awslabs/dgl-lifesci/tree/master/examples/generative_models>`_
-* `Protein-ligand binding affinity prediction <https://github.com/awslabs/dgl-lifesci/tree/master/examples/binding_affinity_prediction>`_
-* `Reaction prediction <https://github.com/awslabs/dgl-lifesci/tree/master/examples/reaction_prediction>`_
-
-Get Started
-------------
-
-Follow the :doc:`instructions<install/index>` to install DGL.
+* Molecular property prediction
+* Generative models
+* Reaction prediction
+* Protein-ligand binding affinity prediction
 
 .. toctree::
    :maxdepth: 1
@@ -29,6 +16,7 @@ Follow the :doc:`instructions<install/index>` to install DGL.
    :glob:
 
    install/index
+   cli
 
 .. toctree::
     :maxdepth: 2
@@ -50,7 +38,3 @@ Free software
 -------------
 DGL-LifeSci is free software; you can redistribute it and/or modify it under the terms
 of the Apache License 2.0. We welcome contributions. Join us on `GitHub <https://github.com/awslabs/dgl-lifesci>`_.
-
-Index
------
-* :ref:`genindex`

@@ -142,9 +142,7 @@ def analyze_mols(smiles=None, mols=None, num_processes=1, path_to_export=None):
      'valid_proportion': 0.6666666666666666,  # Proportion of valid molecules
      'cano_smi': ['CCO',                      # Canonical SMILES for valid molecules
      'CC1(C)S[C@@H]2[C@H](NC(=O)Cc3ccccc3)C(=O)N2[C@H]1C(=O)O'],
-
      # The following items give the number of times each descriptor value appears in molecules
-
      'atom_type_frequency': {'O': 2, 'C': 2, 'N': 1, 'S': 1},
      'degree_frequency': {1: 2, 2: 2, 3: 1, 4: 1},
      'total_degree_frequency': {2: 2, 4: 2, 1: 1, 3: 1},

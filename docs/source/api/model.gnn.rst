@@ -63,3 +63,8 @@ GNNOGB
 ------
 .. automodule:: dgllife.model.gnn.gnn_ogb
     :members:
+
+NF
+--
+.. automodule:: dgllife.model.gnn.nf
+    :members:

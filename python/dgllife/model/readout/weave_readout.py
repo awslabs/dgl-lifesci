@@ -30,9 +30,9 @@ class WeaveGather(nn.Module):
         For each tuple, the first and second element separately specifies the mean
         and std for constructing a normal distribution. This argument comes into
         effect only when ``gaussian_expand==True``. By default, we set this to be
-        ``[(-1.645, 0.283), (-1.080, 0.170), (-0.739, 0.134), (-0.468, 0.118),
-        (-0.228, 0.114), (0., 0.114), (0.228, 0.114), (0.468, 0.118),
-        (0.739, 0.134), (1.080, 0.170), (1.645, 0.283)]``.
+        a list consisting of ``(-1.645, 0.283)``, ``(-1.080, 0.170)``, ``(-0.739, 0.134)``,
+        ``(-0.468, 0.118)``, ``(-0.228, 0.114)``, ``(0., 0.114)``, ``(0.228, 0.114)``,
+        ``(0.468, 0.118)``, ``(0.739, 0.134)``, ``(1.080, 0.170)``, ``(1.645, 0.283)``.
     activation : callable
         Activation function to apply. Default to tanh.
     """

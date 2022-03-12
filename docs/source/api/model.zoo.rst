@@ -69,12 +69,27 @@ GNN OGB Predictor
 .. automodule:: dgllife.model.model_zoo.gnn_ogb_predictor
     :members:
 
+Neural Fingerprint Predictor
+````````````````````````````
+.. automodule:: dgllife.model.model_zoo.nf_predictor
+    :members:
+
+Path-Augmented Graph Transformer Predictor
+``````````````````````````````````````````
+.. automodule:: dgllife.model.model_zoo.pagtn_predictor
+    :members:
+
 Generative Models
 -----------------
 
 DGMG
 ````
 .. automodule:: dgllife.model.model_zoo.dgmg
+    :members:
+
+JTNNVAE
+```````
+.. automodule:: dgllife.model.model_zoo.jtvae
     :members:
 
 Reaction Prediction
@@ -94,4 +109,9 @@ Protein-Ligand Binding Affinity Prediction
 ACNN
 ````
 .. automodule:: dgllife.model.model_zoo.acnn
+    :members:
+
+PotentialNet
+````````````
+.. automodule:: dgllife.model.model_zoo.potentialnet
     :members:
