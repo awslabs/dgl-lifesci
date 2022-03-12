@@ -68,3 +68,8 @@ NF
 --
 .. automodule:: dgllife.model.gnn.nf
     :members:
+
+PAGTN
+-----
+.. automodule:: dgllife.model.gnn.pagtn
+    :members:
