@@ -8,8 +8,7 @@ import torch
 import torch.nn as nn
 
 from dgllife.model import load_pretrained
-from dgllife.utils import smiles_to_bigraph, EarlyStopping, Meter, SMILESToBigraph
-from functools import partial
+from dgllife.utils import EarlyStopping, Meter, SMILESToBigraph
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
