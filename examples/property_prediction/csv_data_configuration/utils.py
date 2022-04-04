@@ -11,8 +11,7 @@ import torch
 import torch.nn.functional as F
 
 from dgllife.data import MoleculeCSVDataset
-from dgllife.utils import smiles_to_bigraph, ScaffoldSplitter, RandomSplitter, mol_to_bigraph
-from functools import partial
+from dgllife.utils import SMILESToBigraph, ScaffoldSplitter, RandomSplitter, mol_to_bigraph
 
 def init_featurizer(args):
     """Initialize node/edge featurizer
@@ -60,10 +59,10 @@ def init_featurizer(args):
     return args
 
 def load_dataset(args, df):
+    smiles_to_g = SMILESToBigraph(add_self_loop=True, node_featurizer=args['node_featurizer'],
+                                  edge_featurizer=args['edge_featurizer'])
     dataset = MoleculeCSVDataset(df=df,
-                                 smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
-                                 node_featurizer=args['node_featurizer'],
-                                 edge_featurizer=args['edge_featurizer'],
+                                 smiles_to_graph=smiles_to_g,
                                  smiles_column=args['smiles_column'],
                                  cache_file_path=args['result_path'] + '/graph.bin',
                                  task_names=args['task_names'],
