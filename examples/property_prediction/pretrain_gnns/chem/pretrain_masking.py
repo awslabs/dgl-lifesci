@@ -12,9 +12,7 @@ import pandas as pd
 import random
 
 import dgl
-from dgllife.utils import PretrainAtomFeaturizer
-from dgllife.utils import PretrainBondFeaturizer
-from dgllife.utils import SMILESToBigraph
+from dgllife.utils import PretrainAtomFeaturizer, PretrainBondFeaturizer, SMILESToBigraph
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 
 from dgllife.model.gnn.gin import GIN
