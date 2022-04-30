@@ -270,7 +270,7 @@ class JTNNDecoder(nn.Module):
 
         # Traverse the tree and predict on children
         for eid, p in dfs_order(tree_graphs, root_ids.to(dtype=tree_graphs.idtype)):
-            eid = eid.to(device)
+            eid = eid.to(device=device, dtype=tree_graphs.idtype)
             p = p.to(device=device, dtype=tree_graphs.idtype)
 
             # Message passing excluding the target
