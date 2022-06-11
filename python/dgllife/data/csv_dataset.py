@@ -15,7 +15,7 @@ from dgl.data.utils import save_graphs, load_graphs
 from functools import partial
 
 from ..utils.io import pmap
-from ..utils.mol_to_graph import ToGraph
+from ..utils.mol_to_graph import ToGraph, SMILESToBigraph
 
 __all__ = ['MoleculeCSVDataset']
 
@@ -35,7 +35,8 @@ class MoleculeCSVDataset(object):
         Dataframe including smiles and labels. Can be loaded by pandas.read_csv(file_path).
         One column includes smiles and some other columns include labels.
     smiles_to_graph: callable, str -> DGLGraph
-        A function turning a SMILES string into a DGLGraph.
+        A function turning a SMILES string into a DGLGraph. If None, it uses
+        :func:`dgllife.utils.SMILESToBigraph` by default.
     node_featurizer : None or callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update
         ndata for a DGLGraph.
@@ -65,7 +66,7 @@ class MoleculeCSVDataset(object):
         Path to a CSV file of molecules that RDKit failed to parse. If not specified,
         the molecules will not be recorded.
     """
-    def __init__(self, df, smiles_to_graph, node_featurizer=None, edge_featurizer=None,
+    def __init__(self, df, smiles_to_graph=None, node_featurizer=None, edge_featurizer=None,
                  smiles_column=None, cache_file_path=None, task_names=None, load=False,
                  log_every=1000, init_mask=True, n_jobs=1, error_log=None):
         self.df = df
@@ -82,6 +83,9 @@ class MoleculeCSVDataset(object):
                 'Initialize smiles_to_graph object with node_featurizer=node_featurizer'
             assert edge_featurizer is None, \
                 'Initialize smiles_to_graph object with edge_featurizer=edge_featurizer'
+        elif smiles_to_graph is None:
+            smiles_to_graph = SMILESToBigraph(node_featurizer=node_featurizer,
+                                              edge_featurizer=edge_featurizer)
         else:
             smiles_to_graph = partial(smiles_to_graph, node_featurizer=node_featurizer,
                                       edge_featurizer=edge_featurizer)
