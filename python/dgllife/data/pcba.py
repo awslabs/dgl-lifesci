@@ -10,7 +10,6 @@ import pandas as pd
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 
 from .csv_dataset import MoleculeCSVDataset
-from ..utils.mol_to_graph import smiles_to_bigraph
 
 __all__ = ['PCBA']
 
@@ -29,8 +28,8 @@ class PCBA(MoleculeCSVDataset):
     Parameters
     ----------
     smiles_to_graph: callable, str -> DGLGraph
-        A function turning a SMILES string into a DGLGraph.
-        Default to :func:`dgllife.utils.smiles_to_bigraph`.
+        A function turning a SMILES string into a DGLGraph. If None, it uses
+        :func:`dgllife.utils.SMILESToBigraph` by default.
     node_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update
         ndata for a DGLGraph. Default to None.
@@ -54,9 +53,10 @@ class PCBA(MoleculeCSVDataset):
 
     >>> import torch
     >>> from dgllife.data import PCBA
-    >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+    >>> from dgllife.utils import SMILESToBigraph, CanonicalAtomFeaturizer
 
-    >>> dataset = PCBA(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> smiles_to_g = SMILESToBigraph(node_featurizer=CanonicalAtomFeaturizer())
+    >>> dataset = PCBA(smiles_to_g)
     >>> # Get size of the dataset
     >>> len(dataset)
     437929
@@ -93,7 +93,7 @@ class PCBA(MoleculeCSVDataset):
     tensor([7.3400, 489.0000, ..., 1.0000])
     """
     def __init__(self,
-                 smiles_to_graph=smiles_to_bigraph,
+                 smiles_to_graph=None,
                  node_featurizer=None,
                  edge_featurizer=None,
                  load=False,
