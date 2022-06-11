@@ -11,7 +11,7 @@ import torch
 import torch.nn.functional as F
 
 from dgllife.data import MoleculeCSVDataset
-from dgllife.utils import SMILESToBigraph, ScaffoldSplitter, RandomSplitter, mol_to_bigraph
+from dgllife.utils import SMILESToBigraph, ScaffoldSplitter, RandomSplitter
 
 def init_featurizer(args):
     """Initialize node/edge featurizer
