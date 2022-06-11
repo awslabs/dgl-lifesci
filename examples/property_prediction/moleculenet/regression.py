@@ -8,8 +8,7 @@ import torch
 import torch.nn as nn
 
 from dgllife.model import load_pretrained
-from dgllife.utils import smiles_to_bigraph, EarlyStopping, Meter
-from functools import partial
+from dgllife.utils import EarlyStopping, Meter, SMILESToBigraph
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
@@ -157,23 +156,19 @@ if __name__ == '__main__':
 
     args = init_featurizer(args)
     mkdir_p(args['result_path'])
+    smiles_to_g = SMILESToBigraph(add_self_loop=True, node_featurizer=args['node_featurizer'],
+                                  edge_featurizer=args['edge_featurizer'])
     if args['dataset'] == 'FreeSolv':
         from dgllife.data import FreeSolv
-        dataset = FreeSolv(smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
-                           node_featurizer=args['node_featurizer'],
-                           edge_featurizer=args['edge_featurizer'],
+        dataset = FreeSolv(smiles_to_graph=smiles_to_g,
                            n_jobs=1 if args['num_workers'] == 0 else args['num_workers'])
     elif args['dataset'] == 'Lipophilicity':
         from dgllife.data import Lipophilicity
-        dataset = Lipophilicity(smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
-                                node_featurizer=args['node_featurizer'],
-                                edge_featurizer=args['edge_featurizer'],
+        dataset = Lipophilicity(smiles_to_graph=smiles_to_g,
                                 n_jobs=1 if args['num_workers'] == 0 else args['num_workers'])
     elif args['dataset'] == 'ESOL':
         from dgllife.data import ESOL
-        dataset = ESOL(smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
-                       node_featurizer=args['node_featurizer'],
-                       edge_featurizer=args['edge_featurizer'],
+        dataset = ESOL(smiles_to_graph=smiles_to_g,
                        n_jobs=1 if args['num_workers'] == 0 else args['num_workers'])
     else:
         raise ValueError('Unexpected dataset: {}'.format(args['dataset']))

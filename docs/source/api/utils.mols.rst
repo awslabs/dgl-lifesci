@@ -49,6 +49,9 @@ three common graph constructions:
     dgllife.utils.k_nearest_neighbors
     dgllife.utils.mol_to_nearest_neighbor_graph
     dgllife.utils.smiles_to_nearest_neighbor_graph
+    dgllife.utils.ToGraph
+    dgllife.utils.MolToBigraph
+    dgllife.utils.SMILESToBigraph
 
 Featurization for Molecules
 ---------------------------

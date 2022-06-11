@@ -26,7 +26,10 @@ __all__ = ['mol_to_graph',
            'mol_to_complete_graph',
            'k_nearest_neighbors',
            'mol_to_nearest_neighbor_graph',
-           'smiles_to_nearest_neighbor_graph']
+           'smiles_to_nearest_neighbor_graph',
+           'ToGraph',
+           'MolToBigraph',
+           'SMILESToBigraph']
 
 # pylint: disable=I1101
 def mol_to_graph(mol, graph_constructor, node_featurizer, edge_featurizer,
@@ -1027,3 +1030,209 @@ def smiles_to_nearest_neighbor_graph(smiles,
         mol, coordinates, neighbor_cutoff, max_num_neighbors, p_distance,
         add_self_loop, node_featurizer, edge_featurizer, canonical_atom_order,
         keep_dists, dist_field, explicit_hydrogens, num_virtual_nodes)
+
+class ToGraph:
+    r"""An abstract class for writing graph constructors."""
+    def __call__(self, data_obj):
+        raise NotImplementedError
+
+    def __repr__(self):
+        return self.__class__.__name__ + '()'
+
+class MolToBigraph(ToGraph):
+    """Convert RDKit molecule objects into bi-directed DGLGraphs and featurize for them.
+
+    Parameters
+    ----------
+    add_self_loop : bool
+        Whether to add self loops in DGLGraphs. Default to False.
+    node_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
+        Featurization for nodes like atoms in a molecule, which can be used to update
+        ndata for a DGLGraph. Default to None.
+    edge_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
+        Featurization for edges like bonds in a molecule, which can be used to update
+        edata for a DGLGraph. Default to None.
+    canonical_atom_order : bool
+        Whether to use a canonical order of atoms returned by RDKit. Setting it
+        to true might change the order of atoms in the graph constructed. Default
+        to True.
+    explicit_hydrogens : bool
+        Whether to explicitly represent hydrogens as nodes in the graph. If True,
+        it will call rdkit.Chem.AddHs(mol). Default to False.
+    num_virtual_nodes : int
+        The number of virtual nodes to add. The virtual nodes will be connected to
+        all real nodes with virtual edges. If the returned graph has any node/edge
+        feature, an additional column of binary values will be used for each feature
+        to indicate the identity of virtual node/edges. The features of the virtual
+        nodes/edges will be zero vectors except for the additional column. Default to 0.
+
+    Examples
+    --------
+    >>> import torch
+    >>> from rdkit import Chem
+    >>> from dgllife.utils import MolToBigraph
+
+    >>> # A custom node featurizer
+    >>> def featurize_atoms(mol):
+    >>>     feats = []
+    >>>     for atom in mol.GetAtoms():
+    >>>         feats.append(atom.GetAtomicNum())
+    >>>     return {'atomic': torch.tensor(feats).reshape(-1, 1).float()}
+
+    >>> # A custom edge featurizer
+    >>> def featurize_bonds(mol):
+    >>>     feats = []
+    >>>     bond_types = [Chem.rdchem.BondType.SINGLE, Chem.rdchem.BondType.DOUBLE,
+    >>>                   Chem.rdchem.BondType.TRIPLE, Chem.rdchem.BondType.AROMATIC]
+    >>>     for bond in mol.GetBonds():
+    >>>         btype = bond_types.index(bond.GetBondType())
+    >>>         # One bond between atom u and v corresponds to two edges (u, v) and (v, u)
+    >>>         feats.extend([btype, btype])
+    >>>     return {'type': torch.tensor(feats).reshape(-1, 1).float()}
+
+    >>> mol_to_g = MolToBigraph(node_featurizer=featurize_atoms, edge_featurizer=featurize_bonds)
+    >>> mol = Chem.MolFromSmiles('CCO')
+    >>> g = mol_to_g(mol)
+    >>> print(g.ndata['atomic'])
+    tensor([[6.],
+            [8.],
+            [6.]])
+    >>> print(g.edata['type'])
+    tensor([[0.],
+            [0.],
+            [0.],
+            [0.]])
+    """
+    def __init__(self,
+                 add_self_loop=False,
+                 node_featurizer=None,
+                 edge_featurizer=None,
+                 canonical_atom_order=True,
+                 explicit_hydrogens=False,
+                 num_virtual_nodes=0):
+        self.add_self_loop = add_self_loop
+        self.node_featurizer = node_featurizer
+        self.edge_featurizer = edge_featurizer
+        self.canonical_atom_order = canonical_atom_order
+        self.explicit_hydrogens = explicit_hydrogens
+        self.num_virtual_nodes = num_virtual_nodes
+
+    def __call__(self, mol):
+        """Construct graph for the molecule and featurize it.
+
+        Parameters
+        ----------
+        mol : rdkit.Chem.rdchem.Mol
+            RDKit molecule holder
+
+        Returns
+        -------
+        DGLGraph or None
+            Bi-directed DGLGraph for the molecule if :attr:`mol` is valid and None otherwise.
+        """
+        return mol_to_bigraph(mol,
+                              self.add_self_loop,
+                              self.node_featurizer,
+                              self.edge_featurizer,
+                              self.canonical_atom_order,
+                              self.explicit_hydrogens,
+                              self.num_virtual_nodes)
+
+class SMILESToBigraph(ToGraph):
+    """Convert SMILES strings into bi-directed DGLGraphs and featurize for them.
+
+    Parameters
+    ----------
+    add_self_loop : bool
+        Whether to add self loops in DGLGraphs. Default to False.
+    node_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
+        Featurization for nodes like atoms in a molecule, which can be used to update
+        ndata for a DGLGraph. Default to None.
+    edge_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
+        Featurization for edges like bonds in a molecule, which can be used to update
+        edata for a DGLGraph. Default to None.
+    canonical_atom_order : bool
+        Whether to use a canonical order of atoms returned by RDKit. Setting it
+        to true might change the order of atoms in the graph constructed. Default
+        to True.
+    explicit_hydrogens : bool
+        Whether to explicitly represent hydrogens as nodes in the graph. If True,
+        it will call rdkit.Chem.AddHs(mol). Default to False.
+    num_virtual_nodes : int
+        The number of virtual nodes to add. The virtual nodes will be connected to
+        all real nodes with virtual edges. If the returned graph has any node/edge
+        feature, an additional column of binary values will be used for each feature
+        to indicate the identity of virtual node/edges. The features of the virtual
+        nodes/edges will be zero vectors except for the additional column. Default to 0.
+
+    Examples
+    --------
+    >>> import torch
+    >>> from rdkit import Chem
+    >>> from dgllife.utils import SMILESToBigraph
+
+    >>> # A custom node featurizer
+    >>> def featurize_atoms(mol):
+    >>>     feats = []
+    >>>     for atom in mol.GetAtoms():
+    >>>         feats.append(atom.GetAtomicNum())
+    >>>     return {'atomic': torch.tensor(feats).reshape(-1, 1).float()}
+
+    >>> # A custom edge featurizer
+    >>> def featurize_bonds(mol):
+    >>>     feats = []
+    >>>     bond_types = [Chem.rdchem.BondType.SINGLE, Chem.rdchem.BondType.DOUBLE,
+    >>>                   Chem.rdchem.BondType.TRIPLE, Chem.rdchem.BondType.AROMATIC]
+    >>>     for bond in mol.GetBonds():
+    >>>         btype = bond_types.index(bond.GetBondType())
+    >>>         # One bond between atom u and v corresponds to two edges (u, v) and (v, u)
+    >>>         feats.extend([btype, btype])
+    >>>     return {'type': torch.tensor(feats).reshape(-1, 1).float()}
+
+    >>> smi_to_g = SMILESToBigraph(node_featurizer=featurize_atoms,
+    ...                            edge_featurizer=featurize_bonds)
+    >>> g = smi_to_g('CCO')
+    >>> print(g.ndata['atomic'])
+    tensor([[6.],
+            [8.],
+            [6.]])
+    >>> print(g.edata['type'])
+    tensor([[0.],
+            [0.],
+            [0.],
+            [0.]])
+    """
+    def __init__(self,
+                 add_self_loop=False,
+                 node_featurizer=None,
+                 edge_featurizer=None,
+                 canonical_atom_order=True,
+                 explicit_hydrogens=False,
+                 num_virtual_nodes=0):
+        self.add_self_loop = add_self_loop
+        self.node_featurizer = node_featurizer
+        self.edge_featurizer = edge_featurizer
+        self.canonical_atom_order = canonical_atom_order
+        self.explicit_hydrogens = explicit_hydrogens
+        self.num_virtual_nodes = num_virtual_nodes
+
+    def __call__(self, smiles):
+        """Construct graph for the molecule and featurize it.
+
+        Parameters
+        ----------
+        smiles : str
+            SMILES string.
+
+        Returns
+        -------
+        DGLGraph or None
+            Bi-directed DGLGraph for the molecule if :attr:`smiles` is valid and None otherwise.
+        """
+        return smiles_to_bigraph(smiles,
+                                 self.add_self_loop,
+                                 self.node_featurizer,
+                                 self.edge_featurizer,
+                                 self.canonical_atom_order,
+                                 self.explicit_hydrogens,
+                                 self.num_virtual_nodes)

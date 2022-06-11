@@ -27,22 +27,18 @@ class PretrainDataset(object):
     used for pretrain_masking(task=masking) and pretrain_supervised(task=supervised) task.
     """
 
-    def __init__(self, data, smiles_to_graph, node_featurizer, edge_featurizer, smiles_column=None, task=None):
+    def __init__(self, data, smiles_to_graph, smiles_column=None, task=None):
         self.data = data
         self.smiles_column = smiles_column
         if task == 'masking':
             self.smiles = self.data[smiles_column].tolist()
         self.smiles_to_graph = smiles_to_graph
-        self.node_featurizer = node_featurizer
-        self.edge_featurizer = edge_featurizer
         self.task = task
         self._pre_process()
 
     def __getitem__(self, item):
         s = self.smiles[item]
-        graph = self.smiles_to_graph(s,
-                                     node_featurizer=self.node_featurizer,
-                                     edge_featurizer=self.edge_featurizer)
+        graph = self.smiles_to_graph(s)
         if self.task == 'masking':
             return graph
         elif self.task == 'supervised':

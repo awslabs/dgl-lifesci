@@ -11,6 +11,7 @@ from dgllife.data.smiles_inference import *
 from dgllife.utils.featurizers import *
 from dgllife.utils.mol_to_graph import *
 from joblib import cpu_count
+from python.dgllife.utils.mol_to_graph import MolToBigraph
 
 def test_data_frame1():
     data = [['CCO', 0, 1], ['CO', 2, 3]]
@@ -97,8 +98,9 @@ def test_mol_csv():
 
 def test_unlabeled_smiles():
     smiles = ['CCO', 'CO']
-    dataset = UnlabeledSMILES(smiles, node_featurizer=CanonicalAtomFeaturizer(),
-                              edge_featurizer=CanonicalBondFeaturizer())
+    mol_to_g = MolToBigraph(node_featurizer=CanonicalAtomFeaturizer(),
+                            edge_featurizer=CanonicalBondFeaturizer())
+    dataset = UnlabeledSMILES(smiles, mol_to_graph=mol_to_g)
     assert len(dataset) == 2
     smiles, graph = dataset[0]
     assert 'h' in graph.ndata

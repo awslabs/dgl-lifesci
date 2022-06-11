@@ -16,7 +16,7 @@ This is a DGL implementation of the following paper based on PyTorch.
 This paper purposed an attribute masking pre-training method. It randomly masks input node/edge attributes by replacing them with special masked indicators, then the GNN will predict those attributes based on neighboring structure.
 
 ``` bash
-python pretrain_masking.py  --output_model_file OUTPUT_MODEL_FILE
+python pretrain_masking.py --output_model_file OUTPUT_MODEL_FILE
 ```
 The self-supervised pre-training model will be found in `OUTPUT_MODEL_FILE` after training (default filename: pretrain_masking.pth).
 
