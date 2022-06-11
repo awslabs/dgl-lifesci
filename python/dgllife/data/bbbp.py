@@ -57,9 +57,10 @@ class BBBP(MoleculeCSVDataset):
 
     >>> import torch
     >>> from dgllife.data import BBBP
-    >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+    >>> from dgllife.utils import SMILESToBigraph, CanonicalAtomFeaturizer
 
-    >>> dataset = BBBP(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> smiles_to_g = SMILESToBigraph(node_featurizer=CanonicalAtomFeaturizer())
+    >>> dataset = BBBP(smiles_to_g)
     >>> # Get size of the dataset
     >>> len(dataset)
     2039
