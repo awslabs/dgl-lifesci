@@ -54,9 +54,10 @@ class MUV(MoleculeCSVDataset):
 
     >>> import torch
     >>> from dgllife.data import MUV
-    >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+    >>> from dgllife.utils import SMILESToBigraph, CanonicalAtomFeaturizer
 
-    >>> dataset = MUV(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> smiles_to_g = SMILESToBigraph(node_featurizer=CanonicalAtomFeaturizer())
+    >>> dataset = MUV(smiles_to_g)
     >>> # Get size of the dataset
     >>> len(dataset)
     93087
