@@ -16,18 +16,18 @@ __all__ = ['BBBP']
 class BBBP(MoleculeCSVDataset):
     r"""BBBP from MoleculeNet for the prediction of permeability properties
 
-    The Blood-brain barrier penetration (BBBP) dataset comes from a study on
-    the modeling and prediction of the barrier permeability. As a membrane
-    separating circulating blood and brain extracellular fluid, the blood-brain
-    barrier blocks most drugs, hormones and neurotransmitters. Thus penetration of
-    the barrier forms a long-standing issue in development of drugs targeting
-    central nervous system. This dataset includes binary labels for over 2000
-    compounds on their permeability properties.
+    Quoting [1], "The Blood–brain barrier penetration (BBBP) dataset comes from a recent study
+    on the modeling and prediction of the barrier permeability. As a membrane separating
+    circulating blood and brain extracellular fluid, the blood–brain barrier blocks most drugs,
+    hormones and neurotransmitters. Thus penetration of the barrier forms a long-standing issue in
+    development of drugs targeting central nervous system. This dataset includes binary labels for
+    over 2000 compounds on their permeability properties."
 
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
         * [2] A Bayesian approach to in silico blood-brain barrier penetration modeling
+        * [3] DeepChem
 
     Parameters
     ----------

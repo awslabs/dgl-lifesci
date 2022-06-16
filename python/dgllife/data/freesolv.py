@@ -18,17 +18,18 @@ class FreeSolv(MoleculeCSVDataset):
     r"""FreeSolv from MoleculeNet for the prediction of hydration free
     energy of small molecules in water
 
-    The dataset provides experimental and calculated hydration free energy
-    of small molecules in the water. The calculated values are derived from
-    alchemical free energy calculations using molecular dynamics simulations.
-    The experimental values are used for labels and the calculated values can
-    be used for comparison.
+    Quoting [1], "The Free Solvation Database (FreeSolv) provides experimental and calculated
+    hydration free energy of small molecules in water. A subset of the compounds in the dataset
+    are also used in the SAMPL blind prediction challenge. The calculated values are derived from
+    alchemical free energy calculations using molecular dynamics simulations. We include the
+    experimental values in the benchmark collection, and use calculated values for comparison."
 
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
         * [2] FreeSolv: a database of experimental and calculated hydration
               free energies, with input files.
+        * [3] DeepChem
 
     Parameters
     ----------

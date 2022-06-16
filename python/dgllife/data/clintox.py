@@ -18,17 +18,18 @@ class ClinTox(MoleculeCSVDataset):
     r"""ClinTox from MoleculeNet for the prediction of clinical trial toxicity
     (or absence of toxicity) and FDA approval status
 
-    The ClinTox dataset compares drugs approved by the FDA and drugs that have failed
-    clinical trials for toxicity reasons. The dataset includes two classification
-    tasks for 1491 drug compounds with known chemical structures: (1) clinical trial
-    toxicity (or absence of toxicity) and (2) FDA approval status. The MoleculeNet
-    benchmark compiles the list of FDA-approved drugs from the SWEETLEAD database and
-    the list of drugs that failed clinical trials for toxicity reasons from the
-    Aggregate Analysis of ClinicalTrials.gov (AACT) database.
+    Quoting [1], "The ClinTox dataset, introduced as part of this work, compares drugs approved by
+    the FDA and drugs that have failed clinical trials for toxicity reasons. The dataset includes
+    two classification tasks for 1491 drug compounds with known chemical structures: (1) clinical
+    trial toxicity (or absence of toxicity) and (2) FDA approval status. List of FDA-approved
+    drugs are compiled from the SWEETLEAD database, and list of drugs that failed clinical trials
+    for toxicity reasons are compiled from the Aggregate Analysis of ClinicalTrials.gov (AACT)
+    database."
 
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
+        * [2] DeepChem
 
     Parameters
     ----------

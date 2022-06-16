@@ -16,17 +16,18 @@ __all__ = ['Lipophilicity']
 
 class Lipophilicity(MoleculeCSVDataset):
     r"""Lipophilicity from MoleculeNet for the prediction of octanol/water
-    distribution coefficient (logD at pH 7.4) of 4200 compounds
+    distribution coefficient (logD at pH 7.4)
 
-    This dataset is curated from ChEMBL database containing experimental results
-    on octanol/water distribution coefficient (logD at pH=7.4). Due to the importance
-    of lipophilicity in membrane permeability and solubility, the task is of high
-    importance to drug development.
+    Quoting [1], "Lipophilicity is an important feature of drug molecules that affects both
+    membrane permeability and solubility. This dataset, curated from ChEMBL database,
+    provides experimental results of octanol/water distribution coefficient (logD at pH 7.4)
+    of 4200 compounds."
 
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
         * [2] ChEMBL Deposited Data Set - AZ dataset; 2015.
+        * [3] DeepChem
 
     Parameters
     ----------
