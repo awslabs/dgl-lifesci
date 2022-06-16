@@ -26,6 +26,7 @@ class ToxCast(MoleculeCSVDataset):
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
         * [2] ToxCast Chemical Landscape: Paving the Road to 21st Century Toxicology
+        * [3] DeepChem
 
     Parameters
     ----------

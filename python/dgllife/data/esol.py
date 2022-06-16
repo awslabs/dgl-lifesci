@@ -16,17 +16,17 @@ __all__ = ['ESOL']
 class ESOL(MoleculeCSVDataset):
     r"""ESOL from MoleculeNet for the prediction of water solubility
 
-    ESOL (delaney) is a standard regression dataset containing structures and water solubility
-    data for 1128 compounds. It uses measured log solubility in mols per litre of compounds
-    as labels. The dataset is widely used to validate machine learning models on estimating
-    solubility directly from molecular structures. Note that these structures don't include
-    3D coordinates, since solubility is a property of a molecule and not of its particular
-    conformers.
+    Quoting [1], " ESOL is a small dataset consisting of water solubility data for 1128 compounds.
+    The dataset has been used to train models that estimate solubility directly from chemical
+    structures (as encoded in SMILES strings). Note that these structures don't include 3D
+    coordinates, since solubility is a property of a molecule and not of its particular
+    conformers."
 
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
         * [2] ESOL: estimating aqueous solubility directly from molecular structure.
+        * [3] DeepChem
 
     Parameters
     ----------

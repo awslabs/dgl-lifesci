@@ -16,11 +16,11 @@ __all__ = ['Tox21']
 class Tox21(MoleculeCSVDataset):
     """Tox21 dataset.
 
-    The Toxicology in the 21st Century (https://tripod.nih.gov/tox21/challenge/)
-    initiative created a public database measuring toxicity of compounds, which
-    has been used in the 2014 Tox21 Data Challenge. The dataset contains qualitative
-    toxicity measurements for 8014 compounds on 12 different targets, including nuclear
-    receptors and stress response pathways. Each target results in a binary label.
+    Quoting [1], "The 'Toxicology in the 21st Century' (Tox21) initiative created a public
+    database measuring toxicity of compounds, which has been used in the 2014 Tox21 Data
+    Challenge. This dataset contains qualitative toxicity measurements for 8014 compounds on 12
+    different targets, including nuclear receptors and stress response pathways." Each target
+    result is a binary label.
 
     A common issue for multi-task prediction is that some datapoints are not labeled for
     all tasks. This is also the case for Tox21. In data pre-processing, we set non-existing
@@ -28,6 +28,11 @@ class Tox21(MoleculeCSVDataset):
 
     All molecules are converted into DGLGraphs. After the first-time construction,
     the DGLGraphs will be saved for reloading so that we do not need to reconstruct them everytime.
+
+    References:
+
+        * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
+        * [2] DeepChem
 
     Parameters
     ----------

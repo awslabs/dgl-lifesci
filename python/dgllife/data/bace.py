@@ -26,6 +26,7 @@ class BACE(MoleculeCSVDataset):
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
+        * [2] DeepChem
 
     Parameters
     ----------

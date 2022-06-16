@@ -16,13 +16,15 @@ __all__ = ['SIDER']
 class SIDER(MoleculeCSVDataset):
     r"""SIDER from MoleculeNet for the prediction of grouped drug side-effects
 
-    The Side Effect Resource (SIDER) is a database of marketed drugs and adverse drug relations
-    (ADR). The MoleculeNet benchmark has grouped drug side-effects into 27 system organ classes
-    following MedDRA classifications measured for 1427 approved drugs.
+    Quoting [1], "The Side Effect Resource (SIDER) is a database of marketed drugs and adverse
+    drug reactions (ADR). The version of the SIDER dataset in DeepChem has grouped drug
+    side-effects into 27 system organ classes following MedDRA classifications measured for 1427
+    approved drugs (following previous usage)."
 
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
+        * [2] DeepChem
 
     Parameters
     ----------

@@ -16,16 +16,17 @@ __all__ = ['HIV']
 class HIV(MoleculeCSVDataset):
     r"""HIV from MoleculeNet for the prediction of the ability to inhibit HIV replication
 
-    The dataset was introduced by the Drug Therapeutics Program (DTP) AIDS Antiviral Screen,
-    which tested the ability to inhibit HIV replication for over 40,000 compounds. Screening
-    results were evaluated and placed into three categories: confirmed inactive (CI),
-    confirmed active (CA) and confirmed moderately active (CM). The MoleculeNet benchmark
-    combines the latter two labels, making it a binary classification task between
-    inactive (CI) and active (CA and CM).
+    Quoting [1], "The HIV dataset was introduced by the Drug Therapeutics Program (DTP) AIDS
+    Antiviral Screen, which tested the ability to inhibit HIV replication for over 40,000
+    compounds. Screening results were evaluated and placed into three categories: confirmed
+    inactive (CI), confirmed active (CA) and confirmed moderately active (CM). We further combine
+    the latter two labels, making it a classification task between inactive (CI) and active
+    (CA and CM)."
 
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
+        * [2] DeepChem
 
     Parameters
     ----------
