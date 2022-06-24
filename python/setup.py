@@ -14,7 +14,7 @@ def get_lib_path():
     """Get library path, name and version"""
      # We can not import `libinfo.py` in setup.py directly since __init__.py
     # Will be invoked which introduces dependences
-    libinfo_py = os.path.join(CURRENT_DIR, './dgllife/libinfo.py')
+    libinfo_py = os.path.join(CURRENT_DIR, './mydgllife/libinfo.py')
     libinfo = {'__file__': libinfo_py}
     exec(compile(open(libinfo_py, "rb").read(), libinfo_py, 'exec'), libinfo, libinfo)
     version = libinfo['__version__']
@@ -36,7 +36,7 @@ setup(
     ],
     maintainer='DGL Team',
     packages=[package for package in find_packages()
-              if package.startswith('dgllife')],
+              if package.startswith('mydgllife')],
     install_requires=[
         'scikit-learn>=0.22.2, <1.0',
         'pandas',
@@ -48,7 +48,7 @@ setup(
         'hyperopt',
         'joblib'
     ],
-    url='https://github.com/awslabs/dgl-lifesci',
+    url='https://github.com/jacobumland/my-dgl-lifesci',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 3',
