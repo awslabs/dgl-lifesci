@@ -47,7 +47,7 @@ class GCNLayer(nn.Module):
 
         self.activation = activation
         self.graph_conv = GraphConv(in_feats=in_feats, out_feats=out_feats,
-                                    norm=gnn_norm, activation=activation)
+                                    norm=gnn_norm, activation=activation, allow_zero_in_degree = True)
         self.dropout = nn.Dropout(dropout)
 
         self.residual = residual

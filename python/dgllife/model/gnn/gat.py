@@ -50,7 +50,7 @@ class GATLayer(nn.Module):
 
         self.gat_conv = GATConv(in_feats=in_feats, out_feats=out_feats, num_heads=num_heads,
                                 feat_drop=feat_drop, attn_drop=attn_drop,
-                                negative_slope=alpha, residual=residual, bias=bias)
+                                negative_slope=alpha, residual=residual, bias=bias, allow_zero_in_degree = True)
         assert agg_mode in ['flatten', 'mean']
         self.agg_mode = agg_mode
         self.activation = activation
