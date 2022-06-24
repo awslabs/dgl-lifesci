@@ -24,7 +24,7 @@ def get_lib_path():
 VERSION = get_lib_path()
 
 setup(
-    name='dgllife',
+    name='mydgllife',
     version=VERSION,
     description='DGL-based package for Life Science',
     keywords=[
