@@ -129,6 +129,8 @@ class MoleculeCSVDataset(object):
             self.labels = label_dict['labels']
             if init_mask:
                 self.mask = label_dict['mask']
+            else:
+                self.mask = None
             self.valid_ids = label_dict['valid_ids'].tolist()
         else:
             print('Processing dgl graphs from scratch...')
