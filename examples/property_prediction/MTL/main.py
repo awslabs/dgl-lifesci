@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     from argparse import ArgumentParser
     from dgllife.data import MoleculeCSVDataset
-    from dgllife.utils import smiles_to_bigraph, RandomSplitter
+    from dgllife.utils import SMILESToBigraph, RandomSplitter
 
     from configure import configs
     from run import main
@@ -67,13 +67,14 @@ if __name__ == '__main__':
     # Setup for experiments
     mkdir_p(args['result_path'])
 
-    node_featurizer = atom_featurizer
     edge_featurizer = CanonicalBondFeaturizer(bond_data_field='he', self_loop=True)
     df = pd.read_csv(args['csv_path'])
+
+    smiles_to_g = SMILESToBigraph(add_self_loop=True, node_featurizer=atom_featurizer,
+                                  edge_featurizer=edge_featurizer)
+
     dataset = MoleculeCSVDataset(
-        df, partial(smiles_to_bigraph, add_self_loop=True),
-        node_featurizer=node_featurizer,
-        edge_featurizer=edge_featurizer,
+        df, smiles_to_g,
         smiles_column=args['smiles_column'],
         cache_file_path=args['result_path'] + '/graph.bin',
         task_names=args['tasks']
@@ -84,4 +85,4 @@ if __name__ == '__main__':
         dataset, frac_train=0.8, frac_val=0.1,
         frac_test=0.1, random_state=0)
 
-    main(args, node_featurizer, edge_featurizer, train_set, val_set, test_set)
+    main(args, atom_featurizer, edge_featurizer, train_set, val_set, test_set)

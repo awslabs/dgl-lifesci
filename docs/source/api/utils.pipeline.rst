@@ -21,4 +21,4 @@ Early stopping is a standard practice for preventing models from overfitting and
 class for handling it.
 
 .. autoclass:: dgllife.utils.EarlyStopping
-    :members:
+    :members: step

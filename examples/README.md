@@ -66,6 +66,9 @@ We provide various examples across 3 applications -- property prediction, genera
 - Atomic Convolutional Networks for Predicting Protein-Ligand Binding Affinity (ACNN) [[paper]](https://arxiv.org/abs/1703.10603), [[github]](https://github.com/deepchem/deepchem/tree/master/contrib/atomicconv)
     - [ACNN with DGL](../python/dgllife/model/model_zoo/acnn.py)
     - [Example Training Script](binding_affinity_prediction)
+- PotentialNet for molecular property prediction (PotentialNet) [[paper]](https://pubs.acs.org/doi/10.1021/acscentsci.8b00507)
+    - [PotentialNet with DGL](../python/dgllife/model/model_zoo/potentialnet.py)
+    - [Example Training Script](binding_affinity_prediction)
 
 ## Reaction Prediction
 - A graph-convolutional neural network model for the prediction of chemical reactivity [[paper]](https://pubs.rsc.org/en/content/articlelanding/2019/sc/c8sc04228d#!divAbstract), [[github]](https://github.com/connorcoley/rexgen_direct)

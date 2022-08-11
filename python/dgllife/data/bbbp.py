@@ -10,31 +10,30 @@ import pandas as pd
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 
 from .csv_dataset import MoleculeCSVDataset
-from ..utils.mol_to_graph import smiles_to_bigraph
 
 __all__ = ['BBBP']
 
 class BBBP(MoleculeCSVDataset):
     r"""BBBP from MoleculeNet for the prediction of permeability properties
 
-    The Blood-brain barrier penetration (BBBP) dataset comes from a study on
-    the modeling and prediction of the barrier permeability. As a membrane
-    separating circulating blood and brain extracellular fluid, the blood-brain
-    barrier blocks most drugs, hormones and neurotransmitters. Thus penetration of
-    the barrier forms a long-standing issue in development of drugs targeting
-    central nervous system. This dataset includes binary labels for over 2000
-    compounds on their permeability properties.
+    Quoting [1], "The Blood–brain barrier penetration (BBBP) dataset comes from a recent study
+    on the modeling and prediction of the barrier permeability. As a membrane separating
+    circulating blood and brain extracellular fluid, the blood–brain barrier blocks most drugs,
+    hormones and neurotransmitters. Thus penetration of the barrier forms a long-standing issue in
+    development of drugs targeting central nervous system. This dataset includes binary labels for
+    over 2000 compounds on their permeability properties."
 
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
         * [2] A Bayesian approach to in silico blood-brain barrier penetration modeling
+        * [3] DeepChem
 
     Parameters
     ----------
     smiles_to_graph: callable, str -> DGLGraph
-        A function turning a SMILES string into a DGLGraph.
-        Default to :func:`dgllife.utils.smiles_to_bigraph`.
+        A function turning a SMILES string into a DGLGraph. If None, it uses
+        :func:`dgllife.utils.SMILESToBigraph` by default.
     node_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update
         ndata for a DGLGraph. Default to None.
@@ -58,9 +57,10 @@ class BBBP(MoleculeCSVDataset):
 
     >>> import torch
     >>> from dgllife.data import BBBP
-    >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+    >>> from dgllife.utils import SMILESToBigraph, CanonicalAtomFeaturizer
 
-    >>> dataset = BBBP(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> smiles_to_g = SMILESToBigraph(node_featurizer=CanonicalAtomFeaturizer())
+    >>> dataset = BBBP(smiles_to_g)
     >>> # Get size of the dataset
     >>> len(dataset)
     2039
@@ -97,7 +97,7 @@ class BBBP(MoleculeCSVDataset):
     tensor([0.7123])
     """
     def __init__(self,
-                 smiles_to_graph=smiles_to_bigraph,
+                 smiles_to_graph=None,
                  node_featurizer=None,
                  edge_featurizer=None,
                  load=False,

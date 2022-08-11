@@ -5,9 +5,10 @@
 #
 # Dataset for inference on smiles
 
+from functools import partial
 from rdkit import Chem
 
-from ..utils.mol_to_graph import mol_to_bigraph
+from ..utils.mol_to_graph import ToGraph, MolToBigraph
 
 __all__ = ['UnlabeledSMILES']
 
@@ -33,7 +34,7 @@ class UnlabeledSMILES(object):
     log_every : bool
         Print a message every time ``log_every`` molecules are processed. Default to 1000.
     """
-    def __init__(self, smiles_list, mol_to_graph=mol_to_bigraph, node_featurizer=None,
+    def __init__(self, smiles_list, mol_to_graph=None, node_featurizer=None,
                  edge_featurizer=None, log_every=1000):
         super(UnlabeledSMILES, self).__init__()
 
@@ -48,11 +49,24 @@ class UnlabeledSMILES(object):
 
         self.smiles = canonical_smiles
         self.graphs = []
+
+        if mol_to_graph is None:
+            mol_to_graph = MolToBigraph()
+
+        # Check for backward compatibility
+        if isinstance(mol_to_graph, ToGraph):
+            assert node_featurizer is None, \
+                'Initialize mol_to_graph object with node_featurizer=node_featurizer'
+            assert edge_featurizer is None, \
+                'Initialize mol_to_graph object with edge_featurizer=edge_featurizer'
+        else:
+            mol_to_graph = partial(mol_to_graph, node_featurizer=node_featurizer,
+                                   edge_featurizer=edge_featurizer)
+
         for i, mol in enumerate(mol_list):
             if (i + 1) % log_every == 0:
                 print('Processing molecule {:d}/{:d}'.format(i + 1, len(self)))
-            self.graphs.append(mol_to_graph(mol, node_featurizer=node_featurizer,
-                                            edge_featurizer=edge_featurizer))
+            self.graphs.append(mol_to_graph(mol))
 
     def __getitem__(self, item):
         """Get datapoint with index

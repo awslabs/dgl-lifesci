@@ -10,18 +10,17 @@ import pandas as pd
 from dgl.data.utils import get_download_dir, download, _get_dgl_url
 
 from .csv_dataset import MoleculeCSVDataset
-from ..utils.mol_to_graph import smiles_to_bigraph
 
 __all__ = ['Tox21']
 
 class Tox21(MoleculeCSVDataset):
     """Tox21 dataset.
 
-    The Toxicology in the 21st Century (https://tripod.nih.gov/tox21/challenge/)
-    initiative created a public database measuring toxicity of compounds, which
-    has been used in the 2014 Tox21 Data Challenge. The dataset contains qualitative
-    toxicity measurements for 8014 compounds on 12 different targets, including nuclear
-    receptors and stress response pathways. Each target results in a binary label.
+    Quoting [1], "The 'Toxicology in the 21st Century' (Tox21) initiative created a public
+    database measuring toxicity of compounds, which has been used in the 2014 Tox21 Data
+    Challenge. This dataset contains qualitative toxicity measurements for 8014 compounds on 12
+    different targets, including nuclear receptors and stress response pathways." Each target
+    result is a binary label.
 
     A common issue for multi-task prediction is that some datapoints are not labeled for
     all tasks. This is also the case for Tox21. In data pre-processing, we set non-existing
@@ -30,11 +29,16 @@ class Tox21(MoleculeCSVDataset):
     All molecules are converted into DGLGraphs. After the first-time construction,
     the DGLGraphs will be saved for reloading so that we do not need to reconstruct them everytime.
 
+    References:
+
+        * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
+        * [2] DeepChem
+
     Parameters
     ----------
     smiles_to_graph: callable, str -> DGLGraph
-        A function turning a SMILES string into a DGLGraph.
-        Default to :func:`dgllife.utils.smiles_to_bigraph`.
+        A function turning a SMILES string into a DGLGraph. If None, it uses
+        :func:`dgllife.utils.SMILESToBigraph` by default.
     node_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update
         ndata for a DGLGraph. Default to None.
@@ -57,9 +61,10 @@ class Tox21(MoleculeCSVDataset):
     --------
 
     >>> from dgllife.data import Tox21
-    >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+    >>> from dgllife.utils import SMILESToBigraph, CanonicalAtomFeaturizer
 
-    >>> dataset = Tox21(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> smiles_to_g = SMILESToBigraph(node_featurizer=CanonicalAtomFeaturizer())
+    >>> dataset = Tox21(smiles_to_g)
     >>> # Get size of the dataset
     >>> len(dataset)
     7831
@@ -96,7 +101,7 @@ class Tox21(MoleculeCSVDataset):
     tensor([26.9706, 35.3750,  5.9756, 21.6364,  6.4404, 21.4500, 26.0000,  5.0826,
             21.4390, 14.7692,  6.1442, 12.4308])
     """
-    def __init__(self, smiles_to_graph=smiles_to_bigraph,
+    def __init__(self, smiles_to_graph=None,
                  node_featurizer=None,
                  edge_featurizer=None,
                  load=False,

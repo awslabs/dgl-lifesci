@@ -167,7 +167,7 @@ if __name__ == '__main__':
     parser.add_argument('-rcb', '--reaction-center-batch-size', type=int, default=200,
                         help='Batch size to use for preparing candidate bonds from a trained '
                              'model on reaction center prediction')
-    parser.add_argument('-np', '--num-processes', type=int, default=8,
+    parser.add_argument('-np', '--num-processes', type=int, default=1,
                         help='Number of processes to use for data pre-processing')
     parser.add_argument('-nw', '--num-workers', type=int, default=100,
                         help='Number of workers to use for data loading in PyTorch data loader')

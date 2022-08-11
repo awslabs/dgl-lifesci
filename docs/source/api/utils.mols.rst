@@ -49,6 +49,9 @@ three common graph constructions:
     dgllife.utils.k_nearest_neighbors
     dgllife.utils.mol_to_nearest_neighbor_graph
     dgllife.utils.smiles_to_nearest_neighbor_graph
+    dgllife.utils.ToGraph
+    dgllife.utils.MolToBigraph
+    dgllife.utils.SMILESToBigraph
 
 Featurization for Molecules
 ---------------------------
@@ -130,6 +133,8 @@ For using featurization methods like above in creating node features:
     dgllife.utils.PretrainAtomFeaturizer
     dgllife.utils.AttentiveFPAtomFeaturizer
     dgllife.utils.AttentiveFPAtomFeaturizer.feat_size
+    dgllife.utils.PAGTNAtomFeaturizer
+    dgllife.utils.PAGTNAtomFeaturizer.feat_size
 
 Featurization for Edges
 ```````````````````````
@@ -164,3 +169,5 @@ For using featurization methods like above in creating edge features:
     dgllife.utils.PretrainBondFeaturizer
     dgllife.utils.AttentiveFPBondFeaturizer
     dgllife.utils.AttentiveFPBondFeaturizer.feat_size
+    dgllife.utils.PAGTNEdgeFeaturizer
+    dgllife.utils.PAGTNEdgeFeaturizer.feat_size

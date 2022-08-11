@@ -38,7 +38,7 @@ setup(
     packages=[package for package in find_packages()
               if package.startswith('dgllife')],
     install_requires=[
-        'scikit-learn>=0.22.2',
+        'scikit-learn>=0.22.2, <1.0',
         'pandas',
         'requests>=2.22.0',
         'tqdm',

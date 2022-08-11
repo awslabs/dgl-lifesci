@@ -12,9 +12,7 @@ import pandas as pd
 import random
 
 import dgl
-from dgllife.utils import PretrainAtomFeaturizer
-from dgllife.utils import PretrainBondFeaturizer
-from dgllife.utils import smiles_to_bigraph
+from dgllife.utils import PretrainAtomFeaturizer, PretrainBondFeaturizer, SMILESToBigraph
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 
 from dgllife.model.gnn.gin import GIN
@@ -184,10 +182,10 @@ def main():
 
     atom_featurizer = PretrainAtomFeaturizer()
     bond_featurizer = PretrainBondFeaturizer()
+    smiles_to_g = SMILESToBigraph(add_self_loop=True, node_featurizer=atom_featurizer,
+                                  edge_featurizer=bond_featurizer)
     dataset = PretrainDataset(data=data,
-                              smiles_to_graph=partial(smiles_to_bigraph, add_self_loop=True),
-                              node_featurizer=atom_featurizer,
-                              edge_featurizer=bond_featurizer,
+                              smiles_to_graph=smiles_to_g,
                               smiles_column='smiles',
                               task='masking')
 

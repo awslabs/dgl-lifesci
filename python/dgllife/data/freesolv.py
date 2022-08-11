@@ -11,7 +11,6 @@ import pandas as pd
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 
 from .csv_dataset import MoleculeCSVDataset
-from ..utils.mol_to_graph import smiles_to_bigraph
 
 __all__ = ['FreeSolv']
 
@@ -19,23 +18,24 @@ class FreeSolv(MoleculeCSVDataset):
     r"""FreeSolv from MoleculeNet for the prediction of hydration free
     energy of small molecules in water
 
-    The dataset provides experimental and calculated hydration free energy
-    of small molecules in the water. The calculated values are derived from
-    alchemical free energy calculations using molecular dynamics simulations.
-    The experimental values are used for labels and the calculated values can
-    be used for comparison.
+    Quoting [1], "The Free Solvation Database (FreeSolv) provides experimental and calculated
+    hydration free energy of small molecules in water. A subset of the compounds in the dataset
+    are also used in the SAMPL blind prediction challenge. The calculated values are derived from
+    alchemical free energy calculations using molecular dynamics simulations. We include the
+    experimental values in the benchmark collection, and use calculated values for comparison."
 
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
         * [2] FreeSolv: a database of experimental and calculated hydration
               free energies, with input files.
+        * [3] DeepChem
 
     Parameters
     ----------
     smiles_to_graph: callable, str -> DGLGraph
-        A function turning a SMILES string into a DGLGraph.
-        Default to :func:`dgllife.utils.smiles_to_bigraph`.
+        A function turning a SMILES string into a DGLGraph. If None, it uses
+        :func:`dgllife.utils.SMILESToBigraph` by default.
     node_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update
         ndata for a DGLGraph. Default to None.
@@ -58,9 +58,10 @@ class FreeSolv(MoleculeCSVDataset):
     --------
 
     >>> from dgllife.data import FreeSolv
-    >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+    >>> from dgllife.utils import SMILESToBigraph, CanonicalAtomFeaturizer
 
-    >>> dataset = FreeSolv(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> smiles_to_g = SMILESToBigraph(node_featurizer=CanonicalAtomFeaturizer())
+    >>> dataset = FreeSolv(smiles_to_g)
     >>> # Get size of the dataset
     >>> len(dataset)
     642
@@ -92,7 +93,7 @@ class FreeSolv(MoleculeCSVDataset):
      -9.625)
     """
     def __init__(self,
-                 smiles_to_graph=smiles_to_bigraph,
+                 smiles_to_graph=None,
                  node_featurizer=None,
                  edge_featurizer=None,
                  load=False,

@@ -1234,9 +1234,9 @@ class PretrainAtomFeaturizer(object):
         choice of 1-118.
     chiral_types : list of Chem.rdchem.ChiralType or None
         Atom chirality to consider for one-hot encoding. If None, we will use a default
-        choice of ``Chem.rdchem.ChiralType.CHI_UNSPECIFIED,
-        Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW,
-        Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW, Chem.rdchem.ChiralType.CHI_OTHER``.
+        choice, including ``Chem.rdchem.ChiralType.CHI_UNSPECIFIED``,
+        ``Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW``,
+        ``Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW``, ``Chem.rdchem.ChiralType.CHI_OTHER``.
 
     Examples
     --------

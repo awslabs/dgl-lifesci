@@ -11,7 +11,6 @@ import pandas as pd
 from dgl.data.utils import get_download_dir, download, _get_dgl_url, extract_archive
 
 from .csv_dataset import MoleculeCSVDataset
-from ..utils.mol_to_graph import smiles_to_bigraph
 
 __all__ = ['ClinTox']
 
@@ -19,23 +18,24 @@ class ClinTox(MoleculeCSVDataset):
     r"""ClinTox from MoleculeNet for the prediction of clinical trial toxicity
     (or absence of toxicity) and FDA approval status
 
-    The ClinTox dataset compares drugs approved by the FDA and drugs that have failed
-    clinical trials for toxicity reasons. The dataset includes two classification
-    tasks for 1491 drug compounds with known chemical structures: (1) clinical trial
-    toxicity (or absence of toxicity) and (2) FDA approval status. The MoleculeNet
-    benchmark compiles the list of FDA-approved drugs from the SWEETLEAD database and
-    the list of drugs that failed clinical trials for toxicity reasons from the
-    Aggregate Analysis of ClinicalTrials.gov (AACT) database.
+    Quoting [1], "The ClinTox dataset, introduced as part of this work, compares drugs approved by
+    the FDA and drugs that have failed clinical trials for toxicity reasons. The dataset includes
+    two classification tasks for 1491 drug compounds with known chemical structures: (1) clinical
+    trial toxicity (or absence of toxicity) and (2) FDA approval status. List of FDA-approved
+    drugs are compiled from the SWEETLEAD database, and list of drugs that failed clinical trials
+    for toxicity reasons are compiled from the Aggregate Analysis of ClinicalTrials.gov (AACT)
+    database."
 
     References:
 
         * [1] MoleculeNet: A Benchmark for Molecular Machine Learning.
+        * [2] DeepChem
 
     Parameters
     ----------
     smiles_to_graph: callable, str -> DGLGraph
-        A function turning a SMILES string into a DGLGraph.
-        Default to :func:`dgllife.utils.smiles_to_bigraph`.
+        A function turning a SMILES string into a DGLGraph. If None, it uses
+        :func:`dgllife.utils.SMILESToBigraph` by default.
     node_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update
         ndata for a DGLGraph. Default to None.
@@ -59,9 +59,10 @@ class ClinTox(MoleculeCSVDataset):
 
     >>> import torch
     >>> from dgllife.data import ClinTox
-    >>> from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+    >>> from dgllife.utils import SMILESToBigraph, CanonicalAtomFeaturizer
 
-    >>> dataset = ClinTox(smiles_to_bigraph, CanonicalAtomFeaturizer())
+    >>> smiles_to_g = SMILESToBigraph(node_featurizer=CanonicalAtomFeaturizer())
+    >>> dataset = ClinTox(smiles_to_g)
     >>> # Get size of the dataset
     >>> len(dataset)
     1478
@@ -82,7 +83,7 @@ class ClinTox(MoleculeCSVDataset):
     tensor([ 0.0684, 10.9048])
     """
     def __init__(self,
-                 smiles_to_graph=smiles_to_bigraph,
+                 smiles_to_graph=None,
                  node_featurizer=None,
                  edge_featurizer=None,
                  load=False,

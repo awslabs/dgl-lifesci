@@ -12,8 +12,10 @@ import pandas as pd
 import torch
 
 from dgl.data.utils import save_graphs, load_graphs
+from functools import partial
 
 from ..utils.io import pmap
+from ..utils.mol_to_graph import ToGraph, SMILESToBigraph
 
 __all__ = ['MoleculeCSVDataset']
 
@@ -33,7 +35,8 @@ class MoleculeCSVDataset(object):
         Dataframe including smiles and labels. Can be loaded by pandas.read_csv(file_path).
         One column includes smiles and some other columns include labels.
     smiles_to_graph: callable, str -> DGLGraph
-        A function turning a SMILES string into a DGLGraph.
+        A function turning a SMILES string into a DGLGraph. If None, it uses
+        :func:`dgllife.utils.SMILESToBigraph` by default.
     node_featurizer : None or callable, rdkit.Chem.rdchem.Mol -> dict
         Featurization for nodes like atoms in a molecule, which can be used to update
         ndata for a DGLGraph.
@@ -63,9 +66,9 @@ class MoleculeCSVDataset(object):
         Path to a CSV file of molecules that RDKit failed to parse. If not specified,
         the molecules will not be recorded.
     """
-    def __init__(self, df, smiles_to_graph, node_featurizer, edge_featurizer, smiles_column,
-                 cache_file_path, task_names=None, load=False, log_every=1000, init_mask=True,
-                 n_jobs=1, error_log=None):
+    def __init__(self, df, smiles_to_graph=None, node_featurizer=None, edge_featurizer=None,
+                 smiles_column=None, cache_file_path=None, task_names=None, load=False,
+                 log_every=1000, init_mask=True, n_jobs=1, error_log=None):
         self.df = df
         self.smiles = self.df[smiles_column].tolist()
         if task_names is None:
@@ -74,14 +77,25 @@ class MoleculeCSVDataset(object):
             self.task_names = task_names
         self.n_tasks = len(self.task_names)
         self.cache_file_path = cache_file_path
-        self._pre_process(smiles_to_graph, node_featurizer, edge_featurizer,
-                          load, log_every, init_mask, n_jobs, error_log)
+
+        if isinstance(smiles_to_graph, ToGraph):
+            assert node_featurizer is None, \
+                'Initialize smiles_to_graph object with node_featurizer=node_featurizer'
+            assert edge_featurizer is None, \
+                'Initialize smiles_to_graph object with edge_featurizer=edge_featurizer'
+        elif smiles_to_graph is None:
+            smiles_to_graph = SMILESToBigraph(node_featurizer=node_featurizer,
+                                              edge_featurizer=edge_featurizer)
+        else:
+            smiles_to_graph = partial(smiles_to_graph, node_featurizer=node_featurizer,
+                                      edge_featurizer=edge_featurizer)
+
+        self._pre_process(smiles_to_graph, load, log_every, init_mask, n_jobs, error_log)
 
         # Only useful for binary classification tasks
         self._task_pos_weights = None
 
-    def _pre_process(self, smiles_to_graph, node_featurizer, edge_featurizer,
-                     load, log_every, init_mask, n_jobs, error_log):
+    def _pre_process(self, smiles_to_graph, load, log_every, init_mask, n_jobs, error_log):
         """Pre-process the dataset
 
         * Convert molecules from smiles format into DGLGraphs
@@ -93,12 +107,6 @@ class MoleculeCSVDataset(object):
         ----------
         smiles_to_graph : callable, SMILES -> DGLGraph
             Function for converting a SMILES (str) into a DGLGraph.
-        node_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
-            Featurization for nodes like atoms in a molecule, which can be used to update
-            ndata for a DGLGraph.
-        edge_featurizer : callable, rdkit.Chem.rdchem.Mol -> dict
-            Featurization for edges like bonds in a molecule, which can be used to update
-            edata for a DGLGraph.
         load : bool
             Whether to load the previously pre-processed dataset or pre-process from scratch.
             ``load`` should be False when we want to try different graph construction and
@@ -121,22 +129,21 @@ class MoleculeCSVDataset(object):
             self.labels = label_dict['labels']
             if init_mask:
                 self.mask = label_dict['mask']
+            else:
+                self.mask = None
             self.valid_ids = label_dict['valid_ids'].tolist()
         else:
             print('Processing dgl graphs from scratch...')
             if n_jobs > 1:
                 self.graphs = pmap(smiles_to_graph,
                                    self.smiles,
-                                   node_featurizer=node_featurizer,
-                                   edge_featurizer=edge_featurizer,
                                    n_jobs=n_jobs)
             else:
                 self.graphs = []
                 for i, s in enumerate(self.smiles):
                     if (i + 1) % log_every == 0:
                         print('Processing molecule {:d}/{:d}'.format(i+1, len(self)))
-                    self.graphs.append(smiles_to_graph(s, node_featurizer=node_featurizer,
-                                                       edge_featurizer=edge_featurizer))
+                    self.graphs.append(smiles_to_graph(s))
 
             # Keep only valid molecules
             self.valid_ids = []
