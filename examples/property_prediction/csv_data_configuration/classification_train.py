@@ -216,8 +216,7 @@ if __name__ == '__main__':
     else:
         print('Use the manually specified hyperparameters')
         exp_config = get_configure(args['model'])
-        main(args, exp_config, train_set, val_set, test_set)
-        trial_path = args['result_path'] + '/1'
+        trial_path, best_score = main(args, exp_config, train_set, val_set, test_set)
 
     # Copy final
     copyfile(trial_path + '/model.pth', args['result_path'] + '/model.pth')
