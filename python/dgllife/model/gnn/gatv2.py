@@ -109,7 +109,7 @@ class GATv2Layer(nn.Module):
         """Reinitialize model parameters."""
         self.gatv2_conv.reset_parameters()
 
-    def forward(self, bg, feats):
+    def forward(self, bg, feats, get_attention=False):
         """Update node representations
 
         Parameters
@@ -119,6 +119,8 @@ class GATv2Layer(nn.Module):
         feats : FloatTensor of shape (N, M1)
             * N is the total number of nodes in the batch of graphs
             * M1 is the input node feature size, which equals in_feats in initialization
+        get_attention : bool, optional. Default `False`
+            whether to return the attention values
 
         Returns
         -------
@@ -127,17 +129,29 @@ class GATv2Layer(nn.Module):
             * M2 is the output node representation size, which equals
               out_feats in initialization if self.agg_mode == 'mean' and
               out_feats * num_heads in initialization otherwise.
+        attention : FloatTensor of shape (E, H, 1)
+            * `E` is the number of edges,
+            * `H` is the number of attention heads.
+            Returned when `get_attention` is ``True``.
         """
-        feats = self.gatv2_conv(bg, feats)
-        if self.agg_mode == "flatten":
-            feats = feats.flatten(1)
+        if get_attention:
+            out_feats, attention = self.gatv2_conv(
+                bg, feats, get_attention=True
+            )
         else:
-            feats = feats.mean(1)
+            out_feats = self.gatv2_conv(bg, feats)
+        if self.agg_mode == "flatten":
+            out_feats = out_feats.flatten(1)
+        else:
+            out_feats = out_feats.mean(1)
 
         if self.activation is not None:
-            feats = self.activation(feats)
-
-        return feats
+            out_feats = self.activation(out_feats)
+        
+        if get_attention:
+            return out_feats, attention
+        else:
+            return out_feats
 
 
 class GATv2(nn.Module):
@@ -207,7 +221,7 @@ class GATv2(nn.Module):
     def __init__(
         self,
         in_feats,
-        out_feats,
+        out_feats=None,
         num_heads=None,
         feat_drops=None,
         attn_drops=None,
@@ -294,7 +308,7 @@ class GATv2(nn.Module):
         for gnn in self.gnn_layers:
             gnn.reset_parameters()
 
-    def forward(self, g, feats):
+    def forward(self, g, feats, get_attention=False):
         """Update node representations.
 
         Parameters
@@ -304,6 +318,8 @@ class GATv2(nn.Module):
         feats : FloatTensor of shape (N, M1)
             * N is the total number of nodes in the batch of graphs
             * M1 is the input node feature size, which equals in_feats in initialization
+         get_attention : bool, optional. Default `False`
+            whether to return the attention values
 
         Returns
         -------
@@ -312,7 +328,18 @@ class GATv2(nn.Module):
             * M2 is the output node representation size, which equals
               hidden_sizes[-1] if agg_modes[-1] == 'mean' and
               hidden_sizes[-1] * num_heads[-1] otherwise.
+        attentions : List of length `num_layers` of FloatTensor of shape (E, H, 1)
+            * `E` is the number of edges,
+            * `H` is the number of attention heads.
+            Returned when `get_attention` is ``True``.
         """
-        for gnn in self.gnn_layers:
-            feats = gnn(g, feats)
+        if get_attention:
+            attentions = []
+            for gnn in self.gnn_layers:
+                feats, attention = gnn(g, feats, get_attention=get_attention)
+                attentions.append(attention)
+            return feats, attentions
+        else:
+            for gnn in self.gnn_layers:
+                feats = gnn(g, feats, get_attention=get_attention)
         return feats

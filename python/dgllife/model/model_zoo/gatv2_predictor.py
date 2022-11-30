@@ -113,7 +113,7 @@ class GATv2Predictor(nn.Module):
         self.predict = MLPPredictor(2 * gnn_out_feats, predictor_out_feats,
                                     n_tasks, predictor_dropout)
 
-    def forward(self, bg, feats):
+    def forward(self, bg, feats, get_attention=False):
         """Graph-level regression/soft classification.
 
         Parameters
@@ -124,13 +124,24 @@ class GATv2Predictor(nn.Module):
             * N is the total number of nodes in the batch of graphs
             * M1 is the input node feature size, which must match
               in_feats in initialization
+         get_attention : bool, optional. Default `False`
+            whether to return the attention values
 
         Returns
         -------
         FloatTensor of shape (B, n_tasks)
             * Predictions on graphs
             * B for the number of graphs in the batch
+        attentions : List of length `len(out_feats)` of FloatTensor of shape (E, H, 1)
+            * `E` is the number of edges,
+            * `H` is the number of attention heads.
+            Returned when `get_attention` is ``True``.
         """
-        node_feats = self.gnn(bg, feats)
-        graph_feats = self.readout(bg, node_feats)
-        return self.predict(graph_feats)
+        if get_attention:
+            node_feats, attentions = self.gnn(bg, feats, get_attention=get_attention)
+            graph_feats = self.readout(bg, node_feats)
+            return self.predict(graph_feats), attentions
+        else:
+            node_feats = self.gnn(bg, feats)
+            graph_feats = self.readout(bg, node_feats)
+            return self.predict(graph_feats)
