@@ -11,7 +11,7 @@ from dgllife.data.smiles_inference import *
 from dgllife.utils.featurizers import *
 from dgllife.utils.mol_to_graph import *
 from joblib import cpu_count
-from python.dgllife.utils.mol_to_graph import MolToBigraph
+from dgllife.utils.mol_to_graph import MolToBigraph
 
 def test_data_frame1():
     data = [['CCO', 0, 1], ['CO', 2, 3]]
