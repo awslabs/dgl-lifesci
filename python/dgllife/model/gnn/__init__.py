@@ -7,6 +7,7 @@
 
 from .attentivefp import *
 from .gat import *
+from .gatv2 import *
 from .gcn import *
 from .gin import *
 from .gnn_ogb import *

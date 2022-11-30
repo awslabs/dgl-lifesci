@@ -144,6 +144,48 @@ def test_gat():
     assert gnn(g, node_feats).shape == torch.Size([3, 3])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 3])
 
+def test_gatv2():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    g, node_feats = test_graph1()
+    g, node_feats = g.to(device), node_feats.to(device)
+    bg, batch_node_feats = test_graph2()
+    bg, batch_node_feats = bg.to(device), batch_node_feats.to(device)
+
+    # Test default setting
+    gnn = GATv2(in_feats=1, out_feats=[32,]).to(device)
+    gnn.reset_parameters()
+    assert gnn(g, node_feats).shape == torch.Size([3, 32])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 32])
+
+    # Test configured setting
+    gnn = GATv2(in_feats=1,
+              out_feats=[1, 1],
+              num_heads=[2, 3],
+              feat_drops=[0.1, 0.1],
+              attn_drops=[0.1, 0.1],
+              alphas=[0.2, 0.2],
+              residuals=[True, True],
+              agg_modes=['flatten', 'mean'],
+              activations=[None, F.elu]).to(device)
+    assert gnn(g, node_feats).shape == torch.Size([3, 1])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 1])
+
+    gnn = GATv2(in_feats=1,
+              out_feats=[1, 1],
+              num_heads=[2, 3],
+              feat_drops=[0.1, 0.1],
+              attn_drops=[0.1, 0.1],
+              alphas=[0.2, 0.2],
+              residuals=[True, True],
+              agg_modes=['mean', 'flatten'],
+              activations=[None, F.elu]).to(device)
+    assert gnn(g, node_feats).shape == torch.Size([3, 3])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 3])
+
 def test_gcn():
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
