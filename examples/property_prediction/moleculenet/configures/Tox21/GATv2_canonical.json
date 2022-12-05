@@ -1,0 +1,13 @@
+{
+  "alpha": 0.574285650239047,
+  "batch_size": 256,
+  "dropout": 0.06205513003092991,
+  "gnn_hidden_feats": 128,
+  "lr": 0.018489331666601175,
+  "num_gnn_layers": 1,
+  "num_heads": 4,
+  "patience": 3,
+  "predictor_hidden_feats": 32,
+  "residual": true,
+  "weight_decay": 0.0005221614306821765
+}
