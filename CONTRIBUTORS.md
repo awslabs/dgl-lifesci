@@ -23,3 +23,4 @@ Contributors
 * [Eric O. Korman](https://github.com/ekorman): Fix for ogbg_ppa
 * [Marcos Leal](https://github.com/marcossilva): Change default number of processes to 1 for rexgen
 * [Raymond Gasper](https://github.com/rgasper): GATv2
+* [Andrew Stolman](https://github.com/astolman): Add allow_zero_in_degree option for GAT and GCN

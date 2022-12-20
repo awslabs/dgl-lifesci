@@ -8,10 +8,9 @@
 
 import torch.nn as nn
 import torch.nn.functional as F
-
 from dgl.nn.pytorch import GraphConv
 
-__all__ = ['GCN']
+__all__ = ["GCN"]
 
 # pylint: disable=W0221, C0103
 class GCNLayer(nn.Module):
@@ -40,14 +39,31 @@ class GCNLayer(nn.Module):
     dropout : float
         The probability for dropout. Default to be 0., i.e. no
         dropout is performed.
+    allow_zero_in_degree: bool
+        Whether to allow zero in degree nodes in graph. Defaults to False.
     """
-    def __init__(self, in_feats, out_feats, gnn_norm='none', activation=None,
-                 residual=True, batchnorm=True, dropout=0.):
+
+    def __init__(
+        self,
+        in_feats,
+        out_feats,
+        gnn_norm="none",
+        activation=None,
+        residual=True,
+        batchnorm=True,
+        dropout=0.0,
+        allow_zero_in_degree=False,
+    ):
         super(GCNLayer, self).__init__()
 
         self.activation = activation
-        self.graph_conv = GraphConv(in_feats=in_feats, out_feats=out_feats,
-                                    norm=gnn_norm, activation=activation)
+        self.graph_conv = GraphConv(
+            in_feats=in_feats,
+            out_feats=out_feats,
+            norm=gnn_norm,
+            activation=activation,
+            allow_zero_in_degree=allow_zero_in_degree,
+        )
         self.dropout = nn.Dropout(dropout)
 
         self.residual = residual
@@ -93,6 +109,7 @@ class GCNLayer(nn.Module):
 
         return new_feats
 
+
 class GCN(nn.Module):
     r"""GCN from `Semi-Supervised Classification with Graph Convolutional Networks
     <https://arxiv.org/abs/1609.02907>`__
@@ -128,9 +145,22 @@ class GCN(nn.Module):
         ``dropout[i]`` decides the dropout probability on the output of the i-th GCN layer.
         ``len(dropout)`` equals the number of GCN layers. By default, no dropout is
         performed for all layers.
+    allow_zero_in_degree: bool
+        Whether to allow zero in degree nodes in graph for all layers. By default, will not
+        allow zero in degree nodes.
     """
-    def __init__(self, in_feats, hidden_feats=None, gnn_norm=None, activation=None,
-                 residual=None, batchnorm=None, dropout=None):
+
+    def __init__(
+        self,
+        in_feats,
+        hidden_feats=None,
+        gnn_norm=None,
+        activation=None,
+        residual=None,
+        batchnorm=None,
+        dropout=None,
+        allow_zero_in_degree=None,
+    ):
         super(GCN, self).__init__()
 
         if hidden_feats is None:
@@ -138,7 +168,7 @@ class GCN(nn.Module):
 
         n_layers = len(hidden_feats)
         if gnn_norm is None:
-            gnn_norm = ['none' for _ in range(n_layers)]
+            gnn_norm = ["none" for _ in range(n_layers)]
         if activation is None:
             activation = [F.relu for _ in range(n_layers)]
         if residual is None:
@@ -146,18 +176,36 @@ class GCN(nn.Module):
         if batchnorm is None:
             batchnorm = [True for _ in range(n_layers)]
         if dropout is None:
-            dropout = [0. for _ in range(n_layers)]
-        lengths = [len(hidden_feats), len(gnn_norm), len(activation),
-                   len(residual), len(batchnorm), len(dropout)]
-        assert len(set(lengths)) == 1, 'Expect the lengths of hidden_feats, gnn_norm, ' \
-                                       'activation, residual, batchnorm and dropout to ' \
-                                       'be the same, got {}'.format(lengths)
+            dropout = [0.0 for _ in range(n_layers)]
+        lengths = [
+            len(hidden_feats),
+            len(gnn_norm),
+            len(activation),
+            len(residual),
+            len(batchnorm),
+            len(dropout),
+        ]
+        assert len(set(lengths)) == 1, (
+            "Expect the lengths of hidden_feats, gnn_norm, "
+            "activation, residual, batchnorm and dropout to "
+            "be the same, got {}".format(lengths)
+        )
 
         self.hidden_feats = hidden_feats
         self.gnn_layers = nn.ModuleList()
         for i in range(n_layers):
-            self.gnn_layers.append(GCNLayer(in_feats, hidden_feats[i], gnn_norm[i], activation[i],
-                                            residual[i], batchnorm[i], dropout[i]))
+            self.gnn_layers.append(
+                GCNLayer(
+                    in_feats,
+                    hidden_feats[i],
+                    gnn_norm[i],
+                    activation[i],
+                    residual[i],
+                    batchnorm[i],
+                    dropout[i],
+                    allow_zero_in_degree=allow_zero_in_degree,
+                )
+            )
             in_feats = hidden_feats[i]
 
     def reset_parameters(self):
