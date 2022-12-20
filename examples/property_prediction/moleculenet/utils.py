@@ -201,20 +201,6 @@ def load_model(exp_configure):
             predictor_dropout=exp_configure['dropout'],
             n_tasks=exp_configure['n_tasks']
         )
-    elif exp_configure['model'] == 'GATv2':
-        from dgllife.model import GATPredictor
-        model = GATPredictor(
-            in_feats=exp_configure['in_node_feats'],
-            hidden_feats=[exp_configure['gnn_hidden_feats']] * exp_configure['num_gnn_layers'],
-            num_heads=[exp_configure['num_heads']] * exp_configure['num_gnn_layers'],
-            feat_drops=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
-            attn_drops=[exp_configure['dropout']] * exp_configure['num_gnn_layers'],
-            alphas=[exp_configure['alpha']] * exp_configure['num_gnn_layers'],
-            residuals=[exp_configure['residual']] * exp_configure['num_gnn_layers'],
-            predictor_hidden_feats=exp_configure['predictor_hidden_feats'],
-            predictor_dropout=exp_configure['dropout'],
-            n_tasks=exp_configure['n_tasks']
-        )
     elif exp_configure['model'] == 'Weave':
         from dgllife.model import WeavePredictor
         model = WeavePredictor(

@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Graph Attention Networks
+# Graph Attention Networks v2
 #
 # pylint: disable= no-member, arguments-differ, invalid-name
 
@@ -15,63 +15,47 @@ __all__ = ["GATv2"]
 
 # pylint: disable=W0221
 class GATv2Layer(nn.Module):
-    r"""Single GAT layer from `HOW ATTENTIVE ARE GRAPH ATTENTION NETWORKS?
+    r"""Single GATv2 layer from `How Attentive Are Graph Attention Networks?
     <https://arxiv.org/pdf/2105.14491.pdf>`
 
     Parameters
     ----------
-    in_feats : int, or pair of ints
-        Input feature size; i.e, the number of dimensions of :math:`h_i^{(l)}`.
-        If the layer is to be applied to a unidirectional bipartite graph, `in_feats`
-        specifies the input feature size on both the source and destination nodes.
-        If a scalar is given, the source and destination node feature size
-        would take the same value.
+    in_feats : int
+        Number of input node features
     out_feats : int
-        Output feature size; i.e, the number of dimensions of :math:`h_i^{(l+1)}`.
+        Number of output node features
     num_heads : int
-        Number of heads in Multi-Head Attention.
+        Number of attention heads
     feat_drop : float, optional
-        Dropout rate on feature. Defaults: ``0``.
+        Dropout rate on feature. Defaults: 0
     attn_drop : float, optional
-        Dropout rate on attention weight. Defaults: ``0``.
+        Dropout rate on attention values of edges. Defaults: 0
     negative_slope : float, optional
-        LeakyReLU angle of negative slope. Defaults: ``0.2``.
+        Hyperparameter in LeakyReLU, which is the slope for negative values.
+        Default to 0.2.
     residual : bool, optional
-        If True, use residual connection. Defaults: ``False``.
-    activation : callable activation function/layer or None, optional.
-        If not None, applies an activation function to the updated node features.
-        Default: ``None``.
+        If True, use residual connection. Defaults: False.
+    activation : callable, optional
+        If not None, the activation function will be applied to the updated
+        node features. Default: None.
     allow_zero_in_degree : bool, optional
-        If there are 0-in-degree nodes in the graph, output for those nodes will be invalid
-        since no message will be passed to those nodes. This is harmful for some applications
-        causing silent performance regression. This module will raise a DGLError if it detects
-        0-in-degree nodes in input graph. By setting ``True``, it will suppress the check
-        and let the users handle it by themselves. Defaults: ``False``.
+        If there are 0-in-degree nodes in the graph, output for those nodes
+        will be invalid since no messages will be passed to those nodes. This
+        is harmful for some applications, causing silent performance regression
+        . This module will raise a DGLError if it detects 0-in-degree nodes in
+        input graph. By setting True, it will suppress the check and let the
+        users handle it by themselves. Defaults: False.
     bias : bool, optional
-        If set to :obj:`False`, the layer will not learn
-        an additive bias. (default: :obj:`True`)
+        If set to False, the layer will not learn an additive bias.
+        Defaults: True.
     share_weights : bool, optional
-        If set to :obj:`True`, the same matrix for :math:`W_{left}` and :math:`W_{right}` in
-        the above equations, will be applied to the source and the target node of every edge.
-        (default: :obj:`False`)
-
-    Note
-    ----
-    Zero in-degree nodes will lead to invalid output value. This is because no message
-    will be passed to those nodes, the aggregation function will be applied on empty input.
-    A common practice to avoid this is to add a self-loop for each node in the graph if
-    it is homogeneous, which can be achieved by:
-
-    >>> g = ... # a DGLGraph
-    >>> g = dgl.add_self_loop(g)
-
-    Calling ``add_self_loop`` will not work for some graphs, for example, heterogeneous graph
-    since the edge type can not be decided for self_loop edges. Set ``allow_zero_in_degree``
-    to ``True`` for those cases to unblock the code and handle zero-in-degree nodes manually.
-    A common practise to handle this is to filter out the nodes with zero-in-degree when use
-    after conv.
+        If set to True, the learnable weight matrix for source and destination
+        nodes will be the same. Defaults: False.
+    agg_mode : str
+        The way to aggregate multi-head attention results, can be either
+        'flatten' for concatenating all-head results or 'mean' for averaging
+        all head results.
     """
-
     def __init__(
         self,
         in_feats,
@@ -103,7 +87,6 @@ class GATv2Layer(nn.Module):
         )
         assert agg_mode in ["flatten", "mean"]
         self.agg_mode = agg_mode
-        self.activation = activation
 
     def reset_parameters(self):
         """Reinitialize model parameters."""
@@ -115,24 +98,26 @@ class GATv2Layer(nn.Module):
         Parameters
         ----------
         bg : DGLGraph
-            DGLGraph for a batch of graphs.
+            DGLGraph for a batch of graphs
         feats : FloatTensor of shape (N, M1)
-            * N is the total number of nodes in the batch of graphs
-            * M1 is the input node feature size, which equals in_feats in initialization
-        get_attention : bool, optional. Default `False`
-            whether to return the attention values
+            * N is the total number of nodes in the batch of graphs.
+            * M1 is the input node feature size, which equals in_feats in
+              initialization
+        get_attention : bool, optional
+            Whether to return the attention values. Defaults: False
 
         Returns
         -------
         feats : FloatTensor of shape (N, M2)
-            * N is the total number of nodes in the batch of graphs
+            * N is the total number of nodes in the batch of graphs.
             * M2 is the output node representation size, which equals
               out_feats in initialization if self.agg_mode == 'mean' and
-              out_feats * num_heads in initialization otherwise.
-        attention : FloatTensor of shape (E, H, 1)
-            * `E` is the number of edges,
+              out_feats * num_heads otherwise.
+        attention : FloatTensor of shape (E, H, 1), optional
+            Attention values, returned when :attr:`get_attention` is True
+
+            * `E` is the number of edges.
             * `H` is the number of attention heads.
-            Returned when `get_attention` is ``True``.
         """
         if get_attention:
             out_feats, attention = self.gatv2_conv(
@@ -140,14 +125,12 @@ class GATv2Layer(nn.Module):
             )
         else:
             out_feats = self.gatv2_conv(bg, feats)
+
         if self.agg_mode == "flatten":
             out_feats = out_feats.flatten(1)
         else:
             out_feats = out_feats.mean(1)
 
-        if self.activation is not None:
-            out_feats = self.activation(out_feats)
-        
         if get_attention:
             return out_feats, attention
         else:
@@ -155,73 +138,68 @@ class GATv2Layer(nn.Module):
 
 
 class GATv2(nn.Module):
-    r"""GATv2 from `HOW ATTENTIVE ARE GRAPH ATTENTION NETWORKS? <https://arxiv.org/pdf/2105.14491.pdf>`
+    r"""GATv2 from `How Attentive Are Graph Attention Networks?
+    <https://arxiv.org/pdf/2105.14491.pdf>`
 
     Parameters
     ----------
-    in_feats : int, or pair of ints
-        Input feature size; i.e, the number of dimensions of :math:`h_i^{(l)}`.
-        If the layer is to be applied to a unidirectional bipartite graph, `in_feats`
-        specifies the input feature size on both the source and destination nodes.
-        If a scalar is given, the source and destination node feature size
-        would take the same value.
-    out_feats : list of int, optional
-        ``out_feats[i]`` gives the output size of an attention head in i-th GATv2 Layer
-        ``len(out_feats)`` equals the number of GATv2 layers.
-        By default, we use ``[32, 32]``
+    in_feats : int
+        Number of input node features
+    hidden_feats : list of int, optional
+        ``hidden_feats[i]`` gives the output size of an attention head in the
+        i-th GATv2 layer. ``len(hidden_feats)`` equals the number of GATv2
+        layers. By default, we use ``[32, 32]``.
     num_heads : list of int, optional
-        ``num_heads[i]`` gives the number of attention heads in the i-th GATv2 Layer.
-        ``len(num_heads)`` equals the number of GATv2 Layers.
-        By default, we use 4 attention heads per GATv2 Layer.
+        ``num_heads[i]`` gives the number of attention heads in the i-th GATv2
+        layer. ``len(num_heads)`` equals the number of GATv2 layers. By default
+        , we use 4 attention heads per GATv2 layer.
     feat_drops : list of float, optional
-        ``feat_drops[i]`` gives the dropout applied to input features in the i-th GATv2 Layer.
-        ``len(feat_drops)`` equals the number of GATv2 Layers.
-        By default we use zero for each GATv2 Layer.
+        ``feat_drops[i]`` gives the dropout applied to the input features in
+        the i-th GATv2 layer. ``len(feat_drops)`` equals the number of GATv2
+        layers. By default, we use zero for all GATv2 layers.
     attn_drops : list of float, optional
-        ``attn_drops[i]`` gives the dropout applied to the attention values of edges in the i-th GATv2 Layer.
-        ``len(attn_drops)`` equals the number of GATv2 Layers.
-        By default we use zero for each GATv2 Layer
+        ``attn_drops[i]`` gives the dropout applied to the attention values of
+        edges in the i-th GATv2 layer. ``len(attn_drops)`` equals the number of
+        GATv2 layers. By default, we use zero for all GATv2 layers.
     alphas : list of float, optional
-        ``alphas[i]`` gives the (slope) alpha for the negative values of the (RELU) ELU of the i-th GATv2 Layer.
-        ``len(alphas)`` equals the number of Gatv2 Layers
-        By default we use ``0.2`` for each GATv2Layer
+        ``alphas[i]`` gives the slope for the negative values in the LeakyReLU
+        function of the i-th GATv2 layer. ``len(alphas)`` equals the number of
+        GATv2 layers. By default, we use 0.2 for all GATv2 layers.
     residuals : list of bool, optional
-        ``residuals[i]`` gives decides if residual connection is to be use for the i-th GATv2 Layer.
-        ``len(residuals)`` equals the number of GATv2 Layers
-        By default we use ``False`` for each GATv2Layer
-    activations : list of callable activation function/layer or None
-        ``activations[i]`` gives the activation function applied to the aggregated multi-head results for the i-th GATv2 Layer
-        ``len(activations)`` equals the number of GATv2 Layers
-        By default, the activation function for each GATv2 Layer is the ELU function, except for the last,
-        which has no activation
+        ``residuals[i]`` decides if residual connection is to be used for the
+        i-th GATv2 layer. ``len(residuals)`` equals the number of GATv2 layers.
+        By default, we use ``False`` for all GATv2 layers.
+    activations : list of callable, optional
+        ``activations[i]`` gives the activation function applied to the result
+        of the i-th GATv2 layer. ``len(activations)`` equals the number of
+        GATv2 layers. By default, we use ELU for all GATv2 layers, except for
+        the last layer.
     allow_zero_in_degree : bool, optional
-        If there are 0-in-degree nodes in the graph, output for those nodes will be invalid
-        since no message will be passed to those nodes. This is harmful for some applications
-        causing silent performance regression. This module will raise a DGLError if it detects
-        0-in-degree nodes in input graph. By setting ``True``, it will suppress the check
-        and let the users handle it by themselves. Defaults: ``False``.
+        If there are 0-in-degree nodes in the graph, output for those nodes
+        will be invalid since no messages will be passed to those nodes. This
+        is harmful for some applications, causing silent performance regression
+        . This module will raise a DGLError if it detects 0-in-degree nodes in
+        input graph. By setting True, it will suppress the check and let the
+        users handle it by themselves. Defaults: False.
     biases : list of bool, optional
-        ``biases[i]`` decides if an additive bias is allowed to be learned by the i-th GATv2 Layer.
-        ``len(biases)`` equals the number of GATv2 Layers
-        By default, additive biases are learned by GATv2 Layers
+        ``biases[i]`` decides if an additive bias is allowed to be learned by
+        the i-th GATv2 layer. ``len(biases)`` equals the number of GATv2
+        layers. By default, additive biases are learned for all GATv2 layers.
     share_weights : list of bool, optional
-        If weight-sharing is enabled, the same matrix for :math:`W_{left}` and :math:`W_{right}` in
-        the above equations, will be applied to the source and the target node of every edge.
-        ``share_weights[i]`` decides if weight-sharing is used for the i-th GATv2 Layer.
+        ``share_weights[i]`` decides if the learnable weight matrix for source
+        and destination nodes is the same in the i-th GATv2 layer.
         ``len(share_weights)`` equals the number of GATv2 Layers.
-        By default, no weight-sharing is used for the GATv2 Layers.
-    agg_modes : list of str
-        The way to aggregate multi-head attention results for each GAT layer, which can be either
-        'flatten' for concatenating all-head results or 'mean' for averaging all-head results.
-        ``agg_modes[i]`` gives the way to aggregate multi-head attention results for the i-th GAT layer.
-        ``len(agg_modes)`` equals the number of GAT layers. 
-        By default, we flatten all-head results for each GAT layer except the last.
+        By default, no weight sharing is used in all GATv2 layers.
+    agg_modes : list of str, optional
+        ``agg_modes[i]`` gives the way to aggregate multi-head attention
+        results in the i-th GATv2 layer. ``len(agg_modes)`` equals the number
+        of GATv2 Layers. By default, we flatten all-head results for each GATv2
+        layer, except for the last layer.
     """
-
     def __init__(
         self,
         in_feats,
-        out_feats=None,
+        hidden_feats=None,
         num_heads=None,
         feat_drops=None,
         attn_drops=None,
@@ -235,10 +213,10 @@ class GATv2(nn.Module):
     ):
         super(GATv2, self).__init__()
 
-        if out_feats is None:
-            out_feats = [32, 32]
+        if hidden_feats is None:
+            hidden_feats = [32, 32]
 
-        n_layers = len(out_feats)
+        n_layers = len(hidden_feats)
         if num_heads is None:
             num_heads = [4 for _ in range(n_layers)]
         if feat_drops is None:
@@ -248,10 +226,7 @@ class GATv2(nn.Module):
         if alphas is None:
             alphas = [0.2 for _ in range(n_layers)]
         if residuals is None:
-            residuals = [True for _ in range(n_layers)]
-        if agg_modes is None:
-            agg_modes = ["flatten" for _ in range(n_layers - 1)]
-            agg_modes.append("mean")
+            residuals = [False for _ in range(n_layers)]
         if activations is None:
             activations = [F.elu for _ in range(n_layers - 1)]
             activations.append(None)
@@ -259,87 +234,92 @@ class GATv2(nn.Module):
             biases = [True for _ in range(n_layers)]
         if share_weights is None:
             share_weights = [False for _ in range(n_layers)]
+        if agg_modes is None:
+            agg_modes = ["flatten" for _ in range(n_layers - 1)]
+            agg_modes.append("mean")
+
         lengths = [
-            len(out_feats),
+            len(hidden_feats),
             len(num_heads),
             len(feat_drops),
             len(attn_drops),
             len(alphas),
             len(residuals),
-            len(agg_modes),
             len(activations),
             len(biases),
             len(share_weights),
+            len(agg_modes),
         ]
         assert len(set(lengths)) == 1, (
-            "Expect the lengths of out_feats, num_heads, "
-            "feat_drops, attn_drops, alphas, residuals, "
-            "agg_modes, activations, and biases to be the same, "
+            "Expect the lengths of hidden_feats, num_heads, feat_drops, "
+            "attn_drops, alphas, residuals, activations, biases, "
+            "share_weights, and agg_modes to be the same, "
             "got {}".format(lengths)
         )
-        self.out_feats = out_feats
-        self.num_heads = num_heads
-        self.agg_modes = agg_modes
         self.gnn_layers = nn.ModuleList()
         for i in range(n_layers):
             self.gnn_layers.append(
                 GATv2Layer(
                     in_feats=in_feats,
-                    out_feats=out_feats[i],
+                    out_feats=hidden_feats[i],
                     num_heads=num_heads[i],
                     feat_drop=feat_drops[i],
                     attn_drop=attn_drops[i],
                     negative_slope=alphas[i],
                     residual=residuals[i],
-                    agg_mode=agg_modes[i],
                     activation=activations[i],
-                    bias=biases[i],
                     allow_zero_in_degree=allow_zero_in_degree,
+                    bias=biases[i],
                     share_weights=share_weights[i],
+                    agg_mode=agg_modes[i],
                 )
             )
             if agg_modes[i] == "flatten":
-                in_feats = out_feats[i] * num_heads[i]
+                in_feats = hidden_feats[i] * num_heads[i]
             else:
-                in_feats = out_feats[i]
+                in_feats = hidden_feats[i]
 
     def reset_parameters(self):
         """Reinitialize model parameters."""
         for gnn in self.gnn_layers:
             gnn.reset_parameters()
 
-    def forward(self, g, feats, get_attention=False):
+    def forward(self, bg, feats, get_attention=False):
         """Update node representations.
 
         Parameters
         ----------
-        g : DGLGraph
+        bg : DGLGraph
             DGLGraph for a batch of graphs
         feats : FloatTensor of shape (N, M1)
-            * N is the total number of nodes in the batch of graphs
-            * M1 is the input node feature size, which equals in_feats in initialization
-         get_attention : bool, optional. Default `False`
-            whether to return the attention values
+            * N is the total number of nodes in the batch of graphs.
+            * M1 is the input node feature size, which equals in_feats in
+              initialization
+        get_attention : bool, optional
+            Whether to return the attention values. Defaults: False
 
         Returns
         -------
         feats : FloatTensor of shape (N, M2)
-            * N is the total number of nodes in the batch of graphs
+            * N is the total number of nodes in the batch of graphs.
             * M2 is the output node representation size, which equals
               hidden_sizes[-1] if agg_modes[-1] == 'mean' and
               hidden_sizes[-1] * num_heads[-1] otherwise.
-        attentions : List of length `num_layers` of FloatTensor of shape (E, H, 1)
-            * `E` is the number of edges,
+        attentions : list of FloatTensor of shape (E, H, 1), optional
+            It is returned when :attr:`get_attention` is True.
+            ``attentions[i]`` gives the attention values in the i-th GATv2
+            layer.
+
+            * `E` is the number of edges.
             * `H` is the number of attention heads.
-            Returned when `get_attention` is ``True``.
         """
         if get_attention:
             attentions = []
             for gnn in self.gnn_layers:
-                feats, attention = gnn(g, feats, get_attention=get_attention)
+                feats, attention = gnn(bg, feats, get_attention=get_attention)
                 attentions.append(attention)
             return feats, attentions
         else:
             for gnn in self.gnn_layers:
-                feats = gnn(g, feats, get_attention=get_attention)
-        return feats
+                feats = gnn(bg, feats, get_attention=get_attention)
+            return feats

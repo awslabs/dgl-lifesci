@@ -163,27 +163,27 @@ def test_gatv2():
 
     # Test configured setting
     gnn = GATv2(in_feats=1,
-              out_feats=[1, 1],
-              num_heads=[2, 3],
-              feat_drops=[0.1, 0.1],
-              attn_drops=[0.1, 0.1],
-              alphas=[0.2, 0.2],
-              residuals=[True, True],
-              agg_modes=['flatten', 'mean'],
-              activations=[None, F.elu]).to(device)
+                hidden_feats=[1, 1],
+                num_heads=[2, 3],
+                feat_drops=[0.1, 0.1],
+                attn_drops=[0.1, 0.1],
+                alphas=[0.2, 0.2],
+                residuals=[True, True],
+                agg_modes=['flatten', 'mean'],
+                activations=[None, F.elu]).to(device)
     assert gnn(g, node_feats).shape == torch.Size([3, 1])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 1])
 
     gnn = GATv2(in_feats=1,
-              out_feats=[1, 1],
-              num_heads=[2, 3],
-              feat_drops=[0.1, 0.1],
-              attn_drops=[0.1, 0.1],
-              alphas=[0.2, 0.2],
-              residuals=[True, True],
-              agg_modes=['mean', 'flatten'],
-              activations=[None, F.elu],
-              share_weights=[True, False]).to(device)
+                hidden_feats=[1, 1],
+                num_heads=[2, 3],
+                feat_drops=[0.1, 0.1],
+                attn_drops=[0.1, 0.1],
+                alphas=[0.2, 0.2],
+                residuals=[True, True],
+                agg_modes=['mean', 'flatten'],
+                activations=[None, F.elu],
+                share_weights=[True, False]).to(device)
     assert gnn(g, node_feats).shape == torch.Size([3, 3])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 3])
 
@@ -216,14 +216,14 @@ def test_gatv2_get_attention():
 
     # Test configured setting, get_attention=True
     gnn = GATv2(in_feats=1,
-              out_feats=[1, 1],
-              num_heads=[2, 3],
-              feat_drops=[0.1, 0.1],
-              attn_drops=[0.1, 0.1],
-              alphas=[0.2, 0.2],
-              residuals=[True, True],
-              agg_modes=['flatten', 'mean'],
-              activations=[None, F.elu]).to(device)
+                hidden_feats=[1, 1],
+                num_heads=[2, 3],
+                feat_drops=[0.1, 0.1],
+                attn_drops=[0.1, 0.1],
+                alphas=[0.2, 0.2],
+                residuals=[True, True],
+                agg_modes=['flatten', 'mean'],
+                activations=[None, F.elu]).to(device)
     out_feats, out_attentions = gnn(g, node_feats, get_attention=True)
     assert out_feats.shape == torch.Size([3, 1])
     len(out_attentions) == 2
@@ -238,15 +238,15 @@ def test_gatv2_get_attention():
     assert batch_out_attentions[1].shape == torch.Size([15, 3, 1])
 
     gnn = GATv2(in_feats=1,
-              out_feats=[1, 1],
-              num_heads=[2, 3],
-              feat_drops=[0.1, 0.1],
-              attn_drops=[0.1, 0.1],
-              alphas=[0.2, 0.2],
-              residuals=[True, True],
-              agg_modes=['mean', 'flatten'],
-              activations=[None, F.elu],
-              share_weights=[True, False]).to(device)
+                hidden_feats=[1, 1],
+                num_heads=[2, 3],
+                feat_drops=[0.1, 0.1],
+                attn_drops=[0.1, 0.1],
+                alphas=[0.2, 0.2],
+                residuals=[True, True],
+                agg_modes=['mean', 'flatten'],
+                activations=[None, F.elu],
+                share_weights=[True, False]).to(device)
     assert gnn(g, node_feats).shape == torch.Size([3, 3])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 3])
     out_feats, out_attentions = gnn(g, node_feats, get_attention=True)

@@ -119,7 +119,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--dataset', choices=['MUV', 'BACE', 'BBBP', 'ClinTox', 'SIDER',
                                                     'ToxCast', 'HIV', 'PCBA', 'Tox21'],
                         help='Dataset to use')
-    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'GATv2', 'Weave', 'MPNN', 'AttentiveFP',
+    parser.add_argument('-mo', '--model', choices=['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP',
                                                    'gin_supervised_contextpred',
                                                    'gin_supervised_infomax',
                                                    'gin_supervised_edgepred',
