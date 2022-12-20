@@ -264,7 +264,7 @@ def load_model(exp_configure):
             predictor_dropout=exp_configure['dropout']
         )
     else:
-        return ValueError("Expect model to be from ['GCN', 'GAT', 'GATv2', 'Weave', 'MPNN', 'AttentiveFP', "
+        return ValueError("Expect model to be from ['GCN', 'GAT', 'Weave', 'MPNN', 'AttentiveFP', "
                           "'gin_supervised_contextpred', 'gin_supervised_infomax', "
                           "'gin_supervised_edgepred', 'gin_supervised_masking'], 'NF'"
                           "got {}".format(exp_configure['model']))
