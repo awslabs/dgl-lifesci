@@ -19,6 +19,11 @@ GAT
 .. automodule:: dgllife.model.gnn.gat
     :members:
 
+GATv2
+---
+.. automodule:: dgllife.model.gnn.gatv2
+    :members:
+
 GCN
 ---
 .. automodule:: dgllife.model.gnn.gcn
