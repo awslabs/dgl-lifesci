@@ -34,6 +34,11 @@ GAT Predictor
 .. automodule:: dgllife.model.model_zoo.gat_predictor
     :members:
 
+GATv2 Predictor
+`````````````
+.. automodule:: dgllife.model.model_zoo.gatv2_predictor
+    :members:
+
 GCN Predictor
 `````````````
 .. automodule:: dgllife.model.model_zoo.gcn_predictor
