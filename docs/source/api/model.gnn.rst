@@ -19,7 +19,7 @@ GAT
 .. automodule:: dgllife.model.gnn.gat
     :members:
 
-GATV2
+GATv2
 ---
 .. automodule:: dgllife.model.gnn.gatv2
     :members:
