@@ -1121,8 +1121,7 @@ class WeaveAtomFeaturizer(object):
         ])
 
         fdef_name = osp.join(RDConfig.RDDataDir, "BaseFeatures.fdef")
-        mol_featurizer = ChemicalFeatures.BuildFeatureFactory(fdef_name)
-        self._mol_featurizer = mol_featurizer
+        self._mol_featurizer = ChemicalFeatures.BuildFeatureFactory(fdef_name)
 
     def feat_size(self):
         """Get the feature size.
