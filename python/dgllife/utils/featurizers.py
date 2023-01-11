@@ -1120,6 +1120,9 @@ class WeaveAtomFeaturizer(object):
             partial(atom_hybridization_one_hot, allowable_set=hybridization_types)
         ])
 
+        fdef_name = osp.join(RDConfig.RDDataDir, "BaseFeatures.fdef")
+        self._mol_featurizer = ChemicalFeatures.BuildFeatureFactory(fdef_name)
+
     def feat_size(self):
         """Get the feature size.
 
@@ -1186,9 +1189,7 @@ class WeaveAtomFeaturizer(object):
         num_atoms = mol.GetNumAtoms()
 
         # Get information for donor and acceptor
-        fdef_name = osp.join(RDConfig.RDDataDir, 'BaseFeatures.fdef')
-        mol_featurizer = ChemicalFeatures.BuildFeatureFactory(fdef_name)
-        mol_feats = mol_featurizer.GetFeaturesForMol(mol)
+        mol_feats = self._mol_featurizer.GetFeaturesForMol(mol)
         is_donor, is_acceptor = self.get_donor_acceptor_info(mol_feats)
 
         # Get a symmetrized smallest set of smallest rings
