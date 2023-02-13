@@ -51,7 +51,13 @@ DGL-LifeSci requires python 3.6+, DGL 0.7.0+ and PyTorch 1.5.0+.
 [Install dgl](https://www.dgl.ai/pages/start.html)
 
 
-Additionally, we require `RDKit 2018.09.3` for utils related to cheminformatics. We recommend installing it with
+Additionally, we require `RDKit`. The easiest way to install RDKit is
+
+```
+pip install rdkit
+```
+
+If you need to work on the example of JTVAE, then you need `RDKit 2018.09.3`. We recommend installing it with
 
 ```
 conda install -c rdkit rdkit==2018.09.3
