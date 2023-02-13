@@ -67,7 +67,7 @@ class WLNContext(nn.Module):
                 self.project_node_pair_feature(node_pair_feat)
             )
             batch_complete_graphs.update_all(
-                fn.src_mul_edge('hv', 'a', 'm'), fn.sum('m', 'context'))
+                fn.u_mul_e('hv', 'a', 'm'), fn.sum('m', 'context'))
             node_contexts = batch_complete_graphs.ndata.pop('context')
 
         return node_contexts

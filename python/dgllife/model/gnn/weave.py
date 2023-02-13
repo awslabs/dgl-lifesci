@@ -107,7 +107,7 @@ class WeaveLayer(nn.Module):
         # Update node features
         node_node_feats = self.activation(self.node_to_node(node_feats))
         g.edata['e2n'] = self.activation(self.edge_to_node(edge_feats))
-        g.update_all(fn.copy_edge('e2n', 'm'), fn.sum('m', 'e2n'))
+        g.update_all(fn.copy_e('e2n', 'm'), fn.sum('m', 'e2n'))
         edge_node_feats = g.ndata.pop('e2n')
         new_node_feats = self.activation(self.update_node(
             torch.cat([node_node_feats, edge_node_feats], dim=1)))

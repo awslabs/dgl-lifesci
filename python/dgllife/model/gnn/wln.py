@@ -173,10 +173,10 @@ class WLN(nn.Module):
             if g.num_edges() > 0:
                 # The following lines do not work for a graph without edges.
                 g.ndata['hv'] = node_feats
-                g.apply_edges(fn.copy_src('hv', 'he_src'))
+                g.apply_edges(fn.copy_u('hv', 'he_src'))
                 concat_edge_feats = torch.cat([g.edata['he_src'], edge_feats], dim=1)
                 g.edata['he'] = self.project_concatenated_messages(concat_edge_feats)
-                g.update_all(fn.copy_edge('he', 'm'), fn.sum('m', 'hv_new'))
+                g.update_all(fn.copy_e('he', 'm'), fn.sum('m', 'hv_new'))
                 node_feats = self.get_new_node_feats(
                     torch.cat([node_feats, g.ndata['hv_new']], dim=1))
             else:
