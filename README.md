@@ -89,7 +89,7 @@ Once you have installed the package, you can verify the success of installation 
 import dgllife
 
 print(dgllife.__version__)
-# 0.3.1
+# 0.3.2
 ```
 
 ## Command Line Interface
