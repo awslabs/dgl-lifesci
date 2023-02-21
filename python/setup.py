@@ -4,9 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
-
-from setuptools import find_packages
 from setuptools import setup
+from setuptools import find_packages
 
 CURRENT_DIR = os.path.dirname(__file__)
 
