@@ -190,7 +190,7 @@ def PN_graph_construction_and_featurization(ligand_mol,
         np.block([
             [d_one_hot, np.zeros((n_d, f_e))],
             [np.zeros((n_e, f_d)), np.array(complex_bigraph.edata['e'])]
-        ]).astype(np.long)
+        ]).astype(np.int64)
     )
     return complex_bigraph, complex_knn_graph
 
