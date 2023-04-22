@@ -23,36 +23,42 @@ def get_lib_path():
 
 VERSION = get_lib_path()
 
-setup(
-    name='dgllife',
-    version=VERSION,
-    description='DGL-based package for Life Science',
-    keywords=[
-        'pytorch',
-        'dgl',
-        'graph-neural-networks',
-        'life-science',
-        'drug-discovery'
-    ],
-    maintainer='DGL Team',
-    packages=[package for package in find_packages()
-              if package.startswith('dgllife')],
-    install_requires=[
-        'scikit-learn>=0.22.2',
-        'pandas',
-        'requests>=2.22.0',
-        'tqdm',
-        'numpy>=1.14.0',
-        'scipy>=1.1.0',
-        'networkx>=2.1',
-        'hyperopt',
-        'joblib'
-    ],
-    url='https://github.com/awslabs/dgl-lifesci',
-    classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: Apache Software License'
-    ],
-    license='APACHE'
-)
+def run_setup(package_dir: str = ""):
+    setup(
+        name='dgllife',
+        version=VERSION,
+        description='DGL-based package for Life Science',
+        keywords=[
+            'pytorch',
+            'dgl',
+            'graph-neural-networks',
+            'life-science',
+            'drug-discovery'
+        ],
+        maintainer='DGL Team',
+        packages=[package for package in find_packages(where=CURRENT_DIR)
+                if package.startswith('dgllife')],
+        package_dir={'': package_dir},
+        install_requires=[
+            'scikit-learn>=0.22.2',
+            'pandas',
+            'requests>=2.22.0',
+            'tqdm',
+            'numpy>=1.14.0',
+            'scipy>=1.1.0',
+            'networkx>=2.1',
+            'hyperopt',
+            'joblib'
+        ],
+        url='https://github.com/awslabs/dgl-lifesci',
+        classifiers=[
+            'Development Status :: 3 - Alpha',
+            'Programming Language :: Python :: 3',
+            'License :: OSI Approved :: Apache Software License'
+        ],
+        license='APACHE'
+    )
+
+
+if __name__ == '__main__':
+    run_setup(package_dir=CURRENT_DIR)
