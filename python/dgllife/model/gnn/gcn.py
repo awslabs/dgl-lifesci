@@ -100,7 +100,9 @@ class GCNLayer(nn.Module):
         """
         new_feats = self.graph_conv(g, feats)
         if self.residual:
-            res_feats = self.activation(self.res_connection(feats))
+            res_feats = self.activation(
+                self.res_connection(feats[: new_feats.shape[0]])
+            )
             new_feats = new_feats + res_feats
         new_feats = self.dropout(new_feats)
 
