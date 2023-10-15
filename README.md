@@ -2,8 +2,6 @@
 
 [Documentation](https://lifesci.dgl.ai/index.html) | [Discussion Forum](https://discuss.dgl.ai)
 
-We also have a **slack channel** for real-time discussion. If you want to join the channel, contact mufeili1996@gmail.com.
-
 ## Table of Contents
 
 - [Introduction](#introduction)
