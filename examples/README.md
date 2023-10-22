@@ -16,7 +16,6 @@ We provide various examples across 3 applications -- property prediction, genera
     - [PubChem Aromaticity with DGL](../python/dgllife/data/pubchem_aromaticity.py)
 - OGB [[paper]](https://arxiv.org/abs/2005.00687)
     - [ogbl-ppa](link_prediction/ogbl-ppa)
-    - [ogbg-ppa](property_prediction/ogbg_ppa)
 - AstraZeneca Experimental Solubility from ChEMBL [[record]](https://www.ebi.ac.uk/chembl/document_report_card/CHEMBL3301361/)
     - [Dataset](../python/dgllife/data/astrazeneca_chembl_solubility.py)
 

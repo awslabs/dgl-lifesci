@@ -39,6 +39,9 @@ def train(model, predictor, g, x, splitted_edge, optimizer, batch_size):
         loss = pos_loss + neg_loss
         optimizer.zero_grad()
         loss.backward()
+        #gradient clipping
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        torch.nn.utils.clip_grad_norm_(predictor.parameters(), 1.0)
         optimizer.step()
 
         num_samples = pos_out.size(0)
@@ -129,6 +132,8 @@ def main():
                         help='Print training progress every {log_steps} epochs (default: 1)')
     parser.add_argument('--use_sage', action='store_true',
                         help='Use GraphSAGE rather than GCN (default: False)')
+    parser.add_argument('--use_node_embedding', action='store_true',
+                        help='Prepare node embeddings using node2vec (default: 128)')
     parser.add_argument('--num_layers', type=int, default=3,
                         help='Number of GNN layers to use as well as '
                              'linear layers to use for final link prediction (default: 3)')
@@ -161,7 +166,12 @@ def main():
     data.add_edges(data.nodes(), data.nodes())
     data = data.to(device)
     splitted_edge = dataset.get_edge_split()
-    x = data.ndata['feat'].float().to(device)
+    
+    if args.use_node_embedding:
+        x = torch.load('embedding.pt')
+        x = x.to(device)
+    else:
+        x = data.ndata['feat'].float().to(device)
 
     if args.use_sage:
         model = GraphSAGE(in_feats=x.size(-1),

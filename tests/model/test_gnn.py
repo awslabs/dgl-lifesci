@@ -485,6 +485,9 @@ def test_graphsage():
                     activation=[F.relu, F.relu],
                     dropout=[0.2, 0.2],
                     aggregator_type=['gcn', 'gcn']).to(device)
+    assert gnn(g, node_feats).shape == torch.Size([3, 1])
+    assert gnn(bg, batch_node_feats).shape == torch.Size([8, 1])
+
     gnn.reset_parameters()
     assert gnn(g, node_feats).shape == torch.Size([3, 1])
     assert gnn(bg, batch_node_feats).shape == torch.Size([8, 1])
