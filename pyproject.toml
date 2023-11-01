@@ -1,0 +1,28 @@
+[build-system]
+requires = [
+  "setuptools>=61.0"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dgl-lifesci"
+version = "0.3.3"
+authors = [
+  { name="Example Author", email="author@example.com" },
+]
+description = "Python package for graph neural networks in chemistry and biology"
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: Apache License 2.0",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "torch==2.1",
+    "dgl==1.1.2"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/awslabs/dgl-lifesci/"
+"Bug Tracker" = "https://github.com/awslabs/dgl-lifesci/issues"
